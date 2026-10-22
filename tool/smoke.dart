@@ -87,5 +87,46 @@ void main() {
     totalSeconds: m(30), poseSeconds: m(30),
   ));
   check(warning.needsSafetyAcknowledgement, 'Missing 25/5 warning.');
+  // Approved D-038: a shorter positive special break is valid and must
+  // still use the D-031 rest warning. A zero-minute break is never valid.
+  final shortSpecial = engine.generate(SessionRules(
+    id: 'short-special',
+    name: 'Positive shorter special break',
+    totalSeconds: m(53),
+    poseSeconds: m(25),
+    shortBreakSeconds: m(5),
+    specialBreakSeconds: m(3),
+    specialBreakCount: 1,
+  ));
+  checkTimeline(shortSpecial, [
+    'pose:0-25', 'specialBreak:25-28', 'pose:28-53',
+  ]);
+  check(shortSpecial.needsSafetyAcknowledgement,
+      'Missing warning after 3m special rest.');
+  var blockedWithoutAcknowledgement = false;
+  try {
+    engine.approve(shortSpecial, acknowledgeWarnings: false);
+  } on StateError {
+    blockedWithoutAcknowledgement = true;
+  }
+  check(blockedWithoutAcknowledgement,
+      'Safety warning was approved without explicit acknowledgement.');
+  engine.approve(shortSpecial, acknowledgeWarnings: true);
+
+  final equalSpecial = engine.generate(SessionRules(
+    id: 'equal-special',
+    name: 'Equal-length special break',
+    totalSeconds: m(55),
+    poseSeconds: m(25),
+    shortBreakSeconds: m(5),
+    specialBreakSeconds: m(5),
+    specialBreakCount: 1,
+  ));
+  checkTimeline(equalSpecial, [
+    'pose:0-25', 'specialBreak:25-30', 'pose:30-55',
+  ]);
+  check(!equalSpecial.needsSafetyAcknowledgement,
+      'A 5m special break should reset accumulated posing.');
+
   print('Scheduling smoke checks succeeded.');
 }
