@@ -1,5 +1,16 @@
 # Changelog — Atelier Time
 
+## 2026-10-22 — Stage 1 Step 1.3 APPROVED / Handoff v1.0
+
+- **Explicit approval:** User approved all remaining documented scheduling proposals **P-01–P-06** subject to **D-036**, and specifically prohibited beginning Stage 1 Step 1.4.
+- Registered **D-037** Step 1.3 completion, **D-038** the one explicitly unresolved positive special-break-versus-normal-break comparison, and **D-039** Step 1.4 stop gate.
+- Confirmed automatic closest-to-work-midpoint break placement (tie earlier), evenly spaced multiple special replacements, manual ordinals, validation, custom ending options, full preview and warnings with user acknowledgement.
+- Approved zero *count* of special replacements and zero final summary for otherwise valid positive sessions. **Zero total session or actual break remains a hard error; no zero-length break slots.**
+- Set 25/5 warning counter to **one full activated session** (no automatic cross-preset carryover); an overall 25m ending needs no invented break, while over-25m posing warns.
+- Updated current docs, TEST_PLAN accepted future tests, README, roadmap, WORK_LOG and self-contained HANDOFF v1.0.
+- **Documentation-only commits/read-back. No source code, automated test execution, build, UI, or installation. Step 1.4 NOT AUTHORIZED.**
+
+
 ## 2026-10-22 — Stage 1 Step 1.3 clarification / Handoff v0.9
 - **Latest approved D-036:** A 0-minute full session or configured normal/active special break is invalid; previous D-031 permission for zero-minute breaks superseded. Positive whole-minute break minimum is 1 minute.
 - **Retained D-031:** Accumulated 25m of posing calls for >=5m rest before continuing; valid shorter breaks and long poses trigger a warning requiring explicit user acknowledgement rather than automatic rejection.
@@ -62,4 +73,7 @@
 - v0.4: User approved Flutter/Dart four-platform choice and non-native UI clarification for Stage 1 Step 1.1 only.
 - v0.5: Step 1.2 documented the proposed data model.
 - v0.6: Step 1.3 placement and edge-policy proposals prepared for review.
-- v0.7: D-031 break-safety 25/5 warning and 0-minute override documented; unresolved nuances remain. Source of truth: docs/HANDOFF.md.
+- v0.7: D-031 25/5 warning with historical zero-minute allowance, **later superseded by D-036**.
+- v0.8: Initial review including now-withdrawn zero-minute logical break slots.
+- v0.9: D-036 forbids 0-minute full session and configured breaks.
+- v1.0: Stage 1 Step 1.3 approved as D-037; strict stop before Step 1.4. Current source of truth: docs/HANDOFF.md.
