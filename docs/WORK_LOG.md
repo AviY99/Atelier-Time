@@ -1,5 +1,23 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-22 — Iteration 0.7: Step 1.3 break warning and zero-minute override
+**User clarification:** After 25 minutes of posing in one phase or accumulated across consecutive poses without qualifying rest, recommend a break of at least 5 minutes; violating configurations **must warn and require affirmative user approval**. The user may **choose 0** for break duration. This explicitly supersedes previous documentation that described an absolute minimum of 1 minute.
+
+**Documented approved requirement (D-031):** cumulative pose-time counter resets only at breaks >=5 minutes; 0–4m breaks do not reset it. No silent rejection for the 25/5 rule; must display affected times and obtain explicit acknowledgement for each approved revision. Default new-session breaks remain 5m normal and 15m special but are editable, including 0.
+
+**Updated:** Step 1.3 edge-policy doc and its P-04 zero-break rows, PRODUCT_SPEC.md, SCHEDULING_RULES.md, DATA_MODEL.md, TEST_PLAN.md (superseded hard-minimum tests), DECISIONS.md (noted D-030 historical reference, D-031 approved, D-032 proposed details), ROADMAP.md, README.md, CHANGELOG.md and this handoff.
+
+**Open for review:** Whether warning accumulation should span separately activated saved full sessions (as opposed to consecutive poses within one full session); treatment of a session ending at exactly 25m without more posing; exact zero-minute *special* break slot presentation. Other P-01–P-06 policies still pending approval.
+
+**No implementation:** No Flutter/Dart scaffolding, schedule engine, executable tests, UI or installable build. **Stage 1 Step 1.4 not authorized.**
+
+**Verification:** GitHub file creation/updates and read-back checks, not runtime tests.
+
+**Next:** Confirm the remaining interpretation, approve Step 1.3 rules, then request separate Step 1.4 authorization.
+
+---
+
+
 ## 2026-10-22 — Iteration 0.6: Stage 1 Step 1.3 scheduling-rule proposals
 **Instruction:** User said **“Continue”** after the Step 1.2 summary with a request to proceed to Step 1.3. This authorized **discussion/documentation of Step 1.3 only**.
 
