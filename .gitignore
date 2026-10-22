@@ -1,0 +1,13 @@
+# Local Dart tool outputs and downloaded packages
+.dart_tool/
+build/
+.pub-cache/
+
+# Local-only verification results
+atelier-time-verification.log
+
+# Editors / system noise
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
