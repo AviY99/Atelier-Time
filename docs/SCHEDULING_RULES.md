@@ -1,6 +1,6 @@
 # Scheduling contract and algorithm design
 
-Status: Core product behavior and **Step 1.3 scheduling placement/edge policies APPROVED (D-037)**. See [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) and [approved review](STEP_1_3_REVIEW.md). D-036 invalidates 0-minute sessions/configured breaks. **No scheduling engine or tests implemented; Step 1.4 not authorized.**
+Status: Core product behavior and **Step 1.3 scheduling placement/edge policies APPROVED (D-037)**. See [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) and [approved review](STEP_1_3_REVIEW.md). D-036 invalidates 0-minute sessions/configured breaks. **Pure Dart scheduling engine and test SOURCES now exist on branch `stage-1-4-scheduling-core` (D-040); no test execution, analyzer or build yet; Stage 1 Step 1.4 is IN PROGRESS.**
 
 ## Time vocabulary
 All times displayed as elapsed from the session start (00:00). Internally prefer integer duration units and monotonic elapsed-time measurement; no floating-point accumulation. Example durations are whole minutes. Preserve the ability to adopt seconds later without altering invariants.
@@ -22,7 +22,7 @@ The examples set `D=180, F=15, W=165, P=25, B=5, L=15, N=1`. Example A opening g
 2. Add opening poses in their configured order, no automatic breaks between poses unless specifically configured.
 3. Add repeating poses and interleaving scheduled short breaks according to cycleStart, stopping at work-block boundary. Never insert a break that would terminate the work block without a pose afterwards.
 4. Select eligible short-break slot(s) for replacement by long break(s), typically near the middle; **do not add a second break** at that boundary. Since replacement consumes `L-B` extra time, regenerate or account for this before fixing final pose length.
-5. Show long-break placement in preview. **Approved D-037:** choose eligible existing short-break position closest to W/2 by proposed **replacement interval center**, tie earlier ordinal; for N>1 distribute centers roughly at j/(N+1), and allow manual ordinal overrides. Reproduce both canonical schedules exactly. Implementation/test remains future Step 1.4.
+5. Show long-break placement in preview. **Approved D-037:** choose eligible existing short-break position closest to W/2 by proposed **replacement interval center**, tie earlier ordinal; for N>1 distribute centers roughly at j/(N+1), and allow manual ordinal overrides. Reproduce both canonical schedules exactly. Initial implementation is now in progress on isolated Step 1.4 branch, not yet compiled/tested.
 6. If the final repeating pose is shorter than nominal, flag it for user selection of one of the three approved resolutions; do not auto-approve.
 7. Append the final summary of exactly `F` and enforce `sum(all durations) = D` and unbroken contiguous interval coverage.
 
@@ -54,5 +54,5 @@ See EXAMPLES.md for the entire time-ordered lists and each alternative.
 
 ## Stage 1 open engineering edge cases
 
-**Step 1.3 proposals P-01–P-06 have been approved** in [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) / [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md) as D-037. The one deliberately unresolved positive-special-break <= normal comparison remains **OPEN D-038**; other later-stage semantics (audio, summary meaning) also remain open. Example A/B expectations unchanged. No code may begin until Step 1.4 is separately authorized.
+**Step 1.3 proposals P-01–P-06 have been approved** in [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) / [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md) as D-037. The one deliberately unresolved positive-special-break <= normal comparison remains **OPEN D-038**; other later-stage semantics (audio, summary meaning) also remain open. Example A/B expectations unchanged. D-040 subsequently authorized ONLY Step 1.4 code on a development branch; compilation, actual tests, and D-038 decision remain pending.
 **Approved D-037:** (a) zero summary with positive work, (b) multiple long breaks, (c) reject overlong opening groups, (d) reject break-first without room for a following pose, (e) zero optional special-break *count* (no 0-minute break), (f) disable infeasible final-two options, (g) midpoint and earlier ties, (i) positive custom split longer than nominal when explicitly selected, (k) **per-activated-full-session** warning counter, no cross-preset carryover. **OPEN D-038:** (h) positive special break <= positive normal. (j) per-pose versus per-set sound is for a later stage. **D-036** forbids 0-minute sessions/configured breaks. **D-031** retains the 25/5 advisory warning and explicit acknowledgment.
