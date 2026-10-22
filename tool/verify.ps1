@@ -20,17 +20,27 @@ function Invoke-DartStep {
 
     # The PowerShell process prints the output; the outer caller can paste it
     # back into the chat. The log retains diagnostic output for failed checks.
-    $output = & dart @StepArguments 2>&1
+    # Dart may print --version and diagnostics to stderr. On Windows
+    # PowerShell 5.1, redirecting stderr under Stop can otherwise trigger
+    # NativeCommandError despite a successful native process exit.
+    $priorErrorPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $output = & dart @StepArguments 2>&1
+        $commandExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $priorErrorPreference
+    }
     $output | ForEach-Object {
         $line = "$_"
         Write-Host $line
         Add-Content -Path $logFile -Value $line
     }
-    if ($LASTEXITCODE -ne 0) {
-        $message = "Verification failed: $heading (exit code $LASTEXITCODE)"
+    if ($commandExitCode -ne 0) {
+        $message = "Verification failed: $heading (exit code $commandExitCode)"
         Write-Host $message
         Add-Content -Path $logFile -Value $message
-        exit $LASTEXITCODE
+        exit $commandExitCode
     }
 }
 
