@@ -288,20 +288,88 @@ void main() {
       expect(c.hasBlockingIssues, isTrue);
     });
 
-    test('D-038 stays pending and is NOT falsely approved or invalidated', () {
+    test('D-038: equal positive special break is valid without warning', () {
       final c = engine.generate(SessionRules(
-        id: 'd038',
-        name: 'Length comparison undecided',
-        totalSeconds: m(80),
+        id: 'd038-equal',
+        name: 'Same-duration replacement',
+        totalSeconds: m(55),
         poseSeconds: m(25),
         shortBreakSeconds: m(5),
         specialBreakSeconds: m(5),
         specialBreakCount: 1,
       ));
-      expect(c.issues.any((i) =>
-          i.code == 'd038_special_length_unresolved' &&
-          i.severity == IssueSeverity.pendingDecision), isTrue);
-      expect(c.canApprove, isFalse);
+      expectContiguous(c);
+      expect(timeline(c), [
+        'pose:0-25',
+        'specialBreak:25-30',
+        'pose:30-55',
+      ]);
+      expect(c.needsSafetyAcknowledgement, isFalse);
+      expect(engine.approve(c, acknowledgeWarnings: false).phases.length, 3);
+    });
+
+    test('D-038: 1m special replacement is legal but triggers warning', () {
+      final c = engine.generate(SessionRules(
+        id: 'd038-one-minute',
+        name: 'One-minute special replacement',
+        totalSeconds: m(51),
+        poseSeconds: m(25),
+        shortBreakSeconds: m(5),
+        specialBreakSeconds: m(1),
+        specialBreakCount: 1,
+      ));
+      expectContiguous(c);
+      expect(timeline(c), [
+        'pose:0-25',
+        'specialBreak:25-26',
+        'pose:26-51',
+      ]);
+      expect(c.needsSafetyAcknowledgement, isTrue);
+      expect(c.issues.where((i) => i.code == 'rest_25_5')
+          .single.offsetSeconds, m(26));
+      expect(() => engine.approve(c, acknowledgeWarnings: false),
+          throwsStateError);
+      expect(engine.approve(c, acknowledgeWarnings: true)
+          .acknowledgedWarningCodes, contains('rest_25_5'));
+    });
+
+    test('D-038: manual 3m special replacement is legal with warning', () {
+      final c = engine.generate(SessionRules(
+        id: 'd038-manual',
+        name: 'Three-minute special replacement',
+        totalSeconds: m(53),
+        poseSeconds: m(25),
+        shortBreakSeconds: m(5),
+        specialBreakSeconds: m(3),
+        specialBreakCount: 1,
+        placement: SpecialBreakPlacement.manual([1]),
+      ));
+      expectContiguous(c);
+      expect(timeline(c), [
+        'pose:0-25',
+        'specialBreak:25-28',
+        'pose:28-53',
+      ]);
+      expect(c.needsSafetyAcknowledgement, isTrue);
+    });
+
+    test('D-038: multiple shorter positive replacements are feasible', () {
+      final c = engine.generate(SessionRules(
+        id: 'd038-multiple',
+        name: 'Two three-minute replacements',
+        totalSeconds: m(91),
+        poseSeconds: m(20),
+        shortBreakSeconds: m(5),
+        specialBreakSeconds: m(3),
+        specialBreakCount: 2,
+      ));
+      expectContiguous(c);
+      final specials = c.phases
+          .where((p) => p.kind == PhaseKind.specialBreak)
+          .toList();
+      expect(specials.map((p) => p.breakOrdinal).toList(), [1, 3]);
+      expect(specials.every((p) => p.durationSeconds == m(3)), isTrue);
+      expect(c.needsSafetyAcknowledgement, isTrue);
     });
   });
 
