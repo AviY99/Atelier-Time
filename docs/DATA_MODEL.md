@@ -23,7 +23,7 @@ The two 3-hour session examples are **input/output reference fixtures**, not har
 | Location of replacement(s) | `longBreaks.placement` | approved slot after pose 10 | approved slot after pose 3 |
 | End adjustment | `endPoseResolution` | remainder/even/custom | remainder/even/custom |
 
-**Approved current break rule (D-031, superseding former D-030 minimum):** newly configured regular/short break defaults to `shortBreakSeconds = 300` (5m), middle/long break defaults to `durationSeconds = 900` (15m). Both are editable **including 0 seconds (no break time)**. 0-value normal/replacement slots create no zero-duration `SchedulePhase`; their desired ordinal/placement semantics are an explicit Step 1.3 design question. A 0 break does **not** reset accumulated posing duration and may trigger a **mandatory-to-acknowledge 25-minute/5-minute warning**.
+**LATEST APPROVED D-036 (supersedes D-031's 0-break allowance):** The full session's `totalSeconds` and any configured actual normal/active special break must be **>0**; a 0-duration session/break is a **blocking input error**. Defaults remain `shortBreakSeconds=300` (5m) and long/special `durationSeconds=900` (15m), editable to other positive values. A count of **0 optional special replacements** is not a 0-duration break. D-031's cumulative **25-minute posing / >=5-minute break advisory warning and explicit acknowledgment** still applies for otherwise valid shorter rests or overlong poses. Zero-length logical break slot concepts have been withdrawn.
 
 User entry can display minutes; internal `int` seconds avoid floating-point arithmetic and support accurate countdowns later. For **currently approved whole-minute pose splitting**, custom and near-equal results remain multiples of 60 seconds, with minimum 60 seconds per pose when feasible. There is no requirement to expose second-resolution inputs in the first UI.
 
@@ -163,7 +163,7 @@ The app's eventual input/editor screens (Stage 2) and persistent preset store (S
 - Every pose has a positive duration and a consecutive pose number.
 - A scheduled long break represents ONE scheduled short-break **slot replaced**, rather than an extra break at that boundary. If the entered replacement is 0, no actual break time or zero-length phase is created; the exact representation in schedule previews remains part of Step 1.3 discussion.
 - All opening groups are expanded into `count` consecutive individual pose phases in the same order as inputs.
-- `summarySeconds` reserves the last part of the session; it is not extra time. A zero-length summary requires no zero-duration display phase (this proposed representation does not resolve other scheduling edge rules).
+- `summarySeconds` reserves the last part of the session; it is not extra time. A **0-minute summary** (proposed) can omit the summary display phase **only if the full session total is positive**; this is not a 0-minute session.
 - `ScheduleIssue` records impossible input combinations rather than inventing times or silently truncating required opening poses.
 - Transitions between phases provide future sound-trigger candidates, but sound choices and per-pose-versus-per-set behavior remain undecided.
 
@@ -236,10 +236,11 @@ The prescribed outputs remain exactly those in [EXAMPLES.md](EXAMPLES.md):
 
 Proposed machine-readable issue codes:
 - `INVALID_TOTAL_DURATION`
+- `NONPOSITIVE_TOTAL_SESSION`
 - `SUMMARY_EXCEEDS_TOTAL`
 - `INVALID_OPENING_GROUP`
 - `INVALID_CYCLE_DURATION`
-- `NEGATIVE_BREAK_DURATION` // 0 is allowed under D-031; negative durations remain invalid
+- `NONPOSITIVE_BREAK_DURATION` // latest approved D-036: 0 and negative configured breaks are invalid
 - `NO_ELIGIBLE_REPLACEMENT_BREAK`
 - `REPLACEMENT_BREAK_COUNT_EXCEEDS_SLOTS`
 - `OPENING_GROUPS_EXCEED_WORK_BLOCK`
@@ -251,14 +252,14 @@ Stage 1 Step 1.3 must explicitly resolve ambiguous product-visible edge cases an
 
 ## 8. Still open: do not silently decide
 
-**New approved 25/5 safety warning (D-031):** accumulate pose durations across consecutive poses until an actual rest of **>=5 minutes**; mark a schedule warning if posing continues after 25 accumulated minutes without that rest, or a single pose exceeds 25 minutes. Display timing/details; user can choose 0 break or another violation but **must explicitly acknowledge the warning** prior to approving. Shorter breaks do not reset the counter. No algorithm or UI code exists; warning/acknowledgement model fields are tentative.
+**Approved 25/5 advisory warning (D-031, retained by D-036):** accumulate posing across consecutive poses until a rest **>=5 minutes**; flag posing beyond 25 accumulated minutes. Display timing/details. A user may choose a **valid positive 1–4m break** or other legal rest violation only after acknowledging the warning. **Break=0 or full session=0 is a blocking error under D-036**, not an exception. Shorter-than-5m valid rests do not reset the counter. No scheduling or UI code exists; acknowledgement metadata fields are tentative.
 
 Step 1.3 created [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) with explicit proposed resolutions to several items below. **These are awaiting user approval, not yet settled requirements.**
 
 1. Exact automatic-middle replacement-break placement and ties when session lengths/counts vary.
 2. How to deal with multiple long breaks and explicit break-ordinal changes after edits.
 3. Inputs too short to fit any pose or a complete break; opening groups exhausting work time.
-4. **Revised by approved D-031:** break values of 0 are allowed, superseding the older 1-minute minimum described as D-030. **Still open:** exact 0-length replacement slot semantics, and whether cross-session accumulation applies across separately started saved sessions.
+4. **Resolved by latest approved D-036:** configured zero-minute normal/special breaks and zero-minute full sessions are **invalid**. Earlier D-031 allowance and proposed 0-length logical slot mechanics are **withdrawn**. **Still open:** whether posing accumulation carries across separately activated full saved sessions and whether positive special breaks may be shorter than normal breaks.
 5. What to show if only one last pose, or no intervening break, remains for end resolution.
 6. Precise activity/label for “summary”; audio at every pose or just set end.
 7. Exact on-disk preset serialization format and file/DB technology (Stage 3).
