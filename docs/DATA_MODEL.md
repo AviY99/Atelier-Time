@@ -239,7 +239,7 @@ Proposed machine-readable issue codes:
 - `SUMMARY_EXCEEDS_TOTAL`
 - `INVALID_OPENING_GROUP`
 - `INVALID_CYCLE_DURATION`
-- `BREAK_DURATION_BELOW_MINIMUM` // proposed issue-code name; approved 1-minute minimum
+- `NEGATIVE_BREAK_DURATION` // 0 is allowed under D-031; negative durations remain invalid
 - `NO_ELIGIBLE_REPLACEMENT_BREAK`
 - `REPLACEMENT_BREAK_COUNT_EXCEEDS_SLOTS`
 - `OPENING_GROUPS_EXCEED_WORK_BLOCK`
