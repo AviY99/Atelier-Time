@@ -1,5 +1,14 @@
 # Changelog — Atelier Time
 
+## 2026-10-22 — Stage 1 Step 1.3 safety clarification / Handoff v0.7
+- **Approved D-031:** A 5-minute break is recommended after 25 minutes of accumulated posing without an adequate break. Accumulate consecutive pose phases; a rest under 5 minutes does not reset the counter.
+- **Permitted:** A user can choose a 0-minute break, and can approve a schedule violating the 25/5 recommendation **after an explicit warning acknowledgement**; the app must not silently adjust the entered durations.
+- **Superseded:** Prior hard minimum of 1 minute attributed to D-030; break defaults stay 5m regular / 15m special, both editable.
+- Updated policy, product specification, data model, schedule rules, decision register and QA tests; documented pending cross-session and zero-length special replacement slot semantics.
+- Updated progress roadmap, work log and handoff to v0.7. Other Step 1.3 proposals are not yet approved.
+- **No executable code/tests, Flutter setup or app builds; Step 1.4 remains on hold.**
+
+
 ## 2026-10-22 — Stage 1 Step 1.3 / Handoff v0.6
 - User authorized discussion/documentation of scheduling placement and edge policies by saying “Continue” after Step 1.2.
 - Added [SCHEDULING_EDGE_POLICY.md](docs/SCHEDULING_EDGE_POLICY.md): six **proposed** rules covering midpoint long-break replacement, multiple evenly-spaced long breaks, manual ordinals, invalid configuration handling and final-pose edge cases.
@@ -38,4 +47,5 @@
 - v0.3: User approved requirements and authorized GitHub documentation setup.
 - v0.4: User approved Flutter/Dart four-platform choice and non-native UI clarification for Stage 1 Step 1.1 only.
 - v0.5: Step 1.2 documented the proposed data model.
-- v0.6: Step 1.3 placement and edge-policy proposals prepared for review; Step 1.4 authorization not granted. Source of truth: docs/HANDOFF.md.
+- v0.6: Step 1.3 placement and edge-policy proposals prepared for review.
+- v0.7: D-031 break-safety 25/5 warning and 0-minute override documented; unresolved nuances remain. Source of truth: docs/HANDOFF.md.
