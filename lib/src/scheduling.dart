@@ -408,8 +408,9 @@ class ScheduleEngine {
         selectedChoice: choice,
       );
 
-  /// Exact O(N * M) dynamic programming for N requested replacements over M
-  /// eligible ordinary break ordinals. This replaces exponential enumeration.
+  /// Exact dynamic programming with O(N * M) candidate states for N requested
+  /// replacements over M eligible ordinals. Path copies add some overhead,
+  /// but this avoids exponential enumeration.
   ///
   /// A replacement adds delta = (special - ordinary) seconds to the timeline.
   /// D-038 disallows choosing any policy for delta <= 0, so this method runs
