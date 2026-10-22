@@ -1,5 +1,25 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-22 — Iteration 1.0: Stage 1 Step 1.3 APPROVED and completed (documentation only)
+
+**Explicit user authorization:** “I approve the remaining Atelier Time Stage 1 Step 1.3 proposals as documented in STEP_1_3_REVIEW.md, with D-036 overriding any zero-duration break/session allowance. Record approval in GitHub and complete Step 1.3 only. Do not start Step 1.4 programming yet.”
+
+**Completed:**
+- Marked six scheduling/validation policies P-01–P-06 **APPROVED** and refined 25/5 warning-endpoint behavior and per-complete-session warning counter as approved. Automatic one-break midpoint and tie-to-earlier, multiple even placement, manual ordinals, blocking invalid schedule versus acknowledgment-required advisory warnings, final-pose feasibility/custom adjustments and immutable preview lifecycle are all recorded.
+- Preserved **D-036:** all full session durations and configured actual normal/special break durations >0. A 0-minute summary is allowed only with a positive total and valid work time; optional special replacement *count* of 0 is distinct from 0-duration break and is approved.
+- Preserved **D-031:** warn after more than 25m cumulative posing without a qualifying >=5m break; valid positive 1–4m breaks do not reset; user must explicitly acknowledge before approving a valid exception.
+- Approved accumulation is scoped to one complete activated session by default; no automatic carryover into a different preset. Exactly 25m accumulated posing at end needs no phantom trailing break; an uninterrupted 30m pose warns.
+- Registered **D-037** Step 1.3 approval, **D-038** narrowly unresolved (whether positive special break duration may be <= normal positive break), and **D-039** strict stop before Step 1.4.
+- Updated STEP_1_3_REVIEW, SCHEDULING_EDGE_POLICY, DECISIONS, ROADMAP, SCHEDULING_RULES, DATA_MODEL, TEST_PLAN, README, WORK_LOG, CHANGELOG and HANDOFF v1.0.
+- Approved A/B sample schedules and three final-pose options unchanged.
+
+**Verification:** GitHub documentation commits and read-back only. **No Dart/Flutter code, scaffold, scheduling engine, unit-test execution, build or installable release exists.** Test cases remain **planned**, not passed.
+
+**Next gate:** Step 1.3 is complete. Stop. User must separately approve Step 1.4, including any chosen implementation scope. Before enforcing a length comparison involving a positive special break <= normal break, get a decision on D-038 rather than assuming either behavior.
+
+---
+
+
 ## 2026-10-22 — Iteration 0.9: latest break/session positivity correction
 **User instruction:** “You are correct, Break of 0 or session of 0 is not valid.” This is the latest substantive clarification and supersedes the earlier D-031 *allowance* for 0-minute breaks while retaining D-031's **25 minutes accumulated posing / >=5m qualifying rest** rule as a *warning requiring affirmative user acknowledgment* for otherwise mathematically legal schedules.
 
