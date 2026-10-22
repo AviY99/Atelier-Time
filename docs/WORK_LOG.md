@@ -1,5 +1,22 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-22 — Iteration 1.2: Step 1.4 break-placement optimizer corrected; D-038 explained
+
+**User:** “Continue, also explain your open question.” Continued only the previously authorized **Step 1.4** core implementation; no later stage, paid workflows or behavior changes authorized.
+
+**Open D-038 explained:** Normal break 5m and special replacement 3m are both positive. Do we allow the specifically selected “long/special” replacement to be **shorter or equal** to normal? Proposal is permit any **positive** duration and apply the 25/5 rest warning when needed; **recommendation not user-approved**. Code still reports `pendingDecision` rather than silently deciding.
+
+**Implementation issue corrected:** The original automatic special-break placement enumerated combinations exponentially and incorrectly used the baseline unreplaced normal schedule to bound eligible ordinals. A fully feasible replacement schedule can exist when that baseline ends with an unfit trailing break. Replaced selection in [branch engine](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/lib/src/scheduling.dart) with exact dynamic programming over break slots in an adjusted virtual work period, retaining the approved closest-to-midpoint/even-placement objective and ordinal tie-breaking.
+
+**More unexecuted regression tests:** Formerly false-invalid 97m example (three 5m opening poses, P12m, B4m, special17m twice, break-first; chosen ordinals 2 and 3); 480m sample with five special replacements (ordinals 13,26,38,51,64). Existing Example A and B test sources unchanged.
+
+**Independent reasoning check:** Implemented the same objective in a temporary Python model; optimized and exhaustive approaches selected the same placements in **25,000 randomly sampled small configurations**, and the model yielded approved A/B third-break positions. **Not a Dart execution.**
+
+**Verification limitation:** No Dart or Flutter SDK is available here; `dart analyze`, `dart test` and smoke script were **not run**. No GitHub Actions configured/started, no paid runners, no budget changes, no merge. Updated decision D-043, branch progress, roadmap, tests, README, changelog and handoff v1.2. **Step 1.4 IN PROGRESS, not complete; Stage 2 not approved.**
+
+---
+
+
 ## 2026-10-22 — Iteration 1.1: Step 1.4 Dart scheduling code started (budget-safe branch)
 
 **Instruction:** User said **“Continue”** after discussion that their GitHub metered budget ($12) was blocked by another project and that beginning Step 1.4 required permission. This authorizes **Step 1.4 only**. No other stage, paid Actions run, build, or release authorized.
