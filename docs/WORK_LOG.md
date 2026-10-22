@@ -1,5 +1,17 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-22 — Iteration 0.8: consolidated Step 1.3 scheduling-policy review
+**User message:** “Continue” after the revised explanation of 25 accumulated posing minutes, recommended 5-minute adequate rest, and allowed 0-minute break with warning and explicit approval.
+
+**Completed:** Continued **documentation and review within Step 1.3 only**. Added [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md) with precise proposals for zero-duration **logical break slot** ordinals (without zero-length timeline phases), retaining slots for later special-break replacement, a possible last-two-pose allocation across a logical 0m break, 25/5 warning boundaries and one-full-session scope by default. Consolidated pending P-01–P-06 break placement/validation and added proposed test cases P-T09 to P-T15. Linked review in README/ROADMAP, updated DECISIONS with D-034/D-035, synchronized SCHEDULING_EDGE_POLICY and updated changelog/handoff.
+
+**Status:** D-031 is approved and unchanged. New proposed details and prior P-01–P-06 **await user approval**; “Continue” did not constitute acceptance of every outstanding rule. Cross-preset rest accumulation remains an open separate feature question. Approved A/B schedules are unchanged. No code or executable tests created.
+
+**Next action:** User reviews the consolidated Step 1.3 proposal and approves/revises it. Even after approval, obtain separate authorization for Step 1.4 programming and regression tests.
+
+---
+
+
 ## 2026-10-22 — Iteration 0.7: Step 1.3 break warning and zero-minute override
 **User clarification:** After 25 minutes of posing in one phase or accumulated across consecutive poses without qualifying rest, recommend a break of at least 5 minutes; violating configurations **must warn and require affirmative user approval**. The user may **choose 0** for break duration. This explicitly supersedes previous documentation that described an absolute minimum of 1 minute.
 
