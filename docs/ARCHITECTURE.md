@@ -1,6 +1,6 @@
 # Architecture and design constraints (pre-implementation)
 
-Status: **Flutter + Dart and initial target OS approved in Stage 1 Step 1.1.** The detailed software architecture and data structures remain proposals pending Step 1.2 approval; no code has been created. See [TD-001](TECH_DECISION_001_PLATFORM.md).
+Status: **Flutter + Dart and four OS targets approved at Stage 1 Step 1.1.** A source-level data-model **design proposal has now been prepared** under Step 1.2 in [DATA_MODEL.md](DATA_MODEL.md). It is not implemented code; user review and separate authorization are required before Step 1.3.
 
 ## Required layers
 1. **Rules/input validation**: validate editable counts, durations and cycle order.
@@ -13,6 +13,8 @@ Status: **Flutter + Dart and initial target OS approved in Stage 1 Step 1.1.** T
 8. **Packaging**: platform-specific installable/offline builds for approved Android, Windows, iOS/iPadOS and macOS targets from the shared codebase; investigate platform limitations for background/lock-screen audio rather than promising behavior prematurely.
 
 ## Proposed data shape (illustrative, not schema lock)
+
+The more detailed authoritative **proposal** (including user-editable opening groups, data types, draft/approval lifecycle and JSON examples) is [DATA_MODEL.md](DATA_MODEL.md). The abbreviated shape below remains introductory only.
 ```text
 SessionRules
   title, totalDuration, summaryDuration,
@@ -36,7 +38,8 @@ The long break REPLACES a normal break. The end-pose resolution is user-selected
 
 ## Technical issues for Stage 1
 - **Step 1.1 COMPLETE:** Flutter + Dart, one application codebase for Android/Windows/iOS-iPadOS/macOS; platform-specific compiled packages; native graphics/menus optional.
-- **Step 1.2 NOT STARTED:** Define the exact source-level Dart data structures and serialization interfaces only when separately authorized.
+- **Step 1.2 DESIGN PREPARED, NOT IMPLEMENTED:** SessionRules, opening groups, cycle, break-placement policy, candidate phases and approved preset are defined conceptually in [DATA_MODEL.md](DATA_MODEL.md). User review is pending.
+- **Step 1.3 NOT AUTHORIZED:** Finalize automatic-middle positioning and edge-case behavior only after user's next approval.
 - Determine sound reliability and clock behavior in background, sleep or phone lock under its restrictions.
 - Confirm the precision and edge-case validation.
 - Clarify whether long break count/position is explicitly selected vs automatically centered; show actual placement.
