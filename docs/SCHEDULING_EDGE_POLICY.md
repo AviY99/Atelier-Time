@@ -1,8 +1,8 @@
 # Stage 1 Step 1.3 — Scheduling and edge-case policies
 
 **Updated:** 2026-10-22  
-**Status:** Partly approved: latest user correction **D-036** requires positive full-session and configured break durations; the **D-031 accumulated posing 25m / qualifying break 5m safety warning** remains approved. Placement and further edge policies P-01–P-06 are **PROPOSALS for user review**.  
-**Scope:** Documentation only. **Step 1.4 programming is NOT authorized.**
+**Status:** **Stage 1 Step 1.3 APPROVED / COMPLETE (2026-10-22)**. User approved placement and edge policies P-01–P-06 as documented in [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md), with **D-036 prohibiting 0-minute sessions and actual breaks**. D-031 retains the advisory 25/5 warning and explicit override for otherwise valid schedules. The one explicitly unresolved case (whether a positive special break may be <= normal break length) stays open.  
+**Scope:** Approved documentation ONLY. **Step 1.4 programming is NOT authorized.**
 
 The latest decision **D-036 supersedes only D-031's earlier allowance of a 0-minute break**. Earlier discussion of 0-minute *logical break slots* was explicitly withdrawn, not approved. A 0-minute **full session** or **configured normal/special break** is an **error**, never an acknowledged safety-warning exception. No numeric duration is hardcoded as the only permissible positive value: the new-session defaults are 5m normal and 15m special.
 
@@ -41,9 +41,9 @@ The **25/5 rule is an advisory schedule constraint**, separate from hard mathema
 | 25m pose → **0m break** → another pose | **Hard error**, not an overrideable safety warning |
 | **0m total session** | **Hard error**, no schedule can be approved |
 
-**Pending boundary policy (not separately approved):** exactly 25m posing at the *end* of a full session does not require an invented trailing break. A 30m uninterrupted final pose already exceeds the limit and warns. It is still unresolved whether counters should continue across separately activated *saved presets*; do not assume cross-preset accumulation.
+**APPROVED boundary/scope:** Exactly 25m posing at the *end* of a full session requires no invented trailing break; a final uninterrupted 30m pose warns. Accumulation is scoped to **one complete activated session** by default. Do **not** carry pose minutes between separately activated saved presets unless a future explicit user-approved feature adds it.
 
-## 3. P-01 (PROPOSAL): Automatic single replacement-break position
+## 3. P-01 (APPROVED): Automatic single replacement-break position
 
 - Compute work midpoint `W/2`, excluding the final summary.
 - Select from **existing scheduled positive-duration short breaks** for which the tentative complete schedule remains feasible, has a positive-duration pose after the break, preserves opening poses and exactly ends at `D`.
@@ -51,32 +51,32 @@ The **25/5 rule is an advisory schedule constraint**, separate from hard mathema
 - **A:** third break 01:20–01:35. **B:** third break 01:25–01:40. The exact canonical schedules are non-negotiable regression fixtures.
 - No candidate is chosen solely to avoid a 25/5 warning if it violates the above placement rule; warn on the resulting full schedule.
 
-## 4. P-02 (PROPOSAL): Multiple replacement breaks
+## 4. P-02 (APPROVED): Multiple replacement breaks
 
 If `N>1`, choose N **distinct eligible normal-break slots** whose replacement centers are approximately evenly distributed at `j/(N+1)` of work time, for `j=1...N`. Minimize ordered sum of absolute timing deviations, with lexicographically earlier ordinal set resolving ties. Never silently reduce N or add imaginary breaks. The configured replacement duration is common to all N unless separately approved later. `N=0` means no replacement (not a zero-duration rest).
 
-## 5. P-03 (PROPOSAL): Manual placement
+## 5. P-03 (APPROVED): Manual placement
 
 The user selects actual existing break-slot ordinals (1st, 2nd, 3rd...) to replace; for multiple replacements, select N distinct ordinals. The preview displays the actual elapsed time. If an edit makes an ordinal impossible, show an error and request correction; **do not silently relocate**. An invalid 0-minute configured break does **not** form an eligible slot.
 
-## 6. P-04 (PROPOSAL): Numeric and structural edge policies
+## 6. P-04 (APPROVED, except named unresolved case): Numeric and structural edge policies
 
-These proposals remain subject to explicit user approval **except** the positive-time restrictions marked APPROVED.
+These policies were **approved for Step 1.3**. The special-break-duration-versus-normal-break comparison explicitly marked **Unresolved** below remains open (not silently decided).
 
 | Case | Proposed behavior/status |
 |---|---|
 | `D <= 0` | **APPROVED D-036: Hard error**, never start/approve |
 | Normal or active special break `<=0` | **APPROVED D-036: Hard error**, never override through 25/5 warning |
 | Negative counts/durations | Error |
-| Final summary `F<0` or `F>=D` | Proposed error: need positive work block |
-| `F=0`, with `D>0` and a valid work schedule | Proposed valid: no summary phase |
+| Final summary `F<0` or `F>=D` | **Approved error:** need positive work block |
+| `F=0`, with `D>0` and a valid work schedule | **Approved valid:** no summary phase |
 | Invalid opening group count or pose duration `<=0` | Error; user can remove unused group |
 | Opening groups exceed work window | Error; do not silently truncate required poses |
-| Opening groups exactly fill work time | Proposed valid **opening-only** session if no following break/pose is needed |
+| Opening groups exactly fill work time | **Approved valid opening-only** session if no following break/pose is needed |
 | Repeating regular pose duration `<=0` | Error |
-| `N=0` special replacements | Proposed valid; no special break emitted |
+| `N=0` special replacements | **Approved valid**; no special break emitted |
 | `N<0` or `N` exceeds eligible ordinary breaks | Error; no silent adjustment |
-| Special break positive but not longer than normal break | **Unresolved:** minimum positive is approved; whether it must be strictly longer than `B` still needs approval |
+| Special break positive but not longer than normal break | **STILL OPEN:** prior approval sheet explicitly stated this comparison was unresolved. Do not assume <= is permitted or forbidden; seek user decision before implementing this case. |
 | Break-first but no room for following positive pose | Proposed error; never end with trailing break |
 | No valid positive last repeating pose remains | Proposed error; no invented poses |
 | Exactly fitted last pose | No final-pose-shortening choice necessary |
@@ -84,16 +84,16 @@ These proposals remain subject to explicit user approval **except** the positive
 
 A whole-minute input UI means the smallest positive configured break is **1 minute**; positive sub-minute support is not authorized or required now.
 
-## 7. P-05 (PROPOSAL): Final incomplete-pose edge options
+## 7. P-05 (APPROVED): Final incomplete-pose edge options
 
 Where the last two positive repeating poses have a **positive-duration intervening break**, `Q>0`, preserve their combined posing duration `T` and unchanged break duration. Show three options if feasible:
 - **Remainder:** keep preceding regular pose full nominal duration; final receives leftover positive time.
 - **Near-even:** first floor(T/2), second ceil(T/2), at one-minute precision.
 - **Custom:** user selects the first pose length from 1 through T−1 whole minutes; second is the rest; update actual break start/end without changing `Q` or session total.
 
-If no preceding eligible pose or positive intervening break exists, do not invent a split structure: disable infeasible options and explain. **Proposed** permit a custom first pose longer than nominal if both remain positive.
+If no preceding eligible pose or positive intervening break exists, do not invent a split structure: disable infeasible options and explain. **Approved:** permit a custom first pose longer than nominal if both remain positive.
 
-## 8. P-06 (PROPOSAL): Preview, warnings, validation and approval
+## 8. P-06 (APPROVED): Preview, warnings, validation and approval
 
 - Show all editable rules, exact phase timestamps, posing/rest totals, number/positions of special breaks, and full final-pose alternative times.
 - Clearly distinguish **blocking errors** (`D=0`, active break `B=0`, invalid math) from **non-blocking safety warnings** (valid 1–4-minute break or over-25-minute posing).
@@ -103,6 +103,6 @@ If no preceding eligible pose or positive intervening break exists, do not inven
 
 ## 9. Next gate
 
-Pending approval: P-01–P-06, treatment of exactly-25-minute session endings, scope of accumulation across distinct saved presets, and whether a positive special break may be shorter than the ordinary break. **Withdrawal:** all proposed "zero-minute logical break slot" behavior from older Step 1.3 drafts is invalid after D-036 and must not be implemented.
+**APPROVED:** P-01–P-06 as set out above; exactly-25-minute endpoint behavior; one-complete-session warning scope (without cross-preset carryover); D-036 invalidates all zero-duration break/session designs. **STILL OPEN as explicitly labeled in the approved review:** whether a positive special break can be shorter than or equal to an ordinary break. Do not invent a rule without asking for approval. **WITHDRAWN:** all zero-minute logical break-slot proposals.
 
-Read the consolidated [Step 1.3 review sheet](STEP_1_3_REVIEW.md) for a compact summary of this same **current** policy. **Stage 1 Step 1.4 code, testing, Flutter scaffolding and UI remain unapproved.**
+Read the [approved Step 1.3 record](STEP_1_3_REVIEW.md) for the consolidated signed-off rules. **Step 1.3 is COMPLETE. Step 1.4 code, tests, Flutter scaffolding and UI remain unapproved.**
