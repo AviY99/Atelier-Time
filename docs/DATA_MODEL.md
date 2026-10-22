@@ -3,7 +3,7 @@
 **Prepared:** 2026-10-22  
 **Status:** Step 1.2 **design documented and used as the basis for Step 1.3**, following the user's further “Continue”. Named types/fields remain a technical proposal, not executable source or new product behavior. No Flutter scaffold or engine exists.  
 **Technology:** Flutter + Dart, one shared app targeting Android, Windows, iOS/iPadOS and macOS (approved TD-001).  
-**Current gate update (D-040):** Step 1.3 policies APPROVED via D-037 (except narrowly unresolved D-038); the user subsequently authorized **Step 1.4**, and source/test files now exist on [development branch](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core). **No Dart SDK, actual compiled code/test executions, GitHub Actions or Flutter build yet. Step 1.4 is IN PROGRESS, not complete.**
+**Current gate update (D-045):** Step 1.3 policies approved via D-037. **D-044 now approves positive special replacement duration shorter than/equal to normal** (D-038 resolved), with applicable 25/5 warnings. Step 1.4 engine and test sources now implement this on [development branch](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core). **No Dart SDK/compiled test executions/GitHub Actions/Flutter build. Step 1.4 IN PROGRESS, not complete.**
 
 ## 1. Product-to-model mapping
 
@@ -259,7 +259,7 @@ Step 1.3's [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) and [approved 
 1. Exact automatic-middle replacement-break placement and ties when session lengths/counts vary.
 2. How to deal with multiple long breaks and explicit break-ordinal changes after edits.
 3. Inputs too short to fit any pose or a complete break; opening groups exhausting work time.
-4. **Resolved by approved D-036 and D-037:** configured 0-minute breaks and 0-minute full sessions invalid; 0-minute logical break-slot proposal withdrawn; warning counter resets on each activated full session (no automatic cross-preset carryover). **OPEN D-038:** whether positive special break can be <= positive normal break.
+4. **Resolved by approved D-036 and D-037:** configured 0-minute breaks and 0-minute full sessions invalid; 0-minute logical break-slot proposal withdrawn; warning counter resets on each activated full session (no automatic cross-preset carryover). **RESOLVED D-044:** a positive special replacement may be <= positive normal break; 0 remains invalid and 25/5 warning acknowledgment applies when needed.
 5. What to show if only one last pose, or no intervening break, remains for end resolution.
 6. Precise activity/label for “summary”; audio at every pose or just set end.
 7. Exact on-disk preset serialization format and file/DB technology (Stage 3).
@@ -277,4 +277,4 @@ Nothing in this data-model proposal overwrites approved user requirements or the
 - [x] Distinguish engineering proposals from approved behavior and unresolved edge rules
 - [x] User said “Continue” after Step 1.2 review, authorizing discussion/documentation of **Step 1.3**. The technical field names remain proposals, not an implemented API.
 
-**STATUS UPDATE (2026-10-22): Step 1.3 formally APPROVED / COMPLETE as D-037**, subject to D-036 strict-positive session/break durations and D-031 25/5 rest warnings; D-038 special break comparison remains specifically OPEN. **Stage 1 Step 1.4 and all programming are NOT authorized.**
+**STATUS UPDATE (2026-10-22): Step 1.3 formally APPROVED / COMPLETE as D-037**, subject to D-036 strict-positive session/break durations and D-031 25/5 rest warnings; D-038 special break comparison was subsequently resolved as APPROVED by D-044 (any positive duration). **Stage 1 Step 1.4 and all programming are NOT authorized.**
