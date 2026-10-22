@@ -48,6 +48,12 @@ The user **approved these scheduling-policy test expectations in D-037** as desc
 - [Implementation status](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/docs/STAGE_1_4_PROGRESS.md)
 - **Verification remains required:** actual `dart analyze`, `dart test` and smoke run, plus scalability checks. No GitHub Actions workflow or paid runner launched. D-038 positive special length comparison is `pendingDecision`.
 
+## Additional regression sources for DP refinement (D-043; NOT RUN)
+- `test/scheduling_test.dart` on [the Step 1.4 branch](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/test/scheduling_test.dart) includes a 97-minute positive session where the unmodified ordinary cycle would be invalid but **two special replacements at break ordinals 2 and 3 make the timeline feasible**; this guards against the former false rejection.
+- A longer 480-minute session (P5m/B1m/L5m, five special replacements) checks deterministic ordinals **13, 26, 38, 51, 64** and replacement count without exponential search.
+- An **independent Python model comparison** checked the exact DP scoring against a brute-force reference over **25,000 randomly generated small scenarios** and reproduced both canonical A/B replacement positions. **This was NOT the Dart engine or Dart tests being executed.**
+- **Dart SDK remains unavailable**; no analyzer/test success claim. Do not enable Actions or paid GitHub build resources without budget clearance/authorization.
+
 ## Stage 1: deterministic scheduling engine
 - T01 Example A baseline exact phase order and boundaries from EXAMPLES.md, down to each opening pose. Expect 130m posing + 35m breaks + 15m summary = 180m.
 - T02 Example B baseline exact phase order and boundaries. Expect same totals and 3h exact.
