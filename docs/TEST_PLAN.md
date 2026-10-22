@@ -2,6 +2,14 @@
 
 Version: 0.3 planning baseline (2026-10-22). Tests are **planned, not executed**; no app or scheduling engine exists yet.
 
+## Approved requirement tests from clarification D-030 (NOT YET EXECUTED)
+- R-B01: A new-session rule configuration pre-fills normal short break at **5 minutes (300s)** and middle/long break at **15 minutes (900s)**.
+- R-B02: Both break values are editable independently and a valid 1-minute (60s) duration is accepted.
+- R-B03: A configured short break of 0 seconds or less is invalid and produces an explicit validation issue; never treat 0 as a break-free cycle.
+- R-B04: An active long/middle replacement of 0 seconds or less is invalid and produces an explicit validation issue.
+- R-B05: Changing default break values produces a recalculated schedule; neither 5 nor 15 is hardcoded into scheduling formulas.
+- R-B06: If the long-break replacement count is 0, no long-break phase is created. This is distinct from accepting a 0-minute long break.
+
 ## Proposed additional tests from Step 1.3 (UNAPPROVED policies)
 
 Only adopt the following as binding acceptance tests after user approval of the policies in [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md). **None have been executed.**
@@ -9,7 +17,7 @@ Only adopt the following as binding acceptance tests after user approval of the 
 - P-T02: When distances tie, earlier eligible break ordinal is selected.
 - P-T03: For N>1, select distinct feasible replacement breaks spread at target fractions of work period, deterministic result; no silent reduction of count.
 - P-T04: Manually selected break ordinals survive valid edits or raise an explicit placement error when invalid; do not silently relocate.
-- P-T05: Accept a zero-duration final summary and valid opening-only configuration; do not emit a zero-length phase.
+- P-T05: Accept a zero-duration final summary and valid opening-only configuration; do not emit a zero-length phase. **Zero-minute break durations are invalid per approved D-030, regardless of this still-proposed summary/opening-only behavior.**
 - P-T06: Explicit errors for invalid total/summary/pose durations, too many replacement breaks and terminal break without following pose.
 - P-T07: If no feasible last-two-pose split exists, mark equal/custom unavailable with explanation; remainder only if valid.
 - P-T08: If the ruler explicitly chooses a last-two split beyond nominal pose duration, preserve total time and all invariant boundaries (pending user approval).
