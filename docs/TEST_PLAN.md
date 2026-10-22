@@ -38,7 +38,7 @@ The user **approved these scheduling-policy test expectations in D-037** as desc
 - P-T08: Explicit custom final-two split may exceed nominal pose length while preserving positive durations and total.
 - P-T09: **Approved:** Exactly 25m accumulated posing at session end does not require a trailing break; >25m continuous pose creates warning.
 - P-T10: **Approved:** Track warnings within one full activated session; do not automatically carry counters into a separately activated saved preset.
-- P-T11: **OPEN D-038 — NOT AN APPROVED ACCEPTANCE EXPECTATION:** Whether a positive special break may be <= its positive normal break remains unspecified. Define the expectation with the user before coding the comparison; never guess it.
+- P-T11: **APPROVED D-044:** Any **positive** special break may be shorter than or equal to the normal break (e.g. 1m or 3m special vs 5m normal, equal 5m vs 5m). Generate correct replacement times, 25/5 warning(s), and require acknowledgment for otherwise valid warnings. Configured 0m breaks remain a blocking error (D-036).
 - P-T12: **Approved D-036:** Strictly no zero logical break slots; do not generate 0m break phases or allow 0m configured breaks as an overrideable safety warning.
 
 ## Step 1.4 source links and execution hold
@@ -46,7 +46,7 @@ The user **approved these scheduling-policy test expectations in D-037** as desc
 - [Dart test suite](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/test/scheduling_test.dart) (written, NOT RUN)
 - [Dependency-free smoke check](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/tool/smoke.dart) (written, NOT RUN)
 - [Implementation status](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/docs/STAGE_1_4_PROGRESS.md)
-- **Verification remains required:** actual `dart analyze`, `dart test` and smoke run, plus scalability checks. No GitHub Actions workflow or paid runner launched. D-038 positive special length comparison is `pendingDecision`.
+- **Verification remains required:** actual `dart analyze`, `dart test` and smoke run, plus scalability checks. No GitHub Actions workflow or paid runner launched. D-038 is **RESOLVED by user-approved D-044**. The implementation no longer emits `pendingDecision`; positive shorter/equal special breaks are allowed, with warnings based on actual rest. Dart tests remain unexecuted.
 
 ## Additional regression sources for DP refinement (D-043; NOT RUN)
 - `test/scheduling_test.dart` on [the Step 1.4 branch](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/test/scheduling_test.dart) includes a 97-minute positive session where the unmodified ordinary cycle would be invalid but **two special replacements at break ordinals 2 and 3 make the timeline feasible**; this guards against the former false rejection.
