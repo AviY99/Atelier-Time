@@ -25,6 +25,17 @@ The prior D-030 hard-minimum tests R-B03/R-B04 are **superseded**; they are no l
 
 **Pending review:** Whether exactly 25m at the *end* of an overall session needs a break, and whether accumulating pose time must carry across separate back-to-back saved sessions.
 
+## Further proposed Step 1.3 review tests (NOT APPROVED OR EXECUTED)
+
+See [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md). Add these to the implementation acceptance list **only after user approval**:
+- P-T09: Short break input `0m` preserves logical break slot ordinal while adding no zero-length elapsed phase; replacing the selected slot with `15m` consumes exactly 15m rather than adding a break.
+- P-T10: Selected special break duration `0m` yields no elapsed break phase but remains traceable by slot ordinal, with 25/5 warning as appropriate.
+- P-T11: A final two-pose split across a **logical** intervening 0m slot preserves work/summary totals and supports equal/custom options when otherwise valid.
+- P-T12: One full session finishing exactly at 25m posing has no warning solely for lacking a later break; finishing after 30m of uninterrupted posing does warn (pending boundary interpretation).
+- P-T13: No pose-time carryover from an independently activated saved preset into a separate one unless the user explicitly requests that feature (pending cross-preset interpretation).
+- P-T14: A warning appears for 20m pose + 3m rest + 6m pose; shows accumulated pose time 26m, permits explicit acknowledgement, and resets only after >=5m rest.
+- P-T15: Safety-warning recalculation reflects changed final-pose split, replacement position and 0m break; previous acknowledgement and approval are invalidated.
+
 ## Proposed additional tests from Step 1.3 (UNAPPROVED policies)
 
 Only adopt the following as binding acceptance tests after user approval of the policies in [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md). **None have been executed.**
