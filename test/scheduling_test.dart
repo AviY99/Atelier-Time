@@ -183,6 +183,30 @@ void main() {
           .phases.last.endSeconds, m(180));
     });
 
+    test('approved sessions preserve warning details and timing offsets', () {
+      final candidate = engine.generate(SessionRules(
+        id: 'warning-snapshot',
+        name: 'Rest warning snapshot',
+        totalSeconds: m(30),
+        poseSeconds: m(30),
+      ));
+      expect(candidate.needsSafetyAcknowledgement, isTrue);
+      final warning = candidate.issues
+          .singleWhere((i) => i.code == 'rest_25_5');
+      expect(warning.offsetSeconds, m(25));
+      final approved = engine.approve(
+          candidate, acknowledgeWarnings: true);
+      expect(approved.acknowledgedWarnings.length, 1);
+      expect(approved.acknowledgedWarnings.single.offsetSeconds, m(25));
+      expect(approved.acknowledgedWarningCodes, ['rest_25_5']);
+      expect(
+          () => approved.acknowledgedWarnings.clear(),
+          throwsUnsupportedError);
+      expect(
+          () => approved.phases.clear(),
+          throwsUnsupportedError);
+    });
+
     test('identical rules generate identical phase IDs and timeline', () {
       final a = engine.generate(
           exampleA(), choice: const FinalPoseChoice.remainder());
