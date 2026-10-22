@@ -5,6 +5,7 @@
 - Consolidated drawing/sculpting product specification, configurable numeric rules, review/approval, offline presets, live timer and three cues.
 - Canonicalized both complete 180-minute examples and the three incomplete-final-pose alternatives with exact times.
 - Added scheduling invariants, planned QA tests, six planned implementation stages following documentation Stage 0, decision register and reusable handoff.
+- Verified all 11 new documentation files can be read back from GitHub.
 - **No implemented app functionality or automated test results yet.** Stage 1 requires separate approval.
 
 ## Handoff history
