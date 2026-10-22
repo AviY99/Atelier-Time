@@ -1,9 +1,9 @@
-# ATELIER TIME — CURRENT PROJECT HANDOFF (v0.5)
+# ATELIER TIME — CURRENT PROJECT HANDOFF (v0.6)
 
 **Date:** 2026-10-22  
 **Project:** Atelier Time  
 **Repository:** https://github.com/AviY99/Atelier-Time (existing public repo, default main)  
-**Current status:** Stage 0 complete; **Stage 1 Step 1.1 approved/complete; Step 1.2 data-model DESIGN PREPARED FOR REVIEW** under the user's instruction “Continue”. **Step 1.3 NOT AUTHORIZED.** No app source code, Flutter scaffold, automated tests or installed build exists.
+**Current status:** Stage 0 complete; Step 1.1 Flutter/Dart platform decision approved; Step 1.2 data-model design documented; **Step 1.3 scheduling edge/placement RULE PROPOSALS PREPARED FOR USER APPROVAL** following the user's latest “Continue”. **Step 1.4 coding NOT AUTHORIZED.** No Dart/Flutter application source, scaffold, automated test executions or installed build exists.
 
 ## User intent
 Build a simple self-contained installed app for live-model sessions in **drawing and sculpting ateliers**. Prioritize a single codebase and consistent cross-platform functionality; native menus/controls are OPTIONAL and a Flutter-rendered interface is acceptable. Offline operation required. Set numerical timing rules, auto-generate complete sequence, approve it, save named presets, activate and run a countdown with sounds. App name is **Atelier Time**. User will provide logo picture when asked at the relevant design stage; graphic appearance must be discussed rather than invented. Log ALL decisions and progress in GitHub; update this handoff after every iteration so a new chat can resume immediately.
@@ -14,7 +14,7 @@ Build a simple self-contained installed app for live-model sessions in **drawing
 - Native UI is NOT a requirement; non-native Flutter graphics/menus/controls are fine. Cross-platform feature parity has higher priority.
 - Linux/web not required in the first release. Specific CI, signing, distribution and build machine choices are open.
 - Authoritative decision: [TD-001](TECH_DECISION_001_PLATFORM.md), register IDs D-019 through D-022.
-- **Stage 1 Step 1.2 was authorized by the user's subsequent “Continue” request and has been carried out as DOCUMENTATION ONLY. Step 1.3 and any coding remain on hold.**
+- User later said **“Continue”** after Step 1.2, authorizing **Step 1.3 documentation/discussion only**. See [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md). **Step 1.4 and any coding are on hold; Step 1.3 policies require approval first.**
 
 ## Stage 1 Step 1.2 — documented design proposal (2026-10-22)
 - Full design specification: [DATA_MODEL.md](DATA_MODEL.md). It proposes Dart-domain records for SessionRules, any number of ordered OpeningPoseGroups, RegularCycle, LongBreakRule/Placement, candidate SchedulePhases, errors/warnings, three EndPoseResolution methods, and frozen ApprovedSessionPreset after explicit approval.
@@ -23,6 +23,17 @@ Build a simple self-contained installed app for live-model sessions in **drawing
 - Crucial distinction: the records/schema/field names are DESIGN PROPOSALS, not implemented/compiled Dart code and not independent user approval of new edge behaviors.
 - Still unresolved and reserved for proposed Step 1.3: exact automatic-middle replacement break choice and ties, multiple long break positions, infeasible schedule inputs, short/zero breaks and insufficient last-two-pose cases. No defaults quietly settled.
 - Docs updated in iteration 0.5, with decisions D-023 to D-025; **next gate is user review of model and explicit permission before Step 1.3**.
+
+## Stage 1 Step 1.3 — proposed scheduling policies (2026-10-22)
+- **Specification:** [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md), proposal P-01 to P-06, **NOT YET USER-APPROVED AS BEHAVIOR**.
+- P-01: automatic **one long break** replaces the eligible short break whose replacement interval **center is nearest the work-window midpoint**; ties go to earlier eligible break. Both canonical examples still replace the **third** short break (A at 01:20–01:35; B at 01:25–01:40).
+- P-02: when N long replacement breaks requested, distribute their centers approximately evenly over the work window using target fractions j/(N+1), deterministic earlier-ordinal tie-breaking, with feasibility enforcement. No silent reduction of N.
+- P-03: manual break positioning by distinct numbered short-break slots; editing rules must not silently relocate manually chosen slots.
+- P-04: explicit validation of impossible inputs (no negative or zero total, summary cannot consume full session, opening poses cannot overrun work, long break longer than short, reject infeasible replacements); propose 0-minute summary valid, 0-minute short break disables breaks and forbids replacements, opening-only sessions valid if they fit exactly. All are **proposed, not approved**.
+- P-05: last incomplete pose still triggers the approved three-option dialog; missing final-two-pose + break structure disables the infeasible split choices with explanations. Propose allowing custom split first pose to exceed regular duration if explicitly selected.
+- P-06: full preview of actual placements, all phase timings and validation messages before approval; any edited numeric rule invalidates approval.
+- Reference fixtures [EXAMPLES.md](EXAMPLES.md) remain fixed. The document is an engineering proposal, NOT executable scheduling code or a passing test report.
+- Decisions D-026 (authorized design), D-027/D-028 (proposals), D-029 (Step 1.4 hold).
 
 ## Approved core requirements
 - **Each new or edited session has its own numeric input screen; every number in the examples can be changed**, opening pose groups can be added/removed; edits recalculate the whole schedule, which must be re-approved. Example A/B are test fixtures, not hardcoded fixed session choices.
@@ -54,25 +65,25 @@ Full per-pose tables in docs/EXAMPLES.md. Each reference baseline totals **130m 
 Stage intervals contiguous, no overlap/gap. Total exactly D, summary last F. Long break replaces short break at one eligible slot, not appended. Final-two-pose alternatives preserve combined pose time and intervening break, fixed lead-in, final summary and total. Do not silently auto-shorten and accept; user chooses during preview. A preview, saved preset and runtime use one consistent approved sequence.
 
 ## Decisions and unresolved details
-The decision register is docs/DECISIONS.md (D-001 through D-025). Target OS/framework remain approved; the Step 1.2 model is a **reviewable design proposal**; the midpoint tie-breaks and input edge-case policies remain open. Also open: distribution/build/signing, branding, summary's meaning and per-pose vs per-set audio. Do not treat these as finalized. The existing GitHub repository is reused.
+The decision register is docs/DECISIONS.md (D-001 through D-029). Target OS/framework are approved. Step 1.2 data model remains the current concept; Step 1.3 P-01–P-06 are **awaiting explicit user approval** (not settled defaults). Also open: distribution/build/signing, branding, exact summary activity and per-pose versus per-set audio. Reuse the existing GitHub repository.
 
 ## Roadmap and current gate
 **Stage 0 COMPLETE:** Documentation baseline committed to existing GitHub repository, all 11 files verified readable (this iteration).  
-**Stage 1 — STEP 1.1 COMPLETE:** Flutter/Dart and four target operating systems approved. **STEP 1.2 DESIGN PREPARED:** [DATA_MODEL.md](DATA_MODEL.md), documentation only and user review pending. **STEP 1.3 NOT AUTHORIZED:** future step will decide automatic midpoint placement/ties and scheduling edge policies; separate approval required, as will the later engine/tests.  
+**Stage 1 — Step 1.1 COMPLETE:** Flutter/Dart and OS targets approved. **Step 1.2 DOCUMENTED:** [DATA_MODEL.md](DATA_MODEL.md). **Step 1.3 PROPOSALS PREPARED, USER APPROVAL PENDING:** [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md). **Step 1.4 NOT AUTHORIZED:** Dart schedule generator/test implementation requires separate permission.  
 **Stage 2:** Cross-platform Flutter UI including per-session numeric input editor, preview/approval and split ruler; discuss visual design.  
 **Stage 3:** Offline saved presets.  
 **Stage 4:** Playback timer, three sounds, interruptions.  
 **Stage 5:** Device QA, installability and accessibility.  
 **Stage 6:** Versioned release and maintenance handoff.
 
-User approved Stage 1 Step 1.1 and then said **“Continue”** to begin Step 1.2. That permission has been used **only for documentation/design**; user has NOT approved Step 1.3, code/scaffolding, or tests. Each future sub-step and stage requires separate explicit permission.
+User approved Step 1.1, then “Continue” to begin Step 1.2, and then “Continue” to begin Step 1.3. Both continuations authorized only the corresponding **documentation/design** steps. Step 1.3 behavior proposals have not yet been formally approved; **Step 1.4, source code/scaffolding and testing are NOT authorized**. Each next sub-step requires separate explicit permission.
 
 ## Documentation operation instructions for next chat
-1. Read this handoff, [TD-001](TECH_DECISION_001_PLATFORM.md), [DATA_MODEL.md](DATA_MODEL.md), docs/PRODUCT_SPEC.md, docs/SCHEDULING_RULES.md, docs/EXAMPLES.md, docs/ROADMAP.md, docs/DECISIONS.md, docs/TEST_PLAN.md and docs/WORK_LOG.md.
+1. Read this handoff, [TD-001](TECH_DECISION_001_PLATFORM.md), [DATA_MODEL.md](DATA_MODEL.md), [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md), docs/PRODUCT_SPEC.md, docs/SCHEDULING_RULES.md, docs/EXAMPLES.md, docs/ROADMAP.md, docs/DECISIONS.md, docs/TEST_PLAN.md and docs/WORK_LOG.md.
 2. Verify GitHub repository current state before writing; reuse existing files, never create duplicate repo.
 3. Maintain same decisions and exactly reproduce reference schedules.
 4. For any implementation iteration commit source/tests, update decision log, work log, test results, changelog and THIS HANDOFF; link commits and clearly separate verified behavior from proposed behavior.
 5. If current stage still pending approval, stop and request approval rather than proceeding with app coding.
 6. Logo and graphic style only discussed at relevant stage after user image supplied.
 
-**Immediate next action:** summarize the newly drafted Step 1.2 data model and its open technical points; request user review/approval to proceed to **Step 1.3 (automatic long-break placement and edge-case rules)**. **Do NOT start Step 1.3, Flutter project scaffolding, scheduling algorithms, tests or UI without separate instruction.**
+**Immediate next action:** Present proposed policies P-01 through P-06 to user and ask **approval or changes**. Then ask for separate permission to begin **Step 1.4 (Dart scheduling engine and regression tests)**. Until that permission is explicitly given, **STOP**: no Dart/Flutter project, source code, tests or UI.
