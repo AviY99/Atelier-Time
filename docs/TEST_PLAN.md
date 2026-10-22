@@ -2,6 +2,18 @@
 
 Version: 0.3 planning baseline (2026-10-22). Tests are **planned, not executed**; no app or scheduling engine exists yet.
 
+## Proposed additional tests from Step 1.3 (UNAPPROVED policies)
+
+Only adopt the following as binding acceptance tests after user approval of the policies in [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md). **None have been executed.**
+- P-T01: Automatically choose the nearest feasible replacement-break **center** to work midpoint; A/B must choose ordinal #3 and exact 15-minute spans.
+- P-T02: When distances tie, earlier eligible break ordinal is selected.
+- P-T03: For N>1, select distinct feasible replacement breaks spread at target fractions of work period, deterministic result; no silent reduction of count.
+- P-T04: Manually selected break ordinals survive valid edits or raise an explicit placement error when invalid; do not silently relocate.
+- P-T05: Accept a zero-duration final summary and valid opening-only configuration; do not emit a zero-length phase.
+- P-T06: Explicit errors for invalid total/summary/pose durations, too many replacement breaks and terminal break without following pose.
+- P-T07: If no feasible last-two-pose split exists, mark equal/custom unavailable with explanation; remainder only if valid.
+- P-T08: If the ruler explicitly chooses a last-two split beyond nominal pose duration, preserve total time and all invariant boundaries (pending user approval).
+
 ## Stage 1: deterministic scheduling engine
 - T01 Example A baseline exact phase order and boundaries from EXAMPLES.md, down to each opening pose. Expect 130m posing + 35m breaks + 15m summary = 180m.
 - T02 Example B baseline exact phase order and boundaries. Expect same totals and 3h exact.
