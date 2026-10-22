@@ -10,12 +10,12 @@ All times displayed as elapsed from the session start (00:00). Internally prefer
 - `W = D-F`: work block length (all poses + breaks)
 - `O`: sequence of optional opening pose groups
 - `P`: nominal repeating pose duration
-- `B`: short break duration
-- `L`: long break duration replacing an existing B
+- `B`: short break duration — **new-session default 5 minutes, editable; minimum 1 minute for an actual break**
+- `L`: middle/long replacement break duration — **new-session default 15 minutes, editable; minimum 1 minute for an actual break**
 - `N`: configured count of long breaks
 - `cycleStart`: pose-first or break-first
 
-The examples set `D=180, F=15, W=165, P=25, B=5, L=15, N=1`. Example A opening groups 4×1 then 4×4 and break-first; Example B no openings and pose-first.
+The examples set `D=180, F=15, W=165, P=25, B=5, L=15, N=1`. Example A opening groups 4×1 then 4×4 and break-first; Example B no openings and pose-first. **D-030:** 5 and 15 minutes are editable new-session break defaults, not fixed constraints. A configured break duration of 0 is invalid (minimum 1 minute); the UI/engine must reject it instead of interpreting it as a skip-break instruction.
 
 ## Baseline generator
 1. Validate every configured duration and count before scheduling. Reject negative durations, summary longer than total, and sequences that cannot legally fit.
@@ -54,4 +54,4 @@ See EXAMPLES.md for the entire time-ordered lists and each alternative.
 ## Stage 1 open engineering edge cases
 
 The candidate resolutions are documented as **unapproved proposals** in [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md). They require the user's approval before implementation. Example A/B expected results remain unchanged.
-How to handle (a) zero final summary, (b) multiple long breaks, (c) work block too short for opening poses, (d) break-first with very short work block, (e) zero-length breaks, (f) final incomplete pose with fewer than two poses, (g) midpoint tie-breaks, (h) whether longer breaks must be at least short-break length, (i) custom pose that exceeds nominal length, (j) set-end vs every-pose sound. Propose explicit behavior, tests, and request approval if user-facing choices change.
+How to handle (a) zero final summary, (b) multiple long breaks, (c) work block too short for opening poses, (d) break-first with very short work block, (e) how to specify a deliberately break-free cycle **without zero-duration breaks**, (f) final incomplete pose with fewer than two poses, (g) midpoint tie-breaks, (h) whether longer breaks must exceed short-break length, (i) custom pose that exceeds nominal length, (j) set-end vs every-pose sound. **Minimum 1 minute per actual break is already approved**. Propose explicit behavior, tests, and request approval if user-facing choices change.
