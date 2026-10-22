@@ -23,6 +23,8 @@ The two 3-hour session examples are **input/output reference fixtures**, not har
 | Location of replacement(s) | `longBreaks.placement` | approved slot after pose 10 | approved slot after pose 3 |
 | End adjustment | `endPoseResolution` | remainder/even/custom | remainder/even/custom |
 
+**Approved defaults and minimum (D-030):** newly configured regular/short break `shortBreakSeconds = 300` (5m), middle/long break `durationSeconds = 900` (15m); both inputs are editable per session. **Any configured break has duration >= 60 seconds (1 minute)**. A break duration of zero is invalid; zero replacement count is a different concept from a zero-duration break. Defaults do **not** fix the example values or assume any unapproved count/placement defaults.
+
 User entry can display minutes; internal `int` seconds avoid floating-point arithmetic and support accurate countdowns later. For **currently approved whole-minute pose splitting**, custom and near-equal results remain multiples of 60 seconds, with minimum 60 seconds per pose when feasible. There is no requirement to expose second-resolution inputs in the first UI.
 
 ## 2. Proposed Dart-domain types (concept only, NOT executable implementation)
@@ -45,7 +47,7 @@ OpeningPoseGroup
 
 RegularCycle
   poseSeconds: int                // regular pose duration
-  shortBreakSeconds: int          // normal rest duration
+  shortBreakSeconds: int          // normal rest duration: default 300s, min 60s
   firstPhase: CycleFirstPhase     // starts pose-first or break-first
 
 LongBreakPlacement
@@ -54,7 +56,7 @@ LongBreakPlacement
 
 LongBreakRule
   count: int                      // 0 means no long breaks
-  durationSeconds: int            // replacement duration; editable
+  durationSeconds: int            // replacement break: default 900s, min 60s when configured
   placement: LongBreakPlacement
 
 SessionRules
@@ -235,6 +237,7 @@ Proposed machine-readable issue codes:
 - `SUMMARY_EXCEEDS_TOTAL`
 - `INVALID_OPENING_GROUP`
 - `INVALID_CYCLE_DURATION`
+- `BREAK_DURATION_BELOW_MINIMUM` // proposed issue-code name; approved 1-minute minimum
 - `NO_ELIGIBLE_REPLACEMENT_BREAK`
 - `REPLACEMENT_BREAK_COUNT_EXCEEDS_SLOTS`
 - `OPENING_GROUPS_EXCEED_WORK_BLOCK`
@@ -251,7 +254,7 @@ Step 1.3 created [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) with exp
 1. Exact automatic-middle replacement-break placement and ties when session lengths/counts vary.
 2. How to deal with multiple long breaks and explicit break-ordinal changes after edits.
 3. Inputs too short to fit any pose or a complete break; opening groups exhausting work time.
-4. Whether zero-length breaks are allowed; whether long duration must exceed short duration.
+4. **Resolved by approved D-030:** zero-length breaks are invalid; minimum actual break is 1 minute. **Still open:** whether long duration must strictly exceed short duration and how the user requests a truly break-free cycle.
 5. What to show if only one last pose, or no intervening break, remains for end resolution.
 6. Precise activity/label for “summary”; audio at every pose or just set end.
 7. Exact on-disk preset serialization format and file/DB technology (Stage 3).
