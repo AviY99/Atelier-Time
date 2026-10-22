@@ -2,7 +2,7 @@
 
 **User approval:** 2026-10-22  
 **State:** **STEP 1.3 COMPLETED AND APPROVED** — user expressly approved the remaining policies as documented in the former v0.9 review. **D-036 overrides all older allowances for 0-minute sessions/breaks.**  
-**Approval scope:** Rules and documentation ONLY. **STEP 1.4 NOT AUTHORIZED. No application code, Flutter scaffolding, tests or builds have started.**
+**Approval scope at the time:** Rules and documentation ONLY. **Later update D-040:** user subsequently said “Continue,” authorizing **Step 1.4 ONLY**, and the pure Dart engine/test sources now exist on [stage-1-4-scheduling-core](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core). **No SDK, executed Dart tests, builds or Flutter application**. This document remains the Step 1.3 approved policy, not a statement that Step 1.4 has completed.
 
 This document is the consolidated **approved** Step 1.3 design. See [detailed approved policy](SCHEDULING_EDGE_POLICY.md), [decision log](DECISIONS.md), [examples](EXAMPLES.md), and [data-model proposal](DATA_MODEL.md). The earlier proposal for logical zero-duration break slots is **WITHDRAWN**.
 
