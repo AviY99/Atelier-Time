@@ -23,7 +23,7 @@ The two 3-hour session examples are **input/output reference fixtures**, not har
 | Location of replacement(s) | `longBreaks.placement` | approved slot after pose 10 | approved slot after pose 3 |
 | End adjustment | `endPoseResolution` | remainder/even/custom | remainder/even/custom |
 
-**Approved defaults and minimum (D-030):** newly configured regular/short break `shortBreakSeconds = 300` (5m), middle/long break `durationSeconds = 900` (15m); both inputs are editable per session. **Any configured break has duration >= 60 seconds (1 minute)**. A break duration of zero is invalid; zero replacement count is a different concept from a zero-duration break. Defaults do **not** fix the example values or assume any unapproved count/placement defaults.
+**Approved current break rule (D-031, superseding former D-030 minimum):** newly configured regular/short break defaults to `shortBreakSeconds = 300` (5m), middle/long break defaults to `durationSeconds = 900` (15m). Both are editable **including 0 seconds (no break time)**. 0-value normal/replacement slots create no zero-duration `SchedulePhase`; their desired ordinal/placement semantics are an explicit Step 1.3 design question. A 0 break does **not** reset accumulated posing duration and may trigger a **mandatory-to-acknowledge 25-minute/5-minute warning**.
 
 User entry can display minutes; internal `int` seconds avoid floating-point arithmetic and support accurate countdowns later. For **currently approved whole-minute pose splitting**, custom and near-equal results remain multiples of 60 seconds, with minimum 60 seconds per pose when feasible. There is no requirement to expose second-resolution inputs in the first UI.
 
@@ -88,7 +88,7 @@ ScheduleIssue
 ScheduleCandidate
   sourceRules: SessionRules
   phases: List<SchedulePhase>
-  issues: List<ScheduleIssue>
+  issues: List<ScheduleIssue>       // errors and safety warnings are distinct
   needsEndPoseResolution: bool
   endPoseOptions: EndPoseChoiceAvailability
   generationVersion: int          // planned for reproducibility; exact scheme TBD
@@ -111,6 +111,7 @@ ApprovedSessionPreset
   approvedRules: SessionRules
   endPoseResolution: EndPoseResolution
   approvedPhases: List<SchedulePhase>       // immutable approved snapshot
+  acknowledgedSafetyWarningCodes: List<String> // proposed: explicit 25/5 override for this revision
   approvedAt: String?                       // timestamp for metadata, not timing math
   revision: int                             // editing requires new approval
 ```
@@ -121,7 +122,7 @@ The set of field names is proposed and can be refined during implementation; **t
 
 - Rules allow the editor to reconstruct every numeric input, including new/reordered opening groups.
 - Approved phases preserve exactly the sequence reviewed, including the chosen last-two-pose allocation.
-- After editing a numeric field the existing approval becomes invalid: generate a new candidate, resolve partial end, obtain approval and then save a new approved revision.
+- After editing a numeric field the existing approval **and safety-warning acknowledgement** become invalid: generate a new candidate, resolve partial end, obtain explicit safety-warning acknowledgement if required, and then save a new approved revision.
 - The live timer consumes `approvedPhases` rather than generating a different schedule while running.
 - All data is intended to be locally stored/offline in later Stage 3; the storage library, file/DB format and migration strategy are not chosen in Step 1.2.
 
@@ -133,7 +134,8 @@ User enters/edits SessionRules (unapproved draft)
        v
 Validate rules -> create ScheduleCandidate (full preview)
        |
-       +-- invalid -> list errors, prevent approval
+       +-- hard-invalid -> list errors, prevent approval
+       +-- safety warning -> show affected times, require explicit acknowledgement, then allow approval
        |
        +-- final pose incomplete -> offer three explicit options
        |       remainder / near 50-50 / custom ruler
@@ -159,7 +161,7 @@ The app's eventual input/editor screens (Stage 2) and persistent preset store (S
 - Each generated phase is a half-open interval `[startOffsetSeconds, endOffsetSeconds)`, permitting exact adjoining boundaries.
 - The first phase starts at 0; the final phase ends at `totalSeconds`; neighboring phases meet exactly.
 - Every pose has a positive duration and a consecutive pose number.
-- A scheduled long break represents ONE scheduled short break **replaced** by the longer duration. Do not retain a short break immediately next to the replacement as if both were scheduled.
+- A scheduled long break represents ONE scheduled short-break **slot replaced**, rather than an extra break at that boundary. If the entered replacement is 0, no actual break time or zero-length phase is created; the exact representation in schedule previews remains part of Step 1.3 discussion.
 - All opening groups are expanded into `count` consecutive individual pose phases in the same order as inputs.
 - `summarySeconds` reserves the last part of the session; it is not extra time. A zero-length summary requires no zero-duration display phase (this proposed representation does not resolve other scheduling edge rules).
 - `ScheduleIssue` records impossible input combinations rather than inventing times or silently truncating required opening poses.
@@ -249,12 +251,14 @@ Stage 1 Step 1.3 must explicitly resolve ambiguous product-visible edge cases an
 
 ## 8. Still open: do not silently decide
 
+**New approved 25/5 safety warning (D-031):** accumulate pose durations across consecutive poses until an actual rest of **>=5 minutes**; mark a schedule warning if posing continues after 25 accumulated minutes without that rest, or a single pose exceeds 25 minutes. Display timing/details; user can choose 0 break or another violation but **must explicitly acknowledge the warning** prior to approving. Shorter breaks do not reset the counter. No algorithm or UI code exists; warning/acknowledgement model fields are tentative.
+
 Step 1.3 created [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) with explicit proposed resolutions to several items below. **These are awaiting user approval, not yet settled requirements.**
 
 1. Exact automatic-middle replacement-break placement and ties when session lengths/counts vary.
 2. How to deal with multiple long breaks and explicit break-ordinal changes after edits.
 3. Inputs too short to fit any pose or a complete break; opening groups exhausting work time.
-4. **Resolved by approved D-030:** zero-length breaks are invalid; minimum actual break is 1 minute. **Still open:** whether long duration must strictly exceed short duration and how the user requests a truly break-free cycle.
+4. **Revised by approved D-031:** break values of 0 are allowed, superseding the older 1-minute minimum described as D-030. **Still open:** exact 0-length replacement slot semantics, and whether cross-session accumulation applies across separately started saved sessions.
 5. What to show if only one last pose, or no intervening break, remains for end resolution.
 6. Precise activity/label for “summary”; audio at every pose or just set end.
 7. Exact on-disk preset serialization format and file/DB technology (Stage 3).
