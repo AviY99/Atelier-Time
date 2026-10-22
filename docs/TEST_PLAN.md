@@ -105,3 +105,9 @@ For every executed test record: test ID, code commit, target platform/config, in
 
 ## Acceptance gate for Stage 1
 At minimum T01–T12, T15–T18 passing on the selected core stack, with documented disposition of Stage 1 edge rules. The full reference examples must match exact phase order and timestamps. Later-stage tests can remain pending.
+
+## Step 1.4 local execution method and approval hardening (D-046)
+
+- [Windows verification script](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/tool/verify.ps1) and [macOS/Linux verification script](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/tool/verify.sh) run `dart tool/smoke.dart`, `dart pub get`, `dart analyze` and `dart test` with a local `atelier-time-verification.log`.
+- Test code on the branch additionally asserts the approved session preserves a **full immutable safety-warning record and exact 25-minute time offset**. `ScheduleCandidate` construction is now library-private so callers cannot fabricate a candidate for approval.
+- **ALL Dart checks remain UNEXECUTED.** Current container lacks Dart/Flutter SDK and cannot resolve the Dart download host. Avoid GitHub Actions or paid runners under user's billing block. Install the **Dart SDK only** on an available local test machine to unblock independent execution; share the log for error correction.
