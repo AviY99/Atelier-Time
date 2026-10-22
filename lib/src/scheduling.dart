@@ -8,8 +8,6 @@
 ///
 /// D-038 is still open: positive special break <= regular break is reported as
 /// a pending policy decision rather than being silently accepted or rejected.
-library;
-
 import 'dart:math' as math;
 
 const int secondsPerMinute = 60;
