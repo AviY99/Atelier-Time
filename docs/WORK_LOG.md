@@ -1,5 +1,20 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-22 — Iteration 1.4: Diagnose local Dart SDK/DNS blocker and prepare free execution path
+
+**User request:** “What to do to solve ur failure? Can you continue?” Continued **already-authorized Step 1.4 only**.
+
+**Environment diagnosis:** On this assistant's Linux container, `dart` and `flutter` are not installed, and no SDK binary found under typical locations. DNS lookup / command-line `curl` to `storage.googleapis.com`, `github.com`, and `dart.dev` fails with host-resolution errors; no network SDK installation was possible. This is a testing-environment limitation, **not proof the written Dart code has failed or passed**.
+
+**Source improvements:** Updated the isolated `stage-1-4-scheduling-core` branch to make `ScheduleCandidate` construction library-private and record **immutable full safety-warning details including elapsed-time offsets** in approved session snapshots; maintained `acknowledgedWarningCodes` compatibility. Added an **unexecuted** regression case checking exact warning offset and immutable snapshot.
+
+**Budget-free verification:** Added `tool/verify.ps1` (Windows), `tool/verify.sh` (macOS/Linux) and `.gitignore` to branch. Scripts run Dart-only smoke, `dart pub get`, `dart analyze`, `dart test`, recording `atelier-time-verification.log`, with no GitHub Actions. The user's practical minimal setup is install the official Dart SDK on their computer, download/clone that branch, run one script, and share the log for debugging. Installing on their PC does not install Dart in the assistant's separate container.
+
+**Decision D-046:** Stage 1 Step 1.4 still **IN PROGRESS / NOT COMPLETE**; no Dart SDK, analyzer result, executed tests or build. No GitHub Actions, paid runners, budget changes, merge or Stage 2 work. Preserve D-044 positive special-break approval, D-036 strict-positive sessions/breaks and D-031 warning rules.
+
+---
+
+
 ## 2026-10-22 — Iteration 1.3: D-038 resolved by D-044; positive shorter/equal special breaks supported
 
 **User approved:** “For Atelier Time, I approve D-038: allow any positive special break duration, even shorter than or equal to the normal break, with the already approved 25/5 rest warnings. Zero-minute breaks remain invalid. Record this decision in GitHub and continue only the authorized Step 1.4 coding and testing work.”
