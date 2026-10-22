@@ -35,3 +35,12 @@ Atelier Time lets an organizer configure pose and break rules, generate and appr
 - “Summary” is a named final reserved time block; its specific activity has not been further defined.
 - Do not silently convert open technical assumptions into approved product rules.
 - Every iteration must update the decision log, work log, change log and handoff with evidence and next actions.
+
+## Step 1.4 — budget-free Dart verification
+
+The development branch [stage-1-4-scheduling-core](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core) now contains a safer immutable schedule approval API and local verification helpers:
+- Windows: [tool/verify.ps1](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/tool/verify.ps1).
+- macOS/Linux: [tool/verify.sh](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/tool/verify.sh).
+- Each helper calls the pure Dart smoke test, `dart pub get`, `dart analyze` and `dart test`, writing `atelier-time-verification.log`.
+
+**Not yet executed:** The assistant's local runtime does not contain Dart/Flutter, and DNS fails for SDK download hosts; no Github Actions or paid runners were used. To run the tests on your computer, install only the [official Dart SDK](https://dart.dev/get-dart), download/clone the development branch, run the appropriate helper and share the generated log. The SDK installed on a user's PC is not automatically available in ChatGPT's separate environment. No Flutter interface or Stage 2 work has been authorized.
