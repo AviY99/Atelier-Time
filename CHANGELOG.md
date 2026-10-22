@@ -1,5 +1,14 @@
 # Changelog — Atelier Time
 
+## 2026-10-22 — Stage 1 Step 1.4 DP fix / Handoff v1.2
+
+- Continued authorized pure Dart coding on `stage-1-4-scheduling-core` after user requested “Continue” and explanation of open D-038.
+- Explained **D-038**: whether positive special break may be shorter or equal to positive regular break (e.g. special 3m versus regular 5m). Recommendation to allow with 25/5 warnings is **not a decision**. Code preserves `pendingDecision`.
+- Fixed exponential automatic-break selection and a false-invalid-placement case using exact dynamic programming with original midpoint/even placement objective and deterministic earlier-ordinal ties.
+- Added regression sources for a formerly false-invalid 97m case and an 8-hour five-special-break case. An **independent Python model** matched exhaustive search over 25,000 sampled configurations and canonical A/B positions, but **Dart tests have NOT run**.
+- Source remains on isolated branch; no Dart/Flutter SDK, no GitHub Actions, budget change, compile, merge, UI or app build. **Step 1.4 remains IN PROGRESS; Stage 2 is not authorized.**
+
+
 ## 2026-10-22 — Stage 1 Step 1.4 first source increment / Handoff v1.1
 
 - User's **“Continue”** after the blocked GitHub budget discussion authorized **Step 1.4 only** (D-040). Created isolated development branch [stage-1-4-scheduling-core](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core).
