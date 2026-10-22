@@ -157,7 +157,10 @@ class ScheduleCandidate {
   final bool canSplitFinalTwo;
   final FinalPoseChoice? selectedChoice;
 
-  ScheduleCandidate({
+  // Only the scheduling library may construct an approvable candidate.
+  // The UI must always call ScheduleEngine.generate rather than inventing
+  // its own candidate and marking it safe to approve.
+  ScheduleCandidate._({
     required this.rules,
     required List<SchedulePhase> phases,
     required List<ScheduleIssue> issues,
@@ -181,15 +184,21 @@ class ApprovedSession {
   final SessionRules rules;
   final List<SchedulePhase> phases;
   final FinalPoseChoice? selectedChoice;
-  final List<String> acknowledgedWarningCodes;
+  /// Full warning records, including their actual elapsed-time offsets.
+  /// These belong to this immutable approved schedule revision.
+  final List<ScheduleIssue> acknowledgedWarnings;
+
+  /// Convenience view for UI badges and later persisted metadata.
+  List<String> get acknowledgedWarningCodes =>
+      List.unmodifiable(acknowledgedWarnings.map((i) => i.code));
 
   ApprovedSession._(
     this.rules,
     List<SchedulePhase> phases,
     this.selectedChoice,
-    List<String> warningCodes,
+    List<ScheduleIssue> warnings,
   )   : phases = List.unmodifiable(phases),
-        acknowledgedWarningCodes = List.unmodifiable(warningCodes);
+        acknowledgedWarnings = List.unmodifiable(warnings);
 }
 
 class _Attempt {
@@ -374,7 +383,6 @@ class ScheduleEngine {
       candidate.selectedChoice,
       candidate.issues
           .where((i) => i.severity == IssueSeverity.warning)
-          .map((i) => i.code)
           .toList(),
     );
   }
@@ -387,7 +395,7 @@ class ScheduleEngine {
     bool canSplit,
     FinalPoseChoice? choice,
   ) =>
-      ScheduleCandidate(
+      ScheduleCandidate._(
         rules: rules,
         phases: phases,
         issues: issues,
