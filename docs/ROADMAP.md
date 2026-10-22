@@ -35,3 +35,9 @@ A stage report includes: agreed scope, work completed, files/commit IDs, tests r
 
 ## Step 1.3 consolidated review (2026-10-22)
 Following D-036, the [Step 1.3 approved review](STEP_1_3_REVIEW.md) withdraws zero-duration break slots, preserves 25/5 advisory warnings for valid positive rest durations, and **records user approval D-037** for automatic/manual positions and remaining documented policies. Policy for positive special break <= normal was subsequently APPROVED via D-044 (including valid shorter or equal lengths); 0-minute configured breaks remain invalid. **Step 1.4 has subsequently been authorized (D-040) but is still IN PROGRESS and unverified; no later stage authorized.**
+
+## Step 1.4 verification blocker and source hardening (D-046)
+
+Step 1.4 remains **IN PROGRESS** on branch `stage-1-4-scheduling-core`, not yet merged. Further work added private candidate construction to prevent fabricated approved schedules, retained immutable timestamped safety-warning records in approved snapshots, and wrote a new unexecuted regression test. Local `tool/verify.ps1` (Windows) and `tool/verify.sh` (macOS/Linux) provide budget-free Dart smoke/analyzer/test checks and a shareable log.
+
+**Blocking environment:** No Dart or Flutter installed here, and DNS resolution of SDK download hosts fails. Installing the official **Dart SDK** on a test machine is sufficient for Step 1.4; full Flutter/platform toolchains are later-stage needs. No GitHub Actions/workflow or metered build triggered. Do not call Step 1.4 complete without Dart test execution and fixes. No Stage 2 authorization.
