@@ -1,6 +1,6 @@
 # Test and acceptance plan — Atelier Time
 
-Version: 0.3 planning baseline (2026-10-22). Tests are **planned, not executed**; no app or scheduling engine exists yet.
+Version: 0.4 planning and test-source baseline (2026-10-22). **Step 1.4 source/test files now exist** on branch `stage-1-4-scheduling-core` (D-040), but **NO Dart tests, analyzer, or builds have been executed** because no Dart SDK is available and GitHub Actions are deliberately not enabled under the current metered-budget block. Tests must NOT be called passing. No Flutter app yet.
 
 ## Approved requirement tests: D-031 + D-036 (NOT EXECUTED)
 
@@ -40,6 +40,13 @@ The user **approved these scheduling-policy test expectations in D-037** as desc
 - P-T10: **Approved:** Track warnings within one full activated session; do not automatically carry counters into a separately activated saved preset.
 - P-T11: **OPEN D-038 — NOT AN APPROVED ACCEPTANCE EXPECTATION:** Whether a positive special break may be <= its positive normal break remains unspecified. Define the expectation with the user before coding the comparison; never guess it.
 - P-T12: **Approved D-036:** Strictly no zero logical break slots; do not generate 0m break phases or allow 0m configured breaks as an overrideable safety warning.
+
+## Step 1.4 source links and execution hold
+- [Pure Dart scheduler](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/lib/src/scheduling.dart) (development branch, uncompiled)
+- [Dart test suite](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/test/scheduling_test.dart) (written, NOT RUN)
+- [Dependency-free smoke check](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/tool/smoke.dart) (written, NOT RUN)
+- [Implementation status](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/docs/STAGE_1_4_PROGRESS.md)
+- **Verification remains required:** actual `dart analyze`, `dart test` and smoke run, plus scalability checks. No GitHub Actions workflow or paid runner launched. D-038 positive special length comparison is `pendingDecision`.
 
 ## Stage 1: deterministic scheduling engine
 - T01 Example A baseline exact phase order and boundaries from EXAMPLES.md, down to each opening pose. Expect 130m posing + 35m breaks + 15m summary = 180m.
