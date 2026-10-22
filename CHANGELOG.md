@@ -1,5 +1,13 @@
 # Changelog — Atelier Time
 
+## 2026-10-22 — Stage 1 Step 1.2 / Handoff v0.5
+- User's “Continue” authorized only the **data-model design** following approved Step 1.1.
+- Added [DATA_MODEL.md](docs/DATA_MODEL.md) with proposed Dart session rules, variable-length editable opening pose groups, phase intervals, long-break replacement representation, validation issues, final-pose option model, and immutable approved preset shape.
+- Included future test fixture input payloads for approved Example A and B; canonical expected schedules unchanged.
+- Recorded decisions/gates D-023 to D-025; updated roadmap, architecture, README, work log and handoff.
+- **No code or tests; Step 1.3 and engine implementation remain on hold.**
+
+
 ## 2026-10-22 — Stage 1 Step 1.1 / Handoff v0.4
 - **Approved:** Flutter + Dart as one shared application codebase for Android phones/tablets, Windows, iOS/iPadOS and macOS in first release.
 - **Clarified:** Native menus/graphics/widgets are optional; non-native Flutter UI is acceptable. Distinct OS-specific installation packages remain necessary.
@@ -20,4 +28,5 @@
 - v0.1: Initial concept and example sequences drafted in chat.
 - v0.2: Three-choice end-pose handling specified, time-ruler prototype shown in chat.
 - v0.3: User approved requirements and authorized GitHub documentation setup.
-- v0.4: User approved Flutter/Dart four-platform choice and non-native UI clarification for Stage 1 Step 1.1 only; current source of truth remains docs/HANDOFF.md.
+- v0.4: User approved Flutter/Dart four-platform choice and non-native UI clarification for Stage 1 Step 1.1 only.
+- v0.5: Step 1.2 documented the proposed data model; user review and separate Step 1.3 approval remain pending. Source of truth: docs/HANDOFF.md.
