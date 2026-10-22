@@ -2,7 +2,7 @@
 
 **Updated:** 2026-10-22  
 **Status:** **Stage 1 Step 1.3 APPROVED / COMPLETE (2026-10-22)**. User approved placement and edge policies P-01–P-06 as documented in [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md), with **D-036 prohibiting 0-minute sessions and actual breaks**. D-031 retains the advisory 25/5 warning and explicit override for otherwise valid schedules. The one explicitly unresolved case (whether a positive special break may be <= normal break length) stays open.  
-**Scope:** Approved documentation ONLY. **Step 1.4 programming is NOT authorized.**
+**Scope:** Step 1.3 approval record. **Later status:** user separately authorized Step 1.4 (D-040) on [isolated pure-Dart branch](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core); engine/test source exists but is uncompiled and unexecuted. No budget-consuming Actions, no Step 1.4 completion and no later stages.
 
 The latest decision **D-036 supersedes only D-031's earlier allowance of a 0-minute break**. Earlier discussion of 0-minute *logical break slots* was explicitly withdrawn, not approved. A 0-minute **full session** or **configured normal/special break** is an **error**, never an acknowledged safety-warning exception. No numeric duration is hardcoded as the only permissible positive value: the new-session defaults are 5m normal and 15m special.
 
