@@ -561,14 +561,17 @@ class ScheduleEngine {
     var warned = false;
     for (final phase in phases) {
       if (phase.kind == PhaseKind.pose) {
+        final previousAccumulated = accumulated;
         accumulated += phase.durationSeconds;
         if (accumulated > _maxUnbrokenPoseSeconds && !warned) {
+          final crossingOffset = phase.startSeconds +
+              math.max(0, _maxUnbrokenPoseSeconds - previousAccumulated);
           warnings.add(ScheduleIssue(
             IssueSeverity.warning,
             'rest_25_5',
             'Posing exceeded 25 accumulated minutes without '
                 'a qualifying rest of at least 5 minutes.',
-            offsetSeconds: phase.startSeconds,
+            offsetSeconds: crossingOffset,
           ));
           warned = true;
         }
