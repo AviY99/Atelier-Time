@@ -75,3 +75,22 @@ Continue to verify and fix **this Step 1.4 code**, ideally with a Dart-capable l
 
 **Still blocked:** Dart SDK absent locally; no `dart analyze`, `dart test`, smoke run or Flutter build. No GitHub Actions workflows created/invoked due the user's reported budget block. No merge into main. Stage 1 Step 1.4 remains **IN PROGRESS**, Stage 2 **NOT AUTHORIZED**.
 
+
+## 2026-10-22 — Additional Step 1.4 hardening and free local verification
+
+**User asked:** “What to do to solve ur failure? Can you continue”. Continued **Step 1.4 ONLY**. No GitHub Actions or later-stage work.
+
+**SDK failure diagnosed in the current environment:**
+- `dart` and `flutter` binaries are absent from `PATH`, and no local SDK was found in common installed locations.
+- DNS cannot resolve `storage.googleapis.com`, `github.com` or `dart.dev` from the local command environment; direct `curl` of the Dart stable SDK version URL fails with `curl: (6) Could not resolve host`. Thus the SDK cannot be installed from this environment in the normal way; it is **not evidence of a failing Dart build**.
+- GitHub connector calls can still commit/read files. Do **not** use Actions or any budget-consuming runner under the reported GitHub billing block.
+
+**Further code improvements on the branch:**
+- `ScheduleCandidate._` is now library-private: callers cannot fabricate an approvable candidate through the public Dart API. Only `ScheduleEngine.generate` produces the review candidate.
+- `ApprovedSession` retains immutable `acknowledgedWarnings` including exact timestamps and messages, with `acknowledgedWarningCodes` as a convenience getter. This avoids losing repeated safety warnings with the same code.
+- Added source-only regression assertion that warnings persist with their 25-minute offset and cannot be cleared from the approved snapshot. This test is **written, not run**.
+- Added `tool/verify.ps1` for Windows PowerShell and `tool/verify.sh` for macOS/Linux, each running the smoke check, `dart pub get`, `dart analyze`, and `dart test`, writing `atelier-time-verification.log`. New `.gitignore` prevents local test output/caches from being committed. **Scripts have not been run against a Dart SDK**.
+- Documented that the **minimal required development install for Step 1.4 is the Dart SDK**, not Flutter, Android Studio, Visual Studio or Xcode. Installing Dart on a user's computer does **not** install it in ChatGPT's separate container; the user must run a local verification script and share its log if no accessible Dart runtime can be made available to the assistant.
+
+**Next action before marking Step 1.4 complete:** Execute `dart tool/smoke.dart`, `dart pub get`, `dart analyze`, and `dart test` on an actual Dart SDK (locally or a non-billable Dart-capable machine), then correct any real errors. Do not claim test passes based on the Python model comparison or delimiter checks. Keep the Step 1.4 branch isolated until verified; Stage 2 remains unapproved.
+
