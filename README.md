@@ -2,7 +2,7 @@
 
 A planned offline-capable, installable posing/break timer for live-model **drawing and sculpting** ateliers.
 
-**Project status (2026-10-22):** Stage 0 and Step 1.1 complete; **Step 1.2 data-model proposal documented; Step 1.3 scheduling-edge policies prepared for review**. Step 1.4 implementation is **NOT authorized**. No application source code, Flutter scaffold, build or executable tests have started.
+**Project status (2026-10-22):** Stage 0 and Step 1.1 complete; Step 1.2 documented; **Step 1.3 under review, including the newly approved 25-minute posing/5-minute-rest warning with a permitted 0-minute break override (D-031)**. Step 1.4 implementation is **NOT authorized**. No app source code, Flutter scaffold, builds or executable tests have started.
 
 Atelier Time lets an organizer configure pose and break rules, generate and approve a chronological schedule, save reusable presets, and run a timer with three distinct sound cues. If the last pose would be incomplete, schedule review offers: (1) keep the remaining short final pose; (2) split the time of the last two poses as evenly as possible; or (3) adjust their split with a ruler/slider.
 
@@ -26,7 +26,8 @@ Atelier Time lets an organizer configure pose and break rules, generate and appr
 
 - An existing GitHub repository is being used. No application implementation has started.
 - **Approved:** One Flutter + Dart codebase for Android, Windows, iOS/iPadOS and macOS in the first release; platform-specific compiled packages. Native OS menus/graphics are optional.
-- **Still open for user approval:** proposed long-break midpoint/multiple-break rules and invalid-input behavior in Step 1.3; package distribution/signing, UI design and logo remain later decisions. No code/scaffold or Step 1.4 until separate authorization.
+- **Approved new rule:** After 25 minutes of cumulative posing without a break of at least 5 minutes, warn before further posing; explicitly acknowledge any deviation to approve the session. **0-minute break inputs are allowed**. Defaults remain 5m normal and 15m special, both editable.
+- **Still open:** Step 1.3 proposals for automatic/multiple break positions, validation edge behavior and whether pose accumulation carries over between distinct saved sessions; packaging/signing, UI and logo remain later decisions. No code/scaffold or Step 1.4 until separate authorization.
 - Every number in both timing examples is configurable through a future per-session input screen; pose groups can be added/removed.
 - “Summary” is a named final reserved time block; its specific activity has not been further defined.
 - Do not silently convert open technical assumptions into approved product rules.
