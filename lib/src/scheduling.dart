@@ -202,6 +202,15 @@ class _Attempt {
   bool get valid => invalidReason == null;
 }
 
+/// One exact dynamic-programming state for replacement-break selection.
+class _ScoredPlacement {
+  final int score;
+  final List<int> ordinals;
+
+  _ScoredPlacement(this.score, List<int> ordinals)
+      : ordinals = List.unmodifiable(ordinals);
+}
+
 class ScheduleEngine {
   /// Builds a review candidate without mutating SessionRules.
   ///
@@ -399,69 +408,110 @@ class ScheduleEngine {
         selectedChoice: choice,
       );
 
-  /// Each candidate is generated with its replacements already applied,
-  /// so actual interval centers (not unmodified break positions) are scored.
-  /// This exact exhaustive optimizer is adequate for small atelier schedules;
-  /// runtime scalability for very large multi-break inputs is NOT yet proven.
+  /// Exact O(N * M) dynamic programming for N requested replacements over M
+  /// eligible ordinary break ordinals. This replaces exponential enumeration.
+  ///
+  /// A replacement adds delta = (special - ordinary) seconds to the timeline.
+  /// D-038 disallows choosing any policy for delta <= 0, so this method runs
+  /// only when delta > 0. Subtracting N*delta from the working window yields
+  /// a virtual ordinary-only timeline. Every valid replacement selection must
+  /// choose from its break ordinals, and the j-th selected replacement starts
+  /// at virtual start(j) + (selected index - 1)*delta.
+  ///
+  /// This also handles cases where the original no-replacement schedule would
+  /// end in an illegal trailing break but the replaced schedule is feasible.
   _Attempt _chooseAutomatic(SessionRules rules) {
-    final ordinary = _build(rules, const []);
-    final maxOrdinal = ordinary.phases
+    final count = rules.specialBreakCount;
+    final delta = rules.specialBreakSeconds - rules.shortBreakSeconds;
+    if (count <= 0 || delta <= 0) {
+      return const _Attempt([], 'Invalid automatic replacement request.');
+    }
+
+    final adjustedWork = rules.workSeconds - count * delta;
+    if (adjustedWork <= 0) {
+      return const _Attempt([],
+          'Special breaks leave no positive work time.');
+    }
+    final virtualRules = SessionRules(
+      id: rules.id,
+      name: rules.name,
+      totalSeconds: rules.totalSeconds - count * delta,
+      summarySeconds: rules.summarySeconds,
+      openingGroups: rules.openingGroups,
+      poseSeconds: rules.poseSeconds,
+      shortBreakSeconds: rules.shortBreakSeconds,
+      specialBreakSeconds: rules.specialBreakSeconds,
+      specialBreakCount: 0,
+      cycleStart: rules.cycleStart,
+    );
+    final virtual = _build(virtualRules, const []);
+    if (!virtual.valid) {
+      return _Attempt(const [],
+          'No feasible replacement positions: ${virtual.invalidReason}');
+    }
+    final slots = virtual.phases
         .where((phase) => phase.kind == PhaseKind.shortBreak)
-        .length;
-    if (rules.specialBreakCount > maxOrdinal) {
+        .toList();
+    final maxOrdinal = slots.length;
+    if (count > maxOrdinal) {
       return const _Attempt([],
           'Requested more special breaks than available ordinary slots.');
     }
-    _Attempt? best;
-    int? bestScore;
-    List<int>? bestOrdinals;
-    final chosen = <int>[];
-    void explore(int next) {
-      if (chosen.length == rules.specialBreakCount) {
-        final candidate = _build(rules, chosen);
-        if (!candidate.valid) return;
-        final special = candidate.phases
-            .where((p) => p.kind == PhaseKind.specialBreak)
-            .toList();
-        if (special.length != rules.specialBreakCount) return;
-        var score = 0;
-        final countPlusOne = rules.specialBreakCount + 1;
-        for (var i = 0; i < special.length; i++) {
-          final actualTwiceCenter =
-              special[i].startSeconds + special[i].endSeconds;
-          score += (actualTwiceCenter * countPlusOne -
-                  2 * rules.workSeconds * (i + 1))
-              .abs();
+
+    var previous = List<_ScoredPlacement?>.filled(maxOrdinal + 1, null);
+    previous[0] = _ScoredPlacement(0, const []);
+
+    for (var selectedIndex = 1; selectedIndex <= count; selectedIndex++) {
+      final current =
+          List<_ScoredPlacement?>.filled(maxOrdinal + 1, null);
+      _ScoredPlacement? bestEarlier;
+      for (var slotIndex = 1; slotIndex <= maxOrdinal; slotIndex++) {
+        final preceding = previous[slotIndex - 1];
+        if (preceding != null &&
+            (bestEarlier == null ||
+                _isBetter(preceding, bestEarlier))) {
+          bestEarlier = preceding;
         }
-        if (bestScore == null ||
-            score < bestScore! ||
-            (score == bestScore &&
-                _ordinalsEarlier(chosen, bestOrdinals!))) {
-          best = candidate;
-          bestScore = score;
-          bestOrdinals = [...chosen];
-        }
-        return;
+        if (bestEarlier == null) continue;
+
+        final ordinaryStart = slots[slotIndex - 1].startSeconds;
+        final actualStart = ordinaryStart + (selectedIndex - 1) * delta;
+        final twiceCenter = 2 * actualStart + rules.specialBreakSeconds;
+        final targetError =
+            (twiceCenter * (count + 1) -
+                    2 * rules.workSeconds * selectedIndex)
+                .abs();
+        current[slotIndex] = _ScoredPlacement(
+          bestEarlier.score + targetError,
+          [...bestEarlier.ordinals, slotIndex],
+        );
       }
-      final remaining = rules.specialBreakCount - chosen.length;
-      for (var ordinal = next;
-          ordinal <= maxOrdinal - remaining + 1;
-          ordinal++) {
-        chosen.add(ordinal);
-        explore(ordinal + 1);
-        chosen.removeLast();
-      }
+      previous = current;
     }
 
-    explore(1);
-    return best ??
-        const _Attempt([],
-            'No feasible replacement positions for the requested breaks.');
+    _ScoredPlacement? best;
+    for (final candidate in previous) {
+      if (candidate != null &&
+          (best == null || _isBetter(candidate, best))) {
+        best = candidate;
+      }
+    }
+    if (best == null) {
+      return const _Attempt([],
+          'No feasible replacement positions for the requested breaks.');
+    }
+
+    // Rebuild with real durations. Never infer validity from the virtual
+    // timeline alone. A failed actual build stays a blocking issue.
+    return _build(rules, best.ordinals);
   }
 
-  bool _ordinalsEarlier(List<int> a, List<int> b) {
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return a[i] < b[i];
+  bool _isBetter(_ScoredPlacement a, _ScoredPlacement b) {
+    if (a.score != b.score) return a.score < b.score;
+    for (var i = 0; i < a.ordinals.length; i++) {
+      if (a.ordinals[i] != b.ordinals[i]) {
+        return a.ordinals[i] < b.ordinals[i];
+      }
     }
     return false;
   }
