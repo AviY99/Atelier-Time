@@ -1,6 +1,6 @@
 # Decision register — Atelier Time
 
-Updated: 2026-10-22. Decision statuses: **APPROVED** (user accepted), **PARTIALLY RESOLVED**, **WORKING PROPOSAL**, **OPEN**, **SUPERSEDED**. Platform and framework choice were approved for Step 1.1, but technical implementation has not started.
+Updated: 2026-10-22. Decision statuses: **APPROVED** (user accepted), **PARTIALLY RESOLVED**, **WORKING PROPOSAL**, **OPEN**, **SUPERSEDED**. Framework choice approved in Step 1.1. Scheduling edge policies in Step 1.3 are **NOT YET APPROVED**; no code exists.
 
 | ID | Status | Decision and context |
 |---|---|---|
@@ -28,7 +28,11 @@ Updated: 2026-10-22. Decision statuses: **APPROVED** (user accepted), **PARTIALL
 | D-022 | HISTORICAL GATE (fulfilled by D-023) | Step 1.1 completed as documentation only and Step 1.2 required separate authorization. |
 | D-023 | USER AUTHORIZED 2026-10-22 | After Step 1.1, user said **“Continue”**. This authorizes **Stage 1 Step 1.2 — prepare the data-model design**. It does not authorize Step 1.3 or implementation. See [DATA_MODEL.md](DATA_MODEL.md). |
 | D-024 | TECHNICAL DESIGN PROPOSAL — review pending | Use conceptual Dart-domain records for editable `SessionRules`, variable-length `OpeningPoseGroup[]`, `RegularCycle`, `LongBreakRule`, `ScheduleCandidate`, `SchedulePhase`, `EndPoseResolution` and `ApprovedSessionPreset`. Proposed internal time unit is integer seconds with approved 1-minute split increments. No code created; product-visible edge rules still open. |
-| D-025 | PROCESS GATE — OPEN | **Step 1.2 documentation drafted; Step 1.3 is NOT authorized.** Obtain user review/approval before resolving midpoint/edge policies; do not begin scheduling engine or Flutter scaffold merely on the basis of Step 1.2 continuation. |
+| D-025 | HISTORICAL GATE (fulfilled by D-026) | Step 1.2 documentation drafted, and Step 1.3 required separate user authorization. |
+| D-026 | USER AUTHORIZED 2026-10-22 | After Step 1.2, user said **“Continue”**. Authorized **Step 1.3 only**: discuss and document long-break placement and edge-case policy. Does not authorize coding. |
+| D-027 | WORKING PROPOSALS — user review pending | Scheduling placement policies P-01 through P-03 in [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md): place a single long replacement closest to midpoint of work window by center; multiple replacements roughly evenly spaced, deterministic earlier-slot ties; allow explicit ordinal placement. These are **not yet approved**, while already-approved A/B timelines remain mandatory. |
+| D-028 | WORKING PROPOSALS — user review pending | Validation/edge policies P-04 through P-06 in [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md): reject impossible inputs rather than secretly modify rules; accept no-summary/no-long-break sessions; define behavior for break-free and opening-only sessions; make split options unavailable when not feasible; custom adjustment may exceed normal pose length. **Awaiting user review**. |
+| D-029 | PROCESS GATE — OPEN | **Step 1.3 documentation prepared; Step 1.4 NOT authorized.** Only implement the Dart schedule generator and tests after user approval of Step 1.3 rules and explicit authorization for Step 1.4. |
 
 ## Scheduling examples: approved reference outputs
 - A: 180m; four 1m poses + four 4m poses; repeated (5m break, 25m pose); 15m long break replaces a short break; final 15m summary. Baseline last pose 10m. Split options for last two poses: 25+10; 17+18; user sample 20+15, all with 5m intervening break.
