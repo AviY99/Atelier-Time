@@ -1,5 +1,19 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-22 — Iteration 0.9: latest break/session positivity correction
+**User instruction:** “You are correct, Break of 0 or session of 0 is not valid.” This is the latest substantive clarification and supersedes the earlier D-031 *allowance* for 0-minute breaks while retaining D-031's **25 minutes accumulated posing / >=5m qualifying rest** rule as a *warning requiring affirmative user acknowledgment* for otherwise mathematically legal schedules.
+
+**Approved D-036:** Full session duration >0, normal break and any configured active special break duration >0. The initial whole-minute editor thus has a 1m minimum per actual break; positive shorter-than-5m breaks remain editable. A 0m full session/break is a **blocking error**, never safety-warning override. The 5m/15m default values remain editable positive durations. A count of 0 optional special breaks is separate from a break duration of 0 and is pending final Step 1.3 policy approval. A possible 0m *final summary* is also distinct from 0m full session.
+
+**Documentation changed:** D-036 in DECISIONS, revised SCHEDULING_EDGE_POLICY and STEP_1_3_REVIEW (previous logical 0m-slot concept withdrawn), PRODUCT_SPEC, SCHEDULING_RULES, DATA_MODEL, TEST_PLAN (replaced obsolete 0-break-allowed cases), ROADMAP, README, CHANGELOG and HANDOFF v0.9. Existing earlier work-log entries remain for traceability, not current authority.
+
+**No implementation:** No Flutter/Dart source, scaffold, automated tests or builds. **Stage 1 Step 1.3 other rules still pending review; Step 1.4 not authorized.**
+
+**Verification:** GitHub read-back of updated documents only; planned tests not executed.
+
+---
+
+
 ## 2026-10-22 — Iteration 0.8: consolidated Step 1.3 scheduling-policy review
 **User message:** “Continue” after the revised explanation of 25 accumulated posing minutes, recommended 5-minute adequate rest, and allowed 0-minute break with warning and explicit approval.
 
