@@ -1,12 +1,12 @@
 # Delivery roadmap and approval gates
 
-Updated: 2026-10-22. **Stage 0 documentation complete/in progress; Stage 1 awaits explicit authorization. No application implementation has started.**
+Updated: 2026-10-22. **Stage 0 documentation complete and verified in GitHub; Stage 1 awaits explicit authorization. No application implementation has started.**
 
 This is a gated, iterative project. Show a working result and documentation after each implementation stage; obtain approval before moving to the next stage. No implied permission to implement later stages.
 
 | Stage | Name | Planned result | Exit/approval evidence | State |
 |---|---|---|---|---|
-| 0 | Project documentation and baseline | Existing GitHub repository populated with approved specification, schedule examples, decision register, roadmap, test plan, and handoff | All files committed and accessible, stages presented | Documentation setup |
+| 0 | Project documentation and baseline | Existing GitHub repository populated with approved specification, schedule examples, decision register, roadmap, test plan, and handoff | All 11 documentation files committed and retrieved successfully | **COMPLETE** |
 | 1 | Technical baseline + scheduling core | Confirm target OS/platform and recommended stack; create deterministic scheduling engine, validation, final-pose three-way allocator and automated tests for approved examples | Demonstrate test run with exact A/B schedules, three splits, totals/invariants; report open edge rules | **WAITING FOR USER APPROVAL** |
 | 2 | App structure, native UX and session editor | Discuss screens, basic graphic style, native controls, design decisions; implement editable parameter inputs and complete schedule preview/approval including ruler/slider | Show working flow and slider that updates all times | Not started |
 | 3 | Local preset library | Save, load, edit, copy, rename, delete and activate approved sequences; offline persistence | Demonstrate persistence after app restart and preserve selected final-pose resolution | Not started |
