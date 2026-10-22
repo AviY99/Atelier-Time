@@ -1,5 +1,15 @@
 # Changelog — Atelier Time
 
+## 2026-10-22 — Stage 1 Step 1.4 verification preparation / Handoff v1.4
+
+- Diagnosed missing Dart SDK and DNS resolution failures in assistant's container. This blocked **actual Dart test execution**, not source-code drafting.
+- On isolated development branch, restricted `ScheduleCandidate` construction to engine/library code and retained full timestamped rest-warning acknowledgment records in immutable approved sessions; added unexecuted regression assertions.
+- Added local no-GitHub-Actions helpers `tool/verify.ps1` and `tool/verify.sh` and `.gitignore` for test logs/caches. Minimum install for this pure-Dart step is **Dart SDK only** on a computer capable of execution.
+- Recorded D-046, updated roadmap, README, test plan, work log and handoff v1.4. **No Dart compiler/analyzer/test run, build, paid Actions usage, merge or Stage 2 work. Step 1.4 remains IN PROGRESS**.
+
+---
+
+
 ## 2026-10-22 — Stage 1 Step 1.4 D-044 support / Handoff v1.3
 
 - User **approved D-044**, resolving former D-038: any **positive** special break can replace a normal break even if shorter/equal (examples regular 5m, special 1m/3m/5m), with the D-031 25/5 warning and acknowledgement when necessary. D-036 still blocks all 0-minute sessions/actual breaks.
