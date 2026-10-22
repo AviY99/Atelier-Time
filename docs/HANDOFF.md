@@ -3,7 +3,7 @@
 **Date:** 2026-10-22  
 **Project:** Atelier Time  
 **Repository:** https://github.com/AviY99/Atelier-Time (existing public repo, default main)  
-**Current status:** Approved product scope; documentation baseline populated. No app code or installed build exists. Awaiting explicit approval to start Stage 1.
+**Current status:** Approved product scope; documentation baseline complete and all 11 files successfully fetched from GitHub. No app code or installed build exists. Awaiting explicit approval to start Stage 1.
 
 ## User intent
 Build a simple self-contained installed app for live-model sessions in **drawing and sculpting ateliers**. Native menus/controls wherever possible, preferably offline. Set numerical timing rules, auto-generate complete sequence, approve it, save named presets, activate and run a countdown with sounds. App name is **Atelier Time**. User will provide logo picture when asked at the relevant design stage; graphic appearance must be discussed rather than invented. Log ALL decisions and progress in GitHub; update this handoff after every iteration so a new chat can resume immediately.
@@ -40,7 +40,7 @@ Stage intervals contiguous, no overlap/gap. Total exactly D, summary last F. Lon
 The decision register is docs/DECISIONS.md (D-001 through D-018). All product features above are approved; platform/OS, tech stack, branding, exact midpoint tie-breaks, edge cases, summary's activity and set/pose alert nuance require discussion at appropriate stages. Avoid treating these as finalized. The GitHub repository was already present, so it was reused.
 
 ## Roadmap and current gate
-**Stage 0:** Populate docs/ with specification, schedules, roadmap, decisions, test plan, architecture notes, work log and handoff (this iteration).  
+**Stage 0 COMPLETE:** Documentation baseline committed to existing GitHub repository, all 11 files verified readable (this iteration).  
 **Stage 1 (NOT AUTHORIZED):** Confirm target platform/stack, implement deterministic scheduling engine and validations including all three ending choices; automate Example A/B regression tests; report real results.  
 **Stage 2:** Native-feeling UI editor, preview/approval and split ruler; discuss visual design.  
 **Stage 3:** Offline saved presets.  
