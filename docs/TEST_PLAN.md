@@ -2,13 +2,28 @@
 
 Version: 0.3 planning baseline (2026-10-22). Tests are **planned, not executed**; no app or scheduling engine exists yet.
 
-## Approved requirement tests from clarification D-030 (NOT YET EXECUTED)
-- R-B01: A new-session rule configuration pre-fills normal short break at **5 minutes (300s)** and middle/long break at **15 minutes (900s)**.
-- R-B02: Both break values are editable independently and a valid 1-minute (60s) duration is accepted.
-- R-B03: A configured short break of 0 seconds or less is invalid and produces an explicit validation issue; never treat 0 as a break-free cycle.
-- R-B04: An active long/middle replacement of 0 seconds or less is invalid and produces an explicit validation issue.
-- R-B05: Changing default break values produces a recalculated schedule; neither 5 nor 15 is hardcoded into scheduling formulas.
-- R-B06: If the long-break replacement count is 0, no long-break phase is created. This is distinct from accepting a 0-minute long break.
+## Approved 25/5 break-safety and 0-minute-input tests (D-031; NOT YET EXECUTED)
+
+The prior D-030 hard-minimum tests R-B03/R-B04 are **superseded**; they are no longer valid acceptance criteria. The 5-minute normal/15-minute special defaults remain user-editable; 0 minutes is allowed.
+
+- R-B01: New-session rule input pre-fills normal short break at **5 minutes (300s)** and middle/special break at **15 minutes (900s)**.
+- R-B02: Both fields are independently editable and accept **0**, **1**, **3**, **5**, and other nonnegative durations; negative durations remain invalid.
+- R-B03 (REVISED): A 0-minute normal break is allowed, adds **no zero-length schedule phase** and does not reset accumulated posing time. Its long-break-slot interaction is subject to Step 1.3 edge review.
+- R-B04 (REVISED): A 0-minute special replacement duration is not a hard error solely for being zero; its ordinal/slot behavior is explicitly reviewed and warnings are computed.
+- R-B05: Different numeric break values produce recalculated timelines; default 5/15 values are not fixed constraints.
+- R-B06: A replacement count of 0 means no special slots are selected, distinct from selecting a replacement slot and setting that break duration to 0.
+- R-B07: Pose segments **5×5m** with no breaks accumulate to 25m; a subsequent 5m rest satisfies the recommendation.
+- R-B08: A **25m pose → 5m break → another pose** does **not** create a warning.
+- R-B09: A **30m pose → 5m rest** produces a warning because the pose runs beyond 25m.
+- R-B10: A **25m pose → 0m break → another pose** produces a warning; explicit acknowledgement allows approval.
+- R-B11: A **25m pose → 3m rest → another pose** produces a warning; the 3m rest does not reset cumulative posing.
+- R-B12: An ordinary 25/5 violation cannot be saved or activated without affirmative acknowledgement; cancelling/warning rejection leaves schedule unapproved.
+- R-B13: A user may approve a schedule with zero or short breaks **after** acknowledging the warning; no hard validation error arises solely from breaking the 25/5 recommendation.
+- R-B14: An edited session, changed replacement position, or changed final-two-pose split invalidates prior warning acknowledgement and schedule approval.
+- R-B15: A 5m or longer normal or special break resets accumulated posing; a rest shorter than 5m does not.
+- R-B16: Approved canonical A/B example schedules produce **no 25/5 warning** and remain byte-for-byte equivalent in start/end/durations after choosing the same end-pose option.
+
+**Pending review:** Whether exactly 25m at the *end* of an overall session needs a break, and whether accumulating pose time must carry across separate back-to-back saved sessions.
 
 ## Proposed additional tests from Step 1.3 (UNAPPROVED policies)
 
@@ -17,7 +32,7 @@ Only adopt the following as binding acceptance tests after user approval of the 
 - P-T02: When distances tie, earlier eligible break ordinal is selected.
 - P-T03: For N>1, select distinct feasible replacement breaks spread at target fractions of work period, deterministic result; no silent reduction of count.
 - P-T04: Manually selected break ordinals survive valid edits or raise an explicit placement error when invalid; do not silently relocate.
-- P-T05: Accept a zero-duration final summary and valid opening-only configuration; do not emit a zero-length phase. **Zero-minute break durations are invalid per approved D-030, regardless of this still-proposed summary/opening-only behavior.**
+- P-T05: Accept a zero-duration final summary and valid opening-only configuration; do not emit a zero-length phase. **Zero-minute break durations are valid under latest approved D-031; warning acknowledgment is required if the complete schedule violates the 25/5 recommendation.**
 - P-T06: Explicit errors for invalid total/summary/pose durations, too many replacement breaks and terminal break without following pose.
 - P-T07: If no feasible last-two-pose split exists, mark equal/custom unavailable with explanation; remainder only if valid.
 - P-T08: If the ruler explicitly chooses a last-two split beyond nominal pose duration, preserve total time and all invariant boundaries (pending user approval).
