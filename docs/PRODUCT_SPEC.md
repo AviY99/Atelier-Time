@@ -17,12 +17,12 @@ A straightforward installable, self-contained timer for **drawing and sculpting 
 ## Editable session parameters
 **Every numerical value appearing in the example sessions is editable per full session.** Every session/preset has its own input screen. The user can add or remove opening pose groups, regenerate the entire schedule when any number changes, review the output and approve it before saving. The examples are regression fixtures, not hardcoded presets or limits.
 
-- Total session duration.
+- Total session duration, **strictly positive**; 0 is invalid.
 - Final reserved summary duration, including zero when desired.
 - Optional ordered opening pose groups: count and duration per group (e.g. 4 x 1 minute, then 4 x 4 minutes).
 - Nominal regular pose duration.
-- Short break duration, **initial default 5 minutes**, user-editable **including 0 minutes** (no rest at that slot).
-- Long replacement/middle break duration, **initial default 15 minutes**, user-editable **including 0 minutes**, plus number of long replacement slots; a zero-duration replacement consumes no break time and is shown explicitly as skipped in review (detailed semantics pending review).
+- Short break duration, **initial default 5 minutes**, editable to other **positive** durations (the planned whole-minute editor has a 1-minute minimum). A configured 0-minute break is invalid.
+- Long replacement/middle break duration, **initial default 15 minutes**, editable to other **positive** durations, plus the number of optional long replacements. An active 0-minute special break is invalid; zero optional *count* is distinct from duration (subject to remaining Step 1.3 edge-policy approval).
 - Long-break placement strategy/position (middle by default in examples, configurable).
 - Recurring cycle ordering: pose then break OR break then pose.
 - Last-two-pose resolution choice and custom split if used.
@@ -34,8 +34,8 @@ A straightforward installable, self-contained timer for **drawing and sculpting 
 - The entire generated sequence ends at the specified session duration.
 - The summary is the final reserved period, not an additional period beyond the session.
 - Long break **replaces** a scheduled short break; never simply append 15 minutes.
-- The 5-minute normal-break and 15-minute middle-break values are **new-session defaults only**. A user can change them, **including to 0 minutes**. Zero inserts no break time and is **not invalid**. The older minimum-1-minute restriction has been superseded by the user's D-031 clarification.
-- **Break safety (approved):** After **25 minutes of accumulated posing without an adequate rest**, a break of **at least 5 minutes** is recommended before posing continues. Consecutive poses add together; a 0–4-minute break does not reset the counter. Violating schedules remain allowed **only with a displayed warning and the user's explicit acknowledgement plus schedule approval**. Recalculating the schedule invalidates previous acknowledgement. See [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md).
+- **Latest approved D-036:** The complete session's total duration and every **configured actual break duration must be positive**. A 0-minute session or break is a **blocking input error**, never a warn-and-override exception. New-session normal/special break defaults remain editable **5m / 15m**; their minimum at whole-minute input precision is **1 minute**.
+- **Break safety (approved D-031, retained by D-036):** After **25 minutes of accumulated posing without adequate rest**, a break lasting **at least 5 minutes** is recommended before posing continues. Consecutive poses accumulate; **valid 1–4-minute breaks do not reset** the counter. Legal schedules that violate this *recommendation* remain allowed **only after visible warning, explicit user acknowledgment and full schedule approval**. Editing the session invalidates the prior acknowledgment. See [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md).
 - Short opening poses flow immediately into each other in the illustrated preset; introducing opening breaks would require an explicit rule.
 - Avoid a trailing break immediately before final summary when no subsequent pose exists.
 - A partial last regular pose is **not silently accepted**: explicitly offer alternatives when detected.
