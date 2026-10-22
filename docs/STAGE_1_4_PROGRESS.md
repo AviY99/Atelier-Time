@@ -66,12 +66,12 @@ Continue to verify and fix **this Step 1.4 code**, ideally with a Dart-capable l
 
 **Fix on this branch:**
 - Replaced exhaustive enumeration with an exact deterministic dynamic-programming selector, storing `O(N×M)` candidate states for N special breaks and M eligible positive ordinary break slots, with some additional ordinal-path copying overhead.
-- Uses a virtual ordinary-break timeline shortened by `N×(L−B)` to calculate all eligible break ordinals when `L>B` (the current allowed branch, while D-038 remains open).
+- Uses a virtual ordinary-break timeline adjusted by `N×(L−B)` for any signed difference between positive break durations, as now allowed by D-044.
 - Scores each selected replacement by the approved P-01/P-02 distance of its **actual special-break center** from the target work fraction; retains earliest-ordinal tie-breaking. Rebuilds and checks the full real timeline before returning.
 - Adds regression tests for the old false-invalid case (97-minute session with 15m opening posing, P12/B4/L17, two special breaks at ordinals 2 and 3) and an 8-hour multi-break case (automatic ordinals 13,26,38,51,64), in addition to original A/B fixtures.
 - **Independent design check only:** A Python reimplementation of the old brute-force objective and new dynamic-programming recurrence produced identical optimal choices in **25,000 random small whole-minute configurations**, comparing only scenarios with a valid virtual ordinary timeline. It also derived A break #3 at 80–95m and B break #3 at 85–100m. This is **NOT execution, analysis or verification of the actual Dart implementation**.
 
-**D-038 OPEN:** If short break is 5m and special replacement is 3m, both durations are positive but the special is shorter than the ordinary. The user has not specified whether to permit it. The engine continues to mark positive special <= normal as `pendingDecision` rather than choosing an unapproved rule. The recommended direction (allow any positive special value with 25/5 warnings) is only a recommendation, NOT approved policy.
+**Historical note (superseded by approved D-044):** D-038 had previously asked about 5m normal versus 3m special. User has since approved it. The engine now permits the shorter positive replacement and applies 25/5 warnings.
 
 **Still blocked:** Dart SDK absent locally; no `dart analyze`, `dart test`, smoke run or Flutter build. No GitHub Actions workflows created/invoked due the user's reported budget block. No merge into main. Stage 1 Step 1.4 remains **IN PROGRESS**, Stage 2 **NOT AUTHORIZED**.
 
