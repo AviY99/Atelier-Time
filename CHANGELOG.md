@@ -1,5 +1,12 @@
 # Changelog — Atelier Time
 
+## 2026-10-22 — Stage 1 Step 1.3 clarification / Handoff v0.9
+- **Latest approved D-036:** A 0-minute full session or configured normal/active special break is invalid; previous D-031 permission for zero-minute breaks superseded. Positive whole-minute break minimum is 1 minute.
+- **Retained D-031:** Accumulated 25m of posing calls for >=5m rest before continuing; valid shorter breaks and long poses trigger a warning requiring explicit user acknowledgement rather than automatic rejection.
+- Withdrawn: the proposed zero-minute logical break-slot model from the earlier Step 1.3 review. Updated current policy, review, data model, product specification, tests, roadmap, README and handoff. Historical changelog entries remain for traceability, not current rules.
+- Other Step 1.3 technical policies still require user approval. **No executable code or tests; Step 1.4 remains on hold.**
+
+
 ## 2026-10-22 — Stage 1 Step 1.3 consolidated review / Handoff v0.8
 - After the user's “Continue,” consolidated remaining scheduling decisions into [STEP_1_3_REVIEW.md](docs/STEP_1_3_REVIEW.md).
 - Proposed logical 0-minute regular/special break slots without elapsed zero-length phases, plus manual replacement ordinals, warning approval after final-pose changes, and boundary/cross-preset interpretation.
