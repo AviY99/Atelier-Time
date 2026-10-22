@@ -3,7 +3,7 @@
 **Prepared:** 2026-10-22  
 **Status:** Step 1.2 **design documented and used as the basis for Step 1.3**, following the user's further “Continue”. Named types/fields remain a technical proposal, not executable source or new product behavior. No Flutter scaffold or engine exists.  
 **Technology:** Flutter + Dart, one shared app targeting Android, Windows, iOS/iPadOS and macOS (approved TD-001).  
-**Current gate:** **Step 1.3 policies APPROVED via D-037** in [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md) and [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md), except specifically unresolved comparison D-038 (positive special break <= normal). **Step 1.4 code/tests remain blocked until separately authorized.**
+**Current gate update (D-040):** Step 1.3 policies APPROVED via D-037 (except narrowly unresolved D-038); the user subsequently authorized **Step 1.4**, and source/test files now exist on [development branch](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core). **No Dart SDK, actual compiled code/test executions, GitHub Actions or Flutter build yet. Step 1.4 is IN PROGRESS, not complete.**
 
 ## 1. Product-to-model mapping
 
