@@ -3,7 +3,7 @@
 **Prepared:** 2026-10-22  
 **Status:** Step 1.2 **design documented and used as the basis for Step 1.3**, following the user's further “Continue”. Named types/fields remain a technical proposal, not executable source or new product behavior. No Flutter scaffold or engine exists.  
 **Technology:** Flutter + Dart, one shared app targeting Android, Windows, iOS/iPadOS and macOS (approved TD-001).  
-**Current next gate:** Review Step 1.3 policy proposals at [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md); Step 1.4 code/tests are blocked until separately authorized.
+**Current gate:** **Step 1.3 policies APPROVED via D-037** in [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md) and [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md), except specifically unresolved comparison D-038 (positive special break <= normal). **Step 1.4 code/tests remain blocked until separately authorized.**
 
 ## 1. Product-to-model mapping
 
@@ -248,18 +248,18 @@ Proposed machine-readable issue codes:
 - `INVALID_CUSTOM_SPLIT`
 - `TIMELINE_GAP_OR_OVERLAP`
 
-Stage 1 Step 1.3 must explicitly resolve ambiguous product-visible edge cases and midpoint tie-breaking before algorithm implementation. Error-code names are tentative, not approved user-facing copy.
+**Status update:** Stage 1 Step 1.3 has **approved** the midpoint/even-spread and edge rules (D-037), preserving D-036 positive duration and D-031 25/5 warnings. Technical error-code names here remain tentative, not approved UI copy; Step 1.4 not authorized.
 
-## 8. Still open: do not silently decide
+## 8. Stage 1 Step 1.3 approved outcomes and remaining future decisions
 
 **Approved 25/5 advisory warning (D-031, retained by D-036):** accumulate posing across consecutive poses until a rest **>=5 minutes**; flag posing beyond 25 accumulated minutes. Display timing/details. A user may choose a **valid positive 1–4m break** or other legal rest violation only after acknowledging the warning. **Break=0 or full session=0 is a blocking error under D-036**, not an exception. Shorter-than-5m valid rests do not reset the counter. No scheduling or UI code exists; acknowledgement metadata fields are tentative.
 
-Step 1.3 created [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) with explicit proposed resolutions to several items below. **These are awaiting user approval, not yet settled requirements.**
+Step 1.3's [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) and [approved final review](STEP_1_3_REVIEW.md) resolved most of the earlier questions below **via D-037**. The following numbered points are a **historical planning checklist**, not current open decisions; current unresolved items are identified explicitly beneath it.
 
 1. Exact automatic-middle replacement-break placement and ties when session lengths/counts vary.
 2. How to deal with multiple long breaks and explicit break-ordinal changes after edits.
 3. Inputs too short to fit any pose or a complete break; opening groups exhausting work time.
-4. **Resolved by latest approved D-036:** configured zero-minute normal/special breaks and zero-minute full sessions are **invalid**. Earlier D-031 allowance and proposed 0-length logical slot mechanics are **withdrawn**. **Still open:** whether posing accumulation carries across separately activated full saved sessions and whether positive special breaks may be shorter than normal breaks.
+4. **Resolved by approved D-036 and D-037:** configured 0-minute breaks and 0-minute full sessions invalid; 0-minute logical break-slot proposal withdrawn; warning counter resets on each activated full session (no automatic cross-preset carryover). **OPEN D-038:** whether positive special break can be <= positive normal break.
 5. What to show if only one last pose, or no intervening break, remains for end resolution.
 6. Precise activity/label for “summary”; audio at every pose or just set end.
 7. Exact on-disk preset serialization format and file/DB technology (Stage 3).
@@ -277,4 +277,4 @@ Nothing in this data-model proposal overwrites approved user requirements or the
 - [x] Distinguish engineering proposals from approved behavior and unresolved edge rules
 - [x] User said “Continue” after Step 1.2 review, authorizing discussion/documentation of **Step 1.3**. The technical field names remain proposals, not an implemented API.
 
-**STATUS UPDATE:** Step 1.3 design was subsequently authorized by a second “Continue” and is documented separately. **Stage 1 Step 1.4 and all programming are NOT authorized.**
+**STATUS UPDATE (2026-10-22): Step 1.3 formally APPROVED / COMPLETE as D-037**, subject to D-036 strict-positive session/break durations and D-031 25/5 rest warnings; D-038 special break comparison remains specifically OPEN. **Stage 1 Step 1.4 and all programming are NOT authorized.**
