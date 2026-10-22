@@ -32,3 +32,6 @@ A stage report includes: agreed scope, work completed, files/commit IDs, tests r
 - Preserve signed-off examples as regression fixtures.
 - Ask for app icon image and discuss graphic design **when branding/design is reached**; do not invent the icon now.
 - Never claim a working timer or installable build before implementing and verifying it.
+
+## Step 1.3 consolidated review (2026-10-22)
+User requested continuation after the approved 25/5 warning and zero-duration break clarification (D-031). The detailed [review sheet](STEP_1_3_REVIEW.md) now proposes zero-duration logical break slots, warning-boundary handling, and the remaining automatic/manual replacement-break policies. **These further proposals require explicit user approval. Step 1.4 implementation remains unauthorized.**
