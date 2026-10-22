@@ -2,51 +2,44 @@
 
 Version: 0.3 planning baseline (2026-10-22). Tests are **planned, not executed**; no app or scheduling engine exists yet.
 
-## Approved 25/5 break-safety and 0-minute-input tests (D-031; NOT YET EXECUTED)
+## Approved requirement tests: D-031 + D-036 (NOT EXECUTED)
 
-The prior D-030 hard-minimum tests R-B03/R-B04 are **superseded**; they are no longer valid acceptance criteria. The 5-minute normal/15-minute special defaults remain user-editable; 0 minutes is allowed.
+**Latest D-036 supersedes D-031 only where the older rule allowed 0-minute breaks.** Session total must be >0; configured normal/active special break durations must be >0. The 25-minute accumulated-posing / >=5-minute qualifying rest rule remains advisory, warning-and-acknowledge for **otherwise valid** short rests/long poses. Default new-session breaks remain 5m normal and 15m special, both editable to other **positive** values.
 
-- R-B01: New-session rule input pre-fills normal short break at **5 minutes (300s)** and middle/special break at **15 minutes (900s)**.
-- R-B02: Both fields are independently editable and accept **0**, **1**, **3**, **5**, and other nonnegative durations; negative durations remain invalid.
-- R-B03 (REVISED): A 0-minute normal break is allowed, adds **no zero-length schedule phase** and does not reset accumulated posing time. Its long-break-slot interaction is subject to Step 1.3 edge review.
-- R-B04 (REVISED): A 0-minute special replacement duration is not a hard error solely for being zero; its ordinal/slot behavior is explicitly reviewed and warnings are computed.
-- R-B05: Different numeric break values produce recalculated timelines; default 5/15 values are not fixed constraints.
-- R-B06: A replacement count of 0 means no special slots are selected, distinct from selecting a replacement slot and setting that break duration to 0.
-- R-B07: Pose segments **5×5m** with no breaks accumulate to 25m; a subsequent 5m rest satisfies the recommendation.
-- R-B08: A **25m pose → 5m break → another pose** does **not** create a warning.
-- R-B09: A **30m pose → 5m rest** produces a warning because the pose runs beyond 25m.
-- R-B10: A **25m pose → 0m break → another pose** produces a warning; explicit acknowledgement allows approval.
-- R-B11: A **25m pose → 3m rest → another pose** produces a warning; the 3m rest does not reset cumulative posing.
-- R-B12: An ordinary 25/5 violation cannot be saved or activated without affirmative acknowledgement; cancelling/warning rejection leaves schedule unapproved.
-- R-B13: A user may approve a schedule with zero or short breaks **after** acknowledging the warning; no hard validation error arises solely from breaking the 25/5 recommendation.
-- R-B14: An edited session, changed replacement position, or changed final-two-pose split invalidates prior warning acknowledgement and schedule approval.
-- R-B15: A 5m or longer normal or special break resets accumulated posing; a rest shorter than 5m does not.
-- R-B16: Approved canonical A/B example schedules produce **no 25/5 warning** and remain byte-for-byte equivalent in start/end/durations after choosing the same end-pose option.
+- R-B01: A new session pre-fills normal short break at **5m** and middle/long break at **15m**.
+- R-B02: Normal and active special breaks independently accept **positive** 1m, 3m, 5m, 15m, etc.; reject 0 and negative numbers with blocking validation.
+- R-B03 (LATEST REVISED): Configured normal break duration **0m is invalid**, blocks preview approval and cannot be accepted via the 25/5 warning acknowledgement.
+- R-B04 (LATEST REVISED): Selected special/long replacement break duration **0m is invalid**; a positive special duration is required for any actual replacement.
+- R-B05: Changing either duration recalculates the entire schedule and never hardcodes 5m/15m.
+- R-B06: Proposed zero *number* of special replacements produces no special break. It is not the same as a 0m break.
+- R-B07: **Total full session duration 0m** (or negative) produces a blocking input error; positive sessions pass this basic constraint.
+- R-B08: 5 consecutive 5m poses then a >=5m break reset the cumulative posing counter, no warning.
+- R-B09: 25m pose -> 5m break -> next pose generates no warning.
+- R-B10: 30m pose -> 5m rest triggers a **warning**, not hard-invalid, due to the exceeded 25m posing threshold.
+- R-B11: 25m pose -> 3m rest -> further posing triggers warning; 3m rest does not reset the counter.
+- R-B12: 20m pose -> 3m rest -> 6m pose triggers warning once cumulative posing exceeds 25m.
+- R-B13: Warning cannot be waived by normal approval alone; user must explicitly acknowledge and then approve.
+- R-B14: An acknowledged valid 1–4m break exception may be saved/activated without changing entered durations.
+- R-B15: Editing rules, changing long-break placement or adjusting final-pose split invalidates warning acknowledgement/approval.
+- R-B16: A break >=5m resets the posing counter; a valid positive break <5m does not.
+- R-B17: Canonical A/B exact timing and end-pose alternatives are unchanged and generate no 25/5 warning.
+- R-B18: Confirm a **0m optional summary** (if later approved) is distinct from **0m full session**; no illegal 0m phase is emitted.
 
-**Pending review:** Whether exactly 25m at the *end* of an overall session needs a break, and whether accumulating pose time must carry across separate back-to-back saved sessions.
+## Proposed Step 1.3 additional acceptance tests (NOT APPROVED OR EXECUTED)
 
-## Further proposed Step 1.3 review tests (NOT APPROVED OR EXECUTED)
-
-See [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md). Add these to the implementation acceptance list **only after user approval**:
-- P-T09: Short break input `0m` preserves logical break slot ordinal while adding no zero-length elapsed phase; replacing the selected slot with `15m` consumes exactly 15m rather than adding a break.
-- P-T10: Selected special break duration `0m` yields no elapsed break phase but remains traceable by slot ordinal, with 25/5 warning as appropriate.
-- P-T11: A final two-pose split across a **logical** intervening 0m slot preserves work/summary totals and supports equal/custom options when otherwise valid.
-- P-T12: One full session finishing exactly at 25m posing has no warning solely for lacking a later break; finishing after 30m of uninterrupted posing does warn (pending boundary interpretation).
-- P-T13: No pose-time carryover from an independently activated saved preset into a separate one unless the user explicitly requests that feature (pending cross-preset interpretation).
-- P-T14: A warning appears for 20m pose + 3m rest + 6m pose; shows accumulated pose time 26m, permits explicit acknowledgement, and resets only after >=5m rest.
-- P-T15: Safety-warning recalculation reflects changed final-pose split, replacement position and 0m break; previous acknowledgement and approval are invalidated.
-
-## Proposed additional tests from Step 1.3 (UNAPPROVED policies)
-
-Only adopt the following as binding acceptance tests after user approval of the policies in [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md). **None have been executed.**
-- P-T01: Automatically choose the nearest feasible replacement-break **center** to work midpoint; A/B must choose ordinal #3 and exact 15-minute spans.
-- P-T02: When distances tie, earlier eligible break ordinal is selected.
-- P-T03: For N>1, select distinct feasible replacement breaks spread at target fractions of work period, deterministic result; no silent reduction of count.
-- P-T04: Manually selected break ordinals survive valid edits or raise an explicit placement error when invalid; do not silently relocate.
-- P-T05: Accept a zero-duration final summary and valid opening-only configuration; do not emit a zero-length phase. **Zero-minute break durations are valid under latest approved D-031; warning acknowledgment is required if the complete schedule violates the 25/5 recommendation.**
-- P-T06: Explicit errors for invalid total/summary/pose durations, too many replacement breaks and terminal break without following pose.
-- P-T07: If no feasible last-two-pose split exists, mark equal/custom unavailable with explanation; remainder only if valid.
-- P-T08: If the ruler explicitly chooses a last-two split beyond nominal pose duration, preserve total time and all invariant boundaries (pending user approval).
+Adopt only after explicit user sign-off on [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md) and [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md):
+- P-T01: Automatic midpoint chooses the eligible replacement whose **center** is nearest work midpoint, ties to earlier eligible ordinal; A/B exact reference positions.
+- P-T02: Multiple special replacements evenly distributed at work fractions j/(N+1), with deterministic ordinal ties.
+- P-T03: Manual ordinal selections survive valid edits; invalid ordinals raise errors, never silently relocate.
+- P-T04: Zero **count** of special breaks yields no replacement phase, not a zero-duration break.
+- P-T05: Opening-only and/or zero reserved-summary sessions when mathematically valid, without zero-duration phases.
+- P-T06: Reject overlarge summary, mandatory opening overruns, absent required pose following break, and impossible replacement counts.
+- P-T07: Infeasible final-two-pose options disabled with reason, no inserted break/pose.
+- P-T08: Explicit custom final-two split may exceed nominal pose length while preserving positive durations and total.
+- P-T09: Exactly 25m uninterrupted posing at session end creates no warning without later posing; >25m pose creates warning (boundary policy pending).
+- P-T10: Track warnings within one full session by default rather than across separate saved presets (scope policy pending).
+- P-T11: Positive special break <= ordinary break duration behavior follows user-approved policy (not settled).
+- P-T12: Strict no-zero logical break slots; do not generate 0m phases or allow 0m break as an overrideable safety warning.
 
 ## Stage 1: deterministic scheduling engine
 - T01 Example A baseline exact phase order and boundaries from EXAMPLES.md, down to each opening pose. Expect 130m posing + 35m breaks + 15m summary = 180m.
