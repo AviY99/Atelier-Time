@@ -1,5 +1,13 @@
 # Changelog — Atelier Time
 
+## 2026-10-22 — Stage 1 Step 1.3 / Handoff v0.6
+- User authorized discussion/documentation of scheduling placement and edge policies by saying “Continue” after Step 1.2.
+- Added [SCHEDULING_EDGE_POLICY.md](docs/SCHEDULING_EDGE_POLICY.md): six **proposed** rules covering midpoint long-break replacement, multiple evenly-spaced long breaks, manual ordinals, invalid configuration handling and final-pose edge cases.
+- Preserved both approved example schedules exactly; these rule proposals are **not yet user-approved**.
+- Updated D-026 through D-029, roadmap, scheduling contract, work log, README and current cross-chat handoff.
+- **No Dart/Flutter source code, test executions or installable builds; Step 1.4 remains blocked.**
+
+
 ## 2026-10-22 — Stage 1 Step 1.2 / Handoff v0.5
 - User's “Continue” authorized only the **data-model design** following approved Step 1.1.
 - Added [DATA_MODEL.md](docs/DATA_MODEL.md) with proposed Dart session rules, variable-length editable opening pose groups, phase intervals, long-break replacement representation, validation issues, final-pose option model, and immutable approved preset shape.
@@ -29,4 +37,5 @@
 - v0.2: Three-choice end-pose handling specified, time-ruler prototype shown in chat.
 - v0.3: User approved requirements and authorized GitHub documentation setup.
 - v0.4: User approved Flutter/Dart four-platform choice and non-native UI clarification for Stage 1 Step 1.1 only.
-- v0.5: Step 1.2 documented the proposed data model; user review and separate Step 1.3 approval remain pending. Source of truth: docs/HANDOFF.md.
+- v0.5: Step 1.2 documented the proposed data model.
+- v0.6: Step 1.3 placement and edge-policy proposals prepared for review; Step 1.4 authorization not granted. Source of truth: docs/HANDOFF.md.
