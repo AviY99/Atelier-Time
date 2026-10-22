@@ -16,6 +16,7 @@ Atelier Time lets an organizer configure pose and break rules, generate and appr
 - [Design and technical approach](docs/ARCHITECTURE.md)
 - [Step 1.2 — Dart data-model design](docs/DATA_MODEL.md)
 - [Step 1.3 — scheduling placement and edge-case proposals](docs/SCHEDULING_EDGE_POLICY.md)
+- [Step 1.3 — consolidated decision review](docs/STEP_1_3_REVIEW.md)
 - [Approved framework and platform decision](docs/TECH_DECISION_001_PLATFORM.md)
 - [Acceptance and test plan](docs/TEST_PLAN.md)
 - [Iteration record](docs/WORK_LOG.md)
