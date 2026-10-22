@@ -1,5 +1,15 @@
 # Changelog — Atelier Time
 
+## 2026-10-22 — Stage 1 Step 1.4 D-044 support / Handoff v1.3
+
+- User **approved D-044**, resolving former D-038: any **positive** special break can replace a normal break even if shorter/equal (examples regular 5m, special 1m/3m/5m), with the D-031 25/5 warning and acknowledgement when necessary. D-036 still blocks all 0-minute sessions/actual breaks.
+- Updated Dart scheduling core on isolated `stage-1-4-scheduling-core` branch to accept negative, zero and positive `L−B` without `pendingDecision`.
+- Added written regression and dependency-free smoke test source for shorter/equal special breaks and valid warning-override flows.
+- Independent Python-based placement comparisons matched **25,000 virtual-schedule random cases** plus **4,000 additional exhaustive real-timeline cases**. This is **not Dart test execution**.
+- **No Dart SDK/network access for download; no Dart compiler, `dart analyze`, `dart test`, smoke script execution, GitHub Actions, paid runners, build or merge**. Reported GitHub budget remains unchanged; Stage 1 Step 1.4 still **IN PROGRESS** and no Stage 2 authorization.
+- Updated decision/policy/test docs, roadmap, README, work log, and self-contained HANDOFF v1.3.
+
+
 ## 2026-10-22 — Stage 1 Step 1.4 DP fix / Handoff v1.2
 
 - Continued authorized pure Dart coding on `stage-1-4-scheduling-core` after user requested “Continue” and explanation of open D-038.
