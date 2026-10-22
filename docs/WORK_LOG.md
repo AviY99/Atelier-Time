@@ -1,5 +1,22 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-22 — Iteration 1.1: Step 1.4 Dart scheduling code started (budget-safe branch)
+
+**Instruction:** User said **“Continue”** after discussion that their GitHub metered budget ($12) was blocked by another project and that beginning Step 1.4 required permission. This authorizes **Step 1.4 only**. No other stage, paid Actions run, build, or release authorized.
+
+**Actions:** Created development branch [stage-1-4-scheduling-core](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core) from `main`; committed a minimal standalone Dart core package (`pubspec.yaml`, public `lib/atelier_time.dart`, `lib/src/scheduling.dart`), exact canonical A/B and 25/5 unit test sources (`test/scheduling_test.dart`), dependency-free smoke runner (`tool/smoke.dart`), and [Step 1.4 implementation notes](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/docs/STAGE_1_4_PROGRESS.md). These artifacts are **on the branch only**, not merged to main.
+
+**Initial functionality written (not validated):** configurable opening groups, pose-first/break-first generation, break replacement (automatic single and multiple closest-to-target solver, manual ordinal), exact elapsed offsets, three final-short-pose choices, explicit review approval, mandatory positive sessions/breaks (D-036), 25m/5m safety warnings with affirmative acknowledgment (D-031), scope limited per activated full session (D-037), and **pendingDecision** for unresolved positive special-break <= regular break (D-038). Approved sample times codified as assertions.
+
+**Verification limits:** No Dart or Flutter SDK in execution environment. **No Dart analyzer, compiler, test runner, automated test execution, or GitHub Actions run**. Source/test files were read back and a basic structural bracket/string/comment balance check completed; that is **not** compilation or a passing test. The exact multi-break optimizer currently exhaustively enumerates combinations and may require performance optimization before stage completion.
+
+**Billing protection:** Did **not** add `.github/workflows` files, trigger Actions, use paid runners or deploy builds. Did not alter user's $12 budget.
+
+**Status:** **Step 1.4 STARTED / IN PROGRESS, NOT COMPLETE**. Source remains uncompiled, tests written but unexecuted. Stage 2 and all later stages remain unapproved. Decision log D-040 to D-042. Need a Dart-capable environment and actual testing, with D-038 resolved before validating the special-break length comparison. Preserve gated approvals.
+
+---
+
+
 ## 2026-10-22 — Iteration 1.0: Stage 1 Step 1.3 APPROVED and completed (documentation only)
 
 **Explicit user authorization:** “I approve the remaining Atelier Time Stage 1 Step 1.3 proposals as documented in STEP_1_3_REVIEW.md, with D-036 overriding any zero-duration break/session allowance. Record approval in GitHub and complete Step 1.3 only. Do not start Step 1.4 programming yet.”
