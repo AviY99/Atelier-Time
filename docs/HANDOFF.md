@@ -1,107 +1,129 @@
-# ATELIER TIME — CURRENT PROJECT HANDOFF (v0.8)
+# ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v0.9)
 
-**Date:** 2026-10-22  
-**Project:** Atelier Time  
-**Repository:** https://github.com/AviY99/Atelier-Time (existing public repo, default main)  
-**Current status:** Stage 0 complete; Stage 1 Step 1.1 Flutter/Dart platform approved; Step 1.2 data model documented; Step 1.3 consolidated review **ready for user approval**. The D-031 25m accumulated posing / >=5m recommended rest warning with 0m break override is approved. Remaining P-01–P-06 and refined logical 0m-break/cross-preset interpretation **remain proposals**. **Step 1.4 NOT AUTHORIZED.** No app code, Flutter scaffold, executable tests or build exists.
+**Updated:** 2026-10-22  
+**Repository:** https://github.com/AviY99/Atelier-Time (existing public repo; default `main`)  
+**Technology APPROVED:** **Flutter + Dart**, **ONE shared application codebase** for first release on **Android phones/tablets, Windows computers, iOS/iPadOS and macOS**. Different install artifacts per OS are acceptable; native-looking menus/graphics are OPTIONAL. No web or Linux release required initially.  
+**Status:** Stage 0 documentation complete; Stage 1 Step 1.1 platform approved; Step 1.2 Dart-domain model conceptual design documented; **Step 1.3 partly approved, other proposals awaiting user approval**; **Step 1.4 programming/test implementation NOT AUTHORIZED**. **NO APP SOURCE CODE, Flutter project/scaffold, working timer, automated executed tests, UI, audio or installable build exists yet.**
 
-## User intent
-Build a simple self-contained installed app for live-model sessions in **drawing and sculpting ateliers**. Prioritize a single codebase and consistent cross-platform functionality; native menus/controls are OPTIONAL and a Flutter-rendered interface is acceptable. Offline operation required. Set numerical timing rules, auto-generate complete sequence, approve it, save named presets, activate and run a countdown with sounds. App name is **Atelier Time**. User will provide logo picture when asked at the relevant design stage; graphic appearance must be discussed rather than invented. Log ALL decisions and progress in GitHub; update this handoff after every iteration so a new chat can resume immediately.
+## Latest mandatory precedence — 0-minute sessions/breaks
 
-## Approved technical platform — Stage 1 Step 1.1 COMPLETE (2026-10-22)
-- **Flutter + Dart**; **one shared maintained application codebase** for the first release on **Android phones/tablets, Windows computers, iOS/iPadOS (iPhone/iPad), and macOS**.
-- Platform-specific compiled app/install packages are expected; thin platform-specific services are permissible for OS audio/notification/integration limitations, without separate application implementations.
-- Native UI is NOT a requirement; non-native Flutter graphics/menus/controls are fine. Cross-platform feature parity has higher priority.
-- Linux/web not required in the first release. Specific CI, signing, distribution and build machine choices are open.
-- Authoritative decision: [TD-001](TECH_DECISION_001_PLATFORM.md), register IDs D-019 through D-022.
-- User later said **“Continue”** after Step 1.2, authorizing **Step 1.3 documentation/discussion only**. See [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md). **Step 1.4 and any coding are on hold; Step 1.3 policies require approval first.**
+**D-036 (2026-10-22) is the LATEST approved clarification and overrides any contrary older note:**
 
-## Stage 1 Step 1.2 — documented design proposal (2026-10-22)
-- Full design specification: [DATA_MODEL.md](DATA_MODEL.md). It proposes Dart-domain records for SessionRules, any number of ordered OpeningPoseGroups, RegularCycle, LongBreakRule/Placement, candidate SchedulePhases, errors/warnings, three EndPoseResolution methods, and frozen ApprovedSessionPreset after explicit approval.
-- Every number in the approved examples remains editable in each eventual session input screen; optional opening groups can be added, removed or reordered. Example A and B input JSON drafts are provided **only as canonical test fixtures**, not mandatory presets or hardcoded limits.
-- Proposed technical representation: integer seconds and elapsed start/end offsets. User-facing approved custom split step remains one minute, with minimum one minute per pose when feasible. Phases occupy contiguous half-open time ranges; work ends before reserved summary.
-- Crucial distinction: the records/schema/field names are DESIGN PROPOSALS, not implemented/compiled Dart code and not independent user approval of new edge behaviors.
-- Still unresolved and reserved for proposed Step 1.3: exact automatic-middle replacement break choice and ties, multiple long break positions, infeasible schedule inputs, short/zero breaks and insufficient last-two-pose cases. No defaults quietly settled.
-- Iteration 0.5 created decisions D-023 through D-025. The user **subsequently authorized Step 1.3 design** via “Continue”; the current gate is **approval of Step 1.3 policy proposals and explicit Step 1.4 authorization**, not another Step 1.3 request.
+> User: “You are correct, Break of 0 or session of 0 is not valid.”
 
-## Stage 1 Step 1.3 consolidated review after latest “Continue” (iteration 0.8)
+Therefore:
+- A **complete session total MUST be >0**. A 0-minute session is a **hard validation ERROR** and cannot be preview-approved, saved or activated.
+- Every **configured actual regular/short break or active long/special replacement break MUST have duration >0**. A break lasting 0 minutes is a **hard validation ERROR**; it cannot be waived by the 25/5 advisory warning mechanism. In the planned whole-minute editor, the smallest valid configured break is **1 minute**.
+- New-session input defaults: **normal/short break 5 minutes**; **long/special replacement break 15 minutes**. Both remain independently editable to **other POSITIVE values**.
+- The previous D-031 approval of 0-minute breaks and the follow-up proposal for “logical 0-minute break slots” are **SUPERSEDED/WITHDRAWN**. Do not implement them. Old work log, changelog or superseded decision text is history, **not current authority**.
+- Zero **number** of optional special replacements, if approved as part of the remaining Step 1.3 rules, means none are scheduled (NOT a 0-duration break). A proposed zero-duration **reserved final summary** `F=0` is distinct from a 0-duration **complete session** `D=0`; do not conflate them.
 
-- User said **“Continue”** after the revised explanation of D-031. This authorizes finishing the **Step 1.3 documentation/review**, **NOT** automatically approving all unreviewed user-visible behaviors or starting Step 1.4 coding.
-- New consolidated review: **[STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md)**, read this document before the earlier detailed [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md). Changes linked in ROADMAP/README/TEST_PLAN and tracked in decisions **D-034/D-035**.
-- **Already approved D-031:** 25 minutes of accumulated posing without qualifying rest; a break >=5m resets; 0–4m breaks do not. User can enter **0m** for normal or special break. Violations produce a visible **warning requiring separate affirmative acknowledgement** before session approval; they are **not hard errors**. Recompute the warning after edits and end-pose changes. New-session 5m/15m break durations remain editable defaults, not minimums.
-- **Proposal awaiting sign-off:** Preserve configured 0m normal breaks as **logical break slots** (no zero-length elapsed schedule phases) so numbered manual/automatic special replacement positions can still be selected, including replacement by positive-length long rest. A selected special break can itself be 0m. If two last poses are separated by a *logical* 0m slot, an equal/custom split with Q=0 may be offered (when feasible); it must not invent a break.
-- **Proposal awaiting sign-off:** Accumulate pose-time warnings **within each full activated session by default**, not silently carrying the counter across **different saved presets**. Exactly 25m at final overall-session end with no further posing does not itself need another rest; a 30m uninterrupted pose always warns. The phrase "accumulated sessions" could mean cross-preset carryover and is NOT settled—do not promise it without approval.
-- **Other remaining proposals P-01–P-06 awaiting sign-off:** Pick automatic special break closest to midpoint of work window (tie earlier ordinal); for N>1 spread near fractions j/(N+1); allow manual numbered slot(s); hard-block mathematically invalid configs, not insufficient 25/5 rest; preserve the immutable full approved timeline; permit explicitly adjusted last-two durations beyond nominal when positive; no silent count/slot edits.
-- **All approved Example A/B expected schedules unchanged.** No tests have been executed; proposed P-T09–P-T15 added to TEST_PLAN.md.
-- **Immediate gate:** present one clear Step 1.3 policy approval choice and allow revisions; **Step 1.4 Dart code/tests remain blocked until separately authorized**.
+**D-031 remains APPROVED insofar as it defines the 25/5 advisory warning:**
+- After **25 minutes of accumulated posing without a qualifying break**, recommend a **>=5-minute rest** before posing continues. Add together durations of consecutive poses, including consecutive 1-minute or 4-minute opening poses; simply reaching a pose boundary does **not** reset the counter.
+- Only a **break >=5 minutes** resets the posing counter. A **valid positive 1–4-minute break does not** reset it. A single pose running past 25 minutes also triggers a warning.
+- A legal schedule violating the 25/5 recommendation shows a clear **WARNING** and requires **explicit separate user acknowledgment plus ordinary schedule approval** before saving/activating. Never silently alter entered numbers.
+- An edit, placement change or final-pose split change invalidates the prior warning acknowledgment and ordinary approval; recompute from the final full timeline.
+- A **0-minute break/session is an ERROR, not a warning**: a user cannot override it.
+- Still pending interpretation: whether the 25m counter continues across **separately activated full saved presets** (user said “accumulated sessions” but did not clarify this), and the handling of exactly 25m at the end of one full session (current proposal: no trailing artificial break).
 
-## Stage 1 Step 1.3 — proposed scheduling policies (2026-10-22)
-- **Specification:** [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md), proposal P-01 to P-06, **NOT YET USER-APPROVED AS BEHAVIOR**.
-- P-01: automatic **one long break** replaces the eligible short break whose replacement interval **center is nearest the work-window midpoint**; ties go to earlier eligible break. Both canonical examples still replace the **third** short break (A at 01:20–01:35; B at 01:25–01:40).
-- P-02: when N long replacement breaks requested, distribute their centers approximately evenly over the work window using target fractions j/(N+1), deterministic earlier-ordinal tie-breaking, with feasibility enforcement. No silent reduction of N.
-- P-03: manual break positioning by distinct numbered short-break slots; editing rules must not silently relocate manually chosen slots.
-- P-04: proposal for mathematically invalid inputs and unusual schedule shapes, revised by **approved D-031**: **0-minute normal and special breaks are allowed** (no zero-duration elapsed phase). Older documentation's minimum-1-minute duration rule is superseded. Requiring a long break to be strictly longer than short break cannot be used to prohibit explicit 0-minute values. Zero special replacement slots and other edge details are still under review.
-- P-05: last incomplete pose still triggers the approved three-option dialog; missing final-two-pose + break structure disables the infeasible split choices with explanations. Propose allowing custom split first pose to exceed regular duration if explicitly selected.
-- P-06: full preview of actual placements, all phase timings and validation messages before approval; any edited numeric rule invalidates approval.
-- Reference fixtures [EXAMPLES.md](EXAMPLES.md) remain fixed. The document is an engineering proposal, NOT executable scheduling code or a passing test report.
-- Decisions D-026 (authorized design), D-027/D-028 (remaining proposals), D-029 (Step 1.4 hold), **D-030 (superseded break minimum in prior documentation), D-031 (user-approved 25/5 warning and 0-minute break), D-032 (pending cross-session/edge interpretation), D-033 (Step 1.4 hold)**.
+## User purpose and full approved features
 
-## Approved break-safety clarification — D-031 (2026-10-22)
-- **After 25 minutes of cumulative posing without a qualifying break, recommend at least 5 minutes of rest before further posing.** Sum consecutive short or long poses; counting does NOT reset merely because a new pose starts. A qualifying break is >=5m; a 0–4m break does not reset the cumulative pose counter.
-- **0-minute regular or special break duration is allowed**, overriding the older hard 1-minute minimum described in the repository as D-030. It allocates no time or zero-length phase. 5m normal and 15m special remain the *editable defaults*, not hard minimums.
-- A schedule violating the 25/5 recommendation is **not rejected solely for safety**. Show precise violating time intervals and a **separate explicit warning acknowledgement** before ordinary schedule approval/saving/activation. Any edit/recalculation invalidates acknowledgement and approval. No silent corrections.
-- Open semantics **not yet user-approved**: exactly 25m at session completion with no further posing; carryover across separately activated full presets versus only multiple poses inside a single full session; what a zero-minute selected special replacement looks like in the final preview.
-- These new rules are in [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md), MODEL/TEST_PLAN changes, and D-031/D-032 in [DECISIONS.md](DECISIONS.md).
+**Atelier Time** is an offline-capable installable timer for **live-model drawing and sculpting ateliers**. Organizer configures, previews and approves an exact complete sequence, saves reusable named sessions, activates the approved schedule and runs a timer with sounds. The user supplies a logo/image later during visual design; **do not invent it** now.
 
-## Approved core requirements
-- **Each new or edited session has its own numeric input screen; every number in the examples can be changed**, opening pose groups can be added/removed; edits recalculate the whole schedule, which must be re-approved. Example A/B are test fixtures, not hardcoded fixed session choices.
-- Editable total session and final reserved summary durations.
-- Configurable count/duration of optional opening pose groups.
-- Repeated pose/short-break cycle, pose-first or break-first.
-- Configurable regular pose length, short break, long replacement break length/count and placement.
-- Long break **replaces** one short break, rather than adding extra break time.
-- Preview full ordered phase list with duration and elapsed start/end; explicit approval before saving and activating.
-- Saved presets: create/list/edit/rename/duplicate/delete/activate, available offline.
-- On an incomplete final pose, ask during **review** for one of 3 solutions: (1) keep final remainder, (2) split last two poses as close as possible to 50/50, (3) use time ruler/slider to divide last two. Show both durations and all updated times; preserve interposing break and total/summary. One-minute slider steps and one-minute minimum per pose are accepted initial rules, when feasible.
-- Running timer displays phase, large countdown, next phase and overall time, pause/resume/stop. Three different audible cues: pose/set ending, break ending, whole sequence ending.
+**Every numeric parameter in BOTH examples is editable for EACH full session**, not hardcoded: total duration, final reserved summary, any number of ordered opening pose groups with user-editable pose counts/durations (can add, remove, reorder), recurring regular pose length, normal break duration, special replacement length and count/placement, cycle pose-first or break-first, and final-pose allocation. Editing regenerates an entirely new preview, needing approval. Future Stage 2 editor must permit changing all these numbers.
 
-## Approved example A (180 minutes)
-- 165 minute work block + 15 minute summary.
-- 4×1-minute poses, 4×4-minute poses, then 5m break / 25m pose repeating, with one 15m break replacing middle short break.
-- 00:00–00:20 opening poses; 00:20–00:25 short break; 00:25–00:50 pose; 00:50–00:55 break; 00:55–01:20 pose; **01:20–01:35 long break**; 01:35–02:00 pose; 02:00–02:05 break; then last-two-poses window **02:05–02:45** with 35 pose minutes separated by 5m break; 02:45–03:00 summary.
-- Ending options: remainder **25+10** (break 02:30–02:35); near-even **17+18** (break 02:22–02:27); custom example **20+15** (break 02:25–02:30).
+Opening poses flow consecutively in the canonical Example A (no default breaks between them). An active long/special break **REPLACES** a scheduled short-break slot; never append another break at that boundary. The final reserved summary is included **inside** the total; its exact activity remains undefined. No trailing normal break without a following pose. All actual phase time ranges are contiguous, non-overlapping and strictly positive, covering the total exactly.
 
-## Approved example B (180 minutes)
-- 165 minute work block + 15 minute summary.
-- 25-minute pose / 5-minute break repeating, with one 15m replacement break midway.
-- 00:00–00:25 pose; 00:25–00:30 break; 00:30–00:55 pose; 00:55–01:00 break; 01:00–01:25 pose; **01:25–01:40 long break**; 01:40–02:05 pose; 02:05–02:10 break; last-two-poses window **02:10–02:45** with 30 pose minutes and 5m break; 02:45–03:00 summary.
-- Ending options: remainder **25+5** (break 02:35–02:40); even **15+15** (break 02:25–02:30); custom example **18+12** (break 02:28–02:33).
+If the final repeating pose is incomplete, offer during review:
+1. **Remainder**: keep previous nominal pose full length; last pose takes leftover.
+2. **Near-equal**: distribute the combined available posing time of the last two poses as floor/ceil at whole-minute precision.
+3. **Custom ruler/slider**: divide that combined time in whole-minute steps, >=1m for each pose where feasible.
 
-Full per-pose tables in docs/EXAMPLES.md. Each reference baseline totals **130m posing + 35m breaks + 15m summary = 180m**. Never alter these regression examples without explicit approval.
+Two-pose formula: `S` = start of earlier final pose, `E` = work-window end, `Q` = duration of the existing intervening **positive** break, `T=E−S−Q`. For selected first pose length `x`, phases are first pose `[S,S+x)`, intervening break `[S+x,S+x+Q)`, final pose `[S+x+Q,E)`. All preceding phases, Q, session total, and summary remain unchanged. If structurally impossible, do not create fictitious poses/breaks.
 
-## Core invariants
-Stage intervals contiguous, no overlap/gap. Total exactly D, summary last F. Long break replaces short break at one eligible slot, not appended. Final-two-pose alternatives preserve combined pose time and intervening break, fixed lead-in, final summary and total. Do not silently auto-shorten and accept; user chooses during preview. A preview, saved preset and runtime use one consistent approved sequence.
+Saved-session operations later: create/name, review/approve, save, list, activate, edit/reapprove, duplicate, rename and delete; usable offline. Runtime later: current phase and countdown, next phase, elapsed/remaining time, pause/resume/stop, three distinct audible cues (pose/set ending; break ending; entire sequence ending). Exact per-opening-pose vs per-set sound nuance remains OPEN. Timing should use monotonic elapsed clock, with later platform-specific notification/audio tests.
 
-## Decisions and unresolved details
-The decision register is docs/DECISIONS.md (D-001 through D-035). Target OS/framework and break-safety D-031 are approved. Step 1.2 data model remains conceptual. Other Step 1.3 proposals P-01–P-06 are **awaiting explicit user approval**, especially cross-preset accumulation and zero special break slot behavior. Also open: distribution/build/signing, branding, summary activity and per-pose versus per-set audio. Reuse the existing GitHub repository.
+## Two canonical THREE-HOUR reference fixtures — never change without approval
 
-## Roadmap and current gate
-**Stage 0 COMPLETE:** Documentation baseline committed to existing GitHub repository, all 11 files verified readable (this iteration).  
-**Stage 1 — Step 1.1 COMPLETE:** Flutter/Dart and OS targets approved. **Step 1.2 DOCUMENTED:** [DATA_MODEL.md](DATA_MODEL.md). **Step 1.3 PARTLY APPROVED:** D-031 user-approved 25/5 warning and 0-minute breaks; other P-01–P-06 proposals and D-032 semantics awaiting approval. **Step 1.4 NOT AUTHORIZED:** Dart scheduling engine/test implementation requires new separate permission.  
-**Stage 2:** Cross-platform Flutter UI including per-session numeric input editor, preview/approval and split ruler; discuss visual design.  
-**Stage 3:** Offline saved presets.  
-**Stage 4:** Playback timer, three sounds, interruptions.  
-**Stage 5:** Device QA, installability and accessibility.  
-**Stage 6:** Versioned release and maintenance handoff.
+Each example has **D=180m**, final summary **F=15m**, work `W=165m`, normal pose `P=25m`, normal break `B=5m`, one long replacement `L=15m`. Both approved final baselines total **130m posing + 35m breaks + 15m summary**. Every number is a configurable *example input*, NOT a product restriction.
 
-User approved Step 1.1, then “Continue” to begin Step 1.2, and then “Continue” to begin Step 1.3. Both continuations authorized only the corresponding **documentation/design** steps. Step 1.3 behavior proposals have not yet been formally approved; **Step 1.4, source code/scaffolding and testing are NOT authorized**. Each next sub-step requires separate explicit permission.
+**Example A — opening 4×1m, then 4×4m; recurring break-first:**
 
-## Documentation operation instructions for next chat
-1. Read this handoff, [TD-001](TECH_DECISION_001_PLATFORM.md), [DATA_MODEL.md](DATA_MODEL.md), [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md), docs/PRODUCT_SPEC.md, docs/SCHEDULING_RULES.md, docs/EXAMPLES.md, docs/ROADMAP.md, docs/DECISIONS.md, docs/TEST_PLAN.md and docs/WORK_LOG.md.
-2. Verify GitHub repository current state before writing; reuse existing files, never create duplicate repo.
-3. Maintain same decisions and exactly reproduce reference schedules.
-4. For any implementation iteration commit source/tests, update decision log, work log, test results, changelog and THIS HANDOFF; link commits and clearly separate verified behavior from proposed behavior.
-5. If current stage still pending approval, stop and request approval rather than proceeding with app coding.
-6. Logo and graphic style only discussed at relevant stage after user image supplied.
+```text
+00:00–00:01 Pose 1 1m
+00:01–00:02 Pose 2 1m
+00:02–00:03 Pose 3 1m
+00:03–00:04 Pose 4 1m
+00:04–00:08 Pose 5 4m
+00:08–00:12 Pose 6 4m
+00:12–00:16 Pose 7 4m
+00:16–00:20 Pose 8 4m
+00:20–00:25 Short break 5m
+00:25–00:50 Pose 9 25m
+00:50–00:55 Short break 5m
+00:55–01:20 Pose 10 25m
+01:20–01:35 LONG replacement break 15m
+01:35–02:00 Pose 11 25m
+02:00–02:05 Short break 5m
+02:05–02:30 Pose 12 25m
+02:30–02:35 Short break 5m
+02:35–02:45 Pose 13 10m (partial)
+02:45–03:00 Summary 15m
+```
 
-**Immediate next action:** Show the user [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md) and its 4 approval groups. Ask whether to approve the remaining P-01–P-06 and logical-zero-slot/per-session boundary proposals **or revise specific points**. Do not imply cross-preset carryover without an explicit decision. **Stop before Step 1.4, Dart/Flutter source code, tests or UI until separately authorized.**
+A end-pair (S=02:05, E=02:45, Q=5m, T=35m):
+- Remainder 25+10: Pose12 02:05–02:30, break 02:30–02:35, Pose13 02:35–02:45.
+- Near-even 17+18: Pose12 02:05–02:22, break 02:22–02:27, Pose13 02:27–02:45.
+- Custom sample 20+15: Pose12 02:05–02:25, break 02:25–02:30, Pose13 02:30–02:45.
+
+**Example B — no opening poses, recurring pose-first:**
+
+```text
+00:00–00:25 Pose 1 25m
+00:25–00:30 Short break 5m
+00:30–00:55 Pose 2 25m
+00:55–01:00 Short break 5m
+01:00–01:25 Pose 3 25m
+01:25–01:40 LONG replacement break 15m
+01:40–02:05 Pose 4 25m
+02:05–02:10 Short break 5m
+02:10–02:35 Pose 5 25m
+02:35–02:40 Short break 5m
+02:40–02:45 Pose 6 5m (partial)
+02:45–03:00 Summary 15m
+```
+
+B end-pair (S=02:10, E=02:45, Q=5m, T=30m):
+- Remainder 25+5: Pose5 02:10–02:35, break 02:35–02:40, Pose6 02:40–02:45.
+- Near-even 15+15: Pose5 02:10–02:25, break 02:25–02:30, Pose6 02:30–02:45.
+- Custom sample 18+12: Pose5 02:10–02:28, break 02:28–02:33, Pose6 02:33–02:45.
+
+Full reference inputs and tables: [EXAMPLES.md](EXAMPLES.md). Neither example has a 25/5 warning.
+
+## Current Step 1.3 policies awaiting **explicit approval**, NOT implementation
+
+**Read latest [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md) and [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md).**
+
+- **P-01 proposed:** one long break chosen at the existing eligible ordinary break whose **replacement interval center** is closest to midpoint of working time `W/2`; tie earlier ordinal; must reproduce A/B (each third short break).
+- **P-02 proposed:** multiple long replacements distributed approximately evenly (targets `j/(N+1)` work time); selected eligible distinct slots; deterministic earlier-ordinal ties. Zero optional special replacement *count* means none, if approved.
+- **P-03 proposed:** manual selection by normal break ordinals; errors if editing invalidates a chosen ordinal; never silent relocation.
+- **P-04 proposed:** other mathematically invalid edge inputs (opening groups overlong, summary consuming total, no positive final phase) are hard errors; `F=0` summary, opening-only sessions and zero optional *count* may be valid. **Positive session and break durations are already approved under D-036**, not proposals.
+- **P-05 proposed:** if final-two-pose structure unavailable, disable infeasible split options; permit custom first pose >nominal if both poses positive; no inserted extra break.
+- **P-06 proposed:** preview displays every stage and validation, differentiates hard errors from advisory 25/5 warnings; user acknowledgment stored per approved revision.
+- Still OPEN: whether exactly 25m when session ends merits no additional break, whether cumulative posing spans separate *saved preset activations*, and whether a positive special break may be <= normal break.
+- **Zero-length logical break slots and any final-two split across such a slot were WITHDRAWN by D-036. Do not implement.**
+
+## Design model, tests and GitHub artifacts
+
+- **[TECH_DECISION_001_PLATFORM.md](TECH_DECISION_001_PLATFORM.md)** records approved Flutter + Dart, four release targets and allowance for non-native UI.
+- **[DATA_MODEL.md](DATA_MODEL.md)** defines only **conceptual** Dart types: `SessionRules`, `OpeningPoseGroup`, `RegularCycle`, `LongBreakRule/Placement`, `SchedulePhase`, `ScheduleCandidate`, `EndPoseResolution`, `ApprovedSessionPreset`, `ScheduleIssue`. Internally integer seconds; whole-minute UI initially; records are not yet executable Dart.
+- **[TEST_PLAN.md](TEST_PLAN.md)** includes canonical T01–T18 and new planned R-B01..R-B18 for D-036 positive inputs + D-031 25/5 advisory warnings; proposed P-T tests are pending policy approval. **NONE HAVE RUN**; do not claim test passes.
+- **[PRODUCT_SPEC.md](PRODUCT_SPEC.md)** approved product scope, **[SCHEDULING_RULES.md](SCHEDULING_RULES.md)** core contract, **[ROADMAP.md](ROADMAP.md)** gates, **[DECISIONS.md](DECISIONS.md)** chronological decision register through latest **D-036**, **[WORK_LOG.md](WORK_LOG.md)** iterations, **[CHANGELOG.md](../CHANGELOG.md)** history.
+- In interpreting decisions, **D-036 supersedes D-031 only for 0-minute break allowance**, while the accumulated 25/5 *warning* of D-031 remains. D-030 reconstructed older minimum, D-032/D-034/D-035 are historical/proposals, not approval of zero slots.
+- GitHub is the authoritative store. After every iteration, update decisions/roadmap/work log/changelog and **THIS HANDOFF**; verify GitHub read-back and link concrete commits. Do not create a duplicate repo.
+
+## Stage gate and exact next action
+
+Stage 0 COMPLETE; Stage 1 **1.1 COMPLETE**, **1.2 DESIGN DOCUMENTED**, **1.3 PARTLY APPROVED / READY FOR REVIEW**; **1.4 NOT AUTHORIZED**. Later Stage 2 per-session responsive Flutter editor and preview; Stage 3 offline presets; Stage 4 monotonic timer/audio; Stage 5 multi-device QA/installability; Stage 6 release.
+
+**Immediate next response in a new chat:** Explain/latest D-036 in plain terms (0 session/0 break invalid; 1–4m break allowed with 25/5 warning if triggered), then request approval/revisions of remaining Step 1.3 proposed P-01–P-06 and scope interpretations. **Do not start Flutter scaffolding, Dart code, scheduling engine, UI or automated tests until separate explicit Step 1.4 authorization.** User will supply logo later only at branding stage.
