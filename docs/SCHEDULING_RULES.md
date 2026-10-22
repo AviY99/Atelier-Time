@@ -10,12 +10,12 @@ All times displayed as elapsed from the session start (00:00). Internally prefer
 - `W = D-F`: work block length (all poses + breaks)
 - `O`: sequence of optional opening pose groups
 - `P`: nominal repeating pose duration
-- `B`: short break duration — **new-session default 5 minutes**, editable **down to 0**; zero indicates no time allocated to normal break slots.
-- `L`: middle/long replacement break duration — **new-session default 15 minutes**, editable **down to 0**; zero indicates no time allocated to that replacement slot.
+- `B`: short break duration — **new-session default 5 minutes**, editable to any valid **positive** duration; 0 is invalid (D-036).
+- `L`: middle/long replacement break duration — **new-session default 15 minutes**, editable to any valid **positive** duration when configured; 0 is invalid (D-036).
 - `N`: configured count of long breaks
 - `cycleStart`: pose-first or break-first
 
-The examples set `D=180, F=15, W=165, P=25, B=5, L=15, N=1`. Example A opening groups 4×1 then 4×4 and break-first; Example B no openings and pose-first. The 5- and 15-minute values remain editable new-session defaults. **Latest D-031 supersedes the older D-030 minimum-1-minute rule:** 0-minute break values are allowed, meaning no break time at that slot, with required safety warnings/acknowledgement when the 25-minute accumulated-posing / 5-minute rest recommendation is violated.
+The examples set `D=180, F=15, W=165, P=25, B=5, L=15, N=1`. Example A opening groups 4×1 then 4×4 and break-first; Example B no openings and pose-first. The 5m/15m values remain editable *positive* defaults. **D-036 is the latest correction:** a full session of 0 and a configured break duration of 0 are **hard errors** (initial whole-minute inputs require at least 1m per break). D-031 still requires a user-acknowledged **warning**, not a hard error, for legitimate sessions violating the **25m posing / >=5m rest** recommendation.
 
 ## Baseline generator
 1. Validate every configured duration and count before scheduling. Reject negative durations, summary longer than total, and sequences that cannot legally fit.
@@ -50,9 +50,9 @@ See EXAMPLES.md for the entire time-ordered lists and each alternative.
 5. The last-two split preserves their combined time and the intervening break length.
 6. Sound transitions are derived from actual schedule edges.
 7. The preview and live timer use an identical persisted, approved schedule.
-8. **Approved break-safety warning:** count posing durations cumulatively until a break lasting **at least 5 minutes**; when posing continues after reaching 25 minutes without such a break, flag the violation and require explicit acknowledgement before approving the session. A single continuous pose over 25 minutes is also flagged. 0-minute breaks are allowed and consume no timeline time; shorter-than-5-minute rests do not reset the counter. Revisions invalidate warning acknowledgement. See [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) for detailed user-approved rule and proposed edge semantics.
+8. **Approved break-safety warning:** count posing cumulatively until a break lasting **at least 5 minutes**; when posing continues after 25 accumulated minutes, flag the violation and require explicit acknowledgement before approval. A pose exceeding 25 minutes also warns. **Valid 1–4-minute breaks** do not reset the counter. A configured **0-minute break or total session is a blocking input error**, not an overrideable rest warning. Revisions invalidate warning acknowledgement. See [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md).
 
 ## Stage 1 open engineering edge cases
 
 The candidate resolutions are documented as **unapproved proposals** in [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md). They require the user's approval before implementation. Example A/B expected results remain unchanged.
-How to handle (a) zero final summary, (b) multiple long breaks, (c) work block too short for opening poses, (d) break-first with very short work block, (e) precise 0-minute nominal/long replacement-slot semantics, (f) final incomplete pose with fewer than two poses, (g) midpoint tie-breaks, (h) 'long break' values that are 0 or shorter than nominal, (i) custom pose longer than nominal length, (j) set-end versus every-pose sound, (k) accumulation across separately activated full sessions. **A break value of 0 is allowed; 25/5 violations require a warning and acknowledgement, not automatic rejection.** Request approval if any remaining edge behavior changes user-facing meaning.
+How to handle (a) zero **summary** when the full session remains positive, (b) multiple long breaks, (c) work block too short for opening poses, (d) break-first with very short work block, (e) zero *number* of optional special breaks without a zero-duration phase, (f) final incomplete pose with fewer than two poses, (g) midpoint tie-breaks, (h) positive 'special' break shorter than normal, (i) custom pose longer than nominal length, (j) set-end versus every-pose sound, (k) posing accumulation across separately activated full sessions. **D-036: break duration 0 and total session duration 0 are invalid. D-031: 25/5 recommendation violations are warnings with explicit acknowledgment.**
