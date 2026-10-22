@@ -306,6 +306,55 @@ void main() {
   });
 
   group('additional Stage 1.4 edge regressions', () {
+    test('replacement can rescue an otherwise unbuildable ordinary cycle', () {
+      // With normal breaks only, the remaining 2m would force a phantom
+      // terminal break. Two longer replacements instead yield a valid 97m
+      // work timeline. The selector must not use the invalid ordinary result
+      // as an excuse to reject the valid replaced schedule.
+      final c = engine.generate(SessionRules(
+        id: 'replacement-feasible',
+        name: 'Long replacements restore a feasible ending',
+        totalSeconds: m(97),
+        openingGroups: [
+          OpeningPoseGroup(id: 'open', count: 3, poseSeconds: m(5)),
+        ],
+        poseSeconds: m(12),
+        shortBreakSeconds: m(4),
+        specialBreakSeconds: m(17),
+        specialBreakCount: 2,
+        cycleStart: CycleStart.breakFirst,
+      ), choice: const FinalPoseChoice.remainder());
+      expectContiguous(c);
+      final specials = c.phases
+          .where((p) => p.kind == PhaseKind.specialBreak)
+          .toList();
+      expect(specials.map((p) => p.breakOrdinal), [2, 3]);
+      expect(specials.map((p) => p.startSeconds), [m(31), m(60)]);
+      expect(specials.map((p) => p.endSeconds), [m(48), m(77)]);
+    });
+
+    test('longer sessions with multiple replacements remain schedulable', () {
+      // This case produced an impractically large search tree in the
+      // original enumerator. The exact dynamic-programming selector
+      // should use only a small number of candidate states.
+      final c = engine.generate(SessionRules(
+        id: 'many-break-slots',
+        name: 'Eight-hour session',
+        totalSeconds: m(480),
+        poseSeconds: m(5),
+        shortBreakSeconds: m(1),
+        specialBreakSeconds: m(5),
+        specialBreakCount: 5,
+      ), choice: const FinalPoseChoice.remainder());
+      expectContiguous(c);
+      final specials = c.phases
+          .where((p) => p.kind == PhaseKind.specialBreak)
+          .toList();
+      expect(specials.map((p) => p.breakOrdinal),
+          [13, 26, 38, 51, 64]);
+      expect(specials.length, 5);
+    });
+
     test('two automatically placed long breaks replace two slots', () {
       final c = engine.generate(SessionRules(
         id: 'two-auto',
