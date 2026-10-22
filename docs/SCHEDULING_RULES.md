@@ -1,6 +1,6 @@
 # Scheduling contract and algorithm design
 
-Status: Product behavior approved; edge policies and engineering method to be implemented/verified in Stage 1.
+Status: Core product behavior approved. **Step 1.3 placement and edge-case behavior is proposed for review** in [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md); no scheduling engine or tests implemented.
 
 ## Time vocabulary
 All times displayed as elapsed from the session start (00:00). Internally prefer integer duration units and monotonic elapsed-time measurement; no floating-point accumulation. Example durations are whole minutes. Preserve the ability to adopt seconds later without altering invariants.
@@ -52,4 +52,6 @@ See EXAMPLES.md for the entire time-ordered lists and each alternative.
 7. The preview and live timer use an identical persisted, approved schedule.
 
 ## Stage 1 open engineering edge cases
+
+The candidate resolutions are documented as **unapproved proposals** in [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md). They require the user's approval before implementation. Example A/B expected results remain unchanged.
 How to handle (a) zero final summary, (b) multiple long breaks, (c) work block too short for opening poses, (d) break-first with very short work block, (e) zero-length breaks, (f) final incomplete pose with fewer than two poses, (g) midpoint tie-breaks, (h) whether longer breaks must be at least short-break length, (i) custom pose that exceeds nominal length, (j) set-end vs every-pose sound. Propose explicit behavior, tests, and request approval if user-facing choices change.
