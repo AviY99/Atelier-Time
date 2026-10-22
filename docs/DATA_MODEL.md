@@ -1,9 +1,9 @@
 # Atelier Time — Data model and scheduling interfaces (Stage 1, Step 1.2)
 
 **Prepared:** 2026-10-22  
-**Status:** Step 1.2 **design prepared for review**. Technical shape below is a **proposal**, not implemented source code and not a change to previously approved user behavior. No Flutter scaffold or engine exists.  
+**Status:** Step 1.2 **design documented and used as the basis for Step 1.3**, following the user's further “Continue”. Named types/fields remain a technical proposal, not executable source or new product behavior. No Flutter scaffold or engine exists.  
 **Technology:** Flutter + Dart, one shared app targeting Android, Windows, iOS/iPadOS and macOS (approved TD-001).  
-**Next gate:** Get explicit approval before Step 1.3 (long-break positioning/edge-case policy). Do not code or build in Step 1.2.
+**Current next gate:** Review Step 1.3 policy proposals at [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md); Step 1.4 code/tests are blocked until separately authorized.
 
 ## 1. Product-to-model mapping
 
@@ -246,6 +246,8 @@ Stage 1 Step 1.3 must explicitly resolve ambiguous product-visible edge cases an
 
 ## 8. Still open: do not silently decide
 
+Step 1.3 created [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) with explicit proposed resolutions to several items below. **These are awaiting user approval, not yet settled requirements.**
+
 1. Exact automatic-middle replacement-break placement and ties when session lengths/counts vary.
 2. How to deal with multiple long breaks and explicit break-ordinal changes after edits.
 3. Inputs too short to fit any pose or a complete break; opening groups exhausting work time.
@@ -265,6 +267,6 @@ Nothing in this data-model proposal overwrites approved user requirements or the
 - [x] Represent explicit final-pose choice and immutable approved timeline
 - [x] Include A/B example fixture payloads with exact reference expected results
 - [x] Distinguish engineering proposals from approved behavior and unresolved edge rules
-- [ ] User review/approval of this data model and permission to proceed to **Step 1.3**
+- [x] User said “Continue” after Step 1.2 review, authorizing discussion/documentation of **Step 1.3**. The technical field names remain proposals, not an implemented API.
 
-**STOP: Stage 1 Step 1.3 and all programming are NOT authorized by the instruction to continue Step 1.2.**
+**STATUS UPDATE:** Step 1.3 design was subsequently authorized by a second “Continue” and is documented separately. **Stage 1 Step 1.4 and all programming are NOT authorized.**
