@@ -1,5 +1,24 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-22 — Iteration 0.6: Stage 1 Step 1.3 scheduling-rule proposals
+**Instruction:** User said **“Continue”** after the Step 1.2 summary with a request to proceed to Step 1.3. This authorized **discussion/documentation of Step 1.3 only**.
+
+**Work done (documentation):**
+- Re-checked approved A/B reference schedules and the conceptual Dart data model.
+- Added [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) with proposals P-01 to P-06: automatic long break nearest midpoint of working time, tie to earlier eligible slot, multiple breaks approximately evenly distributed, manual break ordinal selection, input validation, and final-pose handling when the three options are unavailable.
+- Noted strict replacement of existing short-break slot, preserved final summary, required positive poses, deterministic error reporting, and future presentation of actual times.
+- Proposed rules were reasoned against approved A/B example placements (third break in each); no programmatic tests or simulator were run.
+- Updated README, roadmap, decision register, scheduling contract, changelog and HANDOFF.md.
+
+**Approval status:** Step 1.3 design **prepared for review**. User has **not yet approved** P-01–P-06. Decisions D-026–D-029 record authorization, proposals and next gate.
+
+**Excluded:** No Flutter/Dart project scaffold, app source, scheduling implementation, automated tests, audio, graphical UI or build. **Step 1.4 not authorized.**
+
+**Next:** Show user the proposed placement/edge rules; request explicit approval/changes. Only after approval may the user authorize Step 1.4.
+
+---
+
+
 ## 2026-10-22 — Iteration 0.5: Stage 1 Step 1.2, conceptual scheduling data model
 **Instruction:** “Continue” after the user-approved completion of Step 1.1. Interpreted as permission for **Step 1.2 only** in accordance with the documented one-step-at-a-time process.
 
