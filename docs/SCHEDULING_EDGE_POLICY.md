@@ -1,11 +1,11 @@
 # Stage 1, Step 1.3 — Long-break placement and scheduling edge-case policy
 
 **Date:** 2026-10-22  
-**Status:** REVIEW PROPOSAL; not yet user-approved as new behavior. Step 1.3 prepared with the user's "Continue" after Step 1.2.  
+**Status:** PARTIALLY APPROVED: user approved the minimum break and break defaults on 2026-10-22 (see D-030). Other Step 1.3 rules P-01–P-06 remain REVIEW PROPOSALS.  
 **Scope:** Design rules ONLY — no algorithm implementation, Flutter project or automated tests.  
 **Next gate:** User approval of these rules before entering the next technical step (Step 1.4: scheduling engine implementation and tests).
 
-This document preserves already approved requirements, notably all numbers editable per full session, long breaks **replacing** short breaks, 180-minute examples A/B, a reserved final summary, and the three end-pose allocation choices. It separates those from the new **proposed** policies below.
+This document preserves already approved requirements, notably all numbers editable per full session, long breaks **replacing** short breaks, 180-minute examples A/B, a reserved final summary, and the three end-pose allocation choices. **Approved break rules (D-030):** every configured break duration has a strict **minimum of 1 minute (60 seconds)**; the new-session defaults are **5 minutes for regular short breaks** and **15 minutes for the middle/replacement break**. Both defaults are user-editable, never hardcoded constraints. A user may select **zero long-break replacements** without creating a zero-duration break. This approved clarification overrides the older P-04 zero-short-break suggestion. Other proposals below still require approval.
 
 ## 1. Agreed scheduling principles (already approved)
 
@@ -72,11 +72,12 @@ Every numerical field is editable, but not every combination can generate a mean
 | Total opening-group duration > work window | Error; do not shorten required opening poses |
 | Opening poses exactly use the entire work window | Allow an **opening-only** session, if no long breaks are requested; do not add trailing break |
 | Regular pose duration ≤ 0 | Error |
-| Short break duration = 0 | Treat as **no scheduled breaks**. Adjacent poses may follow each other; long-break replacement count must be 0 |
-| Short break duration < 0 | Error |
+| Short break duration = 0 | **APPROVED (D-030): Error.** If a break is configured its duration must be **at least 1 minute**. Zero is not a valid shortcut for removing breaks; the rules for a break-free cycle, if needed, require a separate explicit design decision. |
+| Short break duration < 0 | **APPROVED (D-030): Error.** Break duration cannot be below 1 minute. |
 | Long replacement count < 0 | Error |
-| Long replacement count = 0 | Valid; ignore long-break duration/placement (retain editable value in draft) |
-| Long replacement count > 0 and long duration ≤ short duration | Error: 'long break' must be longer than the short break it replaces |
+| Long replacement count = 0 | **Still a proposed policy**: allow no long break, independently of the 1-minute minimum for any actual break duration. No zero-minute break is produced. |
+| Long replacement duration = 0 or < 1 minute | **APPROVED (D-030): Error** when that break is configured. An actual long/middle break must be at least 1 minute. |
+| Long replacement count > 0 and long duration ≤ short duration | **PROPOSAL ONLY:** Error because a 'long' break should exceed the short break it replaces. The minimum-1-minute rule is approved; the *strictly longer* comparison is **not yet approved**. |
 | Requested N long breaks but fewer than N eligible short-break positions | Error; never silently lower N or add extra breaks |
 | Work window too short for requested first break and following positive pose (break-first) | Error; cannot end with a trailing break |
 | After replacements, final repeating pose would have < 1 minute or zero length | Error; ask to alter durations/count/placement rather than erase the last pose or leave a trailing break |
@@ -84,7 +85,7 @@ Every numerical field is editable, but not every combination can generate a mean
 | Summary=0 with valid working poses | Valid: final pose ends at total duration; unique final-session completion cue still required later |
 | A saved preset is edited | Generate a new candidate and require fresh approval; keep original saved approved timeline unchanged |
 
-The proposed minimum of **one minute** for a repeating pose derives from the previously approved minute-based custom slider. The overall domain representation may use integer seconds, but the first session editor is designed around minute inputs. Proposals about zero-break and opening-only behavior have not yet been approved.
+**Approved break distinction:** a break duration of **0 minutes is invalid**; the 5-minute short and 15-minute middle values are just editable input defaults, never mandated lengths. The proposed one-minute minimum for a repeating **pose** derives separately from the previously approved minute-based custom slider. Internal time may use integer seconds, but the first editor works in minutes. Other P-04 behaviors, including opening-only sessions and optional break count, await approval.
 
 ## 6. Proposal P-05 — Final incomplete-pose edge behavior
 
@@ -132,6 +133,7 @@ Please review and approve/revise the proposed policies P-01 through P-06. All ar
 - Should two or more long breaks be spread evenly by default?
 - Should invalid parameter combinations be **shown with an explanation instead of silently 'fixing' the numbers**?
 - Should a custom ruler be permitted to make one of the final two poses **longer than the nominal pose length**, provided both remain positive?
+- **Already approved, not awaiting another vote:** minimum duration of an actual break is **1 minute**; pre-filled **regular break 5 minutes** and **middle break 15 minutes**, all editable. This replaces the prior zero-minute-break proposal.
 
 Once the user approves the behavior, record those choices as approved in DECISIONS.md before entering Stage 1 Step 1.4: implementation of the Dart scheduling engine and associated automated tests. Do not begin Step 1.4 without separate authorization.
 
