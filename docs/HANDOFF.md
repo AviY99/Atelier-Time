@@ -1,9 +1,9 @@
-# ATELIER TIME — CURRENT PROJECT HANDOFF (v0.7)
+# ATELIER TIME — CURRENT PROJECT HANDOFF (v0.8)
 
 **Date:** 2026-10-22  
 **Project:** Atelier Time  
 **Repository:** https://github.com/AviY99/Atelier-Time (existing public repo, default main)  
-**Current status:** Stage 0 complete; Step 1.1 Flutter/Dart platform approved; Step 1.2 documented; Step 1.3 partly approved: user approved **25 minutes accumulated posing / 5 minutes recommended rest, warning with explicit override, and allowance for 0-minute breaks (D-031)**. Other Step 1.3 behavior proposals are awaiting user approval. **Step 1.4 implementation NOT AUTHORIZED.** No Dart/Flutter application code, scaffold or automated runtime tests exist.
+**Current status:** Stage 0 complete; Stage 1 Step 1.1 Flutter/Dart platform approved; Step 1.2 data model documented; Step 1.3 consolidated review **ready for user approval**. The D-031 25m accumulated posing / >=5m recommended rest warning with 0m break override is approved. Remaining P-01–P-06 and refined logical 0m-break/cross-preset interpretation **remain proposals**. **Step 1.4 NOT AUTHORIZED.** No app code, Flutter scaffold, executable tests or build exists.
 
 ## User intent
 Build a simple self-contained installed app for live-model sessions in **drawing and sculpting ateliers**. Prioritize a single codebase and consistent cross-platform functionality; native menus/controls are OPTIONAL and a Flutter-rendered interface is acceptable. Offline operation required. Set numerical timing rules, auto-generate complete sequence, approve it, save named presets, activate and run a countdown with sounds. App name is **Atelier Time**. User will provide logo picture when asked at the relevant design stage; graphic appearance must be discussed rather than invented. Log ALL decisions and progress in GitHub; update this handoff after every iteration so a new chat can resume immediately.
@@ -23,6 +23,17 @@ Build a simple self-contained installed app for live-model sessions in **drawing
 - Crucial distinction: the records/schema/field names are DESIGN PROPOSALS, not implemented/compiled Dart code and not independent user approval of new edge behaviors.
 - Still unresolved and reserved for proposed Step 1.3: exact automatic-middle replacement break choice and ties, multiple long break positions, infeasible schedule inputs, short/zero breaks and insufficient last-two-pose cases. No defaults quietly settled.
 - Iteration 0.5 created decisions D-023 through D-025. The user **subsequently authorized Step 1.3 design** via “Continue”; the current gate is **approval of Step 1.3 policy proposals and explicit Step 1.4 authorization**, not another Step 1.3 request.
+
+## Stage 1 Step 1.3 consolidated review after latest “Continue” (iteration 0.8)
+
+- User said **“Continue”** after the revised explanation of D-031. This authorizes finishing the **Step 1.3 documentation/review**, **NOT** automatically approving all unreviewed user-visible behaviors or starting Step 1.4 coding.
+- New consolidated review: **[STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md)**, read this document before the earlier detailed [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md). Changes linked in ROADMAP/README/TEST_PLAN and tracked in decisions **D-034/D-035**.
+- **Already approved D-031:** 25 minutes of accumulated posing without qualifying rest; a break >=5m resets; 0–4m breaks do not. User can enter **0m** for normal or special break. Violations produce a visible **warning requiring separate affirmative acknowledgement** before session approval; they are **not hard errors**. Recompute the warning after edits and end-pose changes. New-session 5m/15m break durations remain editable defaults, not minimums.
+- **Proposal awaiting sign-off:** Preserve configured 0m normal breaks as **logical break slots** (no zero-length elapsed schedule phases) so numbered manual/automatic special replacement positions can still be selected, including replacement by positive-length long rest. A selected special break can itself be 0m. If two last poses are separated by a *logical* 0m slot, an equal/custom split with Q=0 may be offered (when feasible); it must not invent a break.
+- **Proposal awaiting sign-off:** Accumulate pose-time warnings **within each full activated session by default**, not silently carrying the counter across **different saved presets**. Exactly 25m at final overall-session end with no further posing does not itself need another rest; a 30m uninterrupted pose always warns. The phrase "accumulated sessions" could mean cross-preset carryover and is NOT settled—do not promise it without approval.
+- **Other remaining proposals P-01–P-06 awaiting sign-off:** Pick automatic special break closest to midpoint of work window (tie earlier ordinal); for N>1 spread near fractions j/(N+1); allow manual numbered slot(s); hard-block mathematically invalid configs, not insufficient 25/5 rest; preserve the immutable full approved timeline; permit explicitly adjusted last-two durations beyond nominal when positive; no silent count/slot edits.
+- **All approved Example A/B expected schedules unchanged.** No tests have been executed; proposed P-T09–P-T15 added to TEST_PLAN.md.
+- **Immediate gate:** present one clear Step 1.3 policy approval choice and allow revisions; **Step 1.4 Dart code/tests remain blocked until separately authorized**.
 
 ## Stage 1 Step 1.3 — proposed scheduling policies (2026-10-22)
 - **Specification:** [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md), proposal P-01 to P-06, **NOT YET USER-APPROVED AS BEHAVIOR**.
@@ -72,7 +83,7 @@ Full per-pose tables in docs/EXAMPLES.md. Each reference baseline totals **130m 
 Stage intervals contiguous, no overlap/gap. Total exactly D, summary last F. Long break replaces short break at one eligible slot, not appended. Final-two-pose alternatives preserve combined pose time and intervening break, fixed lead-in, final summary and total. Do not silently auto-shorten and accept; user chooses during preview. A preview, saved preset and runtime use one consistent approved sequence.
 
 ## Decisions and unresolved details
-The decision register is docs/DECISIONS.md (D-001 through D-033). Target OS/framework and break-safety D-031 are approved. Step 1.2 data model remains conceptual. Other Step 1.3 proposals P-01–P-06 are **awaiting explicit user approval**, especially cross-preset accumulation and zero special break slot behavior. Also open: distribution/build/signing, branding, summary activity and per-pose versus per-set audio. Reuse the existing GitHub repository.
+The decision register is docs/DECISIONS.md (D-001 through D-035). Target OS/framework and break-safety D-031 are approved. Step 1.2 data model remains conceptual. Other Step 1.3 proposals P-01–P-06 are **awaiting explicit user approval**, especially cross-preset accumulation and zero special break slot behavior. Also open: distribution/build/signing, branding, summary activity and per-pose versus per-set audio. Reuse the existing GitHub repository.
 
 ## Roadmap and current gate
 **Stage 0 COMPLETE:** Documentation baseline committed to existing GitHub repository, all 11 files verified readable (this iteration).  
@@ -93,4 +104,4 @@ User approved Step 1.1, then “Continue” to begin Step 1.2, and then “Conti
 5. If current stage still pending approval, stop and request approval rather than proceeding with app coding.
 6. Logo and graphic style only discussed at relevant stage after user image supplied.
 
-**Immediate next action:** Explain the now-approved D-031 (25 minutes accumulated posing, 5-minute qualifying break, explicit warning/override, allow zero). Ask user whether “accumulated sessions” includes **separate saved full sessions started back-to-back**, or only consecutive pose segments inside one session; this is an unresolved interpretation and must not be silently assumed. Ask approval or changes for remaining Step 1.3 proposals. **Do not proceed to Step 1.4, Dart/Flutter source code, tests or UI without further approval.**
+**Immediate next action:** Show the user [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md) and its 4 approval groups. Ask whether to approve the remaining P-01–P-06 and logical-zero-slot/per-session boundary proposals **or revise specific points**. Do not imply cross-preset carryover without an explicit decision. **Stop before Step 1.4, Dart/Flutter source code, tests or UI until separately authorized.**
