@@ -6,8 +6,8 @@
 /// Approved design: docs/STEP_1_3_REVIEW.md (D-037); zero-length session or
 /// configured break prohibited (D-036); 25/5 warnings (D-031).
 ///
-/// D-038 is still open: positive special break <= regular break is reported as
-/// a pending policy decision rather than being silently accepted or rejected.
+/// D-038 is APPROVED: any positive special break is allowed, including one
+/// shorter than or equal to the normal break. D-031 warning still applies.
 import 'dart:math' as math;
 
 const int secondsPerMinute = 60;
@@ -17,7 +17,7 @@ const int _qualifyingRestSeconds = 5 * secondsPerMinute;
 enum CycleStart { poseFirst, breakFirst }
 enum PhaseKind { pose, shortBreak, specialBreak, summary }
 enum PoseSource { opening, regular }
-enum IssueSeverity { error, warning, pendingDecision }
+enum IssueSeverity { error, warning }
 enum FinalPoseMode { remainder, evenSplit, customSplit }
 
 class OpeningPoseGroup {
@@ -167,9 +167,8 @@ class ScheduleCandidate {
   })  : phases = List.unmodifiable(phases),
         issues = List.unmodifiable(issues);
 
-  bool get hasBlockingIssues => issues.any((issue) =>
-      issue.severity == IssueSeverity.error ||
-      issue.severity == IssueSeverity.pendingDecision);
+  bool get hasBlockingIssues =>
+      issues.any((issue) => issue.severity == IssueSeverity.error);
 
   bool get needsFinalPoseChoice => finalPoseIsShort && selectedChoice == null;
   bool get needsSafetyAcknowledgement =>
@@ -269,20 +268,9 @@ class ScheduleEngine {
             'Choose distinct, positive ordinals for every special break.');
       }
     }
-    // Important: D-038 has no approved behavior yet; this is NOT a claim
-    // that such a combination is invalid. We explicitly defer its decision.
-    if (rules.specialBreakCount > 0 &&
-        rules.specialBreakSeconds <= rules.shortBreakSeconds &&
-        rules.specialBreakSeconds > 0 &&
-        rules.shortBreakSeconds > 0) {
-      issues.add(const ScheduleIssue(
-        IssueSeverity.pendingDecision,
-        'd038_special_length_unresolved',
-        'Ask the user whether a positive special break may be no longer '
-            'than a normal break. This case has no approved policy.',
-      ));
-    }
-    if (issues.any((i) => i.severity != IssueSeverity.warning)) {
+    // D-038 APPROVED: short, equal and long positive replacement breaks are
+    // all legal inputs. D-031 rest warnings are assessed on the actual phases.
+    if (issues.any((i) => i.severity == IssueSeverity.error)) {
       return _candidate(rules, const [], issues, false, false, choice);
     }
 
@@ -413,8 +401,8 @@ class ScheduleEngine {
   /// but this avoids exponential enumeration.
   ///
   /// A replacement adds delta = (special - ordinary) seconds to the timeline.
-  /// D-038 disallows choosing any policy for delta <= 0, so this method runs
-  /// only when delta > 0. Subtracting N*delta from the working window yields
+  /// Under approved D-038, delta may be negative, zero or positive, but both
+  /// configured break durations must remain positive. Subtracting N*delta yields
   /// a virtual ordinary-only timeline. Every valid replacement selection must
   /// choose from its break ordinals, and the j-th selected replacement starts
   /// at virtual start(j) + (selected index - 1)*delta.
@@ -424,8 +412,8 @@ class ScheduleEngine {
   _Attempt _chooseAutomatic(SessionRules rules) {
     final count = rules.specialBreakCount;
     final delta = rules.specialBreakSeconds - rules.shortBreakSeconds;
-    if (count <= 0 || delta <= 0) {
-      return const _Attempt([], 'Invalid automatic replacement request.');
+    if (count <= 0) {
+      return const _Attempt([], 'Invalid automatic replacement count.');
     }
 
     final adjustedWork = rules.workSeconds - count * delta;
