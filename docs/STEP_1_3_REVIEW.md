@@ -32,7 +32,7 @@ This document is the consolidated **approved** Step 1.3 design. See [detailed ap
 - Never truncate specified opening poses, invent poses/breaks, append a trailing phantom break, auto-relocate manual positions, or silently change input numbers just to make the schedule work.
 - Valid **positive** breaks of 1–4m, and over-25m posing, trigger the 25/5 **advisory warning** if needed, not a hard input error.
 
-**OPEN D-038 — outstanding separate decision, explicitly NOT resolved by this approval:** whether a *positive* special/long break is allowed to be shorter than or equal to its replaced normal break. The prior review specifically labeled it **“Unresolved.”** Do **not** silently choose a policy; raise it before implementing that validation case. No other approved rule changes by leaving this narrow question open.
+**LATER APPROVAL UPDATE D-044 (2026-10-22), resolving prior D-038:** The user expressly approved **any positive special replacement break duration**, including shorter than or equal to the normal break. The 25/5 advisory warning applies to actual scheduled rest, with separate acknowledgment when violated. **D-036 still forbids 0-minute actual breaks or full sessions.** The historical Step 1.3 review correctly left D-038 open *at that time*, but this newer decision is authoritative.
 
 ## 4. Approved 25/5 boundary and activation scope
 
