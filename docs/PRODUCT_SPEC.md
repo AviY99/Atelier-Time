@@ -21,8 +21,8 @@ A straightforward installable, self-contained timer for **drawing and sculpting 
 - Final reserved summary duration, including zero when desired.
 - Optional ordered opening pose groups: count and duration per group (e.g. 4 x 1 minute, then 4 x 4 minutes).
 - Nominal regular pose duration.
-- Short break duration, **initial default 5 minutes**, user-editable; an actual break duration must be **at least 1 minute**.
-- Long replacement/middle break duration, **initial default 15 minutes**, user-editable and likewise at least 1 minute, plus number of long replacement breaks.
+- Short break duration, **initial default 5 minutes**, user-editable **including 0 minutes** (no rest at that slot).
+- Long replacement/middle break duration, **initial default 15 minutes**, user-editable **including 0 minutes**, plus number of long replacement slots; a zero-duration replacement consumes no break time and is shown explicitly as skipped in review (detailed semantics pending review).
 - Long-break placement strategy/position (middle by default in examples, configurable).
 - Recurring cycle ordering: pose then break OR break then pose.
 - Last-two-pose resolution choice and custom split if used.
@@ -34,7 +34,8 @@ A straightforward installable, self-contained timer for **drawing and sculpting 
 - The entire generated sequence ends at the specified session duration.
 - The summary is the final reserved period, not an additional period beyond the session.
 - Long break **replaces** a scheduled short break; never simply append 15 minutes.
-- The 5-minute normal-break and 15-minute middle-break values are **new-session defaults only**. A user may change them; **any break that exists has a strict minimum duration of 1 minute**. A zero-minute 'break' is invalid. Whether a cycle may intentionally have no breaks is a separate open behavior decision.
+- The 5-minute normal-break and 15-minute middle-break values are **new-session defaults only**. A user can change them, **including to 0 minutes**. Zero inserts no break time and is **not invalid**. The older minimum-1-minute restriction has been superseded by the user's D-031 clarification.
+- **Break safety (approved):** After **25 minutes of accumulated posing without an adequate rest**, a break of **at least 5 minutes** is recommended before posing continues. Consecutive poses add together; a 0–4-minute break does not reset the counter. Violating schedules remain allowed **only with a displayed warning and the user's explicit acknowledgement plus schedule approval**. Recalculating the schedule invalidates previous acknowledgement. See [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md).
 - Short opening poses flow immediately into each other in the illustrated preset; introducing opening breaks would require an explicit rule.
 - Avoid a trailing break immediately before final summary when no subsequent pose exists.
 - A partial last regular pose is **not silently accepted**: explicitly offer alternatives when detected.
