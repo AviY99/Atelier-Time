@@ -15,6 +15,8 @@ A straightforward installable, self-contained timer for **drawing and sculpting 
 7. Pause, resume or stop the timer; receive three distinct audible alerts.
 
 ## Editable session parameters
+**Every numerical value appearing in the example sessions is editable per full session.** Every session/preset has its own input screen. The user can add or remove opening pose groups, regenerate the entire schedule when any number changes, review the output and approve it before saving. The examples are regression fixtures, not hardcoded presets or limits.
+
 - Total session duration.
 - Final reserved summary duration, including zero when desired.
 - Optional ordered opening pose groups: count and duration per group (e.g. 4 x 1 minute, then 4 x 4 minutes).
@@ -58,9 +60,9 @@ Create, name, approve, save, list, activate, edit, duplicate, rename and delete 
 
 ## Look and installation
 - App name: **Atelier Time**.
-- Native system menus/controls when feasible.
-- Minimal, readable interface; offline capable; self-contained installed app.
-- Target OS and technology **not yet chosen** (decide before UI packaging).
+- Same maintained **Flutter + Dart application codebase** for Android phones/tablets, Windows computers, iPhone/iPad and macOS in the **first release**.
+- Non-native Flutter-rendered menus, controls and graphics **are acceptable**; native widgets are not a requirement. Prioritize cross-platform feature parity and usable responsive layouts.
+- Minimal, readable interface; offline capable; self-contained installed app for each OS (separate platform-specific install packages).
 - Ask user for logo picture at the branding stage; discuss visual style before committing designs.
 
 ## Non-goals not promised yet
