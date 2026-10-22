@@ -11,7 +11,7 @@ Version: 0.3 planning baseline (2026-10-22). Tests are **planned, not executed**
 - R-B03 (LATEST REVISED): Configured normal break duration **0m is invalid**, blocks preview approval and cannot be accepted via the 25/5 warning acknowledgement.
 - R-B04 (LATEST REVISED): Selected special/long replacement break duration **0m is invalid**; a positive special duration is required for any actual replacement.
 - R-B05: Changing either duration recalculates the entire schedule and never hardcodes 5m/15m.
-- R-B06: Proposed zero *number* of special replacements produces no special break. It is not the same as a 0m break.
+- R-B06: **Approved D-037:** Zero *count* of special replacements produces no special break. It is not the same as a 0m break.
 - R-B07: **Total full session duration 0m** (or negative) produces a blocking input error; positive sessions pass this basic constraint.
 - R-B08: 5 consecutive 5m poses then a >=5m break reset the cumulative posing counter, no warning.
 - R-B09: 25m pose -> 5m break -> next pose generates no warning.
@@ -23,11 +23,11 @@ Version: 0.3 planning baseline (2026-10-22). Tests are **planned, not executed**
 - R-B15: Editing rules, changing long-break placement or adjusting final-pose split invalidates warning acknowledgement/approval.
 - R-B16: A break >=5m resets the posing counter; a valid positive break <5m does not.
 - R-B17: Canonical A/B exact timing and end-pose alternatives are unchanged and generate no 25/5 warning.
-- R-B18: Confirm a **0m optional summary** (if later approved) is distinct from **0m full session**; no illegal 0m phase is emitted.
+- R-B18: **Approved D-037:** 0m reserved summary is permitted for an otherwise valid positive full session; no zero-length summary phase is emitted. This is distinct from invalid 0m full session.
 
-## Proposed Step 1.3 additional acceptance tests (NOT APPROVED OR EXECUTED)
+## Approved Stage 1 Step 1.3 acceptance tests (D-037; NOT EXECUTED)
 
-Adopt only after explicit user sign-off on [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md) and [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md):
+The user **approved these scheduling-policy test expectations in D-037** as described by the [approved review](STEP_1_3_REVIEW.md) and [detailed policy](SCHEDULING_EDGE_POLICY.md). They remain **PLANNED, NOT EXECUTED**, and Step 1.4 implementation is not authorized:
 - P-T01: Automatic midpoint chooses the eligible replacement whose **center** is nearest work midpoint, ties to earlier eligible ordinal; A/B exact reference positions.
 - P-T02: Multiple special replacements evenly distributed at work fractions j/(N+1), with deterministic ordinal ties.
 - P-T03: Manual ordinal selections survive valid edits; invalid ordinals raise errors, never silently relocate.
@@ -36,10 +36,10 @@ Adopt only after explicit user sign-off on [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.
 - P-T06: Reject overlarge summary, mandatory opening overruns, absent required pose following break, and impossible replacement counts.
 - P-T07: Infeasible final-two-pose options disabled with reason, no inserted break/pose.
 - P-T08: Explicit custom final-two split may exceed nominal pose length while preserving positive durations and total.
-- P-T09: Exactly 25m uninterrupted posing at session end creates no warning without later posing; >25m pose creates warning (boundary policy pending).
-- P-T10: Track warnings within one full session by default rather than across separate saved presets (scope policy pending).
-- P-T11: Positive special break <= ordinary break duration behavior follows user-approved policy (not settled).
-- P-T12: Strict no-zero logical break slots; do not generate 0m phases or allow 0m break as an overrideable safety warning.
+- P-T09: **Approved:** Exactly 25m accumulated posing at session end does not require a trailing break; >25m continuous pose creates warning.
+- P-T10: **Approved:** Track warnings within one full activated session; do not automatically carry counters into a separately activated saved preset.
+- P-T11: **OPEN D-038 — NOT AN APPROVED ACCEPTANCE EXPECTATION:** Whether a positive special break may be <= its positive normal break remains unspecified. Define the expectation with the user before coding the comparison; never guess it.
+- P-T12: **Approved D-036:** Strictly no zero logical break slots; do not generate 0m break phases or allow 0m configured breaks as an overrideable safety warning.
 
 ## Stage 1: deterministic scheduling engine
 - T01 Example A baseline exact phase order and boundaries from EXAMPLES.md, down to each opening pose. Expect 130m posing + 35m breaks + 15m summary = 180m.
