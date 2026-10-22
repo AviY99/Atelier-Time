@@ -22,7 +22,7 @@ Build a simple self-contained installed app for live-model sessions in **drawing
 - Proposed technical representation: integer seconds and elapsed start/end offsets. User-facing approved custom split step remains one minute, with minimum one minute per pose when feasible. Phases occupy contiguous half-open time ranges; work ends before reserved summary.
 - Crucial distinction: the records/schema/field names are DESIGN PROPOSALS, not implemented/compiled Dart code and not independent user approval of new edge behaviors.
 - Still unresolved and reserved for proposed Step 1.3: exact automatic-middle replacement break choice and ties, multiple long break positions, infeasible schedule inputs, short/zero breaks and insufficient last-two-pose cases. No defaults quietly settled.
-- Docs updated in iteration 0.5, with decisions D-023 to D-025; **next gate is user review of model and explicit permission before Step 1.3**.
+- Iteration 0.5 created decisions D-023 through D-025. The user **subsequently authorized Step 1.3 design** via “Continue”; the current gate is **approval of Step 1.3 policy proposals and explicit Step 1.4 authorization**, not another Step 1.3 request.
 
 ## Stage 1 Step 1.3 — proposed scheduling policies (2026-10-22)
 - **Specification:** [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md), proposal P-01 to P-06, **NOT YET USER-APPROVED AS BEHAVIOR**.
