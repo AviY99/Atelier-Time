@@ -1,5 +1,25 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-22 — Iteration 0.5: Stage 1 Step 1.2, conceptual scheduling data model
+**Instruction:** “Continue” after the user-approved completion of Step 1.1. Interpreted as permission for **Step 1.2 only** in accordance with the documented one-step-at-a-time process.
+
+**Completed (documentation only):**
+- Re-read the current approved GitHub handoff, architecture, roadmap, scheduling contract, examples and decisions.
+- Added [DATA_MODEL.md](DATA_MODEL.md): conceptual Dart types, editable per-session inputs, ordered pose groups, replacement-break policies, immutable timeline intervals, final-pose adjustment choice and approval/persistence boundaries.
+- Added representative Example A and B input payloads and related expected outputs as future regression fixtures. Marked automatic midpoint/tie behavior and edge-case policies explicitly unresolved.
+- Updated the roadmap, architecture, decision register, README, changelog and handoff to reflect Step 1.2 preparation and current stop gate.
+
+**Decisions:** D-023 authorizes documentation; D-024 is a technical **proposal** (not yet approved); D-025 retains the Step 1.3 approval gate. No approved user behavior changed.
+
+**Not done:** No executable Dart or Flutter code, Flutter scaffold, rule-engine implementation, test runner, automated tests, installable packages, UX work or audio integration.
+
+**Verification:** Documentation file creation/read-back and Markdown consistency checks only; no code tests possible or claimed.
+
+**Next action:** Present Step 1.2 model summary for review and ask for explicit approval before Step 1.3; do not start Step 1.3 without it.
+
+---
+
+
 ## 2026-10-22 — Iteration 0.4: Stage 1, Step 1.1 approved and documented
 **User authorization:** Approve Flutter + Dart as the single-codebase technical framework; target Android phones/tablets, Windows, iOS/iPadOS and macOS for the first release. Non-native UI is acceptable. Update GitHub/handoff and **stop before Step 1.2 or coding**.
 
