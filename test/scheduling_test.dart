@@ -305,6 +305,106 @@ void main() {
     });
   });
 
+  group('additional Stage 1.4 edge regressions', () {
+    test('two automatically placed long breaks replace two slots', () {
+      final c = engine.generate(SessionRules(
+        id: 'two-auto',
+        name: 'Two long breaks',
+        totalSeconds: m(180),
+        summarySeconds: m(15),
+        poseSeconds: m(25),
+        shortBreakSeconds: m(5),
+        specialBreakSeconds: m(15),
+        specialBreakCount: 2,
+      ));
+      expectContiguous(c);
+      final special = c.phases
+          .where((p) => p.kind == PhaseKind.specialBreak)
+          .toList();
+      expect(special.length, 2);
+      expect(special[0].breakOrdinal, lessThan(special[1].breakOrdinal!));
+      expect(c.phases.where((p) => p.kind == PhaseKind.summary).length, 1);
+    });
+
+    test('manual placement of two long breaks preserves chosen slots', () {
+      final c = engine.generate(SessionRules(
+        id: 'two-manual',
+        name: 'Manually selected long breaks',
+        totalSeconds: m(180),
+        summarySeconds: m(15),
+        poseSeconds: m(25),
+        specialBreakCount: 2,
+        placement: SpecialBreakPlacement.manual([2, 4]),
+      ));
+      expectContiguous(c);
+      final special = c.phases
+          .where((p) => p.kind == PhaseKind.specialBreak)
+          .map((p) => p.breakOrdinal)
+          .toList();
+      expect(special, [2, 4]);
+    });
+
+    test('unfeasible special count blocks the candidate', () {
+      final c = engine.generate(SessionRules(
+        id: 'too-many',
+        name: 'Not enough rest positions',
+        totalSeconds: m(60),
+        poseSeconds: m(25),
+        specialBreakCount: 99,
+      ));
+      expect(c.hasBlockingIssues, isTrue);
+    });
+
+    test('break-first cannot finish on a trailing break', () {
+      final c = engine.generate(SessionRules(
+        id: 'trailing-break',
+        name: 'No room after first break',
+        totalSeconds: m(5),
+        poseSeconds: m(25),
+        shortBreakSeconds: m(5),
+        cycleStart: CycleStart.breakFirst,
+      ));
+      expect(c.hasBlockingIssues, isTrue);
+    });
+
+    test('exactly fitted last pose has no incomplete choice prompt', () {
+      final c = engine.generate(SessionRules(
+        id: 'exact-fit',
+        name: 'One complete pose',
+        totalSeconds: m(25),
+        poseSeconds: m(25),
+      ));
+      expectContiguous(c);
+      expect(c.finalPoseIsShort, isFalse);
+      expect(c.needsFinalPoseChoice, isFalse);
+    });
+
+    test('explicit custom split may exceed nominal pose length', () {
+      final c = engine.generate(
+          exampleA(), choice: FinalPoseChoice.custom(m(34)));
+      expectContiguous(c);
+      expect(c.phases[15].durationSeconds, m(34));
+      expect(c.phases[17].durationSeconds, m(1));
+      expect(c.needsSafetyAcknowledgement, isTrue);
+    });
+
+    test('20m posing then 3m rest then 6m posing warns', () {
+      final c = engine.generate(SessionRules(
+        id: 'cumulative-with-short-break',
+        name: 'Short rest does not reset count',
+        totalSeconds: m(29),
+        poseSeconds: m(6),
+        shortBreakSeconds: m(3),
+        openingGroups: [
+          OpeningPoseGroup(id: 'warmups', count: 4, poseSeconds: m(5)),
+        ],
+        cycleStart: CycleStart.breakFirst,
+      ));
+      expectContiguous(c);
+      expect(c.needsSafetyAcknowledgement, isTrue);
+    });
+  });
+
   group('25m accumulated posing / 5m qualifying rest', () {
     test('a continuous 30m pose warns and must be acknowledged', () {
       final c = engine.generate(SessionRules(
