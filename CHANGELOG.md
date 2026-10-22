@@ -1,5 +1,15 @@
 # Changelog — Atelier Time
 
+## 2026-10-22 — Stage 1 Step 1.4 first source increment / Handoff v1.1
+
+- User's **“Continue”** after the blocked GitHub budget discussion authorized **Step 1.4 only** (D-040). Created isolated development branch [stage-1-4-scheduling-core](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core).
+- Committed pure Dart scheduling engine, standalone package manifest/export, canonical 3h A/B and 25/5 regression test code, dependency-free smoke script, and branch progress documentation.
+- D-036 positive session/break rule retained; D-031 25/5 warning retained; D-038 positive-special-versus-regular-break comparison explicitly returns **pendingDecision**, not falsely accepted/rejected.
+- **GitHub Actions not used or configured** due reported $12/month budget block (D-041).
+- **Dart and Flutter SDKs unavailable** in current environment; **NO compilation, Dart analyzer, tests or app builds run**. Simple bracket/string/comment structural check only. Engine's multi-break search still needs performance verification.
+- Source is on **development branch only**, not merged. Stage 1 Step 1.4 **IN PROGRESS / NOT COMPLETE**; no Stage 2 authorization. Updated root docs and handoff to v1.1.
+
+
 ## 2026-10-22 — Stage 1 Step 1.3 APPROVED / Handoff v1.0
 
 - **Explicit approval:** User approved all remaining documented scheduling proposals **P-01–P-06** subject to **D-036**, and specifically prohibited beginning Stage 1 Step 1.4.
