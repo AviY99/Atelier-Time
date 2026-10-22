@@ -1,5 +1,22 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-22 — Iteration 1.3: D-038 resolved by D-044; positive shorter/equal special breaks supported
+
+**User approved:** “For Atelier Time, I approve D-038: allow any positive special break duration, even shorter than or equal to the normal break, with the already approved 25/5 rest warnings. Zero-minute breaks remain invalid. Record this decision in GitHub and continue only the authorized Step 1.4 coding and testing work.”
+
+**Approved D-044:** Any configured **positive** special break duration replaces a normal break, whether shorter/equal/longer. **D-036** still rejects 0-minute session or actual break; **D-031** requires warning and explicit acknowledgement for 25m cumulative posing without qualifying >=5m rest. Replacing 5m with 3m is mathematically legal but may require a warning.
+
+**Development-branch work:** On `stage-1-4-scheduling-core`, removed obsolete `pendingDecision` D-038 rejection, updated automatic break-placement DP for negative, zero and positive `L−B`, and expanded `test/scheduling_test.dart` plus dependency-free `tool/smoke.dart` for special 1m, 3m, equal 5m, multiple shorter replacements and acknowledgement. No user-approved canonical A/B fixtures changed.
+
+**Verification evidence:** Independent **Python-only model** matched exhaustive placement scoring across **25,000 virtual-schedule sampled combinations** and **4,000 separate real-schedule exhaustive cases**; this is NOT running Dart. Local machine lacks Dart/Flutter SDK, and network DNS cannot fetch the SDK. GitHub Actions still unused due the user's metered budget block. No Dart compiler, analyzer, `dart test`, smoke run, build or merge. All Dart tests remain **written but unexecuted**.
+
+**Documentation:** Decision register D-038 marked resolved by D-044; D-045 records in-progress code and verification boundary. Updated approved policy, Step 1.3 review, scheduling rules, data model, test plan, roadmap, README, branch status and handoff v1.3.
+
+**Gate:** Step 1.4 **IN PROGRESS, NOT COMPLETE**. Continue only Step 1.4 until real Dart tests and performance checks can run; Stage 2 not approved.
+
+---
+
+
 ## 2026-10-22 — Iteration 1.2: Step 1.4 break-placement optimizer corrected; D-038 explained
 
 **User:** “Continue, also explain your open question.” Continued only the previously authorized **Step 1.4** core implementation; no later stage, paid workflows or behavior changes authorized.
