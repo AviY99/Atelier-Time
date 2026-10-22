@@ -3,7 +3,7 @@
 **Date:** 2026-10-22  
 **Status:** PARTIALLY APPROVED. The user's latest break-safety and zero-break clarification (D-031) SUPERSEDES the former 1-minute minimum attributed to D-030. The remaining placement/edge policies P-01–P-06 are still review proposals.  
 **Scope:** Design rules ONLY — no algorithm implementation, Flutter project or automated tests.  
-**Next gate:** User approval of these rules before entering the next technical step (Step 1.4: scheduling engine implementation and tests).
+**Next gate:** Review the latest consolidated [Step 1.3 decision sheet](STEP_1_3_REVIEW.md) (including zero-duration logical break slots and 25/5 boundary nuances), approve or revise pending policies, then separately authorize Step 1.4.
 
 This document preserves approved requirements including every number being editable, the long break **replacing** a short-break slot, A/B examples, a reserved final summary, and the three end-pose choices. **Latest approved break clarification D-031 (superseding D-030's prior claimed 1-minute minimum):** the **regular-break default remains 5 minutes**, and the **long/replacement-break default remains 15 minutes**, but **0 minutes is allowed** for a break duration; user can override the recommended **5-minute rest after 25 minutes of accumulated posing without an adequate break**. Every violation creates a warning that must be explicitly acknowledged before the schedule can be approved. Other proposals below still require user approval.
 
@@ -33,6 +33,10 @@ This document preserves approved requirements including every number being edita
 The `ScheduleCandidate` must be capable of containing **non-blocking warnings** and a separate explicit **warningAcknowledgement** state in the future `ApprovedSessionPreset` or its associated approval metadata. That state is not implemented in Step 1.3. Do not mistake a warning for an error, and do not silently set `approved=true` after warning presentation.
 
 ---
+
+## Additional review refinement — not yet approved
+
+The detailed [Step 1.3 decision sheet](STEP_1_3_REVIEW.md) proposes preserving zero-minute regular breaks as **logical break slots** rather than zero-length elapsed-time phases. This would allow manual special-break replacement of a slot even when the regular break duration is 0, permit adjusting the last two poses across an existing logical 0-minute break, and retain precise ordinal placement. It also proposes treating cumulative pose time as local to one full activated session rather than automatically carrying it over to separately activated saved presets. These are **PROPOSALS** until user approval; approved D-031 only mandates that zero-minute durations are allowed and insufficient rest must trigger acknowledged warnings.
 
 ## 1. Agreed scheduling principles (already approved)
 
@@ -164,4 +168,4 @@ Please review and approve/revise the proposed policies P-01 through P-06. All ar
 
 Once the user approves the behavior, record those choices as approved in DECISIONS.md before entering Stage 1 Step 1.4: implementation of the Dart scheduling engine and associated automated tests. Do not begin Step 1.4 without separate authorization.
 
-**STOP: Documentation only. No program code, Flutter scaffold, UI, audio or automated tests created.**
+**CONTINUED REVIEW 2026-10-22:** [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md) consolidates all outstanding user-facing decision points after D-031. This step remains documentation only; the additional policies are not yet approved. **No code, Flutter scaffold, UI, audio or automated tests created.**
