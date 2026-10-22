@@ -1,9 +1,9 @@
-# ATELIER TIME — CURRENT PROJECT HANDOFF (v0.4)
+# ATELIER TIME — CURRENT PROJECT HANDOFF (v0.5)
 
 **Date:** 2026-10-22  
 **Project:** Atelier Time  
 **Repository:** https://github.com/AviY99/Atelier-Time (existing public repo, default main)  
-**Current status:** Stage 0 complete; **Stage 1 Step 1.1 COMPLETED** (Flutter + Dart, four OS targets and non-native interface acceptable). **Stage 1 Step 1.2 NOT AUTHORIZED**. No app code, framework scaffold, automated tests or installed build exists.
+**Current status:** Stage 0 complete; **Stage 1 Step 1.1 approved/complete; Step 1.2 data-model DESIGN PREPARED FOR REVIEW** under the user's instruction “Continue”. **Step 1.3 NOT AUTHORIZED.** No app source code, Flutter scaffold, automated tests or installed build exists.
 
 ## User intent
 Build a simple self-contained installed app for live-model sessions in **drawing and sculpting ateliers**. Prioritize a single codebase and consistent cross-platform functionality; native menus/controls are OPTIONAL and a Flutter-rendered interface is acceptable. Offline operation required. Set numerical timing rules, auto-generate complete sequence, approve it, save named presets, activate and run a countdown with sounds. App name is **Atelier Time**. User will provide logo picture when asked at the relevant design stage; graphic appearance must be discussed rather than invented. Log ALL decisions and progress in GitHub; update this handoff after every iteration so a new chat can resume immediately.
@@ -14,7 +14,15 @@ Build a simple self-contained installed app for live-model sessions in **drawing
 - Native UI is NOT a requirement; non-native Flutter graphics/menus/controls are fine. Cross-platform feature parity has higher priority.
 - Linux/web not required in the first release. Specific CI, signing, distribution and build machine choices are open.
 - Authoritative decision: [TD-001](TECH_DECISION_001_PLATFORM.md), register IDs D-019 through D-022.
-- **Do NOT begin Stage 1 Step 1.2 or any coding without further user approval.**
+- **Stage 1 Step 1.2 was authorized by the user's subsequent “Continue” request and has been carried out as DOCUMENTATION ONLY. Step 1.3 and any coding remain on hold.**
+
+## Stage 1 Step 1.2 — documented design proposal (2026-10-22)
+- Full design specification: [DATA_MODEL.md](DATA_MODEL.md). It proposes Dart-domain records for SessionRules, any number of ordered OpeningPoseGroups, RegularCycle, LongBreakRule/Placement, candidate SchedulePhases, errors/warnings, three EndPoseResolution methods, and frozen ApprovedSessionPreset after explicit approval.
+- Every number in the approved examples remains editable in each eventual session input screen; optional opening groups can be added, removed or reordered. Example A and B input JSON drafts are provided **only as canonical test fixtures**, not mandatory presets or hardcoded limits.
+- Proposed technical representation: integer seconds and elapsed start/end offsets. User-facing approved custom split step remains one minute, with minimum one minute per pose when feasible. Phases occupy contiguous half-open time ranges; work ends before reserved summary.
+- Crucial distinction: the records/schema/field names are DESIGN PROPOSALS, not implemented/compiled Dart code and not independent user approval of new edge behaviors.
+- Still unresolved and reserved for proposed Step 1.3: exact automatic-middle replacement break choice and ties, multiple long break positions, infeasible schedule inputs, short/zero breaks and insufficient last-two-pose cases. No defaults quietly settled.
+- Docs updated in iteration 0.5, with decisions D-023 to D-025; **next gate is user review of model and explicit permission before Step 1.3**.
 
 ## Approved core requirements
 - **Each new or edited session has its own numeric input screen; every number in the examples can be changed**, opening pose groups can be added/removed; edits recalculate the whole schedule, which must be re-approved. Example A/B are test fixtures, not hardcoded fixed session choices.
@@ -46,25 +54,25 @@ Full per-pose tables in docs/EXAMPLES.md. Each reference baseline totals **130m 
 Stage intervals contiguous, no overlap/gap. Total exactly D, summary last F. Long break replaces short break at one eligible slot, not appended. Final-two-pose alternatives preserve combined pose time and intervening break, fixed lead-in, final summary and total. Do not silently auto-shorten and accept; user chooses during preview. A preview, saved preset and runtime use one consistent approved sequence.
 
 ## Decisions and unresolved details
-The decision register is docs/DECISIONS.md (D-001 through D-022). Target OS/framework are **approved** as listed above; remaining open topics include distribution/build/signing details, branding, exact midpoint tie-breaks, input edge cases, summary's meaning and per-pose vs per-set sound nuance. Avoid treating these as finalized. The existing GitHub repository is reused.
+The decision register is docs/DECISIONS.md (D-001 through D-025). Target OS/framework remain approved; the Step 1.2 model is a **reviewable design proposal**; the midpoint tie-breaks and input edge-case policies remain open. Also open: distribution/build/signing, branding, summary's meaning and per-pose vs per-set audio. Do not treat these as finalized. The existing GitHub repository is reused.
 
 ## Roadmap and current gate
 **Stage 0 COMPLETE:** Documentation baseline committed to existing GitHub repository, all 11 files verified readable (this iteration).  
-**Stage 1 — STEP 1.1 COMPLETE (DOCUMENTATION ONLY):** Flutter/Dart and four target operating systems approved. **STEP 1.2 NOT AUTHORIZED:** next step is to define Dart data structures only after separate user approval; later scheduling engine/tests also require their own approval gates.  
+**Stage 1 — STEP 1.1 COMPLETE:** Flutter/Dart and four target operating systems approved. **STEP 1.2 DESIGN PREPARED:** [DATA_MODEL.md](DATA_MODEL.md), documentation only and user review pending. **STEP 1.3 NOT AUTHORIZED:** future step will decide automatic midpoint placement/ties and scheduling edge policies; separate approval required, as will the later engine/tests.  
 **Stage 2:** Cross-platform Flutter UI including per-session numeric input editor, preview/approval and split ruler; discuss visual design.  
 **Stage 3:** Offline saved presets.  
 **Stage 4:** Playback timer, three sounds, interruptions.  
 **Stage 5:** Device QA, installability and accessibility.  
 **Stage 6:** Versioned release and maintenance handoff.
 
-User approved **only Stage 1 Step 1.1**. Every next sub-step and stage requires separate explicit permission. No implementation, scaffolding or tests are authorized at this point.
+User approved Stage 1 Step 1.1 and then said **“Continue”** to begin Step 1.2. That permission has been used **only for documentation/design**; user has NOT approved Step 1.3, code/scaffolding, or tests. Each future sub-step and stage requires separate explicit permission.
 
 ## Documentation operation instructions for next chat
-1. Read this handoff, [TD-001](TECH_DECISION_001_PLATFORM.md), docs/PRODUCT_SPEC.md, docs/SCHEDULING_RULES.md, docs/EXAMPLES.md, docs/ROADMAP.md, docs/DECISIONS.md, docs/TEST_PLAN.md and docs/WORK_LOG.md.
+1. Read this handoff, [TD-001](TECH_DECISION_001_PLATFORM.md), [DATA_MODEL.md](DATA_MODEL.md), docs/PRODUCT_SPEC.md, docs/SCHEDULING_RULES.md, docs/EXAMPLES.md, docs/ROADMAP.md, docs/DECISIONS.md, docs/TEST_PLAN.md and docs/WORK_LOG.md.
 2. Verify GitHub repository current state before writing; reuse existing files, never create duplicate repo.
 3. Maintain same decisions and exactly reproduce reference schedules.
 4. For any implementation iteration commit source/tests, update decision log, work log, test results, changelog and THIS HANDOFF; link commits and clearly separate verified behavior from proposed behavior.
 5. If current stage still pending approval, stop and request approval rather than proceeding with app coding.
 6. Logo and graphic style only discussed at relevant stage after user image supplied.
 
-**Immediate next action:** show the user confirmation and links for completed **Step 1.1** and stop. If the user wishes to proceed, obtain explicit approval before **Step 1.2 (data structures and scheduling model)**. Do not interpret Step 1.1 approval as permission to implement.
+**Immediate next action:** summarize the newly drafted Step 1.2 data model and its open technical points; request user review/approval to proceed to **Step 1.3 (automatic long-break placement and edge-case rules)**. **Do NOT start Step 1.3, Flutter project scaffolding, scheduling algorithms, tests or UI without separate instruction.**
