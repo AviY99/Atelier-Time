@@ -1,5 +1,8 @@
 # Atelier Time — Android-phone-first feasibility and migration plan
 
+> **2026-10-23 — SUPERSEDED HISTORICAL EXPERIMENT, NOT CURRENT WORK (D-067):** User explicitly rejected throwaway proof-of-concept tests and requested an industry-standard selection. **Selected Kotlin + Jetpack Compose + Gradle for native Android**, developed on-phone via maintained Code on the Go; future KMP/Compose Multiplatform for sharing to other OSs. The Dart-to-JavaScript/Capacitor trial below is **NOT selected** and is no longer a prerequisite or next user task. Preserve this document and unexecuted spike source for history only. [Current decisions](DECISIONS.md), [current handoff](HANDOFF.md). No Android Kotlin APK built yet.
+
+
 > **2026-10-23 — D-064 CANDIDATE COMPARISON:** [D-063's actively maintained Kotlin / Code on the Go route](ANDROID_FIRST_DEVELOPMENT_PLAN.md) is also feasible as an independent native-first candidate, pending a tiny APK proof. Dart-Web is proposed as a **cheap first feasibility test** because the existing verified Dart code may be reused directly. **Do not interpret this Dart-Web experiment as automatic approval of a full migration or as proof that Capacitor APK/background alerts work.** The user approved the Android-phone-first requirement D-062, not a final implementation framework.
 
 
