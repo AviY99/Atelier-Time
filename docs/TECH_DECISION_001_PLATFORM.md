@@ -1,5 +1,8 @@
 # Technical Decision TD-001 — Flutter + Dart, shared cross-platform application
 
+> **2026-10-23 CRITICAL STATUS UPDATE — FEASIBILITY REOPENED (D-061):** This is the **historical** user-approved Flutter+Dart decision, **NOT current evidence of all-lifecycle toolchain suitability**. User explicitly requires cross-platform capability **from development and tests through builds, native signing/installers and release**, including accessible development from Android Termux. Flutter officially supports deployment on all four target OS families, but **does not officially support Android as a Flutter development host**; Apple iOS builds require macOS/Xcode and desktop Windows/macOS builds require OS-specific tools. The previously acknowledged caveats were incorrectly left to future stages rather than made a pre-code gate. **Do not use this document to justify further Flutter-specific coding.** Read [full re-assessment](PLATFORM_REASSESSMENT_2026_10_23.md); **platform choice on hold pending demonstrated workflow and renewed user approval**. Existing approved requirements/tests are preserved. No replacement stack chosen.
+
+
 - **Date:** 2026-10-22
 - **Status:** APPROVED by user
 - **Scope:** Stage 1, Step 1.1 ONLY (technical platform choice)
