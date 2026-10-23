@@ -1,5 +1,14 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 2.5: Git worktree diagnosis confirmed by Termux screenshot (D-058)
+
+User supplied read-only Git diagnostics. **Actual local branch is `stage-1-4-scheduling-core`, HEAD `907f871`**, not Stage 2. Git index has multiple **staged Stage 2 added files** (`apps/atelier_time_flutter/`, `lib/src/editor_draft.dart`, `test/editor_draft_test.dart`) and staged modified files (`lib/atelier_time.dart`, Stage 1 progress doc), plus untracked `pubspec.lock`. Therefore prior 11-test PASS is valid on these staged/mixed worktree contents but not yet attributable to a clean Stage 2 commit. The `git ls-files` output is expected because added files are in the index, not HEAD.
+
+**Non-destructive repair plan:** preserve `~/Atelier-Time` unchanged. Use `git -C ~/Atelier-Time fetch origin stage-2-session-editor`, then `git -C ~/Atelier-Time worktree add -b stage-2-session-editor ~/Atelier-Time-Stage2 FETCH_HEAD`; run targeted Dart tests in that separate clean checkout. Avoid `git reset --hard`, `git clean`, `git restore` or stash/pop until local changes are accounted for. No code/PR/paid Actions changes in this iteration; D-058, test plan and cross-chat HANDOFF v2.5 updated. Stage 2 in progress; eight Flutter widget tests still not run.
+
+---
+
+
 ## 2026-10-23 — Iteration 2.4: Termux 11 tests passed; Git branch switch failed (D-057)
 
 **Screenshot evidence:** User's Termux fetched `stage-2-session-editor` successfully into a remote ref, but `git switch --track origin/stage-2-session-editor` displayed `fatal: cannot set up tracking information; starting point ... is not a branch`. Subsequently `dart pub get && dart test test/editor_draft_test.dart` completed with **`00:00 +11: All tests passed!`**.
