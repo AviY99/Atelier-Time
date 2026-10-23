@@ -105,3 +105,22 @@ Continue to verify and fix **this Step 1.4 code**, ideally with a Dart-capable l
 - **Next user command from `~/Atelier-Time`:** `git pull --ff-only && dart tool/smoke.dart`. Share the full result. On success: `dart pub get`, `dart analyze`, `dart test`. Dart SDK already installed; no reinstall required.
 - No Actions/paid runs, no merge, no Flutter UI, no Stage 2. Stage 1 Step 1.4 stays **IN PROGRESS** until real Dart tests pass.
 
+
+
+## 2026-10-23 — Android Dart screenshots confirm 34 unit tests passing
+
+User supplied actual Termux screenshots of the `dart pub get && dart analyze && dart test` sequence following the compiler warning-offset fix:
+
+```text
+Changed 49 dependencies!
+Analyzing Atelier-Time...
+No issues found!
+Built test:test.
+00:01 +34: All tests passed!
+```
+
+This is **SCREENSHOT-CONFIRMED Dart analyzer success and 34 passing tests on Android ARM64 Dart 3.13.7** (D-050), stronger than the earlier user-report-only D-049. Prior smoke script also passed. No GitHub Actions or paid CI involved. Git commit SHA of the user's local checkout was not visible in the screenshot, and this is NOT a Flutter UI or APK build.
+
+**Acceptance audit:** Of required Stage 1 T01–T12 and T15–T18, the existing suite explicitly covers canonical A/B, normal/even/custom endings, 34m+1m custom extreme, rejected zero-minute pose, exact-fit behavior, replacement ordinals, determinism and contiguous timeline, and 25/5 advisory/positive-break rules. **Missing specific T09 counterpart:** valid 1m+34m custom ending. Before Step 1.4 is marked complete, add that test and run Dart suite again; broad T13–T14 edge matrix remains partially covered and can be tracked separately. Do not claim Stage 1.4 COMPLETE based solely on the original 34 successes.
+
+**Gate remains:** Step 1.4 on isolated branch; no merge, Stage 2, UI, APK, Actions, paid runners or budget changes.
