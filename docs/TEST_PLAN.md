@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **2026-10-23 — NEW D-062 ANDROID-PHONE-FIRST FEASIBILITY TESTS (NO NEW PASS RESULTS):** F02 now means working **Android phone on-device edit/compile/test/preview** and F04 prioritizes **actual Android APK built/installed on the phone**; iOS/Windows/macOS builder proof becomes a later port phase. In [ANDROID_FIRST_PLATFORM_SPIKE.md](ANDROID_FIRST_PLATFORM_SPIKE.md), first run a tiny **real Dart scheduler compiled to JS**, render canonical Example B special break 01:25–01:40 and summary 02:45–03:00 in Android browser; second verify **Termux-built Capacitor APK** (not merely browser PWA); third verify three distinct native alerts under Android lock/background. **These new proof gates are UNEXECUTED.** Previously verified 35/35 core Dart and 11/11 adapter Dart results remain unchanged.
+
+
 ## 2026-10-23 — Revised Android phone-first feasibility checks (D-062/D-063; NOT RUN)
 
 **Approved priority:** Develop, debug, test, locally build/install Android on the user's **phone first**, then efficiently port to iOS/Windows/macOS later. Earlier D-061 simultaneous multi-platform toolchain gate is no longer a prerequisite for initial Android progress; original functionality remains binding.
