@@ -1,5 +1,13 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Stage 2 Dart/Flutter analyzer isolation / Handoff v2.7
+
+- Investigated user screenshot showing massive `dart analyze` failures on Android Termux Stage 2. Distinct nested Flutter package imports require Flutter SDK; bare Dart cannot resolve them. Chained `dart test` did not start after analyzer failure.
+- Added root analyzer exclusion `apps/atelier_time_flutter/**` and separate nested Flutter analysis options on Stage 2 branch. **Does not suppress later Flutter SDK testing** and makes no changes to schedule/adapter behavior.
+- **Post-fix analyzer and combined 46 Dart tests NOT YET RUN**; prior separately verified 35 Stage 1 and 11 Stage 2 passes unaffected. Eight Flutter widget tests still UNRUN, no APK.
+- Recorded D-060 and updated test plan, roadmap, Stage 2 plan, README, branch README, work log and handoff v2.7. No GitHub Actions/paid runner, budget change, merge or Stage 3+.
+
+
 ## 2026-10-23 — Clean Stage 2 worktree verified 11/11 / Handoff v2.6
 
 - New screenshots show `~/Atelier-Time-Stage2` checkout HEAD `3bb2bad` and `dart test test/editor_draft_test.dart` concluding **`+11: All tests passed!`**.
