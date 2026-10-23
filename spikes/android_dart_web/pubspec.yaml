@@ -1,0 +1,9 @@
+name: atelier_time_android_first_spike
+description: Minimal Android-Termux Dart-to-JS browser feasibility proof reusing Atelier Time scheduling core.
+publish_to: none
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+dependencies:
+  atelier_time_core:
+    path: ../..
+  web: ^1.1.1
