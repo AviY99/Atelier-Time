@@ -61,8 +61,8 @@ fun SessionEditorScreen() {
         cycle = CycleStart.BREAK_FIRST
         automatic = true
         opening.clear()
-        opening.add(OpeningDraft(nextOpeningId++, "4", "1"))
-        opening.add(OpeningDraft(nextOpeningId++, "4", "4"))
+        opening.add(OpeningDraft(nextOpeningId++, "4", "1", "0"))
+        opening.add(OpeningDraft(nextOpeningId++, "4", "4", "5"))
         invalidate()
     }
     fun applyB() {
@@ -92,7 +92,8 @@ fun SessionEditorScreen() {
         opening.clear()
         rules.openingGroups.forEach {
             opening.add(OpeningDraft(nextOpeningId++,
-                it.count.toString(), (it.poseSeconds / 60).toString()))
+                it.count.toString(), (it.poseSeconds / 60).toString(),
+                it.breakAfterSeconds?.div(60)?.toString()))
         }
         ending = preset.ending
         acceptedWarning = preset.acknowledgedRestWarnings
@@ -146,8 +147,10 @@ fun SessionEditorScreen() {
             TextButton(onClick = {
                 helpSection = "Opening pose groups" to
                     "Each group is an ordered set of equal-duration opening poses. " +
-                    "The current approved example has no breaks inside or between opening groups. " +
-                    "New group-break settings are pending scheduling review."
+                    "Every group has a configurable break after it. Zero minutes is allowed " +
+                    "between groups; the last group requires at least one minute. " +
+                    "A break-first regular cycle can share its initial break with the " +
+                    "last group's configured rest, so it is not counted twice."
             }) { Text("Help") }
         }
         opening.toList().forEachIndexed { index, group ->
@@ -157,8 +160,9 @@ fun SessionEditorScreen() {
                     helpSection = "Opening group " + (index + 1) to
                         "Number of poses means how many consecutive poses this group contains. " +
                         "Each pose duration sets the time of one pose in minutes. " +
-                        "A new required break after each group is being specified separately, " +
-                        "so no duration is inserted into the approved schedule without review."
+                        "Set Break after group to 0 for no break between opening groups. " +
+                        "The last group requires at least 1 minute of rest. If it equals " +
+                        "the initial regular break, only one break occurs."
                 }) { Text("Help") }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -168,6 +172,22 @@ fun SessionEditorScreen() {
                 MinuteInput("Each pose duration (min)", group.minutes, {
                     opening[index] = group.copy(minutes = it); invalidate()
                 }, Modifier.weight(1f))
+            }
+            MinuteInput(
+                "Break after group (min)" +
+                    if (index == opening.lastIndex) " · required" else " · 0 allowed",
+                group.breakAfterMinutes ?: if (
+                    index == opening.lastIndex && cycle == CycleStart.BREAK_FIRST
+                ) normal else "0",
+                { opening[index] = group.copy(breakAfterMinutes = it); invalidate() },
+                Modifier.fillMaxWidth(),
+            )
+            if (group.breakAfterMinutes == null) {
+                Text(
+                    "Legacy saved group: this value is a display suggestion. " +
+                        "Edit the break field to apply the new rule.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextButton(onClick = {
@@ -188,7 +208,7 @@ fun SessionEditorScreen() {
             }
         }
         OutlinedButton(onClick = {
-            opening.add(OpeningDraft(nextOpeningId++)); invalidate()
+            opening.add(OpeningDraft(nextOpeningId++, breakAfterMinutes = normal)); invalidate()
         }) { Text("Add opening group") }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -358,7 +378,10 @@ fun SessionEditorScreen() {
                 candidate.phases.forEach { phase ->
                     val label = when (phase.kind) {
                         PhaseKind.POSE -> "Pose " + phase.poseNumber
-                        PhaseKind.SHORT_BREAK -> "Normal break #" + phase.breakOrdinal
+                        PhaseKind.SHORT_BREAK ->
+                            if (phase.openingGroupId != null)
+                                "Opening-group break"
+                            else "Regular break #" + phase.breakOrdinal
                         PhaseKind.SPECIAL_BREAK -> "Special break #" + phase.breakOrdinal
                         PhaseKind.SUMMARY -> "End-of-session summary"
                     }
