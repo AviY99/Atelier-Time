@@ -1,5 +1,18 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 2.3: Stage 2 editor inputs made testable in plain Dart (D-056)
+
+**User request:** “Can you continue?” Continued only authorized Stage 2 session editor/preview development on the existing isolated `stage-2-session-editor` branch.
+
+**Code:** Created `lib/src/editor_draft.dart`, exported it via `lib/atelier_time.dart`, and updated Flutter editor `_readRules` to delegate to `SessionEditorDraft.toRules()`. This pure Dart adapter converts typed whole-minute text, names, opening group order, cycle and special-break ordinals into `SessionRules`; the existing tested scheduler remains responsible for D-036 blocking invalid durations and D-031/D-044 warnings. Inactive typed manual ordinals cannot block schedules when special-break count is zero. It adds no persistence, timer or UI scope beyond Stage 2.
+
+**Tests:** Added **11 new plain Dart test source cases** `test/editor_draft_test.dart`, runnable without Flutter on Android Termux. Covers exact Example B fields, editable/zero/malformed inputs, opening groups, active/inactive manual ordinals, shorter special rest warning. **11 new tests NOT RUN**; prior 35/35 core tests remain screenshot-verified and the eight Flutter widget tests remain unexecuted. Verified committed files present and basic bracket/string structure, not Dart analyzer or runtime compilation.
+
+**Restrictions:** No Flutter SDK, builds, paid Actions, budget change, branch merge, Stage 3 presets or Stage 4 timer work. Stage 2 still IN PROGRESS. User may fetch `stage-2-session-editor` into their existing Termux repo, then run `dart pub get && dart test test/editor_draft_test.dart` to provide actual verification. Decision D-056 recorded; handoff will be v2.3.
+
+---
+
+
 ## 2026-10-23 — Iteration 2.2: Stage 2 editor safeguards and eight widget-test sources (D-055)
 
 **Instruction:** User said “continue.” Continued only the previously authorized Stage 2 session editor/preview branch.
