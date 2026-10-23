@@ -1,5 +1,8 @@
 # Atelier Time — platform and toolchain re-assessment (2026-10-23)
 
+> **LATEST 2026-10-23 D-062 USER REVISION:** Strict native-build-all-four-OSs-now constraint is NO LONGER current. Revised goal: efficiently develop/debug/build/install **Android first directly on user's phone**, design for efficient LATER iOS/Windows/macOS adaptation. D-063 proposes **Kotlin + Code on the Go** as a candidate requiring actual installed APK before migration; see [ANDROID_FIRST_DEVELOPMENT_PLAN.md](ANDROID_FIRST_DEVELOPMENT_PLAN.md). This earlier comprehensive lifecycle audit is retained historically, but its immediate multi-target feasibility STOP condition is superseded as a blocker to **Android-only proof**.
+
+
 **Status: FEASIBILITY AUDIT / PLATFORM SELECTION REOPENED — NO replacement stack approved.**
 **Trigger:** User explicitly rejected the original platform assessment: the system must be cross-platform **throughout development, tests, builds, and deployment**, not merely at runtime. All four original end-user OS targets remain required.
 
