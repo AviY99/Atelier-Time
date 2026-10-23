@@ -1,5 +1,8 @@
 # Atelier Time — Stage 2 session editor and preview: implementation plan
 
+> **2026-10-23 PAUSE — D-061:** Stage 2 Flutter implementation was started before the full cross-platform development/build pipeline was validated. Stop further Flutter-specific source work, UI/widget test expansion and platform packaging pending [cross-platform feasibility re-assessment](PLATFORM_REASSESSMENT_2026_10_23.md) and a revised approved platform decision. Draft PR #2 remains open but UNVERIFIED; no automatic merges. Tested Dart scheduling and form-adapter source is preserved. No assumption that a PWA can fulfill locked-screen audio or native installer requirements.
+
+
 **Started for preparation:** 2026-10-23, following the user's explicit instruction **“finish documentation and continue.”**  
 **Stage 1 core status:** **D-052 COMPLETE/VERIFIED ON TESTED BRANCH**; Android Termux Dart 3.13.7 screenshot: **35/35 `dart test` pass**. Earlier `dart analyze` **No issues found!** on the 34-test version; the 35th test was a test-only addition.  
 **Source integration:** [Stage 1 PR #1](https://github.com/AviY99/Atelier-Time/pull/1) proposes the tested core for `main`; **not merged**.  
