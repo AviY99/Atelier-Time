@@ -194,3 +194,10 @@ Run `flutter pub get`, `flutter analyze`, `flutter test`, and manual preview che
 [Eight Flutter widget tests](https://github.com/AviY99/Atelier-Time/blob/stage-2-session-editor/apps/atelier_time_flutter/test/session_editor_widget_test.dart) now exist on the isolated Stage 2 branch and exercise T19–T23: parsing/hard zero errors, canonical B preview, opening groups, last-pose choices and edit invalidation, 25/5 acknowledgment, and wide layouts. `flutter_test` was added under the nested app's dev dependencies.
 
 **Test execution:** **NOT RUN**. Current assistant machine has no Flutter; user's Android Termux only has Dart. The separately verified 35/35 **core Dart** tests remain evidence for Stage 1 only and do not validate the Flutter UI. When Flutter is available: `cd apps/atelier_time_flutter && flutter pub get && flutter analyze && flutter test`. Document exact failures and correct them before closing Stage 2.
+
+
+## 2026-10-23 — Stage 2 pure Dart form-input regression tests (D-056)
+
+The isolated Stage 2 branch now contains `lib/src/editor_draft.dart`, an editor text-to-rules adapter independent of Flutter, and **11 new Dart unit-test definitions** in `test/editor_draft_test.dart`. They cover Example B fields, altered minute values, zero-duration error handling, malformed numeric inputs, ordered opening groups, manual replacement ordinals, N=0 inactive ordinals and D-044 shorter positive special breaks.
+
+These eleven new tests have **NOT been executed**. They may run with the user's existing Android Termux Dart SDK: from the Stage 2 branch repository root use `dart pub get && dart test test/editor_draft_test.dart`. The old Stage 1 suite's 35 passing tests do not establish the new adapter's results. Separately, the eight Flutter widget tests still require a Flutter SDK and have not run.
