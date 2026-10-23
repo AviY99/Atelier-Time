@@ -1,5 +1,8 @@
 # Product specification — Atelier Time
 
+> **D-070 IMPLEMENTATION STATUS (2026-10-23):** Product requirements unchanged. The existing offline preset requirement is now **coded** in native Android Kotlin (approved-only save/update/load/duplicate/rename/delete/select, local versioned persistent JSON, integrity checking); not yet compiled or run on a phone, so **NOT ACCEPTED/VERIFIED**. 32 JVM + 4 Android instrumentation test cases written/unrun. Running timer/three distinct audio cues and lock/background behavior remain future code, not changed requirements. See [native QA plan](ANDROID_NATIVE_EXECUTION_AND_TEST.md).
+
+
 > **D-068 REQUIREMENTS CONFIRMED — 2026-10-23:** The user approved Android native Kotlin implementation and requested a direct check that all existing settings and requirements are understood, recorded and unchanged. **Confirmed: NO approved product/scheduling requirement changes needed.** Existing D-031/036/037/043/044 and complete exact A/B fixtures, editable session inputs, all 3 ending choices, offline presets, timer and 3 cues stand. D-015 summary description and D-016 cue granularity remain unresolved, not silently decided. **Only the D-062 release priority (Android from phone now, others later) and D-067 framework (Kotlin Compose Gradle) change old Flutter implementation statements.** The real Kotlin source branch/draft PR #3 is underway but unbuilt/unverified. [Baseline and testing pipeline](ANDROID_NATIVE_EXECUTION_AND_TEST.md).
 
 
