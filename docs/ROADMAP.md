@@ -78,3 +78,8 @@ An acceptance-mapping gap in T09 was closed at the **test-source** level by addi
 ## Stage 2 source hardening and test preparation (D-055, 2026-10-23)
 
 The second Stage 2 increment improved invalid-input feedback, guarded partial previews, made mobile preview scrolling stable, and added **eight Flutter widget test sources** on `stage-2-session-editor` (draft [PR #2](https://github.com/AviY99/Atelier-Time/pull/2)). These test cases have **not run**, because Flutter SDK is unavailable. Existing Android Termux 35/35 *Dart core* success is not a Flutter test. Next prerequisite is a Flutter-capable machine for analyzer/widget runs and then design review. Stage 2 IN PROGRESS; Stages 3–6, releases, automatic merges and paid Actions remain not authorized.
+
+
+## 2026-10-23 — Stage 2 pure-Dart form parsing (D-056)
+
+The Flutter editor delegates its input parsing to new `lib/src/editor_draft.dart` on `stage-2-session-editor`, preserving all configured minute fields and opening group order and deferring schedule validation to the tested core. The new adapter is testable with Android Termux Dart without Flutter. **11 additional Dart test cases are written but not yet run**; previously verified Stage 1 core remains 35/35 passing. Eight separate Flutter widget tests still await a Flutter SDK. Stage 2 is in progress; no paid builds, PR merges, persisted presets or timer work.
