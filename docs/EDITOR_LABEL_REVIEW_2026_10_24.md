@@ -1,5 +1,5 @@
 # Atelier Time — editor terminology and opening-group break review
-Date: 2026-10-24. Status: user review in progress; terminology source is committed on Android branch, no compile after this change.
+Date: 2026-10-24. Status: D-071 group-break interpretation explicitly APPROVED by user ("כן") and implemented in source, NOT YET phone-compiled. All field names remain provisional pending terminology review.
 
 ## Labels (first-pass wording, not frozen)
 
@@ -30,17 +30,20 @@ Date: 2026-10-24. Status: user review in progress; terminology source is committ
 
 Implemented in the first-pass Compose source along with Help dialogs for each opening group and each major section. User can request changes to any wording; English is the current UI language.
 
-## Opening-group breaks — user-requested rule (D-071)
+## Opening-group breaks — APPROVED D-071 and source implemented
 
-The user specifically requested a break after every opening group, permitting **zero** at a boundary before the final group while requiring a **strictly positive** break after the final opening group. The current canonical Example A has no gap between 4×1 and 4×4 groups (0 between them), and already has a 5-minute scheduled break immediately after the last group (00:20–00:25) because of break-first pattern. The proposed interpretation is that this existing break **counts**, instead of inventing a second adjacent break.
+User confirmed: every opening group gets an editable after-group rest. Zero-minute rest is allowed at earlier boundaries; **last opening group requires a positive rest**. When BREAK_FIRST is selected and the last group rest equals the configured first regular break, use **the same break** (Example A's existing 00:20–00:25) rather than insert a duplicate. A different explicit last-group break **replaces** the initial repeating-break slot, rather than adding an adjacent break; group-specific rests are not counted as replaceable regular break ordinals.
 
-Before changing `OpeningPoseGroup`, scheduling DP, editor inputs, and persisted versioned JSON, confirm:
-- Break after each earlier group is an editable whole-minute `0 or more` value (zero yields no phase); final group effective after-break is `>=1 minute`.
-- Do not double the last group's break when an already-scheduled first repeating-cycle break occupies exactly that boundary.
-- Clarify whether special-break replacement ordinals include group-boundary breaks, as this can affect the canonical A special-break timestamp and saved approvals.
-- Preserve the **old** A/B fixtures as historical oracle and explicitly approve any revised expected boundaries; maintain total duration and non-terminal-break rule.
+- Group model: `OpeningPoseGroup.breakAfterSeconds: Int?`. `null` represents **legacy stored rules**, avoiding changes to old approval signatures and Example A/B historical fixture inputs. New drafts use numeric explicit durations.
+- Example A UI: first group `0m`, second `5m`, `BREAK_FIRST`; expected historical time boundaries identical.
+- Between groups, `breakAfterSeconds > 0` creates a tagged normal-rest phase with `openingGroupId` and no regular `breakOrdinal`; `0` creates no phase. All group rests count for the existing 25m/5m advisory rule.
+- Last group: explicit `0` or negative blocked; rest and at least one subsequent pose must fit the work window. This preserves the no-trailing-break rule. A custom positive final group rest is inserted once and the beginning regular-break slot suppressed.
+- Automatic special replacement chooses only **ordinary break ordinals**, excluding tagged group-specific rests. Positive replacement of a shared first break remains possible when its value equals normal break duration.
+- Preset JSON remains schema version `1`: optional `breakAfterSeconds` per group; missing field loads `null`; signatures include explicit group-rest values only, preserving the old signature for all-legacy groups. Unedited existing approved presets remain readable and retain the old schedule.
+- New tests: Example A parity, earlier zero/positive break, custom last rest and no duplicate, pose-first insertion, explicit last-zero/negative rejection, required subsequent pose, text-adapter parsing, versioned preset integrity, Android store round-trip.
 
-No untested change to the scheduling engine or saved schema was silently made in this iteration.
+**Source implementation is uncompiled and these new tests have not been run on the phone.** Prior Kotlin test and APK PASS apply only to previous revisions.
+
 
 ## Timer first increment
 
