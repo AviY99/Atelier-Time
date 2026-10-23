@@ -1,11 +1,35 @@
-# ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v1.9)
+# ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v2.0)
 
 **Updated:** 2026-10-23  
 **Repository:** https://github.com/AviY99/Atelier-Time (existing public repo; default `main`)  
 **Technology APPROVED:** **Flutter + Dart**, **ONE shared application codebase** for first release on **Android phones/tablets, Windows computers, iOS/iPadOS and macOS**. Different install artifacts per OS are acceptable; native-looking menus/graphics are OPTIONAL. No web or Linux release required initially.  
-**Status:** Stage 0 and Stage 1 Steps 1.1–1.3 approved/documented, including P-01–P-06 (D-037). **Stage 1 Step 1.4 NOW AUTHORIZED AND IN PROGRESS (D-040)** on isolated branch [stage-1-4-scheduling-core](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core). **Pure Dart scheduling engine, test sources and smoke tool exist ON THAT BRANCH ONLY**, not yet merged to main. **User's Android Termux Dart 3.13.7 produced screenshot-confirmed `dart analyze` “No issues found!” and `dart test` “+34 All tests passed!” after a successful smoke check (D-050).** The assistant's isolated container still has no Dart SDK, and there have been **NO GitHub Actions workflows, Flutter builds, or Flutter UI/scaffold/timer/audio/installed app**. User's GitHub metered budget is blocked by another project; do not invoke billable Actions (D-041). **Step 1.4 NOT COMPLETE**. D-038 is RESOLVED by **approved D-044** (any positive special replacement duration, including shorter/equal). **Latest refinements D-043/D-045/D-046:** automatic replacement placement uses exact dynamic programming; approved warnings persist with full timestamps in immutable session snapshots; candidate construction is library-private to prevent forged approvals. Dart source/test suite now **executed and screenshot-confirmed PASS on user Android Termux (34 tests)**; no SDK in assistant's separate container and DNS cannot fetch it. Budget-free Windows/macOS/Linux local verification scripts are now on the development branch.
+**CURRENT AUTHORITATIVE STATUS — 2026-10-23:** Stage 0 and Stage 1 Steps 1.1–1.3 approved/documented; **Stage 1 Step 1.4 pure Dart scheduling core and required acceptance tests VERIFIED / COMPLETE ON DEVELOPMENT BRANCH** `stage-1-4-scheduling-core` (D-052). User's Android Termux Dart **3.13.7** screenshot shows `git pull --ff-only && dart test` fast-forward **`8cf7a24..907f871`** followed by **`00:00 +35: All tests passed!`**; the new T09 valid 1m+34m final-pose split passed. Earlier screenshots showed `dart analyze` **No issues found!** on the prior 34-test checkout, and smoke PASS; **analysis was not shown rerun after the 35th test-only change**. `main` does **NOT** contain the engine; the branch is intentionally **unmerged**. User's GitHub metered budget is reported blocked; **NO GitHub Actions, paid build, Flutter UI/scaffold, installed APK, offline preset store, runtime timer/audio, or other target-OS app build. Stage 2 NOT AUTHORIZED.** D-044 permits any positive special replacement break duration; D-036 bans 0-minute session/break, and D-031 requires 25/5 warnings.
 
-## Step 1.4 additional work — SDK blocker diagnosis and local test helpers (D-046)
+## Stage 1 Step 1.4 — COMPLETED/VERIFIED on development branch (D-052)
+
+**Authoritative latest milestone:** User's Android Termux screenshot (2026-10-23) includes:
+
+```text
+~/Atelier-Time $ git pull --ff-only && dart test
+...
+8cf7a24..907f871  stage-1-4-scheduling-core -> origin/stage-1-4-scheduling-core
+Fast-forward
+  docs/STAGE_1_4_PROGRESS.md
+  test/scheduling_test.dart
+...
+00:00 +35: All tests passed!
+```
+
+- This is **screenshot-confirmed 35/35 passing Dart unit tests on Android ARM64 Dart 3.13.7** on the branch after adding required T09 valid custom first=1m / last=34m edge case. Earlier screenshot-confirmed `dart analyze` **No issues found!** refers to the immediately preceding 34-test version, before test-only changes; earlier smoke test also passed.
+- **Minimum Stage 1 test gate fulfilled:** T01–T12, T15–T18 map to the 35 passing automated cases, including canonical A/B exact 3h sessions, break replacement, three final-pose choices and both 1m split endpoints, positivity checks, 25/5 advisory warning+acknowledgment, deterministic contiguous schedules. Wider T13/T14 edge-matrix combinations **remain only partially tested** and belong to future QA; do not claim exhaustive inputs, other operating systems or Flutter application verification.
+- **Stage 1 Step 1.4 COMPLETE ON ISOLATED BRANCH** [`stage-1-4-scheduling-core`](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core); [engine](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/lib/src/scheduling.dart), [35 tests](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/test/scheduling_test.dart), [branch verification log](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/docs/STAGE_1_4_PROGRESS.md). **No merge to `main`** or subsequent programming approved. Stage 2 Flutter editor, Stage 3 local presets, Stage 4 live timer/audio and later builds remain distinct stages needing authorization.
+- **STOP AT THIS GATE.** If asked what is next, explain that the verified branch can be merged with explicit user approval and that Stage 2 needs its own separate authorization. Do not use GitHub Actions or other budget-consuming services under current reported block. User does **not** need to reinstall Dart, repeat the 35 tests, or prove the screenshot again.
+
+**Historical notes below are preserved for change history. Any “NOT RUN,” “IN PROGRESS,” “T09 pending,” or “SDK unavailable” in earlier dated sections refers to earlier iterations only and is superseded by this current result.**
+
+
+
+## Historical iteration D-046 — SDK blocker diagnosis and local test helpers
 
 **User question:** “What to do to solve ur failure? Can you continue?” YES: continued **only** authorized Step 1.4 source hardening and test preparation, not Stage 2 or billing-dependent Actions.
 
@@ -21,14 +45,14 @@
 
 **Next code gate:** Fix actual errors revealed by Dart execution before declaring Step 1.4 complete. Continue this step without another authorization; **Stage 2 and other activities remain blocked**.
 
-## Latest code/test-only change (2026-10-23) — T09 35th regression, not yet run (D-051)
+## Historical iteration D-051 — T09 35th regression added (subsequently PASSED D-052)
 
 - The user supplied screenshots showing *prior 34* unit tests PASS and Dart analyzer 0 issues on Android Termux; those results remain verified.
 - The Stage 1 Step 1.4 acceptance check required both positive custom-pose ruler extremes. Test 34m+1m was already passing, but the inverse **1m+34m** endpoint was missing.
 - **New 35th test on development branch** [commit `4b2f5d9`](https://github.com/AviY99/Atelier-Time/commit/4b2f5d9fdd8dabc6dea8dcc0204c5062c7b6916a) asserts Example A 125–126m first pose, 126–131m rest, 131–165m final pose, 165–180m reserved summary; invalid 0m case remains blocked and 25/5 warning still requires acknowledgment.
 - The **35th test has NOT run**. One budget-free Termux rerun is needed: `git pull --ff-only && dart test`. Do not claim 35 PASS until evidence received. No GitHub Actions, main merge, UI/Android APK or Stage 2 work.
 
-## Latest authoritative verification — Android Dart 34/34 unit tests PASS (D-050, 2026-10-23)
+## Historical verified checkpoint — Android Dart 34/34 tests PASS (D-050, superseded by 35/35 D-052)
 
 **User submitted three actual Termux screenshots** after running `dart pub get && dart analyze && dart test` on **Dart SDK 3.13.7 (Android ARM64)** in the `~/Atelier-Time` working tree on `stage-1-4-scheduling-core`. Visible final output:
 
@@ -48,7 +72,7 @@ Built test:test.
 
 The **35th T09 endpoint test is already committed** on `stage-1-4-scheduling-core`. Ask the user to run `git pull --ff-only && dart test` in their existing Android Termux `~/Atelier-Time` directory, then inspect/pass/fix new evidence. Do not ask for Dart reinstallation. Keep main and all later Flutter/UI stages untouched until separately approved.
 
-## Latest Step 1.4 evidence — first Android Dart compile failed, fixed, HISTORICAL: earlier FAIL, since fixed and PASSED (D-047)
+## Historical iteration D-047 — initial compile failed and was fixed
 
 **User has succeeded installing Dart on Android via Termux**: Dart SDK 3.13.7 stable, `android_arm64`. User cloned branch `stage-1-4-scheduling-core` into Termux's `~/Atelier-Time` and ran **`dart tool/smoke.dart`**.
 
@@ -172,7 +196,7 @@ Full reference inputs and tables: [EXAMPLES.md](EXAMPLES.md). Neither example ha
 - **D-037 RESOLVED:** an exactly 25m ending needs no trailing invented break, and pose-time warning counter **does not auto-carry** between separate saved preset activations. **D-038 now RESOLVED via D-044:** positive special breaks may be shorter/equal/longer than positive normal breaks; D-031 warning and D-036 zero-duration ban remain in force.
 - **Zero-length logical break slots and any final-two split across such a slot were WITHDRAWN by D-036. Do not implement.**
 
-## Latest approved D-044 — positive shorter/equal special replacements (2026-10-22)
+## Approved D-044 — positive shorter/equal special replacements (2026-10-22)
 
 The user explicitly approved: **“allow any positive special break duration, even shorter than or equal to the normal break, with the already approved 25/5 rest warnings. Zero-minute breaks remain invalid.”**
 
@@ -182,7 +206,7 @@ The user explicitly approved: **“allow any positive special break duration, ev
 - **Independent Python design checks** matched brute force across **25,000 virtual-schedule random cases** and **4,000 additional real-schedule exhaustive cases**, including `L<B`, `L=B` and `L>B`. These do **NOT verify Dart code**.
 - **No Dart/Flutter SDK, no executable Dart tests, analyzer, smoke execution or build.** SDK download DNS unavailable. GitHub Actions/paid runners intentionally not run owing to user-reported account budget block. Branch unmerged. **Step 1.4 remains IN PROGRESS; Stage 2 NOT authorized.**
 
-## Stage 1 Step 1.4 — newly started coding branch, user budget blocked
+## Historical Step 1.4 start — coding branch, GitHub budget protection
 
 - **Authorization D-040:** The user said “Continue” after asking how to work with minimum intervention while GitHub's $12 metered budget was exhausted on another project. This explicitly started Step 1.4 only.
 - **Branch:** [stage-1-4-scheduling-core](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core), forked from the existing `main`. All new code/test files are on this branch **only**.
@@ -198,13 +222,13 @@ The user explicitly approved: **“allow any positive special break duration, ev
 
 - **[TECH_DECISION_001_PLATFORM.md](TECH_DECISION_001_PLATFORM.md)** records approved Flutter + Dart, four release targets and allowance for non-native UI.
 - **[DATA_MODEL.md](DATA_MODEL.md)** defines only **conceptual** Dart types: `SessionRules`, `OpeningPoseGroup`, `RegularCycle`, `LongBreakRule/Placement`, `SchedulePhase`, `ScheduleCandidate`, `EndPoseResolution`, `ApprovedSessionPreset`, `ScheduleIssue`. Internally integer seconds; whole-minute UI initially; records are not yet executable Dart.
-- **[TEST_PLAN.md](TEST_PLAN.md)** includes canonical T01–T18, R-B01..R-B18, P-T01..P-T12 (including approved D-044 P-T11). **Step 1.4 has now added real Dart test SOURCE on a development branch, but NO Dart tests have actually been RUN or passed.** Never substitute source presence or a syntax-bracket check for execution.
-- **[PRODUCT_SPEC.md](PRODUCT_SPEC.md)** approved product scope, **[SCHEDULING_RULES.md](SCHEDULING_RULES.md)** core contract, **[ROADMAP.md](ROADMAP.md)** gates, **[DECISIONS.md](DECISIONS.md)** chronological register through **D-051**, **[WORK_LOG.md](WORK_LOG.md)** iterations, **[CHANGELOG.md](../CHANGELOG.md)** history. See branch-only [Stage 1.4 progress](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/docs/STAGE_1_4_PROGRESS.md).
+- **[TEST_PLAN.md](TEST_PLAN.md)** lists canonical T01–T18 and P-T/R-B edge cases; **current D-052 evidence: 35/35 Step 1.4 Dart unit tests PASS on Android ARM64** after the added T09 endpoint, prior analyzer no issues, prior smoke PASS. T13/T14 broader edge cases remain a future QA backlog.
+- **[PRODUCT_SPEC.md](PRODUCT_SPEC.md)** approved product scope, **[SCHEDULING_RULES.md](SCHEDULING_RULES.md)** core contract, **[ROADMAP.md](ROADMAP.md)** gates, **[DECISIONS.md](DECISIONS.md)** chronological register through **D-052**, **[WORK_LOG.md](WORK_LOG.md)** iterations, **[CHANGELOG.md](../CHANGELOG.md)** history. See branch-only [Stage 1.4 progress](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/docs/STAGE_1_4_PROGRESS.md).
 - **Decision precedence:** D-036 supersedes D-031's previous 0-minute break allowance, but D-031 25/5 warning remains. D-037 approves P-01–P-06 and within-one-session warning scope, with zero summary / zero special-break **count** permitted. **D-038 resolved by D-044**; engine now accepts positive shorter/equal replacements, with D-031 warnings. D-045 records unexecuted source/tests. **D-039** was the prior Step 1.4 gate; **D-040** subsequently authorizes Step 1.4 only; **D-041** prohibits GitHub Actions/paid workflow use under budget block; **D-042** documents unexecuted branch code. D-030/D-032/D-034/D-035 are earlier historical/proposal records, NOT permission for zero-minute break slots.
 - GitHub is the authoritative store. After every iteration, update decisions/roadmap/work log/changelog and **THIS HANDOFF**; verify GitHub read-back and link concrete commits. Do not create a duplicate repo.
 
-## Stage gate and exact next action
+## Stage gate and exact next action — AUTHORITATIVE 2026-10-23
 
-Stage 0 COMPLETE; Stage 1 **1.1 COMPLETE**, **1.2 DESIGN DOCUMENTED**, **1.3 APPROVED / COMPLETE (D-037)**; **1.4 STARTED / IN PROGRESS ON BRANCH (D-040, D-042), NOT VERIFIED OR COMPLETE**. The user reports GitHub metered-budget blocking (D-041). **Technical source refinement D-043 performed while Actions avoided; SDK and Dart test execution still unavailable.** Stage 2 and later NOT AUTHORIZED. Later Stage 2 per-session responsive Flutter editor/preview; Stage 3 offline presets; Stage 4 monotonic timer/audio; Stage 5 device QA/installability; Stage 6 release.
+Stage 0 COMPLETE. Stage 1 **1.1 COMPLETE**, **1.2 CONCEPTUAL DATA MODEL DOCUMENTED**, **1.3 APPROVED/COMPLETE** (D-037/D-044), **1.4 PURE DART CORE IMPLEMENTATION AND REQUIRED UNIT TESTS VERIFIED/COMPLETE ON ISOLATED BRANCH (D-052)**. User's screenshot shows **35/35 PASS** on Termux Dart 3.13.7; prior analyzer and smoke passed. The `main` branch remains docs-only for source code; dev branch unmerged. **Do not claim a working installable application**. T13/T14 extended edge cases are future QA. **No Stage 2 authorization; no GitHub Actions/paid services under reported budget block.**
 
-**Immediate next response in a new chat:** User provided screenshots proving Android Dart SDK 3.13.7 on Termux `dart analyze` **No issues found!** and `dart test` **+34 All tests passed!** (D-050), and earlier smoke succeeded. The Stage 1 T09 coverage audit found a missing positive **1m+34m** final-split endpoint. That 35th test **has now been added** on the isolated development branch in commit `4b2f5d9fdd8dabc6dea8dcc0204c5062c7b6916a` (D-051), with fixed timeline and 25/5 warning tests; **not yet run**. Ask only to run `git pull --ff-only && dart test` from existing `~/Atelier-Time` Termux clone; fix if test fails, otherwise record passing result. Existing 34-test screenshot evidence remains valid. Do not reinstall Dart, merge branch, start Stage 2, add Flutter UI, or use paid Actions without new explicit authorization. Step 1.4 final QA ongoing; preserve D-031/036/037/044 and the separate future stages.
+**Immediate next response in a future chat:** Confirm D-052 verified completion and link [the verified development branch](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core). **Do not ask user to rerun already-verified tests.** Await explicit permission before either merging the tested Step 1.4 branch into `main` or starting Stage 2 Flutter interface design/programming; these are distinct approval gates. Preserve D-031 25/5 warning, D-036 positive full session/break, D-037 scheduling placement and validation, D-044 any positive special break rule, and canonical Example A/B.
