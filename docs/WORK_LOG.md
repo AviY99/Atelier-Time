@@ -1,5 +1,17 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — K01 on-phone Gradle progressed to Kotlin compile; AAPT2 wrong-architecture failure diagnosed
+
+**Observed source:** Full additional screenshot of phone `:app:testDebugUnitTest` after SDK-36/BOM alignment at code `a4b9469`. `:app:compileDebugKotlin` ran and emitted a Kotlin **warning** at `SessionEditorScreen.kt:207:29` (unnecessary Elvis operator). Task `:app:processDebugResources` FAILED during AndroidX `core-1.16.0.aar` AAPT2 resource processing. **Literal:** `AAPT2 aapt2-9.3.1-15703166-linux Daemon #0: Unexpected error output ... Syntax error: word unexpected (expecting ")")`; `BUILD FAILED in 3m 40s`, `18 actionable tasks: 13 executed, 5 up-to-date`. **NO 32 JVM tests passed, NO APK, NO Android persistence test.**
+
+**Root cause and vendor confirmation:** The plain CoGo terminal Gradle invocation omitted its GUI's native AAPT2 property; Maven-provided `linux` binary on the actual `aarch64` phone cannot start. The maintained [CoGo GradleBuildService source](https://github.com/appdevforall/CodeOnTheGo/blob/stage/app/src/main/java/com/itsaky/androidide/services/builder/GradleBuildService.kt) expressly passes `-Pandroid.aapt2FromMavenOverride=${Environment.AAPT2.absolutePath}` while [Environment.java](https://github.com/appdevforall/CodeOnTheGo/blob/stage/common/src/main/java/com/itsaky/androidide/utils/Environment.java) places native AAPT2 under `$ANDROID_HOME/build-tools/36.0.0/aapt2`. This is *not* a requirement/scheduler failure.
+
+**Committed fix:** [`dcb4887`](https://github.com/AviY99/Atelier-Time/commit/dcb4887c7e18e1c88e8ac7c23e007e3408f6af51) alters GitHub-Issues phone task runner to check native AAPT2 availability/version and inject that same local Gradle property for the fixed build tasks; [setup docs](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/android-native/PHONE_RUNNER.md) revised. GitHub source readback verified, **not yet run on phone**. No cache deletion, AAPT2 file replacement, Actions expense or PR merge.
+
+**Next single device check:** `"$ANDROID_HOME/build-tools/36.0.0/aapt2" version`; only once verified, rerun same Gradle test with `-Pandroid.aapt2FromMavenOverride="$ANDROID_HOME/build-tools/36.0.0/aapt2"`. Record actual PASS or next first error. K01/K02/K03 unverified; K04 unimplemented.
+
+---
+
 ## 2026-10-23 — Native K01 build blocker: API 37 absent; align SDK 36 dependencies for CoGo
 
 **User screenshot evidence:** `ls "$ANDROID_HOME/platforms"` on the actual Code on the Go Android ARM64 terminal printed exactly `android-35` and `android-36`. The subsequent `command -v sdkmanager || find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print 2>/dev/null` produced no output, so no command-line `sdkmanager` was located. The previously committed `compileSdk = 37` cannot compile on this **observed installed SDK set**, regardless of AGP compatibility. Avoid an ad-hoc SDK installation.
