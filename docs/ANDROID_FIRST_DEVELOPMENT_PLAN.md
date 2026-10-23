@@ -1,5 +1,8 @@
 # Atelier Time — Android-first, phone-developed delivery plan
 
+
+> **AUTHORITATIVE UPDATE D-064 (2026-10-23): INDUSTRY-STANDARD STACK SELECTED.** Kotlin + Jetpack Compose + Gradle for Android now; domain isolated in platform-free Kotlin for later Kotlin Multiplatform/Compose Multiplatform reuse. **Code on the Go is a maintained on-phone development IDE, NOT the industry-standard IDE** (Android Studio is). User explicitly rejected further "toy APK" feasibility experiments; the earlier three-step proof plan below is **historical and superseded as a STOP/GATE**. Next work is real Atelier Time Android implementation and ordinary build/debug as part of development, preserving Dart regression behavior. No claim of guaranteed CoGo compatibility or already-built APK. No paid Actions.
+
 > **2026-10-23 — D-064 DECISION SUPERSEDES THIS DOCUMENT'S "CANDIDATE/PROOF BEFORE MIGRATION" STATUS:** User explicitly rejected standalone feasibility experiments and demanded a sourced **industry-standard selection**. Official Google (May 2026 Compose First) and JetBrains guidance establish **Kotlin + Jetpack Compose + Gradle** as the Android application technology; **Kotlin Multiplatform / Compose Multiplatform** is the intended later code/UI reuse strategy. For the unusual developer host requirement (on Android phone, no desktop), choose **Code on the Go** as an actively maintained, local Gradle Kotlin IDE. Be accurate: **Android Studio remains the industry-standard IDE on desktop; there is no equally entrenched on-phone IDE standard**, so CoGo is an engineering choice for that constraint, not Google's official IDE. Do **not** demand throwaway "Hello World" APK experiments. Proceed to build the ACTUAL Atelier Time Android app in Kotlin/Compose, with build/analyze/unit tests performed as ordinary implementation acceptance. The 35 verified Dart scheduler and 11 verified adapter tests are regression specifications; Kotlin requires deliberate port. An actual APK and Flutter/Kotlin success must NOT be claimed before produced. See [D-064](DECISIONS.md).
 
 
@@ -7,7 +10,7 @@
 
 
 **Date:** 2026-10-23  
-**Status:** User-approved **change in priorities** (D-062); **candidate implementation path** awaiting a real build feasibility spike (D-063). This is the new active platform-planning document. See historical [full-lifecycle reassessment](PLATFORM_REASSESSMENT_2026_10_23.md).
+**Status:** User-approved Android-first priorities (D-062); **selected Kotlin + Jetpack Compose + Gradle architecture (D-064)**, CoGo on-phone IDE. No separate feasibility spike gate. This is the new active platform-planning document. See historical [full-lifecycle reassessment](PLATFORM_REASSESSMENT_2026_10_23.md).
 
 ## Revised product delivery requirement — user instruction
 
@@ -29,7 +32,7 @@
 
 **Important tradeoff:** Current verified scheduling engine and editor input adapter are **Dart**. Kotlin cannot call those Dart classes directly in an ordinary Kotlin Android app. Migration would require **porting scheduling logic** to Kotlin and using the saved 180-minute Example A/B exact outputs and **35 + 11 existing Dart tests as regression specifications**; port is work, not free. Preserve original branches/PRs until a new runnable APK and parity tests justify replacement. We must minimize that cost and prove the new toolchain first.
 
-## Three-stage technical validation BEFORE committing the migration
+## Historical three-stage trial proposal — SUPERSEDED by D-064 (DO NOT REQUIRE THESE AS A PRECONDITION)
 
 1. **CoGo installation / compatibility (NO Atelier Time migration yet):** Install official CoGo for ARM64, create a small Kotlin Android project with a simple screen, compile **debug APK locally on the phone**, install and run it. Capture only build result/version and any first relevant error. No cloud paid runs. If Compose fails but XML succeeds, report the tradeoff before deciding UI strategy.
 2. **Proof of core + project structure:** Build small Kotlin domain proof of canonical example B with deterministic phases, not the entire engine yet. Run on-device JUnit tests for schedule outputs; demonstrate UI uses the logic and can change duration. Preserve files under a **new isolated prototype branch**, not overwrite Dart branch. Measure build speed/device usability and local persistence feasibility.
@@ -42,3 +45,13 @@
 - **Now / Android:** edit/build/debug/install APK directly from phone; all schedules/tests and preview work; persistent local presets; accurate timer + three cues, offline; no unexpected fees.
 - **Later iOS/Windows/macOS:** preserve domain logic and composable UI by design; adopt KMP/Compose Multiplatform when compatible on a desktop/macOS build host, reuse as much Kotlin business/UI code as actually supported, add native integrations for timer/notifications/sound, run target-specific acceptance tests. **No promise of zero-effort or phone-only builds for Apple/desktop**.
 - **Current status:** Preferred direction **Kotlin + CoGo**, pending local APK proof; the user authorized revised **requirements**, not an untested wholesale code migration.
+
+## Current execution decision — D-064
+
+**Choose:** Android Kotlin/Jetpack Compose (official modern Android standard) + Gradle/Android Gradle Plugin, developed via maintained Code on the Go on the Android phone. Treat Code on the Go as the mobile tool used to run the standard project; **it is NOT itself the standard industry IDE**. A professional desktop Android Studio project remains the same standard Kotlin/Gradle source, which facilitates future migration.
+
+**Architecture:** `core/domain` contains pure Kotlin schedules/rules/validation and testable time calculations with NO `android.*` imports; `androidApp` contains Jetpack Compose screens, Android storage and timer/audio adapters. Keep domain boundaries compatible with later Kotlin Multiplatform module, move cross-platform-ready Composables to Compose Multiplatform only when other targets are scheduled. Do not use platform-specific code in scheduling algorithm.
+
+**No toy APK prerequisite:** The next coding is the **real Atelier Time Android app**, followed by ordinary build/install/test/debug as a routine development loop, not a separate proof-of-concept. The project is not yet built. Use **Dart 35+11 verified tests and canonical A/B timing** as parity oracles while porting logic from Dart to Kotlin.
+
+**Forum evidence/caveats:** [Androiddev phone-build question](https://www.reddit.com/r/androiddev/comments/1soxcog/is_there_a_reliable_way_to_edit_and_build_a/) has responses steering developers toward desktop/cloud because full local phone workflows remain niche; [Termux firsthand Gradle app build](https://www.reddit.com/r/termux/comments/1wu8n5d/i_build_install_and_test_a_full_android_app_on/) required special aapt2/toolchain overrides; CoGo's own [GitHub issue #1699](https://github.com/appdevforall/CodeOnTheGo/issues/1699) describes a Compose Preview failure despite compiled APK. Thus no guarantee mobile IDE equals Android Studio; keep ordinary build errors explicit and avoid overpromising.
