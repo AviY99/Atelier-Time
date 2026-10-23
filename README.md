@@ -1,5 +1,8 @@
 # Atelier Time
 
+> **2026-10-23 — D-061 PLATFORM DECISION REOPENED:** The user requires cross-platform compatibility **from development and automated testing through native builds/signing, installation, and live operation**, not just a shared Flutter runtime on four targets. The original Flutter recommendation did NOT verify Android Termux as a supported developer host or establish viable Apple/Windows/macOS builders. **Pause further Stage 2 Flutter-specific coding and PR merges.** See [full documented feasibility assessment](docs/PLATFORM_REASSESSMENT_2026_10_23.md) and [updated handoff](docs/HANDOFF.md). No PWA/native-wrapper replacement has been approved. Previously verified 35/35 core Dart and 11/11 Stage 2 form-adapter test evidence is preserved; eight Flutter widget tests have never run. No GitHub Actions/paid builds.
+
+
 A planned offline-capable, installable posing/break timer for live-model **drawing and sculpting** ateliers.
 
 **Project status (2026-10-23, D-052–D-054):** **Stage 1 Step 1.4 COMPLETE on tested branch** — Android Termux Dart 3.13.7 screenshot verified **35/35 Dart unit tests PASS**; prior smoke test and analyzer passed. [Stage 1 integration PR #1](https://github.com/AviY99/Atelier-Time/pull/1) is OPEN, **not merged**. At the user's instruction to **“finish documentation and continue”**, **Stage 2 session editor/preview started**: [implementation plan](docs/STAGE_2_PLAN.md), [uncompiled Flutter prototype branch](https://github.com/AviY99/Atelier-Time/tree/stage-2-session-editor), [draft PR #2](https://github.com/AviY99/Atelier-Time/pull/2). **Flutter source is NOT tested/built**, no APK, saved presets, live timer/audio, GitHub Actions or paid builds. No later stages authorized.
