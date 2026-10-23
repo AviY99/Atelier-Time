@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atelier Time - Android phone feasibility</title>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { max-width: 740px; margin: 0 auto; padding: 28px 18px; line-height: 1.55; }
+    h1 { font-size: 1.7rem; }
+    .note { opacity: .8; }
+    #status { font-weight: 700; margin-top: 20px; overflow-wrap: anywhere; }
+    pre { white-space: pre-wrap; font-size: .95rem; background: #3331;
+          padding: 16px; border-radius: 12px; overflow-wrap: anywhere; }
+  </style>
+  <script defer src="main.dart.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Atelier Time - Phone-first feasibility</h1>
+    <p class="note">This small test checks whether the existing Dart schedule
+       can compile to JavaScript and run in an Android browser. It is
+       not the finished editor or an APK.</p>
+    <p id="status" aria-live="polite">Waiting for compiled Dart...</p>
+    <pre id="timeline" aria-label="Generated Example B timeline"></pre>
+  </main>
+</body>
+</html>
