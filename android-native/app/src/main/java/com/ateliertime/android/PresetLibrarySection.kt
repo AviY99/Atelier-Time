@@ -22,6 +22,7 @@ fun PresetLibrarySection(
     suggestedName: String,
     onSelected: (StoredPreset, ApprovedSession) -> Unit,
     onSaved: (StoredPreset) -> Unit,
+    onDeleted: (String) -> Unit,
 ) {
     var collection by remember(catalog) { mutableStateOf(PresetCollection()) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -163,7 +164,10 @@ fun PresetLibrarySection(
             text = { Text("This removes the stored preset from the phone.") },
             confirmButton = {
                 TextButton(onClick = {
-                    action { catalog.delete(deleteTarget) }
+                    action {
+                        catalog.delete(deleteTarget)
+                        onDeleted(deleteTarget)
+                    }
                     pendingDelete = null
                 }) { Text("Delete") }
             },
