@@ -1,5 +1,8 @@
 # Atelier Time — Approved requirements baseline and Android phone development/QA process
 
+> **CURRENT K03 UPDATE D-070 — 2026-10-23:** User authorized moving to the next stage. The Kotlin Android branch now contains actual offline approved-session storage, versioned Android-private persistence, Compose UI for save/load/update/duplicate/rename/delete/select and **32 JVM + 4 instrumented Kotlin test METHODS WRITTEN, NOT RUN**. The preserved product rules remain unchanged. The K03 acceptance gate remains **UNVERIFIED** until a real CoGo build, Android APK run, restart/persistence and corruption testing. K04 timer and 3 audio cues are still not implemented. See [native branch README](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/android-native/README.md).
+
+
 **Date:** 2026-10-23. **Status:** Android-first Kotlin/Compose implementation in progress, NOT build-verified. **Authorized by user:** “מאושר , תתקדם , יש פער גדול לסגור , אשר שהגדרות והדרישות.מובנות תועדו ולא דורשות.שינוי , עדכן את תהליך הפיתוח והבדיקה למע החדשות”.  
 **Authoritative decisions:** D-062 Android on phone first, D-067 Kotlin/Compose/Gradle and CoGo, D-068 baseline confirmation and process, D-069 first native source increment.
 
