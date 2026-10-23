@@ -1,5 +1,11 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v3.4)
 
+## PHONE DEBUG APK ASSEMBLY SUCCESS — 2026-10-23
+
+New screenshot-verified phone milestone: native `android-native/` `:app:assembleDebug` with CoGo's Android-native AAPT2 property finished **`BUILD SUCCESSFUL in 47s`**, 36 actionable tasks (18 executed, 18 up-to-date), including packaging/signing task stages. `:app:testDebugUnitTest` earlier passed Gradle task in 34 seconds on same phone. **Debug APK build Gradle task now PASSED**, but actual APK path/hash, installation, app launch, canonical editor UI and persisted-session acceptance have **not yet been demonstrated**. Verify `app/build/outputs/apk/debug/app-debug.apk`, install/open, and check K03 offline preset operations/relaunch next. Six Android instrumentation tests and numerical JUnit XML evidence remain outstanding; K04 unimplemented; PR #3 draft/unmerged. Source/build changes not required solely to record successful build.
+
+---
+
 ## REAL KOTLIN UNIT-TEST GRADLE SUCCESS — 2026-10-23
 
 **New phone evidence, superseding older pending/failed K01 statements below:** On Code on the Go Android ARM64, actual `:app:testDebugUnitTest` ran with native AAPT2 Gradle property; screenshot shows Android resource/Kotlin/JVM test tasks and **`BUILD SUCCESSFUL in 34s`** (24 tasks; 10 executed/14 up-to-date). Latest screenshot-confirmed device Git checkout from preceding pull was `a4b9469`, before subsequent runner/document-only branch commits. **K01 Gradle unit test gate now PASSED ON THE PHONE.** JUnit XML count not yet seen; 32 JUnit methods are written in source. **No `:app:assembleDebug` result, APK, installation, editor acceptance or K03 persistent-storage acceptance yet.** The six Android instrumentation tests not run. K04 not implemented. Next perform real debug APK build with the same CoGo AAPT2 override, then device installation/UI/K03 persistence tests; no Actions, auto merge or repeated historical Dart suites. See [WORK_LOG.md](WORK_LOG.md) and [TEST_PLAN.md](TEST_PLAN.md).
