@@ -1,0 +1,175 @@
+package com.ateliertime.android
+
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.ateliertime.domain.*
+
+/**
+ * Offline preset actions. Only an approved timeline can be saved. Every read
+ * validates the saved signature with the current scheduling engine.
+ * Activate selects a stored approved plan but does not start a timer yet.
+ */
+@Composable
+fun PresetLibrarySection(
+    catalog: PresetCatalog,
+    approved: ApprovedSession?,
+    selectedId: String?,
+    suggestedName: String,
+    onSelected: (StoredPreset, ApprovedSession) -> Unit,
+    onSaved: (StoredPreset) -> Unit,
+) {
+    var collection by remember(catalog) { mutableStateOf(PresetCollection()) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var renameId by remember { mutableStateOf<String?>(null) }
+    var renameText by remember { mutableStateOf("") }
+    var pendingDelete by remember { mutableStateOf<String?>(null) }
+
+    fun refresh() {
+        try {
+            collection = catalog.state()
+            error = null
+        } catch (failure: Exception) {
+            error = failure.message ?: "Cannot read local sessions."
+        }
+    }
+    fun action(block: () -> Unit) {
+        try {
+            block()
+            refresh()
+        } catch (failure: Exception) {
+            error = failure.message ?: "Local session operation failed."
+        }
+    }
+
+    LaunchedEffect(catalog) { refresh() }
+
+    HorizontalDivider()
+    Text("Saved sessions · offline", style = MaterialTheme.typography.titleLarge)
+    Text("Save only an explicitly approved schedule. Stored sessions remain on this phone.")
+    if (error != null) {
+        Text(
+            error ?: "",
+            color = MaterialTheme.colorScheme.error,
+        )
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Button(
+            enabled = approved != null && selectedId == null,
+            onClick = {
+                val session = approved ?: return@Button
+                action {
+                    val saved = catalog.save(session, suggestedName)
+                    onSaved(saved)
+                }
+            },
+        ) { Text("Save approved") }
+        OutlinedButton(
+            enabled = approved != null && selectedId != null,
+            onClick = {
+                val session = approved ?: return@OutlinedButton
+                action {
+                    val saved = catalog.save(session, suggestedName, selectedId)
+                    onSaved(saved)
+                }
+            },
+        ) { Text("Update approved") }
+        OutlinedButton(
+            enabled = approved != null,
+            onClick = {
+                val session = approved ?: return@OutlinedButton
+                action {
+                    val saved = catalog.save(session, suggestedName)
+                    onSaved(saved)
+                }
+            },
+        ) { Text("Save as new") }
+    }
+    if (collection.entries.isEmpty()) Text("No saved sessions yet.")
+    collection.entries.forEach { preset ->
+        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(preset.title, style = MaterialTheme.typography.titleMedium)
+                if (collection.activeId == preset.id) {
+                    Text("Selected for future timer activation")
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    TextButton(onClick = {
+                        action { onSelected(preset, catalog.open(preset.id)) }
+                    }) { Text("Load") }
+                    TextButton(onClick = {
+                        action {
+                            val selected = catalog.activate(preset.id)
+                            onSelected(preset, selected)
+                        }
+                    }) { Text("Activate") }
+                    TextButton(onClick = {
+                        action {
+                            catalog.duplicate(preset.id, preset.title + " copy")
+                        }
+                    }) { Text("Duplicate") }
+                    TextButton(onClick = {
+                        renameId = preset.id
+                        renameText = preset.title
+                    }) { Text("Rename") }
+                    TextButton(onClick = { pendingDelete = preset.id }) {
+                        Text("Delete")
+                    }
+                }
+            }
+        }
+    }
+    val renameTarget = renameId
+    if (renameTarget != null) {
+        AlertDialog(
+            onDismissRequest = { renameId = null },
+            title = { Text("Rename saved session") },
+            text = {
+                OutlinedTextField(
+                    value = renameText,
+                    onValueChange = { renameText = it },
+                    label = { Text("New name") },
+                    singleLine = true,
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    action {
+                        val renamed = catalog.rename(renameTarget, renameText)
+                        if (selectedId == renameTarget) {
+                            onSelected(renamed, catalog.open(renameTarget))
+                        }
+                    }
+                    renameId = null
+                }) { Text("Rename") }
+            },
+            dismissButton = {
+                TextButton(onClick = { renameId = null }) { Text("Cancel") }
+            },
+        )
+    }
+    val deleteTarget = pendingDelete
+    if (deleteTarget != null) {
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text("Delete saved session?") },
+            text = { Text("This removes the stored preset from the phone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    action { catalog.delete(deleteTarget) }
+                    pendingDelete = null
+                }) { Text("Delete") }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDelete = null }) { Text("Cancel") }
+            },
+        )
+    }
+}
