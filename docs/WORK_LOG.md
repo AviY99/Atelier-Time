@@ -1,5 +1,16 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 2.6: Stage 2 test verification completed on clean Git worktree (D-059)
+
+**Screenshot evidence:** User successfully created separate `~/Atelier-Time-Stage2` worktree, and Git output shows current HEAD `3bb2bad`. In this folder `dart pub get && dart test test/editor_draft_test.dart` returned **`00:01 +11: All tests passed!`**. GitHub `compare_commits` confirmed the exact commit `3bb2bade992fddab7dc3d7ece31d9aa58231380f` is IDENTICAL to `stage-2-session-editor` current tip (0 ahead/behind).
+
+**Meaning:** The 11 Stage 2 Flutter-independent text-to-scheduling adapter tests are **screenshot-verified PASS on the clean Stage 2 source commit**. Earlier D-057/058 11-pass attribution was uncertain due to Stage 2 files staged on Stage 1; separate worktree now resolves this without touching user's dirty original `~/Atelier-Time`. Prior Stage 1 engine 35/35 tests remain verified separately, not counted as a newly executed Stage 2 suite.
+
+**Next gate:** Combined analyzer plus full root Dart suite on clean Stage 2 branch still needs `dart analyze && dart test` (optional low-cost Android Termux follow-up). Eight nested Flutter widget tests still have **NO Flutter SDK or execution**; Stage 2 is IN PROGRESS, NOT complete. No code changes, paid Actions, merges, APK or Stage 3+.
+
+---
+
+
 ## 2026-10-23 — Iteration 2.5: Git worktree diagnosis confirmed by Termux screenshot (D-058)
 
 User supplied read-only Git diagnostics. **Actual local branch is `stage-1-4-scheduling-core`, HEAD `907f871`**, not Stage 2. Git index has multiple **staged Stage 2 added files** (`apps/atelier_time_flutter/`, `lib/src/editor_draft.dart`, `test/editor_draft_test.dart`) and staged modified files (`lib/atelier_time.dart`, Stage 1 progress doc), plus untracked `pubspec.lock`. Therefore prior 11-test PASS is valid on these staged/mixed worktree contents but not yet attributable to a clean Stage 2 commit. The `git ls-files` output is expected because added files are in the index, not HEAD.
