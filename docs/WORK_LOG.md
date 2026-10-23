@@ -1,5 +1,20 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 3.2: User approved native Android implementation and unchanged product baseline (D-068/D-069)
+
+**Direct user authorization:** “מאושר , תתקדם , יש פער גדול לסגור , אשר שהגדרות והדרישות.מובנות תועדו ולא דורשות.שינוי , עדכן את תהליך הפיתוח והבדיקה למע החדשות”. Confirmed after re-reading PRODUCT_SPEC, EXAMPLES, SCHEDULING_RULES, SCHEDULING_EDGE_POLICY, STEP_1_3_REVIEW and active D-031/036/037/043/044: **NO changes to approved product/schedule data, inputs, warnings, timers, presets or three audio cue expectations**. D-015 summary semantics and D-016 per-pose/per-group audio remain open; earlier D-062 Android-first release and D-067 selected Kotlin/Compose stack are the ONLY change in delivery/tooling from historical Flutter plan.
+
+**Real source committed:** New isolated `android-native-kotlin-compose` based on Stage 2 Dart branch, draft [PR #3](https://github.com/AviY99/Atelier-Time/pull/3) for review/unmerged. `android-native/` contains standard Gradle project with CoGo-aligned AGP 9.3.1 / Kotlin Compose compiler 2.3.21 (Gradle 9.6.1 managed by CoGo), Android Activity and Compose editor preview. Platform-free pure Kotlin models and deterministic schedule engine port includes exact D-043 DP replacement, three last-two-pose options, 25/5 warning and separate approval. Editor allows editing all minute parameters, opening groups, break cycle/placement, chronological review and explicit in-memory approval. **No preset persistence or actual running timer/audio yet**.
+
+**Tests created, not executed:** 16 Kotlin scheduling JUnit regressions and 5 input JUnit regressions (total **21 written**) for exact Examples A/B, 3 ending options, extreme 1m splits, manual/auto replacement, DP 97m/480m and safety constraints. Found zero-summary fixture wrongly ending in an illegal trailing break and corrected **fixture to valid 165m work**, not algorithm or product policy. Verified GitHub file readback and basic balanced-delimiter check, **not compilation or JUnit success**. Existing Dart 35/35 + 11/11 PASS remain historical regression oracles only. No APK/install, no CoGo run, no CI/budget expenditure or PR merge.
+
+**Process updated:** New [ANDROID_NATIVE_EXECUTION_AND_TEST.md](ANDROID_NATIVE_EXECUTION_AND_TEST.md) maps frozen requirements, Kotlin domain/UI/platform layers, CoGo phone workloop (`:app:testDebugUnitTest`, `:app:assembleDebug`), evidence handling and acceptance stages K01–K06 including offline presets, monotonic timer with 3 sound cues, background/lock/device QA and future KMP. Decision D-068/D-069, docs/product/roadmap/QA, README and handoff v3.2 updated.
+
+**Next:** Run normal project unit tests and APK/debug build in CoGo on Android phone, fix actual failures; continue adding real offline preset/save/activate and live timer/audio rather than revisiting platform choice or asking for toy tests. Keep exact rules unchanged.
+
+---
+
+
 ## 2026-10-23 — Iteration 3.1: user demands industry-standard stack, not proof spikes (D-067)
 
 **User request (Hebrew):** “לא רוצה ניסויים והוכחות יכולת, אין מה להמציא את הגלגל, בדוק ברשת ובפורומים מה הסטנדרט בתעשיה שצריך לבחור לדרישה שהצבתי”. Explicitly rejects toy APKs and further capability proofs before choosing the industry-standard technology for Android phone-first development and later portability.
