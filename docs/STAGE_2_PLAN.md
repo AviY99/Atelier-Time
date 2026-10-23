@@ -1,5 +1,8 @@
 # Atelier Time — Stage 2 session editor and preview: implementation plan
 
+> **LATEST D-064:** Stage 2 Flutter screen source remains historical uncompiled prototype. New implementation uses **Kotlin + Jetpack Compose + Gradle**, designed with pure Kotlin domain and future KMP reuse. CoGo is phone IDE (not industry-standard IDE; Android Studio is). **No separate toy APK build gate**—write real Atelier Time Android code and build/test it routinely. Dart 35/35 core + 11/11 adapter regressions stay the migration reference; no paid Actions.
+
+
 > **2026-10-23 — D-062 ANDROID-FIRST FEASIBILITY SUB-GATE:** User's immediate priority is **rapid Android development directly on phone and a usable installable Android APK**, with future efficient iOS/Windows/macOS porting. The original unexecuted Flutter editor remains preserved but **PAUSED**. New [Dart-web/Capacitor candidate spike](ANDROID_FIRST_PLATFORM_SPIKE.md) will test whether the *already validated Dart scheduling core* can run in a phone browser, then in an Android APK built in Termux. UI migration, native alarms and persistence still require verification and subsequent implementation; don't call Stage 2 done.
 
 
