@@ -106,7 +106,7 @@ class AndroidPresetStoreTest {
         val preferences = context.getSharedPreferences(testName, Context.MODE_PRIVATE)
         for (raw in listOf(
             "{bad json",
-            "{\\"version\\":999,\\"presets\\":[],\\"activeId\\":null}",
+            """{"version":999,"presets":[],"activeId":null}""",
         )) {
             assertTrue(preferences.edit().putString("library_v1", raw).commit())
             try {
