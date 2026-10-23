@@ -187,3 +187,10 @@ Prototype: [apps/atelier_time_flutter/lib/session_editor_page.dart](https://gith
 - **T23 responsive/accessibility — PLANNED/UNRUN:** Single-column Android phone layout, 2-pane tablet/desktop layout, keyboard/numeric fields, readable contrast/text and screen-reader labeling. Temporary Material theme is not final branding.
 
 Run `flutter pub get`, `flutter analyze`, `flutter test`, and manual preview checks on an actual Flutter-capable environment when one is available. User's Termux Dart installation validates the pure Dart scheduling engine but **does not validate this Flutter UI**. Avoid paid GitHub Actions. PR #1 verified core and draft PR #2 prototype remain unmerged.
+
+
+## 2026-10-23 — Stage 2 widget-test sources (D-055, UNEXECUTED)
+
+[Eight Flutter widget tests](https://github.com/AviY99/Atelier-Time/blob/stage-2-session-editor/apps/atelier_time_flutter/test/session_editor_widget_test.dart) now exist on the isolated Stage 2 branch and exercise T19–T23: parsing/hard zero errors, canonical B preview, opening groups, last-pose choices and edit invalidation, 25/5 acknowledgment, and wide layouts. `flutter_test` was added under the nested app's dev dependencies.
+
+**Test execution:** **NOT RUN**. Current assistant machine has no Flutter; user's Android Termux only has Dart. The separately verified 35/35 **core Dart** tests remain evidence for Stage 1 only and do not validate the Flutter UI. When Flutter is available: `cd apps/atelier_time_flutter && flutter pub get && flutter analyze && flutter test`. Document exact failures and correct them before closing Stage 2.
