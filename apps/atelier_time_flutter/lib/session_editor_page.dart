@@ -659,8 +659,13 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
                 ],
               );
             }
-            return ListView(
-              children: [_editPanel(), const Divider(), _previewPanel()],
+            // Keep the editor and full preview mounted so invalidation
+            // feedback and ending controls remain reachable by scrolling.
+            // Later large-timeline optimization can virtualize phase rows.
+            return SingleChildScrollView(
+              child: Column(
+                children: [_editPanel(), const Divider(), _previewPanel()],
+              ),
             );
           },
         ),
