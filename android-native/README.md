@@ -1,5 +1,8 @@
 # Atelier Time — Android native Kotlin / Jetpack Compose
 
+> **CURRENT STATUS — 2026-10-23, D-070 / HANDOFF v3.4:** Offline saved-preset K03 **source is NOW IMPLEMENTED** (supersedes the original “not implemented” summary below). The Kotlin `Presets.kt` domain catalog, private versioned `AndroidPresetStore.kt` and Compose `PresetLibrarySection.kt` integrated with `SessionEditorScreen.kt` handle approved-only save/update/load/rename/duplicate/delete/select. **32 JVM Kotlin JUnit + 4 Android instrumentation test methods have been WRITTEN but NONE RUN. No successful Kotlin compile/Gradle task/APK/install is evidenced. K03 NOT ACCEPTED until tested on phone; K04 live timer and 3 cues NOT IMPLEMENTED.** For the next chat read [self-contained handoff](https://github.com/AviY99/Atelier-Time/blob/main/docs/NEXT_CHAT_HANDOFF_2026_10_23.md) and [canonical project handoff](https://github.com/AviY99/Atelier-Time/blob/main/docs/HANDOFF.md). Older status/test counts below are historical.
+
+
 **Status (2026-10-23): REAL project source committed, NOT compiled/analyzed/device-tested, no APK yet.** This is **not** a sample/throwaway proof project. Its UI already edits session rules and previews/approves actual generated schedules. Offline preset persistence and running timer/audio are the next functional deliverables, **not yet implemented**.
 
 ## Architecture / portability
