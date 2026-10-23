@@ -1,5 +1,18 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 2.9: User approved Android-first development ON THE PHONE (D-062/D-063)
+
+**New requirement in user's own words:** “פיתוח לאנדרואיד על הטלפון מהיר ויעיל שניתן אחכ להסב ביעילות לסביבות אחרות”. Prioritize **fast local Android development, testing, debug APK builds and install directly on Android ARM64 phone NOW**, architect efficiently for **later** iOS/iPadOS/Windows/macOS. This supersedes D-061's all-target-at-once constraints and D-019's original simultaneous four-platform first release, but NOT product features or safety rules.
+
+**Current October 2026 research:** AndroidIDE is archived; successor [Code on the Go](https://appdevforall.org/code-on-the-go/) remains actively maintained, version **26.43 published October 20, 2026** on GitHub. It promises Kotlin/Java Android app building/debugging wholly on phone, with free open-source tool. JetBrains official Kotlin Multiplatform and Compose Multiplatform support later sharing Android/iOS/desktop logic and UI. CoGo's full KMP support is NOT established. Kotlin cannot directly use Dart scheduling source; preserving 35/35 Dart scheduling and 11/11 Dart adapter regression oracles is essential.
+
+**Recommended proof before migration:** install maintained ARM64 Code on the Go, create a minimal Kotlin Android sample, build and install/debug APK on user's phone; if possible test Jetpack Compose build. Only on success establish separate Android-first prototype branch and port tiny canonical scheduling fixture before substantial rewrite. Do not silently switch frameworks or delete existing code. No Android APK or CoGo test has run yet. No paid Actions/CI/builds or PR merge.
+
+**Documentation:** Created [ANDROID_FIRST_DEVELOPMENT_PLAN.md](ANDROID_FIRST_DEVELOPMENT_PLAN.md), decisions D-062/D-063, revised product/TD-001/architecture/roadmap/Stage 2/full platform assessment, handoff v2.9. Priority clarified, old audit retained historically. Stage 1 tests remain validated; current Flutter source still uncompiled.
+
+---
+
+
 ## 2026-10-23 — Iteration 2.8: original platform selection re-examined end-to-end (D-061)
 
 **User instruction:** Explicitly demanded rerunning the initial platform review, emphasizing cross-platform at **all stages from development through finished application**, not simply runtime support. User correctly identified an earlier process failure; no more Flutter-specific UI implementation authorized before the feasibility check.
