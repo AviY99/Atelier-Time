@@ -5,7 +5,9 @@ plugins {
 
 android {
     namespace = "com.ateliertime.android"
-    compileSdk = 35
+    // Compose runtime 1.12.x (BOM 2026.09.00) requires API 37 at compile time.
+    // AGP 9.3.1 supports API 37; targetSdk/minSdk remain unchanged.
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.ateliertime.android"
