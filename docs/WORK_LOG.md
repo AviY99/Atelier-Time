@@ -1,5 +1,16 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 1.6: Android Dart smoke test PASS, full checks pending
+
+**User-reported execution:** After the previous integer-type fix in commit `0dedd95756b6d3984b2e16548a58599179fbf7ff`, user reported **“Scheduling smoke checks succeeded.”** This is a **real positive smoke-test result** from Termux Dart 3.13.7 on Android ARM64. It confirms the corrected scheduling source compiled and the smoke assertions completed. The old D-047 `num` → `int?` compile error is no longer observed in that run.
+
+**Scope/evidence:** No detailed stdout screenshot beyond the exact user message; classify as **USER-CONFIRMED SMOKE PASS** only. The full `dart pub get`, `dart analyze`, `dart test`, Flutter builds and multi-platform test runs have **NOT** been reported as completed. No source behavior changes this iteration.
+
+**Next step:** In existing `~/Atelier-Time` Termux folder run `dart pub get && dart analyze && dart test`; share terminal output or errors. Keep project in **Stage 1 Step 1.4 IN PROGRESS**, branch unmerged; GitHub Actions/budget untouched; Stage 2 not authorized. Decision D-048 recorded, handoff v1.6 refreshed.
+
+---
+
+
 ## 2026-10-23 — Iteration 1.5: first Android Dart compile result and immediate type fix
 
 **User supplied actual execution evidence:** Termux Dart SDK 3.13.7 stable on `android_arm64`, cloned the isolated `stage-1-4-scheduling-core` branch, then ran `dart tool/smoke.dart`. The compiler **FAILED** at `lib/src/scheduling.dart:621:28`: `The argument type 'num' can't be assigned to the parameter type 'int?'` at `offsetSeconds: crossingOffset`.
