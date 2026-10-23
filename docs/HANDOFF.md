@@ -1,5 +1,11 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v3.4)
 
+## D-071 APPROVED AND IMPLEMENTED IN SOURCE — 2026-10-24; MUST REBUILD ON PHONE
+
+The user replied **“כן”** to the proposed opening-group break semantics: configurable `0m` allowed between earlier opening groups, strictly positive rest after last group, and matching first regular `BREAK_FIRST` break **reused not duplicated**. Logged **APPROVED** in [DECISIONS.md D-071](DECISIONS.md), with detailed rules in [EDITOR_LABEL_REVIEW_2026_10_24.md](EDITOR_LABEL_REVIEW_2026_10_24.md). Real `android-native-kotlin-compose` source now has optional group after-break field, explicit editor input/validation, group-break phases that do not consume ordinary break replacement ordinals, version-1 optional persistence field and signature extension for explicit values while leaving legacy signed records unchanged. Example A UI newly sets 0m + 5m. **46 Kotlin JVM test methods + 7 Android instrumentation methods written; newly added 14?** Correction: 46 JVM counts 37 prior (32 earlier passed on device + 5 K04 unrun) plus 9 group-break JVM unrun; 7 Android instrumentation (6 prior unrun + 1 new). **New sources are NOT compiled/tested on the phone yet**, previous 32-test / APK PASS belongs to earlier source. Next device step update checkout and run native-AAPT2 Gradle tests/build; then reinstall, validate timer and group-break behavior and saved preset compatibility. PR #3 remains unmerged, no paid CI.
+
+---
+
 ## LATEST — 2026-10-24: INSTALLED ANDROID UI OBSERVED, K04 TIMER SOURCE ADDED / UNVERIFIED
 
 User uploaded screenshot of the **installed Atelier Time Compose app running on their Android phone**, showing live session editor, Example A preview, explicit approval and an existing saved preset. This is first confirmed **K02 on-device launch/visual output**, not proof of exhaustive editor operations or K03 persistence through relaunch. Earlier phone screenshots verified `:app:testDebugUnitTest`, `:app:assembleDebug` and APK file hash at prior source commit.
