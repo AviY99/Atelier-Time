@@ -1,5 +1,20 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 3.3: K03 offline approved session library authored (D-070)
+
+**User instruction:** “להתקדם לשלב הבא”. Continued already-approved real Android Kotlin development; implemented named offline preset lifecycle, with **NO changes** to previously approved timing/break/warning rules.
+
+**Source committed to `android-native-kotlin-compose`, open draft PR #3:** New pure Kotlin `domain/Presets.kt` separates persistence and business rules through `PresetStore` interface and `PresetCatalog` service. Only immutable **ApprovedSession** can be saved. Supports save/update/open/duplicate/rename/delete/activate-as-selection; reloads regenerate the entire exact timeline through `ScheduleEngine`, revalidate any acknowledged D-031 warnings and compare a full-rule/phase/choice/warning consistency fingerprint (not cryptographic). New `android/AndroidPresetStore.kt` versioned JSON private SharedPreferences adapter stores full collection and selected ID with one commit and refuses to erase corrupt or future-version records. New Compose `PresetLibrarySection.kt` integrated in `SessionEditorScreen.kt` exposes full preset management, confirmation before deleting, warning/schedule approval safety, and no false timer activation. `EditorInput.kt` now rejects Int overflow during minute-to-second conversion.
+
+**Tests created:** 10 new pure Kotlin `PresetCatalogTest` methods (round-trip, overwrite, duplicate/rename/delete/select, warnings, corrupt metadata and revision fingerprint, disk failure), 1 extra editor overflow test, 4 Android instrumentation tests using isolated private test prefs (disk reload, CRUD, corruption/future schema). Cumulative **32 Kotlin JVM JUnit methods and 4 Android instrumentation methods WRITTEN, NONE EXECUTED**. Historical Dart 35/35 scheduling and 11/11 editor parser passed on Android Termux earlier but do not establish Kotlin success.
+
+**Verification:** GitHub source read-back and simple lexical delimiter checks PASS; this is not a compiler or emulator. **No Kotlin compile, test, installed APK, actual on-phone persistence result or K03 acceptance**. No paid GitHub Actions, merges or cleanup of original user data/worktrees. K04 monotonic timer and three audio cues still unimplemented. Added decision D-070 and updated roadmap/test plan/product, native README and cross-chat handoff v3.3.
+
+**Next:** Run `:app:testDebugUnitTest` and `:app:assembleDebug` as standard project build from CoGo on Android phone, then install and verify saved sessions survive app restart; run `:app:connectedDebugAndroidTest` when instrumentation is available. Fix actual compile/test issues, then continue K04 timer/audio source work while preserving D-015/D-016 open policy details.
+
+---
+
+
 ## 2026-10-23 — Iteration 3.2: User approved native Android implementation and unchanged product baseline (D-068/D-069)
 
 **Direct user authorization:** “מאושר , תתקדם , יש פער גדול לסגור , אשר שהגדרות והדרישות.מובנות תועדו ולא דורשות.שינוי , עדכן את תהליך הפיתוח והבדיקה למע החדשות”. Confirmed after re-reading PRODUCT_SPEC, EXAMPLES, SCHEDULING_RULES, SCHEDULING_EDGE_POLICY, STEP_1_3_REVIEW and active D-031/036/037/043/044: **NO changes to approved product/schedule data, inputs, warnings, timers, presets or three audio cue expectations**. D-015 summary semantics and D-016 per-pose/per-group audio remain open; earlier D-062 Android-first release and D-067 selected Kotlin/Compose stack are the ONLY change in delivery/tooling from historical Flutter plan.
