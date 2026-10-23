@@ -137,7 +137,7 @@ class ScheduleEngineTest {
 
     @Test fun zeroSpecialCountAndSummaryAllowed() {
         val c = result(
-            b().copy(specialBreakCount = 0, summarySeconds = 0),
+            b().copy(totalSeconds = m(165), specialBreakCount = 0, summarySeconds = 0),
             FinalPoseChoice.remainder()
         )
         contiguous(c)
