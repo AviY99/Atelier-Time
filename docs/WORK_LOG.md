@@ -1,5 +1,15 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — K03 follow-up: corruption safety code committed; Android QA still blocked
+
+**Live implementation branch:** `android-native-kotlin-compose`; draft PR #3 remains open/unmerged. Commits: [`01e56f0`](https://github.com/AviY99/Atelier-Time/commit/01e56f01be73f0d90e473a2263ecbda2be187404) (catch wrong-type SharedPreferences values in the uniform storage error guard and refuse direct overwrite of malformed/future-version stored data), [`95facb8`](https://github.com/AviY99/Atelier-Time/commit/95facb8005578b605307771e0876c377ac747ae8) (two Android instrumentation regression methods), [`0db22e8`](https://github.com/AviY99/Atelier-Time/commit/0db22e8f5833459dc2e7c80300b4e6a5cfe22748) (fix Kotlin JSON test literal), [`c3ed4dc`](https://github.com/AviY99/Atelier-Time/commit/c3ed4dc2d0c1c4709029b9bd4ab865b576380153) (native README updated). Source write and GitHub readback confirmed for each changed code/test file; **no compiler execution** was inferred from this check.
+
+**Environment observed in current assistant session:** `kotlinc-jvm 1.9.0`, OpenJDK 21; Gradle, Android SDK, `adb`, and access to the user's physical phone are absent. GitHub remote access through local `git` failed with DNS resolution error; GitHub connector reads/writes succeeded. This environment cannot execute the pinned AGP 9.3.1 / Kotlin 2.3.21 Android Gradle project or produce/test an APK. No `:app:testDebugUnitTest`, `:app:assembleDebug`, `:app:connectedDebugAndroidTest`, installation, or phone persistence test was executed; **all 32 JVM tests and 6 Android instrumentation tests remain WRITTEN, NOT RUN**. K01/K02/K03 acceptance remains **OPEN**, K04 NOT IMPLEMENTED. No paid GitHub Actions, build service, PR merge, destructive worktree operations or Dart reruns.
+
+**Next blocking validation:** open the **real** `android-native/` Gradle root on `android-native-kotlin-compose` in Code on the Go on the phone, run `:app:testDebugUnitTest` followed by `:app:assembleDebug`, install/reopen, check A/B/preview/saved-session CRUD and corruption handling, then `:app:connectedDebugAndroidTest` if supported. Capture exact task output, commit SHA, environment and behavior before closing K01–K03. After verified acceptance, proceed to K04 monotonic timer and three distinct cues, keeping D-015/D-016 undecided until user input is required.
+
+---
+
 ## 2026-10-23 — Chat closure: independently usable next-chat handoff v3.4 (documentation only)
 
 **User request:** “השיחה הגיעה לסיום , נדרש הנדאוף לשיחה חדשה שמסתמך על מסמכי הפרוייקט.” Stopped feature coding and prepared [NEXT_CHAT_HANDOFF_2026_10_23.md](NEXT_CHAT_HANDOFF_2026_10_23.md) from the live authoritative decision register/product spec/current Kotlin implementation branch/test documentation. Linked this standalone handoff from canonical [HANDOFF.md v3.4](HANDOFF.md); corrected outdated status in Android branch README to say K03 offline preset persistence source exists but remains UNVERIFIED. **No application code changes** made for this handoff.
