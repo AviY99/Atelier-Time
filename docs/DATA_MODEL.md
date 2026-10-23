@@ -1,9 +1,9 @@
 # Atelier Time — Data model and scheduling interfaces (Stage 1, Step 1.2)
 
 **Prepared:** 2026-10-22  
-**Status:** Step 1.2 **design documented and used as the basis for Step 1.3**, following the user's further “Continue”. Named types/fields remain a technical proposal, not executable source or new product behavior. No Flutter scaffold or engine exists.  
+**Status (historical Step 1.2 design, updated 2026-10-23):** The document originally described conceptual field names and interfaces. Since then, the pure Dart core **has been implemented and verified 35/35 tests PASS** (D-052) on `stage-1-4-scheduling-core`. Refer to [actual scheduling code](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/lib/src/scheduling.dart) for implemented API names; this earlier conceptual model is not an exact code schema lock. Stage 2 Flutter editor/preview source exists on a separate branch but has **not been Flutter-tested**.  
 **Technology:** Flutter + Dart, one shared app targeting Android, Windows, iOS/iPadOS and macOS (approved TD-001).  
-**Current gate update (D-045):** Step 1.3 policies approved via D-037. **D-044 now approves positive special replacement duration shorter than/equal to normal** (D-038 resolved), with applicable 25/5 warnings. Step 1.4 engine and test sources now implement this on [development branch](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core). **No Dart SDK/compiled test executions/GitHub Actions/Flutter build. Step 1.4 IN PROGRESS, not complete.**
+**Current gate update (D-052–D-054):** Step 1.3 policies approved via D-037/D-044. Stage 1 Step 1.4 **VERIFIED/COMPLETE** on branch (screenshot-confirmed **35/35 Dart tests PASS** on Android Termux 3.13.7; prior smoke and analyzer PASS). Stage 2 editor work **STARTED** under D-053 with nested Flutter source on [branch](https://github.com/AviY99/Atelier-Time/tree/stage-2-session-editor), [Stage 2 plan](STAGE_2_PLAN.md) and draft PR #2. **Flutter editor uncompiled/untested, no installed app; no GitHub Actions or paid build.**
 
 ## 1. Product-to-model mapping
 
