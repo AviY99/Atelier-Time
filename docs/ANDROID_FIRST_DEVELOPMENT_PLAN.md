@@ -1,5 +1,8 @@
 # Atelier Time — Android-first, phone-developed delivery plan
 
+> **2026-10-23 — D-064 RECONCILIATION:** This document evaluates **Kotlin / Code on the Go** as the more direct Android-native on-phone development path (D-063), **but it is NOT a finally approved replacement**. Another bounded candidate has been prepared to **reuse the already-verified Dart core** using Dart-to-JavaScript and Capacitor; see [ANDROID_FIRST_PLATFORM_SPIKE.md](ANDROID_FIRST_PLATFORM_SPIKE.md). **Try the low-cost Dart-to-JS browser proof before choosing whether porting 35+11 passing Dart tests into Kotlin is necessary**. Neither native APK route nor three distinct background/locked-screen alerts has been proven on the user's phone. No framework migration yet.
+
+
 **Date:** 2026-10-23  
 **Status:** User-approved **change in priorities** (D-062); **candidate implementation path** awaiting a real build feasibility spike (D-063). This is the new active platform-planning document. See historical [full-lifecycle reassessment](PLATFORM_REASSESSMENT_2026_10_23.md).
 
