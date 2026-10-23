@@ -1,5 +1,8 @@
 # Atelier Time
 
+> **2026-10-23 — D-064 SHORTLIST CORRECTED:** **Two unproven Android-phone candidates** now tracked: (A) keep 35+11 test-verified Dart business logic and prove a small Dart-JS browser app / later Termux Capacitor native APK; (B) build Kotlin Android directly using maintained Code on the Go, then explore Kotlin Multiplatform, accepting a substantial Dart-to-Kotlin port. **No APK has been built on this phone and no replacement stack has been selected.** Test first with the smallest isolated `spike-android-dart-web` proof, then verify an actual installed native APK and locked-screen alerts before full UI migration. See [D-064](docs/DECISIONS.md) and [spike README](https://github.com/AviY99/Atelier-Time/blob/spike-android-dart-web/spikes/android_dart_web/README.md).
+
+
 > **2026-10-23 — LATEST REQUIREMENT D-062:** **Build Android app on user's Android phone first**, with a fast on-phone development/test/preview/build loop and efficient later iOS/Windows/macOS ports. D-061's universal day-one local cross-OS build requirement is superseded; original Flutter SDK on Termux is still unverified and its source is preserved/frozen. Preferred **unproven** feasibility candidate is **existing Dart scheduling engine → Dart-to-JavaScript browser UI → Capacitor-generated native Android APK in Termux**; later OS wrappers reuse frontend/core, with OS-specific signing/alert adapters. A tiny spike is on [spike-android-dart-web](https://github.com/AviY99/Atelier-Time/tree/spike-android-dart-web), and [acceptance gates](docs/ANDROID_FIRST_PLATFORM_SPIKE.md) forbid claiming APK or background reliability until real testing. No GitHub Actions/paid workflows. Stage 1 35/35 and Stage 2 adapter 11/11 verified.
 
 
