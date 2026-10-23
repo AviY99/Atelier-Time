@@ -51,3 +51,6 @@ The user installed **Dart 3.13.7 on Android ARM64 via Termux**, successfully ran
 
 
 **Latest verification:** Actual Android Termux screenshots confirm `dart analyze` **No issues found!** and `dart test` **34 passing**. No separate APK, Flutter application or non-Android build has been produced. Final Step 1.4 QA coverage review still needs the valid 1m+34m custom-split endpoint before formal completion.
+
+
+**Acceptance coverage checkpoint D-051:** A 35th unit test for the missing valid 1m+34m final-pose split was added on the development branch after the screenshots. **34 tests have screenshot-confirmed PASS; the new 35th test has NOT run.** To retest in existing Android Termux clone: `git pull --ff-only && dart test`.
