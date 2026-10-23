@@ -219,6 +219,7 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
     return SizedBox(
       width: 155,
       child: TextField(
+        key: ValueKey('field_' + key),
         controller: _numbers[key],
         keyboardType: const TextInputType.numberWithOptions(signed: true),
         decoration: InputDecoration(labelText: label),
@@ -247,6 +248,7 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
           ),
           _sectionTitle('Session'),
           TextField(
+            key: const ValueKey('session_name'),
             controller: _name,
             decoration: const InputDecoration(labelText: 'Session name'),
           ),
@@ -298,6 +300,7 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
                         SizedBox(
                           width: 120,
                           child: TextField(
+                            key: ValueKey('opening_count_' + _openings[i].id),
                             controller: _openings[i].count,
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
@@ -308,6 +311,7 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
                         SizedBox(
                           width: 135,
                           child: TextField(
+                            key: ValueKey('opening_minutes_' + _openings[i].id),
                             controller: _openings[i].minutes,
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
@@ -322,6 +326,7 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
               ),
             ),
           OutlinedButton.icon(
+            key: const ValueKey('add_opening'),
             onPressed: _addOpening,
             icon: const Icon(Icons.add),
             label: const Text('Add opening group'),
@@ -339,6 +344,7 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<CycleStart>(
+            key: const ValueKey('cycle_order'),
             value: _cycle,
             decoration: const InputDecoration(labelText: 'Regular cycle starts'),
             items: const [
@@ -359,6 +365,7 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
           ),
           _sectionTitle('Special break placement'),
           SwitchListTile(
+            key: const ValueKey('automatic_placement'),
             contentPadding: EdgeInsets.zero,
             title: const Text('Automatic placement'),
             subtitle: const Text(
@@ -370,6 +377,7 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
           ),
           if (!_automaticPlacement)
             TextField(
+              key: const ValueKey('manual_ordinals'),
               controller: _manualOrdinals,
               keyboardType: TextInputType.text,
               decoration: const InputDecoration(
@@ -420,6 +428,7 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
       String label, FinalPoseMode mode, FinalPoseChoice choice,
       {bool enabled = true}) {
     return ChoiceChip(
+      key: ValueKey('end_' + mode.name),
       label: Text(label),
       selected: _endingChoice?.mode == mode,
       onSelected: enabled ? (_) => _setEnding(choice) : null,
@@ -486,6 +495,7 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
               ' min; final pose: ' +
               (availableMinutes - customMinutes).toString() + ' min'),
           Slider(
+            key: const ValueKey('split_slider'),
             min: 1,
             max: maxFirst.toDouble(),
             divisions: maxFirst - 1,
@@ -510,7 +520,14 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
     if (candidate == null) {
       return Padding(
         padding: const EdgeInsets.all(16),
-        child: Text(_parseIssue ?? 'Enter session rules to preview a schedule.'),
+        child: Card(
+          child: ListTile(
+            leading: const Icon(Icons.error_outline),
+            title: const Text('Blocking input error'),
+            subtitle: Text(_parseIssue ??
+                'Enter valid whole-minute rules to preview a schedule.'),
+          ),
+        ),
       );
     }
 
@@ -560,11 +577,15 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
                             '.')),
               ),
             ),
-          _endingOptions(candidate),
+          if (!candidate.hasBlockingIssues) _endingOptions(candidate),
           _sectionTitle('All scheduled phases'),
-          if (candidate.phases.isEmpty)
+          if (candidate.hasBlockingIssues)
+            const Text('The inputs are blocked. No schedule can be approved.'),
+          if (!candidate.hasBlockingIssues && candidate.phases.isEmpty)
             const Text('No valid timeline can be generated with these inputs.'),
-          for (final phase in candidate.phases)
+          for (final phase in candidate.hasBlockingIssues
+              ? const <SchedulePhase>[]
+              : candidate.phases)
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
@@ -577,6 +598,7 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
             ),
           if (warnings.isNotEmpty)
             CheckboxListTile(
+              key: const ValueKey('rest_acknowledgement'),
               contentPadding: EdgeInsets.zero,
               value: _warningAcknowledged,
               onChanged: (accepted) {
@@ -592,6 +614,7 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
             ),
           const SizedBox(height: 12),
           FilledButton.icon(
+            key: const ValueKey('approve_schedule'),
             onPressed: canApprove ? _approve : null,
             icon: const Icon(Icons.check_circle_outline),
             label: const Text('Approve this exact timeline'),
