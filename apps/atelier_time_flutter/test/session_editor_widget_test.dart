@@ -118,6 +118,7 @@ void main() {
     // rest cannot reset the accumulated posing counter (D-031/D-044).
     await editMinutes(tester, 'count', '0');
     await editMinutes(tester, 'normal', '1');
+    await editMinutes(tester, 'summary', '0');
     await editMinutes(tester, 'total', '51');
 
     expect(find.text('25/5 rest recommendation'), findsWidgets);
