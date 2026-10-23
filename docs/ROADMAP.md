@@ -52,3 +52,8 @@ Android Termux Dart 3.13.7 user reports smoke success (D-048) and subsequently *
 ## Android screenshot-confirmed code check — 2026-10-23 (D-050)
 
 Termux on Android ARM64: `dart pub get` succeeded, `dart analyze` returned **No issues found!**, `dart test` ended **00:01 +34: All tests passed!**. This is screenshot evidence, not merely user narration. The branch scheduling engine is functional under this SDK, but **Step 1.4 remains at the acceptance gate**: the minimum T09 final-split edge test requires both 1-minute endpoints; the current 34 tests explicitly cover only the 34m+1m direction. A small additional test and Android rerun should close that item before declaring Step 1.4 complete. No action on Stage 2, paid GitHub workflows or build distribution.
+
+
+## Final Stage 1.4 T09 edge-case check committed (D-051)
+
+An acceptance-mapping gap in T09 was closed at the **test-source** level by adding a 35th Dart test for the approved 1m+34m custom last-two-poses endpoint (commit `4b2f5d9`). The first 34 tests and analyzer have screenshot-confirmed PASS (D-050). **The 35th test is not yet executed**, so Step 1.4 remains in final acceptance QA. User can update their existing Termux project with `git pull --ff-only && dart test`. Do not merge or start Stage 2 or billable workflows.
