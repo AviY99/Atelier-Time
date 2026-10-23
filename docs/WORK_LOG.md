@@ -1,5 +1,18 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 3.1: user demands industry-standard stack, not proof spikes (D-067)
+
+**User request (Hebrew):** “לא רוצה ניסויים והוכחות יכולת, אין מה להמציא את הגלגל, בדוק ברשת ובפורומים מה הסטנדרט בתעשיה שצריך לבחור לדרישה שהצבתי”. Explicitly rejects toy APKs and further capability proofs before choosing the industry-standard technology for Android phone-first development and later portability.
+
+**Independent research:** Google Android Developers Blog May 19 2026 declared Compose First; Kotlin Android official docs endorse Kotlin; JetBrains Kotlin Multiplatform & Compose Multiplatform documentation says Android/iOS/desktop UI is stable and can reuse business logic. Verified active CoGo phone IDE release 26.43 Oct 20, 2026 (local Kotlin/Gradle Android build); standard IDE in industry is Android Studio on desktop, NOT CoGo. Checked Reddit r/termux independent on-device Android APK build discussion (reports SDK/Gradle setup can be burdensome), r/Android CoGo developer post (self-disclosed author affiliation), AndroidIDE archived repository, and CoGo Compose Preview issue reports.
+
+**Decision:** Kotlin + Jetpack Compose + standard Android Gradle project + Android-free pure Kotlin domain; CoGo local Android phone IDE; future Kotlin/Compose Multiplatform port. Do NOT require a separate throwaway sample build or Dart-Web/Capacitor spike. Real Atelier Time implementation and ordinary compile/test follow; currently **no Kotlin APK yet**. Keep prior verified 35 Dart scheduling and 11 adapter tests as migration parity sources.
+
+**Reconciled simultaneous conflicting writes:** GitHub Decision file contained **three duplicated D-064 rows** with contradictory conclusions; preserved history as D-064, D-065, D-066 and recorded **D-067 authoritative**. Updated handoff v3.1 to put final decision first, superseding former spike guidance. No original branches deleted, no paid GitHub Actions, no PR merges.
+
+---
+
+
 ## 2026-10-23 — Iteration 3.0: reconcile Android-first Kotlin and Dart-web candidates (D-064)
 
 **Concurrently researched candidate:** Maintained Code on the Go Kotlin IDE/Android native tooling (D-063), possible later Kotlin/Compose Multiplatform reuse. Native APK build on user's phone unverified. **Tradeoff:** 35/35 validated scheduling tests + 11/11 validated input parser are Dart; a Kotlin migration requires port and complete parity revalidation.
