@@ -1,5 +1,10 @@
 # ATELIER TIME — Hand-off for the next ChatGPT conversation
 
+## ADDENDUM — 2026-10-23 K03 source hardening after original handoff
+
+The original snapshot below was accurate at its time but is **superseded on two details**: K03 storage code now has a guard against wrong-type private preferences values and against direct overwrites of corrupt/future-version JSON ([commit `01e56f0`](https://github.com/AviY99/Atelier-Time/commit/01e56f01be73f0d90e473a2263ecbda2be187404)); two more Android instrumentation regression tests were added ([`95facb8`](https://github.com/AviY99/Atelier-Time/commit/95facb8005578b605307771e0876c377ac747ae8), test literal fix [`0db22e8`](https://github.com/AviY99/Atelier-Time/commit/0db22e8f5833459dc2e7c80300b4e6a5cfe22748)). **CURRENT TEST SOURCE COUNT: 32 JVM JUnit + 6 Android instrumentation methods, ALL NOT RUN.** GitHub source readback succeeded, but there is no verified Kotlin compilation, Gradle result, APK or phone persistence. Current assistant environment lacks Gradle/Android SDK/phone access. PR #3 remains draft/unmerged; K01–K03 acceptance still pending; K04 timer/audio not implemented. Resume the ordinary CoGo/Android Gradle build gates below, not new documentation or throwaway experiments. See [work log](WORK_LOG.md) for exact evidence.
+
+
 **Date:** 2026-10-23 (Asia/Jerusalem). **Handoff status:** AUTHORITATIVE SNAPSHOT / SOURCE-ONLY ANDROID DEVELOPMENT IN PROGRESS.
 **Repository:** https://github.com/AviY99/Atelier-Time  
 **Default `main`:** authoritative product decisions, specification, test plan and cross-chat history.  
