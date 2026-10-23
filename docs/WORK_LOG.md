@@ -1,5 +1,15 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — FIRST VERIFIED PHONE DEBUG APK GRADLE ASSEMBLY SUCCESS (K02 build gate)
+
+**User screenshot evidence:** In Code on the Go Android ARM64 terminal, running from the actual `android-native/` Gradle project with the previously verified native AAPT2 override, task `:app:assembleDebug` executed through Gradle 9.6.1/Bash and reached `> Task :app:assembleDebug` followed by **`BUILD SUCCESSFUL in 47s`**. Final count: **36 actionable tasks: 18 executed, 18 up-to-date**. `:app:packageDebug` and debug signing tasks appear in output. Nonblocking packaging warning: unable to strip `libandroidx.graphics.path.so`, packaging unstripped. Previous phone screenshot already confirmed `:app:testDebugUnitTest` **BUILD SUCCESSFUL in 34s**. This is real, user-supplied phone build evidence, not remote CI or an inferred test result.
+
+**Evidence distinction:** This verifies **successful debug APK assembly Gradle gate**, **NOT** the exact on-disk APK file size/checksum, installer success, first launch, editor UI, offline preset persistence, six device instrumentation methods or locked-screen behavior. User has not yet shown `app/build/outputs/apk/debug/app-debug.apk` filesystem details or an installed app. Latest phone checkout previously confirmed as `a4b9469` (native build source); later commits only update runner/docs. The JUnit XML exact case count was not shown in screenshots. **K01 Gradle JVM test gate PASSED; K02 APK assembly PASSED but install/UI acceptance OPEN; K03 storage acceptance OPEN; K04 NOT IMPLEMENTED.** PR #3 stays draft, no GitHub Actions.
+
+**Next:** Verify APK location and SHA256 with `ls -lh app/build/outputs/apk/debug/app-debug.apk && sha256sum app/build/outputs/apk/debug/app-debug.apk`; then install through Android/Code on the Go, launch and manually validate canonical A/B timeline, warnings, save/list/load/rename/duplicate/delete, relaunch/offline behavior. Record observed device outcomes only; proceed to six isolated instrumentation tests when available.
+
+---
+
 ## 2026-10-23 — FIRST VERIFIED REAL ON-PHONE KOTLIN GRADLE UNIT-TEST SUCCESS (K01)
 
 **Evidence:** User-provided Code on the Go Android ARM64 terminal screenshot, project checkout at previously reported `a4b9469` (most recent screenshot-confirmed phone Git pull). Ran **`:app:testDebugUnitTest`** using CoGo Gradle 9.6.1 through Bash and CoGo native Android AAPT2 override (`-Pandroid.aapt2FromMavenOverride=$ANDROID_HOME/build-tools/36.0.0/aapt2`). Gradle log visibly contains `:app:compileDebugKotlin UP-TO-DATE`, `:app:processDebugResources`, `:app:compileDebugUnitTestKotlin`, `:app:testDebugUnitTest`, and **`BUILD SUCCESSFUL in 34s`**; **24 actionable tasks (10 executed, 14 up-to-date)**. This establishes successful Android Kotlin compilation/resource processing and completion of the JVM test Gradle task on the actual phone. The screenshot does *not* show the JUnit XML numerical count, so the precise number of test methods executed is **not yet independently confirmed by test report** (32 methods are defined in source).
