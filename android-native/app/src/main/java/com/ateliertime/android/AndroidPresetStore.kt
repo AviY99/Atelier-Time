@@ -110,7 +110,12 @@ class AndroidPresetStore(
         .put("openingGroups", JSONArray().apply {
             r.openingGroups.forEach {
                 put(JSONObject().put("id", it.id).put("count", it.count)
-                    .put("poseSeconds", it.poseSeconds))
+                    .put("poseSeconds", it.poseSeconds).apply {
+                        // Optional field; old version-1 presets still deserialize.
+                        it.breakAfterSeconds?.let { rest ->
+                            put("breakAfterSeconds", rest)
+                        }
+                    })
             }
         })
 
@@ -137,6 +142,10 @@ class AndroidPresetStore(
                     id = group.getString("id"),
                     count = group.getInt("count"),
                     poseSeconds = group.getInt("poseSeconds"),
+                    breakAfterSeconds =
+                        if (group.has("breakAfterSeconds"))
+                            group.getInt("breakAfterSeconds")
+                        else null,
                 )
             },
             poseSeconds = data.getInt("poseSeconds"),
