@@ -62,4 +62,11 @@ class EditorInputTest {
         val rules = defaults().copy(normalBreakMinutes = "0").toRules()
         assertTrue(ScheduleEngine().generate(rules).hasBlockingIssues)
     }
+    @Test fun hugeMinuteInputsCannotOverflowIntoDifferentSchedule() {
+        try {
+            defaults().copy(totalMinutes = "2147483647").toRules()
+            fail("Minute-to-second overflow must not be accepted")
+        } catch (_: IllegalArgumentException) { }
+    }
+
 }
