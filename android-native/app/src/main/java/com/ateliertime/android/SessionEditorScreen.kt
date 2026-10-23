@@ -7,6 +7,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.platform.LocalContext
+import java.util.UUID
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
@@ -21,6 +23,13 @@ import com.ateliertime.domain.*
 @Composable
 fun SessionEditorScreen() {
     val engine = remember { ScheduleEngine() }
+    val context = LocalContext.current
+    val catalog = remember(context) {
+        PresetCatalog(AndroidPresetStore(context), engine) {
+            UUID.randomUUID().toString()
+        }
+    }
+    var selectedPresetId by remember { mutableStateOf<String?>(null) }
     var name by remember { mutableStateOf("Atelier session") }
     var total by remember { mutableStateOf("180") }
     var summary by remember { mutableStateOf("15") }
@@ -43,6 +52,7 @@ fun SessionEditorScreen() {
         approved = null
     }
     fun applyA() {
+        selectedPresetId = null
         name = "Example A"
         total = "180"; summary = "15"; pose = "25"
         normal = "5"; special = "15"; count = "1"
@@ -54,6 +64,7 @@ fun SessionEditorScreen() {
         invalidate()
     }
     fun applyB() {
+        selectedPresetId = null
         name = "Example B"
         total = "180"; summary = "15"; pose = "25"
         normal = "5"; special = "15"; count = "1"
@@ -61,6 +72,29 @@ fun SessionEditorScreen() {
         automatic = true
         opening.clear()
         invalidate()
+    }
+
+    fun loadPreset(preset: StoredPreset, restored: ApprovedSession) {
+        val rules = preset.rules
+        selectedPresetId = preset.id
+        name = preset.title
+        total = (rules.totalSeconds / 60).toString()
+        summary = (rules.summarySeconds / 60).toString()
+        pose = (rules.poseSeconds / 60).toString()
+        normal = (rules.shortBreakSeconds / 60).toString()
+        special = (rules.specialBreakSeconds / 60).toString()
+        count = rules.specialBreakCount.toString()
+        cycle = rules.cycleStart
+        automatic = rules.placement.automatic
+        manualOrdinals = rules.placement.breakOrdinals.joinToString(",")
+        opening.clear()
+        rules.openingGroups.forEach {
+            opening.add(OpeningDraft(nextOpeningId++,
+                it.count.toString(), (it.poseSeconds / 60).toString()))
+        }
+        ending = preset.ending
+        acceptedWarning = preset.acknowledgedRestWarnings
+        approved = restored
     }
 
     var parseError: String? = null
@@ -294,9 +328,24 @@ fun SessionEditorScreen() {
                 }
             }
         }
+        PresetLibrarySection(
+            catalog = catalog,
+            approved = approved,
+            selectedId = selectedPresetId,
+            suggestedName = name,
+            onSelected = { record, session -> loadPreset(record, session) },
+            onSaved = { record -> selectedPresetId = record.id },
+            onDeleted = { id ->
+                if (selectedPresetId == id) {
+                    selectedPresetId = null
+                    approved = null
+                    acceptedWarning = false
+                }
+            },
+        )
         Text(
-            "Current milestone: live schedule editing and in-memory approval. " +
-                "Saved presets, running timer and audio cues follow in later work.",
+            "Saved sessions work offline. Activation selects an approved plan; " +
+                "the live countdown and three audio cues are the next milestone.",
             style = MaterialTheme.typography.bodySmall,
         )
     }
