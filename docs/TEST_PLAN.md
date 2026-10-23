@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **K01 FAILURE ON REAL PHONE (2026-10-23) — AAPT2 ARCHITECTURE, FIX PENDING RETEST:** Gradle `:app:testDebugUnitTest` progressed to Kotlin compile (nonblocking Elvis warning) but FAILED in `:app:processDebugResources` because `aapt2-9.3.1-15703166-linux` could not launch on ARM64 (`Syntax error: word unexpected`; `BUILD FAILED in 3m 40s`). CoGo vendor's native Android AAPT2 flag was omitted from manual Gradle invocation. [Phone runner fix dcb4887](https://github.com/AviY99/Atelier-Time/commit/dcb4887c7e18e1c88e8ac7c23e007e3408f6af51) now adds `-Pandroid.aapt2FromMavenOverride=${ANDROID_HOME}/build-tools/36.0.0/aapt2`, which still requires on-phone binary validation and real retest. **32 JVM tests NOT PASSED / acceptance OPEN; six instrumentation tests NOT RUN; no APK.**
+
+
 > **2026-10-23 K01 ON-PHONE BUILD BLOCKER, CORRECTION PENDING RETEST:** User's first real CoGo Gradle `:app:testDebugUnitTest` ended `BUILD FAILED in 5m 1s` because `compileSdk=35` was lower than AndroidX Core API 36 and Compose Runtime 1.12 API 37 metadata requirements. Phone screenshot subsequently confirmed only Android SDK platforms **35 and 36** installed and no `sdkmanager` found via CLI. Changed native branch `app/build.gradle.kts` to `compileSdk=36`, Compose BOM `2026.06.01` (pre-API37 Compose 1.12), Activity Compose `1.12.4` in [commit a4b9469](https://github.com/AviY99/Atelier-Time/commit/a4b94692d14796e9090420e6f389a64eee31c3cf), preserving `targetSdk=35` and `minSdk=26`. **Source committed but NOT retested; no PASS may be claimed.**
 
 
