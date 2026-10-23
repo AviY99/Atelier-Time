@@ -1,6 +1,6 @@
 # Test and acceptance plan — Atelier Time
 
-Version: 0.4 planning and test-source baseline (2026-10-22). **Step 1.4 source/test files now exist** on branch `stage-1-4-scheduling-core` (D-040), but **NO Dart tests, analyzer, or builds have been executed** because no Dart SDK is available and GitHub Actions are deliberately not enabled under the current metered-budget block. Tests must NOT be called passing. No Flutter app yet.
+Version: 0.5 early execution evidence (2026-10-23). **Step 1.4 source/test files exist** on branch `stage-1-4-scheduling-core`. User installed **Dart 3.13.7 on Android Termux** and attempted `dart tool/smoke.dart`; compilation **FAILED** due to a `num` → `int?` mismatch at warning offset, corrected in development branch commit `0dedd95756b6d3984b2e16548a58599179fbf7ff`. **Corrected code NOT YET rerun. No analyzer/full `dart test` executions or passes**, and no GitHub Actions/bills/builds. No Flutter app yet.
 
 ## Approved requirement tests: D-031 + D-036 (NOT EXECUTED)
 
@@ -111,3 +111,10 @@ At minimum T01–T12, T15–T18 passing on the selected core stack, with documen
 - [Windows verification script](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/tool/verify.ps1) and [macOS/Linux verification script](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/tool/verify.sh) run `dart tool/smoke.dart`, `dart pub get`, `dart analyze` and `dart test` with a local `atelier-time-verification.log`.
 - Test code on the branch additionally asserts the approved session preserves a **full immutable safety-warning record and exact 25-minute time offset**. `ScheduleCandidate` construction is now library-private so callers cannot fabricate a candidate for approval.
 - **ALL Dart checks remain UNEXECUTED.** Current container lacks Dart/Flutter SDK and cannot resolve the Dart download host. Avoid GitHub Actions or paid runners under user's billing block. Install the **Dart SDK only** on an available local test machine to unblock independent execution; share the log for error correction.
+
+## 2026-10-23 — First real compiler execution (FAILED; fix pending retest)
+- **Environment:** Android Termux Dart 3.13.7 stable `android_arm64`.
+- **Command:** `dart tool/smoke.dart` on user-cloned `stage-1-4-scheduling-core`.
+- **Actual:** Compiler error `lib/src/scheduling.dart:621:28`, `num` cannot be assigned to `int?` at `offsetSeconds: crossingOffset`.
+- **Fix committed:** `0dedd95756b6d3984b2e16548a58599179fbf7ff`; typed integer conditional instead of `math.max` inference.
+- **Next:** User runs `git pull --ff-only && dart tool/smoke.dart` from `~/Atelier-Time` (no reinstall). After smoke success, run `dart pub get`, `dart analyze`, `dart test`. **No pass evidence for updated code yet.**
