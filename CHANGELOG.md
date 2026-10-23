@@ -1,5 +1,14 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — K03 offline preset management in Android native source / HANDOFF v3.3
+
+- User authorized the next stage; continued real Android Kotlin/Compose/Gradle code on `android-native-kotlin-compose` draft PR #3.
+- Implemented pure Kotlin `PresetCatalog` / storage contract with approved-only save/update/load/duplicate/rename/delete/activate selection and timeline regeneration/full-revision consistency verification.
+- Implemented versioned offline private Android `SharedPreferences` JSON collection persistence, no silent data loss on corrupt/unknown schema, isolated test storage; integrated full Compose saved-sessions UI with delete confirmation. Fixed whole-minute overflow input.
+- Added 10 Kotlin preset unit tests + 1 Kotlin input-overflow test + 4 Android isolated instrumentation cases; now **32 JVM + 4 Android instrumentation test methods WRITTEN, NONE EXECUTED**. No APK, phone QA, Gradle unit tests, GitHub Actions or paid runners.
+- K03 **CODED BUT UNVERIFIED**; K04 monotonic timer and three distinct audible cues remain next. Updated D-070, docs/roadmap/test plan, native README and self-contained HANDOFF v3.3; product requirements unchanged.
+
+
 ## 2026-10-23 — First native Android Kotlin app increment / HANDOFF v3.2 (D-068/D-069)
 
 - User approved implementing Android-first Kotlin/Jetpack Compose/Gradle and reconfirmed all existing Atelier Time **functional and scheduling rules remain unchanged**; old D-062 release/toolchain pivot only.
