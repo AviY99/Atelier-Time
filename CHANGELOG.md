@@ -1,5 +1,14 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Android-first, develop/build on the phone; portability later / Handoff v2.9
+
+- User changed primary delivery requirement: **develop, debug, test, build and install Android directly on Android phone efficiently**, design for efficient future iOS/Windows/macOS port, no simultaneous four-platform first release obligation (D-062).
+- Research verified maintained Android phone IDE [Code on the Go](https://appdevforall.org/code-on-the-go/) v26.43 (Oct 20, 2026) supports Kotlin/Java Android application builds on device; JetBrains Kotlin/Compose Multiplatform is a prospective future port path, NOT verified in this toolchain.
+- Preferred candidate Kotlin Android + CoGo (D-063) awaits one successfully installed minimal on-device APK. No Kotlin project, UI or APK build is claimed. No broad migration until proven; Kotlin requires porting original verified Dart logic.
+- New [Android-first plan](docs/ANDROID_FIRST_DEVELOPMENT_PLAN.md) and updated decision register, tech decision, product spec, architecture, roadmap, Stage 2 plan, platform reassessment and self-contained HANDOFF v2.9.
+- Preserved prior **35/35 Dart scheduler**, **11/11 Dart adapter** passes and both unmerged PRs; no paid CI/Actions, auto-merge, data deletion or Stage 3+ work.
+
+
 ## 2026-10-23 — Full-lifecycle platform reassessment / Handoff v2.8 (D-061)
 
 - At the user's demand, re-evaluated Flutter against **cross-platform development, tests, builds, signing, installation, and live operation**, not only app runtime.
