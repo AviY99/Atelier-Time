@@ -1,5 +1,8 @@
 # Delivery roadmap and approval gates
 
+> **LATEST D-064 (2026-10-23) — STANDARD STACK SELECTED:** Kotlin + Jetpack Compose + Gradle Android architecture, with platform-independent Kotlin core to ease later Kotlin Multiplatform/Compose Multiplatform port. Code on the Go is the Android-phone IDE needed for the user's workflow, **not industry-standard IDE** (Android Studio is official standard). User rejected separate toy APK/feasibility experiments. **No toy APK proof gate**: proceed with real Android implementation and its usual build/test/debug process. Prior D-063 gate text below is historical/superseded. No Kotlin app has been built yet; preserve verified Dart 35+11 tests, no paid Actions.
+
+
 > **2026-10-23 — LATEST SELECTED ANDROID STACK D-064:** User rejected standalone capability tests and required an industry-standard choice. **Kotlin + Jetpack Compose + Gradle Android** is selected for Android-first development; **Code on the Go** is the dedicated phone-local IDE (not standard desktop Android Studio), and Kotlin/Compose Multiplatform is the prospective later shared-code/UI path. **No throwaway feasibility spike; real APK build/testing belongs to normal development.** Preserve verified Dart schedule/adapter baselines, migrate Kotlin behavior with regression parity, keep domain independent of Android framework APIs. No Kotlin APK exists yet. Do not resume Flutter draft UI or auto-merge old PRs; no paid Actions.
 
 
