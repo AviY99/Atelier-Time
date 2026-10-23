@@ -529,6 +529,26 @@ void main() {
       expect(c.needsSafetyAcknowledgement, isTrue);
     });
 
+    test('T09: custom minimum first pose keeps a positive 34m last pose', () {
+      // Example A final-pose window has 35m of pose time plus a 5m break.
+      // T09 requires BOTH legal 1-minute endpoints (34+1 tested above).
+      final c = engine.generate(
+          exampleA(), choice: FinalPoseChoice.custom(m(1)));
+      expectContiguous(c);
+      expect(timeline(c).sublist(15), [
+        'pose:125-126',
+        'shortBreak:126-131',
+        'pose:131-165',
+        'summary:165-180',
+      ]);
+      expect(c.needsFinalPoseChoice, isFalse);
+      expect(c.needsSafetyAcknowledgement, isTrue);
+      expect(() => engine.approve(c, acknowledgeWarnings: false),
+          throwsStateError);
+      expect(engine.approve(c, acknowledgeWarnings: true)
+          .acknowledgedWarningCodes, contains('rest_25_5'));
+    });
+
     test('20m posing then 3m rest then 6m posing warns', () {
       final c = engine.generate(SessionRules(
         id: 'cumulative-with-short-break',
