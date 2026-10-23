@@ -1,5 +1,8 @@
 # Architecture and design constraints — implemented core, Stage 2 editor underway
 
+> **D-068/D-069 — 2026-10-23: CURRENT IMPLEMENTATION** User approved actual Android Kotlin/Compose source, explicitly **no changes to accepted session/schedule/product rules**. `android-native/` Gradle project on new [android-native-kotlin-compose](https://github.com/AviY99/Atelier-Time/tree/android-native-kotlin-compose) branch separates pure Kotlin deterministic `domain` from Android Compose editor/input for later KMP extraction. D-043 exact DP special break placement in Kotlin port; 21 Kotlin JUnit sources unrun. Offline local preset repository, monotonic timer and 3 cue adapters remain next tasks. Historic Flutter architecture below is obsolete for current delivery. See [native development/QA process](ANDROID_NATIVE_EXECUTION_AND_TEST.md).
+
+
 > **LATEST D-064:** Select **native Kotlin + Jetpack Compose + Gradle** for Android, modular `core/domain` pure Kotlin separated from platform-specific storage/timer/audio. Future Kotlin Multiplatform/Compose Multiplatform reuse is a target, not a promise of zero port effort. **Android Studio = official industry-standard IDE; Code on the Go = current mobile IDE**, not the standard. Drop D-063's toy APK proof prerequisite and instead implement real Atelier Time. Earlier Flutter-specific architecture below is historical/paused, and 35+11 Dart regression test evidence must be preserved for Kotlin port parity.
 
 
