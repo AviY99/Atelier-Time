@@ -1,5 +1,15 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Native K01 build blocker: API 37 absent; align SDK 36 dependencies for CoGo
+
+**User screenshot evidence:** `ls "$ANDROID_HOME/platforms"` on the actual Code on the Go Android ARM64 terminal printed exactly `android-35` and `android-36`. The subsequent `command -v sdkmanager || find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print 2>/dev/null` produced no output, so no command-line `sdkmanager` was located. The previously committed `compileSdk = 37` cannot compile on this **observed installed SDK set**, regardless of AGP compatibility. Avoid an ad-hoc SDK installation.
+
+**Documented compatibility:** Google's Compose August 2026 release says Compose 1.12 requires `compileSdk 37`; Compose 1.11 stable predates that requirement. On native implementation branch `android-native-kotlin-compose`, commit [`a4b9469`](https://github.com/AviY99/Atelier-Time/commit/a4b94692d14796e9090420e6f389a64eee31c3cf) changes only Gradle configuration: `compileSdk = 36`, stable Compose BOM `2026.06.01` (Compose 1.11 line), `activity-compose:1.12.4`; `targetSdk=35`, `minSdk=26`, AGP/Kotlin, code, product rules unchanged. GitHub readback verified. **This is a compatibility fix, not a verified build**; other transitive libraries and Kotlin source may still fail when the phone reruns the task.
+
+**Next phone action:** From `android-native/` on the same branch: `git pull --ff-only`, then execute `bash "$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle" :app:testDebugUnitTest --no-daemon --console=plain`. Do not reset/delete `.cg` or existing worktrees. Capture first failure or actual PASS. **32 JVM and six instrumentation tests remain unverified; APK not built; K04 not implemented; no paid Actions.**
+
+---
+
 ## 2026-10-23 — First real Kotlin Gradle task FAILED on phone: compile SDK/AAR metadata incompatibility
 
 **User phone screenshot evidence:** Code on the Go (Android ARM64) executed `cd android-native && bash "$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle" :app:testDebugUnitTest --no-daemon --console=plain`. Gradle printed `BUILD FAILED in 5m 1s` and `8 actionable tasks: 8 executed`. Visible dependency metadata diagnostics require `compileSdk` at least **36** for `androidx.core:core:1.18.0` and at least **37** for `androidx.compose.runtime:runtime-saveable-android:1.12.1`, but the Android app was configured with **35**. This is a **confirmed failed build** at dependency metadata validation; **32 Kotlin unit tests did NOT demonstrate PASS**. Screenshot shows only part of output, so any other errors remain unknown.
