@@ -1,5 +1,14 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Stage 2 Flutter-independent editor-input tests / Handoff v2.3
+
+- Continued Stage 2 on isolated `stage-2-session-editor` branch after user asked to continue.
+- Extracted Flutter UI text parsing into pure Dart `lib/src/editor_draft.dart`, exported from `lib/atelier_time.dart`. Preserves user-entered minutes, ordered opening groups, cycle and special placement; the scheduling engine still validates positivity and warnings. Ignores inactive manual ordinal text when special-break count is zero.
+- Added **11 unexecuted plain Dart test definitions** for editor input conversion (`test/editor_draft_test.dart`) runnable with Android Termux Dart, without Flutter.
+- **New adapter/tests NOT compiled or run** in the assistant runtime. Previously verified Stage 1 core 35 tests PASS; eight Flutter widget test cases still NOT run. No paid GitHub Actions, builds, merge, persisted preset or timer development.
+- Updated project decision D-056, Stage 2 plan, roadmap, test plan, work log and handoff v2.3.
+
+
 ## 2026-10-23 — Stage 2 UI safety and widget-test source / Handoff v2.2
 
 - Continued authorized Stage 2 `stage-2-session-editor` work; added stable widget identifiers for inputs, approval, endings, warning controls.
