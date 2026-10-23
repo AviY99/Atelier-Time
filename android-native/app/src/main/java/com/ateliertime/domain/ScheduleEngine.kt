@@ -36,22 +36,43 @@ class ScheduleEngine {
             error("negative_break_count", "Special break count cannot be negative.")
         }
         var openingSum = 0L
-        for (group in rules.openingGroups) {
+        rules.openingGroups.forEachIndexed { index, group ->
             if (group.count <= 0 || group.poseSeconds <= 0) {
                 error("invalid_opening_group", "Opening groups need positive values.")
             } else {
                 openingSum += group.count.toLong() * group.poseSeconds
             }
+            val configured = group.breakAfterSeconds
+            if (configured != null) {
+                if (configured < 0) {
+                    error("negative_opening_break", "Opening-group breaks cannot be negative.")
+                }
+                if (index == rules.openingGroups.lastIndex && configured <= 0) {
+                    error("final_opening_break_required",
+                        "A positive break is required after the last opening group.")
+                }
+                if (configured > 0) {
+                    // A final explicit rest identical to BREAK_FIRST's initial regular
+                    // rest shares that original slot; never count it twice.
+                    if (!(index == rules.openingGroups.lastIndex &&
+                          rules.cycleStart == CycleStart.BREAK_FIRST &&
+                          configured == rules.shortBreakSeconds)) {
+                        openingSum += configured.toLong()
+                    }
+                }
+            }
         }
         val durations = listOf(
             rules.totalSeconds, rules.summarySeconds, rules.poseSeconds,
             rules.shortBreakSeconds, rules.specialBreakSeconds,
-        ) + rules.openingGroups.map { it.poseSeconds }
+        ) + rules.openingGroups.flatMap { group ->
+            listOfNotNull(group.poseSeconds, group.breakAfterSeconds)
+        }
         if (durations.any { it % SECONDS_PER_MINUTE != 0 }) {
             error("minute_precision", "Initial session rules use whole minutes.")
         }
         if (openingSum > rules.workSeconds.toLong()) {
-            error("opening_overrun", "Opening poses exceed available work time.")
+            error("opening_overrun", "Opening groups and their breaks exceed available work time.")
         }
         if (!rules.placement.automatic && rules.specialBreakCount > 0) {
             val ordinals = rules.placement.breakOrdinals
@@ -172,7 +193,9 @@ class ScheduleEngine {
             return Attempt(emptyList(),
                 "No feasible replacement positions: " + virtual.invalidReason)
         }
-        val slots = virtual.phases.filter { it.kind == PhaseKind.SHORT_BREAK }
+        val slots = virtual.phases.filter {
+            it.kind == PhaseKind.SHORT_BREAK && it.openingGroupId == null
+        }
         val maxOrdinal = slots.size
         if (count > maxOrdinal) {
             return Attempt(emptyList(),
@@ -237,18 +260,74 @@ class ScheduleEngine {
             )
             cursor += duration
         }
-        for (group in rules.openingGroups) {
+        val end = rules.workSeconds
+        fun addOpeningGroupBreak(group: OpeningPoseGroup, duration: Int): Attempt? {
+            // Unlike a repeating break, a group-boundary rest is NOT a numbered
+            // regular-break replacement slot. It is a rest/sound phase nonetheless.
+            if (cursor.toLong() + duration + SECONDS_PER_MINUTE > end) {
+                return Attempt(phases,
+                    "The last opening-group break must leave a regular pose afterward.")
+            }
+            phases += SchedulePhase(
+                id = "phase_" + (phases.size + 1),
+                kind = PhaseKind.SHORT_BREAK,
+                startSeconds = cursor,
+                endSeconds = cursor + duration,
+                openingGroupId = group.id,
+            )
+            cursor += duration
+            return null
+        }
+
+        var lastGroupExplicitRest: Int? = null
+        rules.openingGroups.forEachIndexed { groupIndex, group ->
             for (index in 0 until group.count) {
                 addPose(group.poseSeconds, PoseSource.OPENING, group.id)
             }
+            val rest = group.breakAfterSeconds
+            if (groupIndex != rules.openingGroups.lastIndex && rest != null && rest > 0) {
+                // There are poses in the next group: a zero rest creates no phase.
+                if (cursor.toLong() + rest > end) {
+                    return Attempt(phases, "Opening-group rest exceeds work duration.")
+                }
+                phases += SchedulePhase(
+                    id = "phase_" + (phases.size + 1),
+                    kind = PhaseKind.SHORT_BREAK,
+                    startSeconds = cursor,
+                    endSeconds = cursor + rest,
+                    openingGroupId = group.id,
+                )
+                cursor += rest
+            } else if (groupIndex == rules.openingGroups.lastIndex) {
+                lastGroupExplicitRest = rest
+            }
         }
-        val end = rules.workSeconds
+        // When the repeating pattern begins with a 5m regular break, the same
+        // phase already satisfies a last-group 5m rest (Example A). A different
+        // explicitly chosen rest replaces that initial slot and is not counted
+        // as a replaceable normal-break ordinal. POSE_FIRST needs a new rest.
+        val shareRegularFirstBreak = lastGroupExplicitRest != null &&
+            rules.cycleStart == CycleStart.BREAK_FIRST &&
+            lastGroupExplicitRest == rules.shortBreakSeconds
+        if (lastGroupExplicitRest != null) {
+            if (cursor >= end) {
+                return Attempt(phases,
+                    "The last opening group must leave time for its break and a regular pose.")
+            }
+            if (!shareRegularFirstBreak) {
+                val reason = addOpeningGroupBreak(
+                    rules.openingGroups.last(), lastGroupExplicitRest!!
+                )
+                if (reason != null) return reason
+            }
+        }
         if (cursor == end) {
             if (replacements.isNotEmpty()) {
                 return Attempt(phases, "Cannot replace breaks in an opening-only session.")
             }
         } else {
-            var nextIsBreak = rules.cycleStart == CycleStart.BREAK_FIRST
+            var nextIsBreak = rules.cycleStart == CycleStart.BREAK_FIRST &&
+                (lastGroupExplicitRest == null || shareRegularFirstBreak)
             while (cursor < end) {
                 if (nextIsBreak) {
                     breakOrdinal++
