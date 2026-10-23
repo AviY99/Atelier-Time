@@ -1,5 +1,13 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Android Dart smoke pass / Handoff v1.6
+
+- User confirms **“Scheduling smoke checks succeeded.”** on Android Termux Dart 3.13.7 following Step 1.4 warning-offset integer fix. This is a **user-confirmed successful Dart smoke run**, including compilation and the smoke assertions.
+- Previous D-047 `num`/`int?` compiler error is no longer observed in that smoke run.
+- Next checkpoint: `dart pub get && dart analyze && dart test`. **Full analyzer and unit-test results are still pending; do not call Stage 1 Step 1.4 complete.**
+- D-048 and v1.6 handoff recorded; no Actions, paid runners, builds, branch merge, or Stage 2 authorization.
+
+
 ## 2026-10-23 — Stage 1 Step 1.4 first real Android compiler feedback / Handoff v1.5
 
 - User successfully ran Dart SDK **3.13.7** in Android Termux and downloaded the development branch. The first smoke invocation **FAILED compilation** with `num` supplied to `int?` at `offsetSeconds: crossingOffset` in `lib/src/scheduling.dart`.
