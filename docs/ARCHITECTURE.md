@@ -1,5 +1,8 @@
 # Architecture and design constraints — implemented core, Stage 2 editor underway
 
+> **2026-10-23 — D-062 LATEST ANDROID-PHONE-FIRST PRIORITY:** The user now requires **fast on-phone Android development and installability first**, while making iOS/Windows/macOS port efficient later. D-061's universal build-on-every-host restriction is superseded. Maintain platform-independent tested Dart scheduling and editor parsing; prototype [Dart-to-JavaScript browser proof](ANDROID_FIRST_PLATFORM_SPIKE.md) on an isolated branch, then verify phone-built Capacitor APK and background notifications before choosing a migration. **Do not redesign the core or delete the existing Flutter prototype** without results/approval.
+
+
 > **2026-10-23 — CURRENT D-062/D-063 DESIGN PRIORITY:** Build/run Android APP and APK **on user's own phone** first; plan efficient future port to iOS/iPadOS, Windows, macOS. The earlier Flutter-only UI architecture is **historical draft, NOT selected for the new Android-first gate**. Candidate is Kotlin Android + Code on the Go; isolate domain from UI/Android APIs, evaluate Jetpack Compose with future Compose Multiplatform after a REAL first APK build. Preserve all deterministic timing requirements and existing Dart fixtures for parity testing. See [ANDROID_FIRST_DEVELOPMENT_PLAN.md](ANDROID_FIRST_DEVELOPMENT_PLAN.md). No Kotlin/KMP compilation claimed yet.
 
 
