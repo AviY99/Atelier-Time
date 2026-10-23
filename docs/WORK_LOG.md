@@ -1,5 +1,19 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 2.0: Stage 1 Step 1.4 VERIFIED/COMPLETE on isolated development branch (D-052)
+
+**User evidence:** New Android Termux screenshot shows `git pull --ff-only && dart test`, fast-forwarding `stage-1-4-scheduling-core` **`8cf7a24..907f871`** and updating `test/scheduling_test.dart` plus branch progress. Terminal ends **`00:00 +35: All tests passed!`** on user's Android ARM64 Dart 3.13.7. This **confirms the new T09 valid 1m+34m final-pose split test PASSED** along with the previous 34. Earlier screenshots had **`dart analyze` “No issues found!”** and smoke PASS on the preceding checkout; the newer 35th test-only change was not shown re-analyzed.
+
+**Acceptance:** `docs/TEST_PLAN.md` core minimum T01–T12 and T15–T18 covered by 35 passing tests: canonical A/B exact timelines, three ending options, 1m endpoints, positive break validation, 25/5 accumulated rest warnings/acknowledgments, deterministic placements, no overlaps or phantom endings. Broader T13/T14 edge combinatorics and other OS builds intentionally remain later QA, not asserted complete.
+
+**Outcome:** **Stage 1 Step 1.4 pure Dart scheduling engine and required tests COMPLETE/VERIFIED ON DEV BRANCH** (D-052). No engine changes in this checkpoint; branch documentation synced to accurate test evidence. The branch is deliberately **unmerged** to main and all later Stage 2+ work is **NOT authorized**. No paid GitHub Actions, usage budget change, Flutter UI, Android APK, run-time timer/audio, persistence or multi-OS build. Updated README, decisions, roadmap, test plan, changelog, WORK_LOG and HANDOFF v2.0; read back GitHub state.
+
+**Stop point:** Await explicit user direction to merge verified branch and/or independently authorize Stage 2's UI design/implementation; do not imply permission.
+
+---
+
+
+
 ## 2026-10-23 — Iteration 1.9: T09 missing end-split endpoint test added, retest pending
 
 **Evidence from user screenshot:** Android Termux Dart 3.13.7 `dart analyze` completed **No issues found!**, `dart test` completed **00:01 +34: All tests passed!**, smoke check passed (D-050). No GitHub Actions used.
