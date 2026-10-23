@@ -1,5 +1,8 @@
 # Atelier Time — Stage 2 session editor and preview: implementation plan
 
+> **2026-10-23 — D-062 ANDROID-FIRST FEASIBILITY SUB-GATE:** User's immediate priority is **rapid Android development directly on phone and a usable installable Android APK**, with future efficient iOS/Windows/macOS porting. The original unexecuted Flutter editor remains preserved but **PAUSED**. New [Dart-web/Capacitor candidate spike](ANDROID_FIRST_PLATFORM_SPIKE.md) will test whether the *already validated Dart scheduling core* can run in a phone browser, then in an Android APK built in Termux. UI migration, native alarms and persistence still require verification and subsequent implementation; don't call Stage 2 done.
+
+
 > **2026-10-23 — LATEST GATE D-062/D-063:** Android is now the FIRST target; the user requires building/testing/installing directly on their Android phone, with later efficient portability to iOS/Windows/macOS. The prior Flutter editor plan and draft PR #2 are preserved as **uncompiled historical prototype**; this is **NOT** a green light for more Flutter UI code. Before any port, prove an Android Kotlin APK builds and runs in the actively maintained Code on the Go IDE on user's device. Preserve canonical Dart 35/35+11/11 tests as migration oracle. See [Android-first plan](ANDROID_FIRST_DEVELOPMENT_PLAN.md).
 
 
