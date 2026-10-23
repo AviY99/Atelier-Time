@@ -1,5 +1,15 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Stage 1 integration proposed; Stage 2 editor prototype begun / Handoff v2.1
+
+- User explicitly asked to **finish documentation and continue** after verified Stage 1 Step 1.4 completion (D-052). Recorded continuation decision D-053 and source/checkpoint D-054.
+- Opened [verified Dart core PR #1](https://github.com/AviY99/Atelier-Time/pull/1), **not merged**. Created isolated [Stage 2 editor branch](https://github.com/AviY99/Atelier-Time/tree/stage-2-session-editor), nested Flutter prototype source under `apps/atelier_time_flutter/` consuming existing core via path dependency, and [draft PR #2](https://github.com/AviY99/Atelier-Time/pull/2).
+- Added [Stage 2 input/preview and QA plan](docs/STAGE_2_PLAN.md) with all user-approved fields, full phase preview, three ending choices, and 25/5 warning acknowledgment; provisional neutral styling only. Stage 3 presets and Stage 4 timer/audio remain unstarted.
+- Stage 1 Dart evidence remains **35/35 user-screenshot-confirmed passing**. Stage 2 Flutter source only underwent noncompiler structural check; **NO Flutter SDK, `flutter analyze`, Flutter unit/widget tests, APK or app build**. No GitHub Actions/paid workflow, budget change, branch merge or Stage 3+ coding.
+- Updated DECISIONS, ROADMAP, TEST_PLAN, PRODUCT_SPEC, README, WORK_LOG, CHANGELOG and self-contained HANDOFF v2.1.
+
+
+
 ## 2026-10-23 — Stage 1 Step 1.4 pure Dart core verified / Handoff v2.0 (D-052)
 
 - User screenshot confirms branch update `8cf7a24..907f871` and **`00:00 +35: All tests passed!`** under Android Termux Dart 3.13.7. The 35th T09 1m+34m regression passed along with all prior tests.
