@@ -1,6 +1,6 @@
 # Test and acceptance plan — Atelier Time
 
-Version: 0.6 Android user-reported test evidence (2026-10-23). **Step 1.4 source/test files exist** on branch `stage-1-4-scheduling-core`. User installed **Dart 3.13.7 on Android Termux** and attempted `dart tool/smoke.dart`; compilation **FAILED** due to a `num` → `int?` mismatch at warning offset, corrected in development branch commit `0dedd95756b6d3984b2e16548a58599179fbf7ff`. **User now confirms the corrected Dart smoke check PASSED on Termux (D-048)**. **User subsequently reports “All tests passed!” after `dart pub get && dart analyze && dart test` (D-049)**. This is a **user-reported pass of the branch's written suite** (34 Dart `test(...)` definitions); specific terminal logs/results and analyzer output were not provided. This does **NOT certify every separately planned acceptance item**, Flutter UI, builds or cross-platform compatibility. No GitHub Actions/bills/builds. No Flutter app yet.
+Version: 0.7 Android screenshot-confirmed test evidence and Stage 1 coverage audit (2026-10-23). **Step 1.4 source/test files exist** on branch `stage-1-4-scheduling-core`. User installed **Dart 3.13.7 on Android Termux** and attempted `dart tool/smoke.dart`; compilation **FAILED** due to a `num` → `int?` mismatch at warning offset, corrected in development branch commit `0dedd95756b6d3984b2e16548a58599179fbf7ff`. **User now confirms the corrected Dart smoke check PASSED on Termux (D-048)**. **User subsequently reports “All tests passed!” after `dart pub get && dart analyze && dart test` (D-049)**. This is a **user-reported pass of the branch's written suite** (34 Dart `test(...)` definitions); specific terminal logs/results and analyzer output were not provided. This does **NOT certify every separately planned acceptance item**, Flutter UI, builds or cross-platform compatibility. No GitHub Actions/bills/builds. No Flutter app yet.
 
 ## Approved requirement tests: D-031 + D-036 (some covered by user-reported passing Dart suite; remaining plan-level acceptance items require mapping)
 
@@ -128,3 +128,35 @@ At minimum T01–T12, T15–T18 passing on the selected core stack, with documen
 **Evidence and limits:** Record **USER-REPORTED PASS** of the written Dart unit test suite and apparent success of the preceding analyzer step if the chained command ran as supplied. The currently committed `test/scheduling_test.dart` defines **34 unit tests**; user did not supply exact runner test count, stdout, `dart analyze` transcript, or local git commit SHA. Do not call those independently verified or confuse them with a multi-platform app build.
 
 **Acceptance audit still needed:** Map current test source to Stage 1 required T01–T12, T15–T18 and any Step 1.3 policy acceptance tests not yet covered, adding and executing missing cases within authorized Step 1.4. Flutter UI, app packaging, OS-specific builds and device timer/audio behavior belong to later authorized stages. Do not mark Stage 1.4 completed, merge the branch, or initiate Stage 2 solely based on this high-level report. GitHub Actions budget remains untouched.
+
+
+## 2026-10-23 — Screenshot-verified Android analyzer and test suite (D-050)
+
+User provided Termux screenshots from `~/Atelier-Time` after the corrected smoke run, showing the output of `dart pub get && dart analyze && dart test` on **Dart 3.13.7, Android ARM64**:
+
+```text
+Changed 49 dependencies!
+Analyzing Atelier-Time...
+No issues found!
+Built test:test.
+00:01 +34: All tests passed!
+```
+
+**Evidence status:** Screenshot-confirmed **`dart analyze`: 0 issues**, and **`dart test`: 34 passed** for currently checked-out source. No failed tests shown. This upgrades earlier D-049 user-only report to verified screenshot evidence (D-050). Smoke check was separately confirmed as passed. No GitHub Actions, paid runner or build was used.
+
+**Stage 1 acceptance mapping against the 34 currently passed test definitions:**
+
+| Planned check | Existing written tests | Coverage disposition |
+|---|---|---|
+| T01–T08 A/B exact schedules and 3 final-pose modes | Canonical Example A/B six tests, exact timelines and final-pose choices | **Covered and screenshot-reported passing** |
+| T09 custom ruler split limits, minimum 1m on either pose | Custom 34m+1m; 0m custom rejected; exact valid 1m+34m **not explicitly tested** | **Partial — add opposite endpoint test before Step 1.4 completion** |
+| T10 exact final fit, no adjustment prompt | `exactly fitted last pose has no incomplete choice prompt` | **Covered** |
+| T11 one special break replaces one ordinary slot | A/B baseline and manual ordinal 3, multiple-placement assertions | **Covered** |
+| T12 break-first and pose-first, no phantom trailing break | A/B baselines; `break-first cannot finish on a trailing break` | **Covered** |
+| T15–T16 deterministic output, full exact contiguous phase coverage | `identical rules generate identical phase IDs and timeline`; `expectContiguous` invariant helper | **Covered** |
+| T17 floor/ceil even split with odd available pose total | A 17+18, B 15+15 | **Covered** |
+| T18 no silent shortened-pose approval | `a shortened final pose requires an explicit choice` | **Covered** |
+| Additional D-031/D-036/D-044 | Hard 0-minute errors, 25/5 warning/acknowledgment, equal/shorter special breaks | **Covered by written cases** |
+| Wider T13–T14 and P-T edge matrix | Representative edge cases present; many combinatorial extremes not exhaustive | **Partial / remains in QA backlog** |
+
+**Gate:** Step 1.4 scheduling core has strong real Android Dart success. **The written test plan still calls for T09 both endpoints. Do not mark Step 1.4 complete or merge into main until remaining required edge coverage is addressed and retested.** Flutter UI, APK, cross-platform builds and Stage 2 are not covered or authorized.
