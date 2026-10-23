@@ -1,5 +1,15 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Debug APK file verified on actual Android phone (size and SHA-256)
+
+**User screenshot evidence:** From the Code on the Go terminal while located in `Atelier-Time/android-native`, ran `ls -lh app/build/outputs/apk/debug/app-debug.apk && sha256sum app/build/outputs/apk/debug/app-debug.apk`. Both commands succeeded; the existing file `app/build/outputs/apk/debug/app-debug.apk` is listed as **12M**, timestamp **Oct 23 23:29** (device clock). Exact 64-character SHA-256 shown: `d793f6f322000307fb4d636ff3c6d842dad5c3724517776ba3de81dedd78ae77`. Earlier screenshot verifies **`:app:assembleDebug` BUILD SUCCESSFUL in 47s**. This is *real file-existence and checksum evidence*, not just the Gradle task status.
+
+**Acceptance boundary:** APK **built, present and hashed** on phone; **NOT YET INSTALLED/LAUNCHED**, so K02 editor/UI acceptance and K03 saved-session lifecycle/offline/reopen are still **OPEN**. K01 JVM Gradle test task succeeded; numerical JUnit XML counts not yet separately inspected. Six Android instrumentation tests unrun; K04 timer/cues not implemented. No paid CI/Actions or PR merge.
+
+**Next:** Install `app-debug.apk` on the phone via Android file manager / Code on the Go installer, approve Android's per-app "Install unknown apps" only if prompted, launch Atelier Time, check canonical A/B phase tables and approval, save/load/rename/duplicate/delete, fully close/reopen and verify local persistence. Record observed results, not guesses. Do not run unrelated Dart tests or reset local user files.
+
+---
+
 ## 2026-10-23 — FIRST VERIFIED PHONE DEBUG APK GRADLE ASSEMBLY SUCCESS (K02 build gate)
 
 **User screenshot evidence:** In Code on the Go Android ARM64 terminal, running from the actual `android-native/` Gradle project with the previously verified native AAPT2 override, task `:app:assembleDebug` executed through Gradle 9.6.1/Bash and reached `> Task :app:assembleDebug` followed by **`BUILD SUCCESSFUL in 47s`**. Final count: **36 actionable tasks: 18 executed, 18 up-to-date**. `:app:packageDebug` and debug signing tasks appear in output. Nonblocking packaging warning: unable to strip `libandroidx.graphics.path.so`, packaging unstripped. Previous phone screenshot already confirmed `:app:testDebugUnitTest` **BUILD SUCCESSFUL in 34s**. This is real, user-supplied phone build evidence, not remote CI or an inferred test result.
