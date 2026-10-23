@@ -1,0 +1,192 @@
+package com.ateliertime.android
+
+import android.media.AudioManager
+import android.media.ToneGenerator
+import android.os.SystemClock
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.ateliertime.domain.*
+import kotlinx.coroutines.delay
+
+/**
+ * K04 first real Android timer screen. Uses the EXACT approved phases rather
+ * than recalculating an unapproved schedule. Background/lock-screen audible
+ * reliability still needs foreground-service work and actual phone tests.
+ */
+@Composable
+fun SessionTimerScreen(
+    session: ApprovedSession,
+    onBackToEditor: () -> Unit,
+) {
+    val timer = remember(session) {
+        MonotonicSessionTimer(session) { SystemClock.elapsedRealtime() }
+    }
+    var snapshot by remember(timer) { mutableStateOf(timer.view()) }
+    var soundEnabled by remember { mutableStateOf(true) }
+    var confirmStop by remember { mutableStateOf(false) }
+    val audio = remember { runCatching { ToneGenerator(AudioManager.STREAM_MUSIC, 80) }.getOrNull() }
+    DisposableEffect(audio) {
+        onDispose { audio?.release() }
+    }
+
+    fun tone(cue: TimerCue) {
+        val kind = when (cue) {
+            TimerCue.POSE_FINISHED -> ToneGenerator.TONE_DTMF_1
+            TimerCue.BREAK_FINISHED -> ToneGenerator.TONE_DTMF_5
+            TimerCue.SESSION_FINISHED -> ToneGenerator.TONE_DTMF_9
+        }
+        runCatching { audio?.startTone(kind, 230) }
+    }
+
+    LaunchedEffect(timer, soundEnabled, audio) {
+        while (true) {
+            val tick = timer.update()
+            snapshot = tick.view
+            if (soundEnabled && tick.cue != null) tone(tick.cue)
+            delay(200)
+        }
+    }
+
+    val view = snapshot
+    Column(
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text("Atelier Time", style = MaterialTheme.typography.headlineMedium)
+        Text("Session timer", style = MaterialTheme.typography.titleLarge)
+        Text(session.rules.name, style = MaterialTheme.typography.titleMedium)
+        Text(
+            when (view.status) {
+                TimerStatus.READY -> "Ready to begin the approved session"
+                TimerStatus.RUNNING -> "Running"
+                TimerStatus.PAUSED -> "Paused"
+                TimerStatus.FINISHED -> "Session finished"
+                TimerStatus.STOPPED -> "Stopped"
+            },
+            style = MaterialTheme.typography.bodyLarge,
+        )
+
+        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(phaseLabel(view.phase), style = MaterialTheme.typography.titleLarge)
+                Text(
+                    durationLabel(view.phaseRemainingSeconds),
+                    style = MaterialTheme.typography.displayLarge,
+                )
+                Text("Current phase remaining")
+                val current = view.phase
+                if (current != null) {
+                    val done = current.durationSeconds - view.phaseRemainingSeconds
+                    LinearProgressIndicator(
+                        progress = { done.toFloat() / current.durationSeconds },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                Text("Next: " + phaseLabel(view.nextPhase))
+            }
+        }
+
+        Text("Whole session remaining: " + durationLabel(view.totalRemainingSeconds))
+        LinearProgressIndicator(
+            progress = {
+                view.elapsedSeconds.toFloat() / view.totalSeconds.coerceAtLeast(1)
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text("Elapsed: " + durationLabel(view.elapsedSeconds) +
+            " / " + durationLabel(view.totalSeconds))
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            when (view.status) {
+                TimerStatus.READY, TimerStatus.STOPPED, TimerStatus.FINISHED -> {
+                    Button(onClick = { snapshot = timer.start() }) {
+                        Text(if (view.status == TimerStatus.FINISHED) "Restart" else "Start")
+                    }
+                }
+                TimerStatus.RUNNING -> {
+                    Button(onClick = { snapshot = timer.pause() }) { Text("Pause") }
+                }
+                TimerStatus.PAUSED -> {
+                    Button(onClick = { snapshot = timer.resume() }) { Text("Resume") }
+                }
+            }
+            OutlinedButton(
+                enabled = view.status == TimerStatus.RUNNING ||
+                    view.status == TimerStatus.PAUSED,
+                onClick = { confirmStop = true },
+            ) { Text("Stop") }
+            TextButton(onClick = {
+                timer.stop()
+                onBackToEditor()
+            }) { Text("Editor") }
+        }
+
+        HorizontalDivider()
+        Text("Sound cues", style = MaterialTheme.typography.titleMedium)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Enable sounds", modifier = Modifier.weight(1f))
+            Switch(checked = soundEnabled, onCheckedChange = { soundEnabled = it })
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { tone(TimerCue.POSE_FINISHED) }) { Text("Test A") }
+            OutlinedButton(onClick = { tone(TimerCue.BREAK_FINISHED) }) { Text("Test B") }
+            OutlinedButton(onClick = { tone(TimerCue.SESSION_FINISHED) }) { Text("Test C") }
+        }
+        Text("A: pose to break  ·  B: break to pose  ·  C: session finished")
+        Text(
+            "Consecutive opening-pose sounds await the separate cue policy decision. " +
+                "Background and locked-screen alerts still require device testing.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+    }
+
+    if (confirmStop) {
+        AlertDialog(
+            onDismissRequest = { confirmStop = false },
+            title = { Text("Stop this session?") },
+            text = { Text("Stopping resets the live clock. Your saved plan is unchanged.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    snapshot = timer.stop()
+                    confirmStop = false
+                }) { Text("Stop timer") }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmStop = false }) { Text("Cancel") }
+            },
+        )
+    }
+}
+
+private fun phaseLabel(phase: SchedulePhase?): String = when (phase?.kind) {
+    PhaseKind.POSE -> "Pose " + (phase.poseNumber ?: "")
+    PhaseKind.SHORT_BREAK -> "Regular break"
+    PhaseKind.SPECIAL_BREAK -> "Special break"
+    PhaseKind.SUMMARY -> "End-of-session summary"
+    null -> "No active phase"
+}
+
+private fun durationLabel(seconds: Int): String {
+    val safe = seconds.coerceAtLeast(0)
+    val hours = safe / 3600
+    val minutes = (safe / 60) % 60
+    val remain = safe % 60
+    return if (hours > 0) {
+        "%02d:%02d:%02d".format(hours, minutes, remain)
+    } else {
+        "%02d:%02d".format(minutes, remain)
+    }
+}
