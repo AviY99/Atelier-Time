@@ -1,5 +1,15 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Stage 2 UI safety and widget-test source / Handoff v2.2
+
+- Continued authorized Stage 2 `stage-2-session-editor` work; added stable widget identifiers for inputs, approval, endings, warning controls.
+- Blocked malformed inputs and suppressed misleading partial timelines for invalid candidates. Updated mobile scroll layout while preserving two-pane wide display.
+- Added **eight Flutter widget-test definitions** and `flutter_test` dev dependency, covering stage T19–T23 requirements and canonical Example B preview. Corrected short-rest warning fixture to a valid zero-summary session.
+- **FLUTTER TESTS NOT EXECUTED**: no accessible Flutter SDK. Previously verified Stage 1 Dart core remains 35/35 PASS on Android Termux; it was not changed.
+- Recorded D-055 and updated roadmap/QA/Stage 2 plan and handoff v2.2. PR #1 / draft PR #2 remain unmerged; no GitHub Actions, paid builds, APK, persisted presets, live timer or later-stage work.
+
+
+
 ## 2026-10-23 — Stage 1 integration proposed; Stage 2 editor prototype begun / Handoff v2.1
 
 - User explicitly asked to **finish documentation and continue** after verified Stage 1 Step 1.4 completion (D-052). Recorded continuation decision D-053 and source/checkpoint D-054.
