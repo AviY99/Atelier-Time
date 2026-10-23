@@ -1,6 +1,6 @@
 # Atelier Time — on-phone execution bridge (K01–K03)
 
-**Status: source committed, NOT started or verified on the user's device.** No Gradle tests, APKs, installed-app checks or persisted-session validations are implied by this helper's existence.
+**Status: source committed, runner not yet started or verified against GitHub tasks on the user's device.** A user screenshot from the real CoGo terminal on 2026-10-23 verifies that `bash "$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle" --version` succeeds (Gradle 9.6.1, embedded Kotlin 2.3.21, Java 21.0.10, ARM64). Direct execution of that Gradle script produced `Permission denied`. The runner now invokes CoGo's managed script **through Bash** instead of requiring an executable `gradle` command in `PATH`. Python 3.12.12 and Git were also observed on-device. **No Android Gradle project build, APK, UI or stored-session test has run yet.**
 
 This is the real Android project, not a sample app. The phone runs the tasks itself. A small Python process in the **Code on the Go embedded terminal** polls **GitHub Issues** for tasks created by repository owner `AviY99` and posts limited results back. It does **not** run GitHub Actions or expose SSH/network ports. It accepts only:
 - `doctor`: inspect visible CLI Java, Git, Gradle, Android SDK and ADB.
