@@ -87,3 +87,10 @@ The Flutter editor delegates its input parsing to new `lib/src/editor_draft.dart
 ## 2026-10-23 — Stage 2 form-adapter verified at clean HEAD (D-059)
 
 Android Termux screenshot confirms `~/Atelier-Time-Stage2` at commit `3bb2bad` and **11/11 pure-Dart editor adapter tests PASS**. GitHub comparison confirms `3bb2bad` equals current `stage-2-session-editor` tip. D-057/D-058 mixed-worktree issue resolved using a separate Git worktree, preserving the original files. Stage 1 core still has separately verified 35/35 tests. Next low-cost check is a full `dart analyze && dart test` from the clean Stage 2 worktree; eight Flutter widget tests still require Flutter SDK. Stage 2 NOT complete; no PR merges, APK, GitHub Actions, paid runners, or later-stage work.
+
+
+## 2026-10-23 — Root Dart analyzer / Flutter subpackage isolation (D-060)
+
+The user tried the combined Stage 2 command `dart analyze && dart test` in Android Termux and encountered a flood of analyzer errors, associated with nested Flutter source despite Termux only having the **Dart SDK**. The `&&` prevented full `dart test` from running after analysis failed. The existing 35 Stage 1 and 11 clean Stage 2 test passes remain distinct historical evidence, not a new 46-test pass.
+
+Committed root and nested package `analysis_options.yaml` files on Stage 2 branch: root excludes the separate Flutter app from bare-Dart analysis, while the Flutter package remains independently analyzable on a Flutter-capable machine. Root analyzer/test rerun is **PENDING** on user device; Flutter UI test suite (8) still unrun. Stage 2 IN PROGRESS; no budget spend, PR merge, APK or Stage 3+ work.
