@@ -1,5 +1,21 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 2.2: Stage 2 editor safeguards and eight widget-test sources (D-055)
+
+**Instruction:** User said “continue.” Continued only the previously authorized Stage 2 session editor/preview branch.
+
+**Source work on `stage-2-session-editor`:** Reviewed Flutter UI against actual tested Dart core API. Added stable widget keys on inputs, opening groups, ending chips, slider, warnings and approval. Replaced unformatted parsing failure text with blocking error message. Invalid generated candidates no longer display misleading partial timeline phase rows or allow approval. Mobile preview now stays mounted within a scrollable page. Kept wide two-pane layout. Pure Dart scheduler unchanged.
+
+**Tests written:** Added `flutter_test` SDK dev dependency and eight widget-test definitions under `apps/atelier_time_flutter/test/session_editor_widget_test.dart`, checking T19–T23 including zero-duration and malformed field block, canonical Example B 01:25–01:40 special break, opening group edits, ending choice and invalidation, rest warning acknowledgement, and wide layout. Corrected 25+1+25 warning fixture to `summary=0` as required by approved D-037.
+
+**Verification limits:** Flutter SDK **not installed/available**. The eight Flutter widget tests and Flutter editor code are **NOT compiled/analyzed/run**; source review and primitive delimiter inspection do not certify compilation. The verified Stage 1 Dart core remains 35/35 test success from Android Termux. PR #1 still open/unmerged, draft PR #2 holds source changes. No GitHub Actions, paid build, APK, Stage 3 or timer implementation.
+
+**Documentation:** Updated decision D-055, Stage 2 plan, test plan, roadmap, branch README, work log, changelog, and cross-chat handoff v2.2. Next task within Stage 2: obtain Flutter-capable test execution safely and correct analyzer/widget errors; discuss provisional visual style with user before final approval.
+
+---
+
+
+
 ## 2026-10-23 — Iteration 2.1: Finish Stage 1 documentation and continue into Stage 2 prototype (D-053/D-054)
 
 **User instruction:** “What's going on u dont respond to actions ??? I want you to finish documentation and continue.” Responded by acting in GitHub rather than requesting another approval for work already authorized.
