@@ -1,5 +1,8 @@
 # Delivery roadmap and approval gates
 
+> **2026-10-23 — LATEST USER-APPROVED DELIVERY PRIORITY D-062:** Replace D-061's universal day-one native-build requirement with **fast, efficient Android PHONE-ON-DEVICE development → test → preview → installable Android build FIRST**, preserving architecture for later efficient iOS/Windows/macOS port. **Feasibility spike now authorized**: original Dart engine compiled to browser JavaScript, then separate small Capacitor APK build on the phone, then native background/audio proof. All production UI migration waits for proof; no paid Actions or PR merges. See [ANDROID_FIRST_PLATFORM_SPIKE.md](ANDROID_FIRST_PLATFORM_SPIKE.md) and [isolated spike branch](https://github.com/AviY99/Atelier-Time/tree/spike-android-dart-web).
+
+
 > **2026-10-23 — LATEST USER APPROVED PRIORITY D-062:** Replace immediate four-target release gate with **Android-first development on the phone**, test/debug/build/install Android APK locally and efficiently, while architecting for a later move to iOS, Windows, macOS. **D-063 recommended proof toolchain:** Kotlin with active Code on the Go mobile IDE, plus domain/UI separation for later Kotlin/Compose Multiplatform reuse, ONLY AFTER demonstrated on-device APK build. The former D-061 freeze while requiring all OS toolchains immediately is superseded; **do not resume Flutter feature coding or migrate to Kotlin before feasibility proof**. See [new plan](ANDROID_FIRST_DEVELOPMENT_PLAN.md). No stage beyond the authorized Android-first proof, no paid Actions or release claims.
 
 
