@@ -1,5 +1,20 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 2.8: original platform selection re-examined end-to-end (D-061)
+
+**User instruction:** Explicitly demanded rerunning the initial platform review, emphasizing cross-platform at **all stages from development through finished application**, not simply runtime support. User correctly identified an earlier process failure; no more Flutter-specific UI implementation authorized before the feasibility check.
+
+**What was checked:** Re-read original approved [TD-001](TECH_DECISION_001_PLATFORM.md), product/architecture/roadmap, and official Flutter development/deployment platform docs, Apple iOS build requirements, PWA/offline/visibility constraints, Tauri, Capacitor, Expo native build hosting, Termux Node availability. Recorded [12k-character engineering reassessment](PLATFORM_REASSESSMENT_2026_10_23.md) with F01–F08 full-lifecycle criteria, five option matrix and proof gates.
+
+**Outcome:** Flutter **runs** on four target OSs but Android Termux is NOT a supported official Flutter development host; native iOS release requires macOS/Xcode and desktop packages require target OS tools. Tauri/Capacitor/React Native alternatives also don't magically remove target build/signing restrictions. Browser-installed PWA could improve development/device portability but is not an independent native installer, and background timer/audio behavior is uncertain under lock. **No assessed candidate meets all strict requirements with fully local Android-only signed native builds for all four targets**; controlled remote host/build infrastructure may resolve the workflow but requires explicit plan, available infrastructure and budget. User has not accepted changing installation or lock-screen requirements. Original Flutter platform approval recorded historically but **UNDER RE-REVIEW for full lifecycle**.
+
+**Action:** Created platform assessment, registered D-061; added critical hold notices in TD-001, product spec, architecture, roadmap, Stage 2 plan, README; updated self-contained HANDOFF v2.8. **STOP new Flutter-specific UI coding and automatic merges**, preserve verified 35/35 Dart core and 11/11 Stage 2 adapter tests and GitHub branches, no paid Actions or cloud builders. No replacement selected or migration performed.
+
+**Next:** Present precisely which native distribution/build constraints are fundamentally host-specific and the tradeoffs of remotely operable builders vs a browser-installed PWA; ask for a renewed framework decision only with an evidence-backed implementable plan, not mere claims.
+
+---
+
+
 ## 2026-10-23 — Iteration 2.7: Mass Termux analyzer errors from nested Flutter source; split analysis scope (D-060)
 
 **User evidence:** User ran `dart analyze && dart test` from clean Stage 2 Termux checkout and uploaded a very tall screenshot with hundreds of diagnostic lines, saying in Hebrew “This is only a tenth of the errors.” Do not request all screenshots; do not conflate massive analyzer failures with failing unit tests. Since `&&` follows `dart analyze`, the full Dart suite did **not** run on this attempt.
