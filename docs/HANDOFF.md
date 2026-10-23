@@ -1,4 +1,12 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v3.4)
+
+## LATEST SOURCE-ONLY FOLLOW-UP — K03 corruption guards (2026-10-23)
+
+Current implementation branch `android-native-kotlin-compose`; draft [PR #3](https://github.com/AviY99/Atelier-Time/pull/3) remains open, unmerged. After previous D-070 handoff, committed actual code fix [`01e56f0`](https://github.com/AviY99/Atelier-Time/commit/01e56f01be73f0d90e473a2263ecbda2be187404) ensuring wrong-type SharedPreferences data is treated as a readable error without erasure, and direct adapter writes reject invalid/future-version data. Added two Android instrumentation cases ([`95facb8`](https://github.com/AviY99/Atelier-Time/commit/95facb8005578b605307771e0876c377ac747ae8); corrected JSON literal [`0db22e8`](https://github.com/AviY99/Atelier-Time/commit/0db22e8f5833459dc2e7c80300b4e6a5cfe22748)). GitHub wrote and read back source successfully, **not compiled**.
+
+**Current count: 32 Kotlin JVM + 6 Android instrumentation methods WRITTEN, NONE EXECUTED. K01–K03 remain UNVERIFIED; APK NOT BUILT/INSTALLED; K04 runtime timer and three cues NOT IMPLEMENTED.** Current assistant environment has Kotlin 1.9 and Java 21 but **no Gradle, Android SDK, ADB or access to user's phone**. Phone-local CoGo must run `:app:testDebugUnitTest`, `:app:assembleDebug`, then install/reopen and check offline persistence; `:app:connectedDebugAndroidTest` if available. Detailed evidence in [WORK_LOG](WORK_LOG.md), [TEST_PLAN](TEST_PLAN.md) and [native branch README](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/android-native/README.md). No new product decisions, GitHub Actions, Dart reruns or merge; original handoff v3.4 paragraphs below remain a historical snapshot.
+
+---
 **Updated:** 2026-10-23  
 **Repository:** https://github.com/AviY99/Atelier-Time (existing public repo; default `main`)  
 **CURRENT PRODUCT/IMPLEMENTATION REQUIREMENT:** Develop Android on user's phone quickly/efficiently, build/install APK there, while isolating pure Kotlin domain logic and Compose UI for later iOS/Windows/macOS via KMP/Compose MP. **Industry-standard code stack selected D-067, not proof-spike gating.**
