@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **LATEST K02 BUILD EVIDENCE (2026-10-23):** Android phone screenshot confirms **`:app:assembleDebug` BUILD SUCCESSFUL in 47s**, 36 Gradle tasks (18 executed, 18 up-to-date), including `:app:packageDebug`. Previous real on-phone `:app:testDebugUnitTest` **BUILD SUCCESSFUL in 34s**. Unstripped `libandroidx.graphics.path.so` warning is nonblocking. APK filesystem metadata/size/hash, installation, editor UI and K03 persistence checks remain **NOT YET VERIFIED**; exact JUnit XML count and six Android instrumentation cases are also pending. **K01 Gradle test gate PASS; K02 assembly PASS, install/UI acceptance OPEN; K03 OPEN; K04 not implemented.** No Actions or merge.
+
+
 > **LATEST REAL K01 RESULT — PASS ON ANDROID PHONE (2026-10-23):** User screenshot confirms Code on the Go `:app:testDebugUnitTest` with the **native CoGo AAPT2 override** finished `BUILD SUCCESSFUL in 34s` (24 Gradle tasks, 10 executed and 14 up-to-date). Android resources, Kotlin compilation and JVM test task completed on-phone. **The screenshot does not expose exact JUnit XML per-method count**, though 32 JVM tests are defined in code. K01 unit-test Gradle gate **PASSED**; APK build `:app:assembleDebug`, real install/UI, K03 offline persistence and six instrumented device tests remain **NOT VERIFIED**. Previous failed-build notes below are historical and superseded for this task.
 
 
