@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **PHONE TEST RUNNER PREPARED — NOT EXECUTED (2026-10-23):** [Code on the Go phone runner instructions](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/android-native/PHONE_RUNNER.md) and [restricted task runner](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/android-native/tools/phone_task_runner.py) are in the implementation branch. The GitHub-Issues **doctor** task is queued at [Issue #4](https://github.com/AviY99/Atelier-Time/issues/4) but has not been executed. The user's actual CoGo/Gradle command-line integration, all **32 JVM + 6 device instrumentation methods**, debug APK/install and persistence checks remain **UNVERIFIED**. Do not count infrastructure source creation as a test pass.
+
+
 > **LATEST K03 QA CHECKPOINT — 2026-10-23, AFTER D-070:** Committed an actual Android storage safeguard against wrong-type SharedPreferences values and direct overwrite of corrupt/future-version data on branch `android-native-kotlin-compose`. Added two Android instrumentation regression methods. **32 JVM JUnit + 6 instrumentation tests written, 0 executed in this follow-up; no Android SDK/Gradle/device available here.** GitHub source readback succeeded, which does *not* verify Kotlin compilation. Acceptance tasks are still `:app:testDebugUnitTest`, `:app:assembleDebug`, phone install/relaunch and saved-session manual QA, and `:app:connectedDebugAndroidTest`. **K01–K03 unverified; K04 not implemented.** The historical 4-instrumentation count below is superseded.
 
 
