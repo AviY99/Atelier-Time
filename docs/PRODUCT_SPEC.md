@@ -1,5 +1,8 @@
 # Product specification — Atelier Time
 
+> **2026-10-23 — LATEST APPROVED DELIVERY PRIORITY (D-062):** Android FIRST: fast, practical **development/testing/building/installing the Android APK directly on the user's Android phone**. Design the code for efficient LATER adaptation to iOS/iPadOS, Windows and macOS, but those are **no longer initial release blockers**. The product's offline presets, live timer/sounds, and approved scheduling fixtures remain unchanged. [ANDROID_FIRST_DEVELOPMENT_PLAN.md](ANDROID_FIRST_DEVELOPMENT_PLAN.md) proposes Kotlin + CoGo pending an on-device APK proof (D-063). This supersedes the earlier D-061 demand for immediately complete cross-platform build pipelines. **Framework is not yet migrated; original Dart test passes preserved.**
+
+
 > **2026-10-23 — D-061 PLATFORM FEASIBILITY HOLD:** The application requirements **remain** offline, installable, same maintained product/features on Android/iOS/Windows/macOS, reliable clock and three audio cues. User explicitly clarified that **development, automated tests, builds, signing and deployment must also be workable cross-platform**, including the currently available Android Termux environment. The historical Flutter+Dart approval is **under reconsideration** because it did not prove that complete lifecycle; no framework replacement or relaxation of separate native installers has been authorized. See [reassessment](PLATFORM_REASSESSMENT_2026_10_23.md). Pause additional Flutter-specific UI coding pending feasibility proof. Preserve verified Dart logic, documentation and tests.
 
 
