@@ -1,5 +1,19 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 1.8: User screenshot verifies Dart analyzer and all 34 tests PASS
+
+**Evidence received:** Three Android Termux screenshots displaying `dart pub get && dart analyze && dart test` on **Dart SDK 3.13.7, android_arm64**. Exact final output visible: `Changed 49 dependencies!`, `Analyzing Atelier-Time... No issues found!`, `Built test:test.`, `00:01 +34: All tests passed!`. Previous corrected smoke check also succeeded.
+
+**Verdict:** **SCREENSHOT-VERIFIED** `dart analyze` no issues, **34/34 defined Dart unit tests PASS**, and smoke PASS. Supersedes earlier user-report-only verification D-049; register D-050 records screenshots. Commit SHA of user's local checkout not shown; evidence is for the executed local checkout on Stage 1 development branch, not cross-platform Flutter app distribution. No app build exists.
+
+**Stage 1 acceptance crosscheck:** Core T01–T08/A-B exact timelines, final pose choices, T10–T12, T15–T18, D-031/036/044 are represented in the executed 34 test definitions. T09 custom split low/high endpoints is **partial**: 34m+1m and invalid 0 tested; valid **1m+34m** endpoint lacks an explicit test. T13/T14 full edge matrix remains partial. Updated TEST_PLAN.md and branch progress; a small T09 test and re-run should precede formal Step 1.4 completion.
+
+**Process:** No new implementation code in this iteration. Step 1.4 **IN PROGRESS / FINAL QA REVIEW**; do not merge branch or start Stage 2 without proper gate. GitHub Actions untouched and user's budget unchanged. Updated Handoff v1.8.
+
+---
+
+
+
 ## 2026-10-23 — Iteration 1.7: User reports complete Dart unit suite passing in Termux (D-049)
 
 **User follow-up:** After confirmed `dart tool/smoke.dart` success (D-048), user was asked to run `dart pub get && dart analyze && dart test` in the existing Android Termux Dart 3.13.7 installation and replied exactly **“All tests passed!”**.
