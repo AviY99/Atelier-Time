@@ -1,5 +1,13 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Android industry-standard decision, no toy spikes / Handoff v3.1
+
+- At user's demand for a firm industry-standard choice rather than new experiments, selected **Kotlin + Jetpack Compose + Gradle** for Android-first app built on phone with **Code on the Go** (specialized mobile IDE; Android Studio is standard desktop IDE). Future Kotlin Multiplatform/Compose Multiplatform sharing for iOS/Windows/macOS (D-067).
+- Sourced official Google May 2026 Compose First, JetBrains Multiplatform stability and migration docs, maintained Code on the Go 26.43 and Reddit developer/Termux community discussions; archived AndroidIDE not recommended.
+- Existing duplicate/conflicting D-064 GitHub rows reconciled as D-064/D-065/D-066 history plus **D-067 authoritative**; older unexecuted Dart-to-JS/Capacitor spike remains historical only. **No disposable prototype builds required**; next work is real Atelier Time native Android implementation and ordinary QA.
+- Preserved Dart scheduling 35 tests PASS, form adapter 11 tests PASS, unmerged historical PRs. No Kotlin APK yet, no GitHub Actions or paid build. Updated docs and HANDOFF v3.1.
+
+
 ## 2026-10-23 — Phone-first Dart reuse proof and Kotlin alternative reconciled / Handoff v3.0 (D-064)
 
 - User-approved requirement D-062 now prioritizes fast, efficient Android development/build/install ON PHONE, with iOS/Windows/macOS ports efficiently later; D-061 strict universal build host condition superseded.
