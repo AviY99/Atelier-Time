@@ -1,5 +1,14 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Stage 1 Step 1.4 first real Android compiler feedback / Handoff v1.5
+
+- User successfully ran Dart SDK **3.13.7** in Android Termux and downloaded the development branch. The first smoke invocation **FAILED compilation** with `num` supplied to `int?` at `offsetSeconds: crossingOffset` in `lib/src/scheduling.dart`.
+- Fixed the integer typing issue with conditional integer arithmetic; committed to `stage-1-4-scheduling-core` as `0dedd95756b6d3984b2e16548a58599179fbf7ff`.
+- **Updated code NOT YET retested**. Next step for Termux: `git pull --ff-only && dart tool/smoke.dart`, followed (if successful) by Dart analyzer and test suite.
+- D-047 and handoff v1.5 updated. No GitHub Actions, paid runner, merge, Stage 2 code or unverified success claim.
+
+
+
 ## 2026-10-22 — Stage 1 Step 1.4 verification preparation / Handoff v1.4
 
 - Diagnosed missing Dart SDK and DNS resolution failures in assistant's container. This blocked **actual Dart test execution**, not source-code drafting.
