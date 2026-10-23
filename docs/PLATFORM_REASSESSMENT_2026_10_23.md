@@ -1,5 +1,8 @@
 # Atelier Time — platform and toolchain re-assessment (2026-10-23)
 
+> **2026-10-23 — HISTORICAL D-061 CONSTRAINT SUPERSEDED BY D-062:** User relaxed the universal native-build-host requirement. **Current hard priority** is fast and efficient Android development/preview/testing/building **directly on the Android phone**, keeping iOS/Windows/macOS later ports efficient through shared code; future OS-specific builder availability is acceptable and **not a day-one blocker**. The analysis below documents why the original all-host requirement failed, but is NOT the current product gate. See [new Android-first plan](ANDROID_FIRST_PLATFORM_SPIKE.md), including a Dart code-reuse browser proof and a phone-built Capacitor APK proof before any framework approval.
+
+
 > **LATEST 2026-10-23 D-062 USER REVISION:** Strict native-build-all-four-OSs-now constraint is NO LONGER current. Revised goal: efficiently develop/debug/build/install **Android first directly on user's phone**, design for efficient LATER iOS/Windows/macOS adaptation. D-063 proposes **Kotlin + Code on the Go** as a candidate requiring actual installed APK before migration; see [ANDROID_FIRST_DEVELOPMENT_PLAN.md](ANDROID_FIRST_DEVELOPMENT_PLAN.md). This earlier comprehensive lifecycle audit is retained historically, but its immediate multi-target feasibility STOP condition is superseded as a blocker to **Android-only proof**.
 
 
