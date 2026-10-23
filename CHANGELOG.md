@@ -1,5 +1,14 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Screenshot-verified 34 Dart tests / Handoff v1.8
+
+- Received Termux screenshots proving `dart pub get` succeeded, `dart analyze` reports **No issues found!**, and `dart test` ends **00:01 +34: All tests passed!** on Android Dart 3.13.7. The earlier smoke check also passed.
+- Elevated verification to **screenshot-confirmed results D-050**, superseding user-report-only status D-049. This is not a multi-platform Flutter application build.
+- Acceptance audit of the 34 tests identifies one explicit Stage 1 T09 custom split endpoint not yet tested (1m+34m); 34m+1m and 0m rejection already covered. No new tests or code committed in this log iteration, so original 34-pass evidence remains valid.
+- **Step 1.4 remains in final QA review**, branch unmerged, Stage 2 not authorized. No GitHub Actions, paid runners, budget changes, UI, or APK.
+
+
+
 ## 2026-10-23 — Full Android Dart unit suite user-reported passing / Handoff v1.7
 
 - Following user-confirmed Termux smoke test PASS (D-048), user reports **“All tests passed!”** after requested `dart pub get && dart analyze && dart test` on Android Dart 3.13.7 (D-049). Written suite currently defines **34 tests**. No full analyzer/test transcript or local commit ID supplied; preserve as **USER-REPORTED PASS**, not independently reproduced.
