@@ -1,5 +1,13 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Clean Stage 2 worktree verified 11/11 / Handoff v2.6
+
+- New screenshots show `~/Atelier-Time-Stage2` checkout HEAD `3bb2bad` and `dart test test/editor_draft_test.dart` concluding **`+11: All tests passed!`**.
+- GitHub commit comparison establishes `3bb2bad` is exactly Stage 2 branch tip `3bb2bade992fddab7dc3d7ece31d9aa58231380f`; D-057/D-058 checkout provenance problem resolved using separate worktree, original staged files untouched.
+- Stage 1 35 verified core tests remain historical separate evidence. Full Stage 2 analyzer/root suite and eight Flutter widget tests still outstanding. No GitHub Actions/paid CI, APK, branch merges or later-stage programming.
+- Recorded decision D-059, test plan, roadmap, Stage 2 plan and complete handoff v2.6.
+
+
 ## 2026-10-23 — Termux branch/index diagnosis clarified / Handoff v2.5
 
 - User's read-only Git screenshot proves checkout remains `stage-1-4-scheduling-core` at `907f871`, despite successful fetch and failed Stage 2 switch. Stage 2 files including the 11-test adapter are **staged additions** in the old Stage 1 working tree; `pubspec.lock` remains untracked.
