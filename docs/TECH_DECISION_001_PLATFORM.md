@@ -1,5 +1,8 @@
 # Technical Decision TD-001 — Flutter + Dart, shared cross-platform application
 
+> **LATEST OVERRIDE D-064:** The choice is now **Kotlin + Jetpack Compose + Gradle** for Android-first phone development (D-062); pure Kotlin domain designed for future KMP/Compose Multiplatform, with maintained **Code on the Go** as mobile development environment. **Industry-standard IDE is Android Studio**, which does not run on phone. D-063's preliminary minimal sample/feasibility spike is **not a mandatory project gate**, rejected explicitly by user. Earlier Flutter+Dart decision remains recorded historically only; preserve passing Dart code as migration test oracle.
+
+
 > **2026-10-23 — NEW DECISION D-064 SUPERSEDES THE FLUTTER IMPLEMENTATION CHOICE:** The accepted Android-first technology is **Kotlin + Jetpack Compose + Gradle**, authored/built on user's Android phone through maintained **Code on the Go**; future portability via Kotlin Multiplatform and Compose Multiplatform. Android Studio is the standard developer IDE in general industry, but cannot be run as normal native Android app; CoGo is the supported phone-focused alternative. No separate feasibility demo demanded. Flutter remains historical unmerged source; Dart scheduling and adapter tests retained for port-parity. See [D-064](DECISIONS.md) and [Android-first plan](ANDROID_FIRST_DEVELOPMENT_PLAN.md).
 
 
