@@ -611,8 +611,12 @@ class ScheduleEngine {
         final previousAccumulated = accumulated;
         accumulated += phase.durationSeconds;
         if (accumulated > _maxUnbrokenPoseSeconds && !warned) {
+          // Use integer-only arithmetic; math.max() can infer num and
+          // fails type checking for ScheduleIssue.offsetSeconds (int?).
+          final secondsUntilThreshold =
+              _maxUnbrokenPoseSeconds - previousAccumulated;
           final crossingOffset = phase.startSeconds +
-              math.max(0, _maxUnbrokenPoseSeconds - previousAccumulated);
+              (secondsUntilThreshold > 0 ? secondsUntilThreshold : 0);
           warnings.add(ScheduleIssue(
             IssueSeverity.warning,
             'rest_25_5',
