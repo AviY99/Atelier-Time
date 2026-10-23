@@ -58,3 +58,19 @@ On the first Flutter-capable run, correct any compilation, responsive-layout, fo
 - No flutter SDK, APK, native platform scaffolding, GitHub Actions, paid runner or merge.
 
 On Android Termux, the user can fetch/check out the `stage-2-session-editor` branch and run `dart test test/editor_draft_test.dart` from repository root. Do not run `flutter test` in Termux without a working Flutter SDK.
+
+
+## 2026-10-23 — Dart-only root analyzer isolation (D-060)
+
+**Reported problem:** The user ran `dart analyze && dart test` in Android Termux from the Stage 2 root worktree. The root analyzer produced a very large quantity of diagnostics after traversing nested Flutter sources while the phone only had **Dart**, not the **Flutter SDK**. The analyzer command stops at that point, so the chained full test command did NOT reach `dart test`.
+
+**Fix committed on Stage 2 branch:**
+- Root [analysis_options.yaml](../../analysis_options.yaml) excludes `apps/atelier_time_flutter/**` from **root pure-Dart** analysis.
+- Nested [analysis_options.yaml](analysis_options.yaml) has a **separate configuration** preserving Flutter UI/widget files within scope of `flutter analyze` from this package on a proper Flutter environment.
+- No Dart scheduling or editor logic changed. This does not imply Flutter widget tests are passing.
+
+**Recheck (Dart-only Termux):** From `~/Atelier-Time-Stage2`, run `git pull --ff-only && dart analyze && dart test`. This should analyze the root Dart package and execute its 46 tests (35 original core + 11 editor adapter), but **actual outcome is pending a device run**. If diagnostics persist, send only the first 10–20 lines / first error, not hundreds of screenshots.
+
+**Recheck (Flutter-capable machine, later):** In `apps/atelier_time_flutter/` run `flutter pub get && flutter analyze && flutter test`. Flutter source is not exempt from that independent review. Android Termux's bare Dart installation is insufficient for it.
+
+**Restrictions:** No paid GitHub Actions, APK build, PR merge, Stage 3 saved presets or Stage 4 timer development.
