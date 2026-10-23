@@ -86,6 +86,38 @@ class AndroidPresetStoreTest {
     }
 
     @Test
+    fun wrongTypePreferenceReportsErrorAndPreservesOriginalValue() {
+        val preferences = context.getSharedPreferences(testName, Context.MODE_PRIVATE)
+        assertTrue(preferences.edit().putInt("library_v1", 42).commit())
+        try {
+            catalog().state()
+            fail("A non-string storage value must be reported, not treated as empty.")
+        } catch (_: IllegalStateException) { }
+        assertEquals(42, preferences.getInt("library_v1", -1))
+        try {
+            AndroidPresetStore(context, testName).write(PresetCollection())
+            fail("A direct write must never erase wrong-type stored data.")
+        } catch (_: IllegalStateException) { }
+        assertEquals(42, preferences.getInt("library_v1", -1))
+    }
+
+    @Test
+    fun directWriteCannotReplaceCorruptOrFutureSchema() {
+        val preferences = context.getSharedPreferences(testName, Context.MODE_PRIVATE)
+        for (raw in listOf(
+            "{bad json",
+            "{\\"version\\":999,\\"presets\\":[],\\"activeId\\":null}",
+        )) {
+            assertTrue(preferences.edit().putString("library_v1", raw).commit())
+            try {
+                AndroidPresetStore(context, testName).write(PresetCollection())
+                fail("Direct storage writes must respect corruption/version guard.")
+            } catch (_: IllegalStateException) { }
+            assertEquals(raw, preferences.getString("library_v1", null))
+        }
+    }
+
+    @Test
     fun futureVersionCannotBeDowngradedWithoutMigration() {
         val preferences = context.getSharedPreferences(testName, Context.MODE_PRIVATE)
         val raw = "{\"version\":999,\"presets\":[],\"activeId\":null}"
