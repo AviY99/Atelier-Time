@@ -1,5 +1,27 @@
 # Atelier Time — on-phone execution bridge (K01–K03)
 
+## 2026-10-23 — Required native AAPT2 override for CLI Gradle on ARM64
+
+User's **real first SDK-36 project run** on phone reached Kotlin compilation but Gradle task `:app:processDebugResources` failed with `aapt2-9.3.1-15703166-linux ... Syntax error: word unexpected (expecting ")")`. This is Maven Linux AAPT2, inappropriate for native Android ARM64. CoGo's own [GradleBuildService.kt](https://github.com/appdevforall/CodeOnTheGo/blob/stage/app/src/main/java/com/itsaky/androidide/services/builder/GradleBuildService.kt) injects `-Pandroid.aapt2FromMavenOverride` when building from its **GUI**, but the earlier plain terminal Gradle invocation omitted it. Its [Environment.java](https://github.com/appdevforall/CodeOnTheGo/blob/stage/common/src/main/java/com/itsaky/androidide/utils/Environment.java) defines native AAPT2 at `$ANDROID_HOME/build-tools/36.0.0/aapt2`.
+
+The restricted phone runner now validates the local binary in `doctor` and automatically adds the same Gradle CLI option to unit-test, APK and instrumentation tasks. This is a **tool invocation fix**, not a product/Gradle model change; it must be verified by an actual on-phone rerun. No global `gradle.properties` changes or destructive Gradle cache clearing are needed.
+
+From the already-open `android-native/` terminal folder, first check the existing CoGo binary:
+
+```sh
+"$ANDROID_HOME/build-tools/36.0.0/aapt2" version
+```
+
+If this prints the AAPT2 version successfully, rerun the **same real project tests** with the native override:
+
+```sh
+bash "$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle" :app:testDebugUnitTest --no-daemon --console=plain "-Pandroid.aapt2FromMavenOverride=$ANDROID_HOME/build-tools/36.0.0/aapt2"
+```
+
+Do not claim any Kotlin tests have passed until the Gradle task reports verified results. A separate Kotlin warning `SessionEditorScreen.kt:207` about an unnecessary Elvis operator is not the AAPT2 build failure.
+
+---
+
 **Status: source committed, runner not yet started or verified against GitHub tasks on the user's device.** A user screenshot from the real CoGo terminal on 2026-10-23 verifies that `bash "$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle" --version` succeeds (Gradle 9.6.1, embedded Kotlin 2.3.21, Java 21.0.10, ARM64). Direct execution of that Gradle script produced `Permission denied`. The runner now invokes CoGo's managed script **through Bash** instead of requiring an executable `gradle` command in `PATH`. Python 3.12.12 and Git were also observed on-device. **No Android Gradle project build, APK, UI or stored-session test has run yet.**
 
 This is the real Android project, not a sample app. The phone runs the tasks itself. A small Python process in the **Code on the Go embedded terminal** polls **GitHub Issues** for tasks created by repository owner `AviY99` and posts limited results back. It does **not** run GitHub Actions or expose SSH/network ports. It accepts only:
