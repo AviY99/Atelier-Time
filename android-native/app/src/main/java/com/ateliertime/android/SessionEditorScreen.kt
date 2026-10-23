@@ -17,7 +17,7 @@ import com.ateliertime.domain.*
 
 /**
  * Real Stage 2 Android editor/chronological schedule preview.
- * No persistence, activation or live timer yet: those require separate implementation.
+ * Offline approved presets now persist. Selecting a preset does NOT yet run a timer.
  * Style is a neutral Material 3 baseline, NOT final branding.
  */
 @Composable
@@ -323,8 +323,8 @@ fun SessionEditorScreen() {
                     Text("Approve exact timeline")
                 }
                 if (approved != null) {
-                    Text("Approved for this preview only. Offline saving " +
-                        "and timer activation are not implemented yet.")
+                    Text("Exact timeline approved. Use Save approved below to " +
+                        "store this session offline. Live timer is not available yet.")
                 }
             }
         }
