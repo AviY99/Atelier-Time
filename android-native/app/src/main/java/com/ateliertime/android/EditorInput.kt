@@ -21,6 +21,14 @@ data class EditorInput(
         fun read(input: String, label: String): Int =
             input.trim().toIntOrNull()
                 ?: throw IllegalArgumentException("Enter a whole number for " + label)
+        fun seconds(input: String, label: String): Int {
+            val minutes = read(input, label)
+            val result = minutes.toLong() * SECONDS_PER_MINUTE
+            require(result in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
+                "Duration for " + label + " exceeds the supported range."
+            }
+            return result.toInt()
+        }
         if (name.isBlank()) throw IllegalArgumentException("Enter a session name.")
         val count = read(specialCount, "special break count")
         val placement = if (!automaticPlacement && count > 0) {
@@ -31,20 +39,20 @@ data class EditorInput(
         return SessionRules(
             id = "editor-preview",
             name = name.trim(),
-            totalSeconds = read(totalMinutes, "total minutes") * SECONDS_PER_MINUTE,
-            summarySeconds = read(summaryMinutes, "summary minutes") * SECONDS_PER_MINUTE,
+            totalSeconds = seconds(totalMinutes, "total minutes"),
+            summarySeconds = seconds(summaryMinutes, "summary minutes"),
             openingGroups = opening.map {
                 OpeningPoseGroup(
                     "opening_" + it.id,
                     read(it.count, "opening pose count"),
-                    read(it.minutes, "opening pose minutes") * SECONDS_PER_MINUTE,
+                    seconds(it.minutes, "opening pose minutes"),
                 )
             },
-            poseSeconds = read(poseMinutes, "pose minutes") * SECONDS_PER_MINUTE,
+            poseSeconds = seconds(poseMinutes, "pose minutes"),
             shortBreakSeconds =
-                read(normalBreakMinutes, "normal break minutes") * SECONDS_PER_MINUTE,
+                seconds(normalBreakMinutes, "normal break minutes"),
             specialBreakSeconds =
-                read(specialBreakMinutes, "special break minutes") * SECONDS_PER_MINUTE,
+                seconds(specialBreakMinutes, "special break minutes"),
             specialBreakCount = count,
             cycleStart = cycleStart,
             placement = placement,
