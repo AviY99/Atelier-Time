@@ -1,5 +1,11 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v3.4)
 
+## REAL KOTLIN UNIT-TEST GRADLE SUCCESS — 2026-10-23
+
+**New phone evidence, superseding older pending/failed K01 statements below:** On Code on the Go Android ARM64, actual `:app:testDebugUnitTest` ran with native AAPT2 Gradle property; screenshot shows Android resource/Kotlin/JVM test tasks and **`BUILD SUCCESSFUL in 34s`** (24 tasks; 10 executed/14 up-to-date). Latest screenshot-confirmed device Git checkout from preceding pull was `a4b9469`, before subsequent runner/document-only branch commits. **K01 Gradle unit test gate now PASSED ON THE PHONE.** JUnit XML count not yet seen; 32 JUnit methods are written in source. **No `:app:assembleDebug` result, APK, installation, editor acceptance or K03 persistent-storage acceptance yet.** The six Android instrumentation tests not run. K04 not implemented. Next perform real debug APK build with the same CoGo AAPT2 override, then device installation/UI/K03 persistence tests; no Actions, auto merge or repeated historical Dart suites. See [WORK_LOG.md](WORK_LOG.md) and [TEST_PLAN.md](TEST_PLAN.md).
+
+---
+
 ## PHONE EXECUTION BRIDGE PENDING DEVICE SETUP — 2026-10-23
 
 At the user's request to make ChatGPT-triggered Android execution possible, added a **restricted** GitHub-Issues-to-CoGo-terminal task bridge to the live `android-native-kotlin-compose` implementation branch: [runner source](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/android-native/tools/phone_task_runner.py), [setup instructions](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/android-native/PHONE_RUNNER.md). [Issue #4](https://github.com/AviY99/Atelier-Time/issues/4) queues a **doctor** environment-inspection task for when the phone worker is started. Script is authored and committed, not installed or exercised on user's phone. It will require CoGo toolchain, terminal Python/git, a narrow GitHub Issues token held only on-device, and an actively running process. Its CLI Gradle compatibility is **not yet verified**. GitHub Actions remain unused. K01–K03 unverified, APK/device storage untested, K04 not implemented. See [WORK_LOG](WORK_LOG.md) for evidence.
