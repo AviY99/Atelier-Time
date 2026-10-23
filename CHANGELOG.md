@@ -1,5 +1,14 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Stage 1 Step 1.4 pure Dart core verified / Handoff v2.0 (D-052)
+
+- User screenshot confirms branch update `8cf7a24..907f871` and **`00:00 +35: All tests passed!`** under Android Termux Dart 3.13.7. The 35th T09 1m+34m regression passed along with all prior tests.
+- Earlier screenshot proved `dart analyze` **No issues found!** for the prior 34-test checkout, plus prior successful smoke check. The new 35th test-only revision was **not separately re-analyzed**.
+- **Stage 1 Step 1.4 scheduling core/required test gate VERIFIED and COMPLETE ON ISOLATED BRANCH.** Wider T13/T14 edge combinations remain a later QA backlog; no installed app or cross-platform build evidence.
+- **No merge to main; no Stage 2 authorization. No GitHub Actions, paid runners, user budget modification, Flutter screens, Android APK or deployment.** Handoff v2.0 and decision D-052 preserve the exact stop point.
+
+
+
 ## 2026-10-23 — Stage 1 Step 1.4 T09 edge regression added / Handoff v1.9
 
 - Screenshot-confirmed Android `dart analyze`: **No issues found!** and `dart test`: **34 tests all passed** (D-050). Separate smoke check passed.
