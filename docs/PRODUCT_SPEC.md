@@ -1,6 +1,6 @@
 # Product specification — Atelier Time
 
-Status: **Approved product scope** on 2026-10-22. Implementation has not begun.
+Status: **Approved product scope** on 2026-10-22. Stage 1 pure-Dart scheduling core subsequently implemented and screenshot-verified 35/35 tests PASS on Android Termux (D-052), on an unmerged branch. Stage 2 user subsequently authorized initial editor/preview SOURCE work (D-053/D-054), not yet Flutter-compiled/tested. No installable app, persistence or runtime timer/audio exists.
 
 ## Purpose and audience
 A straightforward installable, self-contained timer for **drawing and sculpting ateliers** where a live model holds timed poses and takes breaks. The application runs a complete predefined sequence with minimal intervention.
@@ -72,3 +72,9 @@ No account service, cloud synchronization, multi-device orchestration, payments 
 
 ## Definition of done
 Installable working app on the chosen OS, saves/loads presets, generates examples A/B exactly, permits all three end-pose choices, runs reliable timer with three distinct audio events, and passes documented acceptance tests. Document every iteration and leave a current cross-chat handoff.
+
+## Development status (2026-10-23; D-052–D-054)
+
+- **Verified Stage 1 scheduling core:** Android ARM64 Dart 3.13.7 screenshot 35 unit tests PASS; earlier Dart analyzer and smoke check passed. [Core PR #1](https://github.com/AviY99/Atelier-Time/pull/1) is open and unmerged.
+- **Stage 2 editor:** User instructed “finish documentation and continue”; [Stage 2 plan](STAGE_2_PLAN.md) and [Flutter editor source branch](https://github.com/AviY99/Atelier-Time/tree/stage-2-session-editor) exist, [draft PR #2](https://github.com/AviY99/Atelier-Time/pull/2). Responsive input and full timeline preview are source-only and **NOT Flutter-compiled or tested**. Temporary Material theme is subject to user feedback; branding/logo comes later.
+- Stage 3 offline saved presets, Stage 4 live timer/audio and installation remain **NOT IMPLEMENTED/NOT AUTHORIZED**. No paid GitHub workflows, deployments or budget increase.
