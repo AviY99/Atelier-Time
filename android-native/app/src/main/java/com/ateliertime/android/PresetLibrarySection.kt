@@ -29,6 +29,7 @@ fun PresetLibrarySection(
     var renameId by remember { mutableStateOf<String?>(null) }
     var renameText by remember { mutableStateOf("") }
     var pendingDelete by remember { mutableStateOf<String?>(null) }
+    var showHelp by remember { mutableStateOf(false) }
 
     fun refresh() {
         try {
@@ -52,8 +53,12 @@ fun PresetLibrarySection(
     LaunchedEffect(catalog) { refresh() }
 
     HorizontalDivider()
-    Text("Saved sessions · offline", style = MaterialTheme.typography.titleLarge)
-    Text("Save only an explicitly approved schedule. Stored sessions remain on this phone.")
+    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+        Text("Saved session presets", style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.weight(1f))
+        TextButton(onClick = { showHelp = true }) { Text("Help") }
+    }
+    Text("Only an approved session timeline can be saved. Presets are stored offline.")
     if (error != null) {
         Text(
             error ?: "",
@@ -73,7 +78,7 @@ fun PresetLibrarySection(
                     onSaved(saved)
                 }
             },
-        ) { Text("Save approved") }
+        ) { Text("Save approved session") }
         OutlinedButton(
             enabled = approved != null && selectedId != null,
             onClick = {
@@ -83,7 +88,7 @@ fun PresetLibrarySection(
                     onSaved(saved)
                 }
             },
-        ) { Text("Update approved") }
+        ) { Text("Overwrite saved preset") }
         OutlinedButton(
             enabled = approved != null,
             onClick = {
@@ -93,7 +98,7 @@ fun PresetLibrarySection(
                     onSaved(saved)
                 }
             },
-        ) { Text("Save as new") }
+        ) { Text("Save as new preset") }
     }
     if (collection.entries.isEmpty()) Text("No saved sessions yet.")
     collection.entries.forEach { preset ->
@@ -101,7 +106,7 @@ fun PresetLibrarySection(
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(preset.title, style = MaterialTheme.typography.titleMedium)
                 if (collection.activeId == preset.id) {
-                    Text("Selected for future timer activation")
+                    Text("Selected preset (load to open its timer)")
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
@@ -109,13 +114,13 @@ fun PresetLibrarySection(
                 ) {
                     TextButton(onClick = {
                         action { onSelected(preset, catalog.open(preset.id)) }
-                    }) { Text("Load") }
+                    }) { Text("Load & edit") }
                     TextButton(onClick = {
                         action {
                             val selected = catalog.activate(preset.id)
                             onSelected(preset, selected)
                         }
-                    }) { Text("Activate") }
+                    }) { Text("Select preset") }
                     TextButton(onClick = {
                         action {
                             catalog.duplicate(preset.id, preset.title + " copy")
@@ -131,6 +136,22 @@ fun PresetLibrarySection(
                 }
             }
         }
+    }
+    if (showHelp) {
+        AlertDialog(
+            onDismissRequest = { showHelp = false },
+            title = { Text("Saved session presets") },
+            text = {
+                Text("Save an explicitly approved timeline on this phone. " +
+                    "Load & edit restores that exact approved session into the editor. " +
+                    "Select preset marks it for timer use but does not start a clock; " +
+                    "open the timer separately when ready. Duplicating or renaming " +
+                    "preserves the approved timeline.")
+            },
+            confirmButton = {
+                TextButton(onClick = { showHelp = false }) { Text("Close") }
+            },
+        )
     }
     val renameTarget = renameId
     if (renameTarget != null) {
