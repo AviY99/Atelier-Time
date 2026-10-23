@@ -1,6 +1,6 @@
 # Test and acceptance plan — Atelier Time
 
-Version: 0.5 early execution evidence (2026-10-23). **Step 1.4 source/test files exist** on branch `stage-1-4-scheduling-core`. User installed **Dart 3.13.7 on Android Termux** and attempted `dart tool/smoke.dart`; compilation **FAILED** due to a `num` → `int?` mismatch at warning offset, corrected in development branch commit `0dedd95756b6d3984b2e16548a58599179fbf7ff`. **Corrected code NOT YET rerun. No analyzer/full `dart test` executions or passes**, and no GitHub Actions/bills/builds. No Flutter app yet.
+Version: 0.5 early execution evidence (2026-10-23). **Step 1.4 source/test files exist** on branch `stage-1-4-scheduling-core`. User installed **Dart 3.13.7 on Android Termux** and attempted `dart tool/smoke.dart`; compilation **FAILED** due to a `num` → `int?` mismatch at warning offset, corrected in development branch commit `0dedd95756b6d3984b2e16548a58599179fbf7ff`. **User now confirms the corrected Dart smoke check PASSED on Termux (D-048)**. No analyzer/full `dart test` results reported yet; no GitHub Actions/bills/builds. No Flutter app yet.
 
 ## Approved requirement tests: D-031 + D-036 (NOT EXECUTED)
 
