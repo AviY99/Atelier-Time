@@ -10,9 +10,12 @@ import org.json.JSONObject
  * Versioned JSON is local/private and usable offline. Never overwrite
  * unreadable or future-schema data with an empty collection.
  */
-class AndroidPresetStore(context: Context) : PresetStore {
+class AndroidPresetStore(
+    context: Context,
+    storageName: String = "atelier_time_presets",
+) : PresetStore {
     private val preferences = context.applicationContext.getSharedPreferences(
-        "atelier_time_presets", Context.MODE_PRIVATE,
+        storageName, Context.MODE_PRIVATE,
     )
 
     override fun read(): PresetCollection {
