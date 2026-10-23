@@ -1,5 +1,18 @@
 # Test and acceptance plan — Atelier Time
 
+## 2026-10-23 — Revised Android phone-first feasibility checks (D-062/D-063; NOT RUN)
+
+**Approved priority:** Develop, debug, test, locally build/install Android on the user's **phone first**, then efficiently port to iOS/Windows/macOS later. Earlier D-061 simultaneous multi-platform toolchain gate is no longer a prerequisite for initial Android progress; original functionality remains binding.
+
+- A01 **CoGo on-device environment:** install official ARM64 [Code on the Go](https://appdevforall.org/code-on-the-go/) current release; record release, Android version/device resources. NOT YET PERFORMED.
+- A02 **Minimal Kotlin app/Android APK:** create basic Kotlin Android project, run build locally on phone, install and open the debug APK; record exact build/test logs. NOT YET PERFORMED.
+- A03 **Jetpack Compose feasibility:** test an actually compiling/running simple Compose UI using supported CoGo Kotlin/Gradle version, or document fall back to XML and porting implications. NOT YET PERFORMED.
+- A04 **Portable domain/API boundary:** Kotlin scheduling model no Android SDK imports, correct Example A/B regression oracles and 25/5 warning behavior matching existing Dart tests. Only proceed after A02 success.
+- A05 **On-device clock/sounds pilot:** monotonic timer with visible and locked-screen behavior and all three distinct cues; validate Android runtime limitations in real device tests before claiming product quality.
+- A06 **Future port readiness:** confirm reusable Kotlin domain structure and Compose Multiplatform path on later target-specific toolchains; do not imply zero migration or that CoGo can build iOS/desktop locally.
+
+Previous evidence: Dart scheduling engine **35/35 PASS** and text-input adapter **11/11 PASS** remain valid test oracles. New Kotlin and APK test evidence **NONE** as of D-063. No paid GitHub Actions.
+
 > **2026-10-23 — D-061 CRITICAL PLATFORM FEASIBILITY GATE:** Original Flutter-only QA plan assumed supported native target runtimes sufficed. User explicitly requires **cross-platform development, test execution, native build/signing, installation and operation**, including accessible Android Termux development. **Do not run more Flutter widget QA as a substitute for checking the entire supported toolchain.** Platform solution is under re-review; see [feasibility assessment](PLATFORM_REASSESSMENT_2026_10_23.md). Historical 35/35 Dart core and 11/11 form-adapter passes remain valid, eight Flutter tests unrun. No new stack or paid cloud build authorized.
 
 ## Newly required platform lifecycle acceptance checks (D-061; NOT EXECUTED)
