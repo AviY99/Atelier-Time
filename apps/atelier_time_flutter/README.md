@@ -47,3 +47,14 @@ flutter test
 ```
 
 On the first Flutter-capable run, correct any compilation, responsive-layout, focus/scrolling, widget-finder, or semantics errors before reporting results. Then review appearance with the user; the current neutral theme is not final branding.
+
+
+## 2026-10-23 — Stage 2 form adapter extraction (D-056, UNTESTED)
+
+- Added Flutter-independent `lib/src/editor_draft.dart` in the repository core package. Flutter editor now uses `SessionEditorDraft.toRules()` instead of duplicating minute parsing and rule construction.
+- The adapter preserves raw positive/zero/negative editor values for the **approved scheduling engine** to validate; malformed text produces an explicit input error; invalid/unused manual ordinal text is **ignored only when special break count is zero**, keeping D-037 `N=0` valid. Positive D-044 special lengths remain flexible.
+- Eleven additional **pure Dart** test definitions were added under root [test/editor_draft_test.dart](../../../test/editor_draft_test.dart). Unlike Flutter widget tests, these can run using the already-installed Android Termux Dart SDK.
+- **All 11 new Dart tests UNEXECUTED** until verified in Termux. The previous 35/35 Stage 1 core Dart test success remains valid and the eight Flutter widget tests remain **written but unrun**.
+- No flutter SDK, APK, native platform scaffolding, GitHub Actions, paid runner or merge.
+
+On Android Termux, the user can fetch/check out the `stage-2-session-editor` branch and run `dart test test/editor_draft_test.dart` from repository root. Do not run `flutter test` in Termux without a working Flutter SDK.
