@@ -1,5 +1,14 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — First native Android Kotlin app increment / HANDOFF v3.2 (D-068/D-069)
+
+- User approved implementing Android-first Kotlin/Jetpack Compose/Gradle and reconfirmed all existing Atelier Time **functional and scheduling rules remain unchanged**; old D-062 release/toolchain pivot only.
+- New isolated [android-native-kotlin-compose](https://github.com/AviY99/Atelier-Time/tree/android-native-kotlin-compose) branch and draft [PR #3](https://github.com/AviY99/Atelier-Time/pull/3). Real `android-native/` Gradle Android source: Compose session editor, fully editable opening/break/rhythm rules, timeline preview, 3 ending options, 25/5 advisory warnings and explicit in-memory approval. Pure Kotlin deterministic engine includes D-043 DP replacement.
+- **16 Kotlin scheduler + 5 editor input JUnit methods written, none run. No Android APK/Flutter run or device validation claimed.** Previous screenshot-confirmed Dart 35+11 tests preserved as parity fixture oracles. Later offline presets and timer/3 sounds remain unimplemented.
+- Added [requirements freeze + Android CoGo development/QA contract](docs/ANDROID_NATIVE_EXECUTION_AND_TEST.md) with K01–K06 gates; updated decisions D-068/D-069, roadmap, architecture, product, Stage 2, test plan, work log and handoff v3.2.
+- No GitHub Actions/paid builds, PR merge or destruction of old branches/user files.
+
+
 ## 2026-10-23 — Android industry-standard decision, no toy spikes / Handoff v3.1
 
 - At user's demand for a firm industry-standard choice rather than new experiments, selected **Kotlin + Jetpack Compose + Gradle** for Android-first app built on phone with **Code on the Go** (specialized mobile IDE; Android Studio is standard desktop IDE). Future Kotlin Multiplatform/Compose Multiplatform sharing for iOS/Windows/macOS (D-067).
