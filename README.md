@@ -1,5 +1,8 @@
 # Atelier Time
 
+> **2026-10-23 — LATEST REQUIREMENT D-062:** **Build Android app on user's Android phone first**, with a fast on-phone development/test/preview/build loop and efficient later iOS/Windows/macOS ports. D-061's universal day-one local cross-OS build requirement is superseded; original Flutter SDK on Termux is still unverified and its source is preserved/frozen. Preferred **unproven** feasibility candidate is **existing Dart scheduling engine → Dart-to-JavaScript browser UI → Capacitor-generated native Android APK in Termux**; later OS wrappers reuse frontend/core, with OS-specific signing/alert adapters. A tiny spike is on [spike-android-dart-web](https://github.com/AviY99/Atelier-Time/tree/spike-android-dart-web), and [acceptance gates](docs/ANDROID_FIRST_PLATFORM_SPIKE.md) forbid claiming APK or background reliability until real testing. No GitHub Actions/paid workflows. Stage 1 35/35 and Stage 2 adapter 11/11 verified.
+
+
 > **CURRENT APPROVED REQUIREMENT (D-062, 2026-10-23):** Android FIRST, **develop/debug/test/build/install an APK directly on the user's Android ARM64 phone efficiently**. Preserve efficient LATER portability to iOS/iPadOS, Windows, macOS; those are no longer first-release blockers. [Android-first development plan](docs/ANDROID_FIRST_DEVELOPMENT_PLAN.md) identifies **Kotlin + actively maintained Code on the Go** as a preferred **candidate pending one real on-device APK proof** (D-063), then Kotlin/Compose Multiplatform as a later port option. NO migration/installed APK/verified CoGo build yet. Keep existing **35/35 Dart scheduling and 11/11 Dart editor adapter** test evidence; Flutter draft source remains uncompiled, PRs unmerged, no paid GitHub Actions. Older platform status sections below are historical only.
 
 
