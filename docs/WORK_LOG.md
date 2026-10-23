@@ -1,5 +1,19 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 1.5: first Android Dart compile result and immediate type fix
+
+**User supplied actual execution evidence:** Termux Dart SDK 3.13.7 stable on `android_arm64`, cloned the isolated `stage-1-4-scheduling-core` branch, then ran `dart tool/smoke.dart`. The compiler **FAILED** at `lib/src/scheduling.dart:621:28`: `The argument type 'num' can't be assigned to the parameter type 'int?'` at `offsetSeconds: crossingOffset`.
+
+**Code defect:** `math.max(0, _maxUnbrokenPoseSeconds - previousAccumulated)` was inferred as `num` in this context. The issue occurs when recording the exact elapsed offset for a 25/5 rest warning. Fixed **on the development branch only**, replacing this with a typed integer-only conditional and retaining the exact warning threshold. Commit `0dedd95756b6d3984b2e16548a58599179fbf7ff`.
+
+**Verification:** Prior `dart tool/smoke.dart` invocation is a **confirmed compile FAIL** for the older branch commit. The updated code has **NOT yet been tested or compiled**. User can run in their existing `~/Atelier-Time` Termux folder: `git pull --ff-only && dart tool/smoke.dart`. If smoke succeeds, proceed to `dart pub get`, `dart analyze` and `dart test` (subject to package download). Share actual output for continuing corrections. No Dart SDK install needed again; no paid Actions, builds or merge.
+
+**Step gate:** Step 1.4 in progress; no Stage 2 code. D-047 records exact evidence.
+
+---
+
+
+
 ## 2026-10-22 — Iteration 1.4: Diagnose local Dart SDK/DNS blocker and prepare free execution path
 
 **User request:** “What to do to solve ur failure? Can you continue?” Continued **already-authorized Step 1.4 only**.
