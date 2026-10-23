@@ -66,3 +66,10 @@ The [Stage 2 branch](https://github.com/AviY99/Atelier-Time/tree/stage-2-session
 From a Stage 2 branch checkout, a free targeted command is `dart test test/editor_draft_test.dart`. No GitHub Actions, paid runner or app build is needed for that test.
 
 **D-059 verification update (2026-10-23):** The user's clean Android Termux `~/Atelier-Time-Stage2` worktree at exact GitHub branch HEAD `3bb2bad` completed **11/11 pure-Dart editor-adapter tests PASS**, screenshot-confirmed. This supersedes the earlier “11 tests have not run” wording above. A combined `dart analyze && dart test` for Stage 2 is still outstanding, and all eight Flutter widget tests remain unexecuted pending Flutter SDK. No APK/build or paid workflow.
+
+
+## Dart SDK vs Flutter SDK — Stage 2 analyzer fix (D-060)
+
+The root package is **pure Dart**; `apps/atelier_time_flutter/` is a separate package that requires a **Flutter SDK**. Termux currently has bare Dart only. Running root `dart analyze` before the package boundaries were configured caused large numbers of Flutter SDK diagnostic errors; the chained `dart test` therefore did NOT execute.
+
+The Stage 2 development branch now has root `analysis_options.yaml` excluding the nested Flutter package from bare-Dart analysis and a separate `apps/atelier_time_flutter/analysis_options.yaml` for proper later Flutter toolchain verification. **No actual new post-fix analyzer or 46-test pass has been observed yet**. Android Termux rerun after updating the Stage 2 worktree: `dart analyze && dart test`. For Flutter code, eventually run `flutter analyze && flutter test` inside the nested app on a Flutter-capable machine. This does not change approved scheduling logic or imply an installable APK.
