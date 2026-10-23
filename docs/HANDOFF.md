@@ -1,5 +1,11 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v3.4)
 
+## PHONE EXECUTION BRIDGE PENDING DEVICE SETUP — 2026-10-23
+
+At the user's request to make ChatGPT-triggered Android execution possible, added a **restricted** GitHub-Issues-to-CoGo-terminal task bridge to the live `android-native-kotlin-compose` implementation branch: [runner source](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/android-native/tools/phone_task_runner.py), [setup instructions](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/android-native/PHONE_RUNNER.md). [Issue #4](https://github.com/AviY99/Atelier-Time/issues/4) queues a **doctor** environment-inspection task for when the phone worker is started. Script is authored and committed, not installed or exercised on user's phone. It will require CoGo toolchain, terminal Python/git, a narrow GitHub Issues token held only on-device, and an actively running process. Its CLI Gradle compatibility is **not yet verified**. GitHub Actions remain unused. K01–K03 unverified, APK/device storage untested, K04 not implemented. See [WORK_LOG](WORK_LOG.md) for evidence.
+
+---
+
 ## LATEST SOURCE-ONLY FOLLOW-UP — K03 corruption guards (2026-10-23)
 
 Current implementation branch `android-native-kotlin-compose`; draft [PR #3](https://github.com/AviY99/Atelier-Time/pull/3) remains open, unmerged. After previous D-070 handoff, committed actual code fix [`01e56f0`](https://github.com/AviY99/Atelier-Time/commit/01e56f01be73f0d90e473a2263ecbda2be187404) ensuring wrong-type SharedPreferences data is treated as a readable error without erasure, and direct adapter writes reject invalid/future-version data. Added two Android instrumentation cases ([`95facb8`](https://github.com/AviY99/Atelier-Time/commit/95facb8005578b605307771e0876c377ac747ae8); corrected JSON literal [`0db22e8`](https://github.com/AviY99/Atelier-Time/commit/0db22e8f5833459dc2e7c80300b4e6a5cfe22748)). GitHub wrote and read back source successfully, **not compiled**.
