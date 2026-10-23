@@ -2,7 +2,7 @@
 
 A planned offline-capable, installable posing/break timer for live-model **drawing and sculpting** ateliers.
 
-**Project status (2026-10-23):** Stage 1 Steps 1.1–1.3 design/architecture complete and **Step 1.4 pure Dart scheduling core VERIFIED/COMPLETE ON THE ISOLATED [development branch](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core) (D-052)**. User's Android Termux Dart 3.13.7 screenshot shows **35/35 unit tests passing**, including both T09 final-pose split endpoints. Earlier smoke checks passed, and `dart analyze` reported **No issues found!** on the preceding 34-test version (not rerun after the 35th test-only addition). Broader edge/target-OS QA remains later work. **Code is not merged into `main`. Stage 2, Flutter UI, runtime timer/audio, offline preset library, APK, GitHub Actions, paid runners, and multi-platform builds are NOT authorized/started.**
+**Project status (2026-10-23, D-052–D-054):** **Stage 1 Step 1.4 COMPLETE on tested branch** — Android Termux Dart 3.13.7 screenshot verified **35/35 Dart unit tests PASS**; prior smoke test and analyzer passed. [Stage 1 integration PR #1](https://github.com/AviY99/Atelier-Time/pull/1) is OPEN, **not merged**. At the user's instruction to **“finish documentation and continue”**, **Stage 2 session editor/preview started**: [implementation plan](docs/STAGE_2_PLAN.md), [uncompiled Flutter prototype branch](https://github.com/AviY99/Atelier-Time/tree/stage-2-session-editor), [draft PR #2](https://github.com/AviY99/Atelier-Time/pull/2). **Flutter source is NOT tested/built**, no APK, saved presets, live timer/audio, GitHub Actions or paid builds. No later stages authorized.
 
 Atelier Time lets an organizer configure pose and break rules, generate and approve a chronological schedule, save reusable presets, and run a timer with three distinct sound cues. If the last pose would be incomplete, schedule review offers: (1) keep the remaining short final pose; (2) split the time of the last two poses as evenly as possible; or (3) adjust their split with a ruler/slider.
 
@@ -12,6 +12,7 @@ Atelier Time lets an organizer configure pose and break rules, generate and appr
 - [Schedule model and algorithms](docs/SCHEDULING_RULES.md)
 - [Complete 3-hour example schedules](docs/EXAMPLES.md)
 - [Delivery stages and approval gates](docs/ROADMAP.md)
+- [Stage 2 editor/preview development plan](docs/STAGE_2_PLAN.md)
 - [Decision register](docs/DECISIONS.md)
 - [Design and technical approach](docs/ARCHITECTURE.md)
 - [Step 1.2 — Dart data-model design](docs/DATA_MODEL.md)
@@ -25,12 +26,12 @@ Atelier Time lets an organizer configure pose and break rules, generate and appr
 
 ## Important project boundaries
 
-- An existing GitHub repository is being used. No application implementation has started.
+- Existing GitHub repository used throughout. Tested pure Dart scheduling engine and a separate **source-only Flutter editor prototype** now exist on isolated branches; neither is merged to `main`.
 - **Approved:** One Flutter + Dart codebase for Android, Windows, iOS/iPadOS and macOS in the first release; platform-specific compiled packages. Native OS menus/graphics are optional.
 - **Latest approved D-036:** A full session or a configured normal/active special break of **0 minutes is invalid** (blocking error). Positive 1–4-minute breaks remain allowed; **D-031 warning and explicit user acknowledgment** apply to a mathematically legal schedule exceeding the 25-minute posing / 5-minute rest recommendation. Regular/special defaults remain editable positive 5m/15m. Logical 0-minute break-slot proposals were withdrawn.
 - **Approved Step 1.3:** Automatic midpoint/earlier-tie replacement, evenly spaced multiple long breaks, manual positioning, whole-timeline validations/approvals, and 25/5 warning counter **within one full activated session** (no automatic carryover between distinct saved presets).
-- **D-038 resolved by user-approved D-044:** Any **positive** special break may replace a normal break, even when shorter or equal (for example normal 5m, special 3m). The engine permits it and applies the approved 25/5 rest warning/acknowledgment. **Zero-minute configured breaks and total sessions remain invalid (D-036).** Dart code and tests are written but **not yet executed**.
-- **Step 1.4** is restricted to the code/test core on a development branch, **without GitHub Actions, paid runners or deploys**. Dart 3.13.7 on Android passes analyzer and 34 written tests; final QA acceptance and cross-platform app builds remain pending. Flutter UI/scaffold, timer, distribution/signing and later stages remain unauthorized.
+- **D-038 resolved by user-approved D-044:** Any **positive** special break may replace a normal break, even when shorter or equal (for example normal 5m, special 3m). The engine permits it and applies the approved 25/5 rest warning/acknowledgment. **Zero-minute configured breaks and total sessions remain invalid (D-036).** Dart core code and all **35 unit tests were executed successfully on Android Termux** (D-052).
+- **Step 1.4 VERIFIED/COMPLETE** on the isolated core branch, 35/35 Android Dart tests passing. **Stage 2 STARTED** with a neutral Flutter editor source; it remains **uncompiled/unbuilt**, and visual design is provisional. Stages 3–6, distribution and production branding remain unapproved. No paid GitHub Actions.
 - Every number in both timing examples is configurable through a future per-session input screen; pose groups can be added/removed.
 - “Summary” is a named final reserved time block; its specific activity has not been further defined.
 - Do not silently convert open technical assumptions into approved product rules.
