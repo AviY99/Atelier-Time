@@ -74,6 +74,20 @@ def gradle_command():
     raise RuntimeError("Gradle not found; first check CoGo's managed Gradle distribution")
 
 
+def device_aapt2():
+    """Match the native AAPT2 override used by Code on the Go's GradleBuildService.
+
+    Maven's linux AAPT2 is not usable on Android ARM64; do not fall back to it.
+    """
+    sdk = os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT")
+    if not sdk:
+        raise RuntimeError("ANDROID_HOME/ANDROID_SDK_ROOT is not set")
+    binary = Path(sdk) / "build-tools" / "36.0.0" / "aapt2"
+    if not binary.is_file():
+        raise RuntimeError("CoGo native AAPT2 missing at: " + str(binary))
+    return str(binary)
+
+
 def doctor():
     lines = ["Real on-phone build toolchain:", "Python: " + sys.version.split()[0]]
     for executable in ("git", "java", "adb"):
@@ -93,7 +107,16 @@ def doctor():
         lines.append("Gradle: " + str(exc))
     sdk_ok = bool(sdk and Path(sdk).is_dir())
     lines.append("Android SDK directory exists: " + str(sdk_ok))
-    ok = bool(shutil.which("git") and shutil.which("java") and gradle_ok and sdk_ok)
+    aapt2_ok = False
+    try:
+        aapt2 = device_aapt2()
+        code, output = command([aapt2, "version"], timeout=30)
+        aapt2_ok = code == 0
+        lines.append("CoGo Android-native AAPT2: " + aapt2)
+        lines.append("AAPT2 version: " + ("PASS " if aapt2_ok else "FAILED ") + output.strip()[:300])
+    except Exception as exc:
+        lines.append("CoGo AAPT2: " + str(exc))
+    ok = bool(shutil.which("git") and shutil.which("java") and gradle_ok and sdk_ok and aapt2_ok)
     lines.append("CLI toolchain ready: " + str(ok))
     return (0 if ok else 2), "\n".join(lines)
 
@@ -140,7 +163,14 @@ def execute(task, sha):
         return code, output, None
     project = project_at(sha)
     launcher = gradle_command()
-    exit_code, output = command(launcher + [TASKS[task], "--no-daemon", "--console=plain"], cwd=project)
+    # CoGo's GUI always injects this project-local command-line property;
+    # direct terminal calls must do the same to avoid linux-x86_64 AAPT2.
+    native_aapt2 = device_aapt2()
+    exit_code, output = command(
+        launcher + [TASKS[task], "--no-daemon", "--console=plain",
+                    "-Pandroid.aapt2FromMavenOverride=" + native_aapt2],
+        cwd=project,
+    )
     apk_info = None
     if task == "debug-apk" and exit_code == 0:
         apk = project / "app/build/outputs/apk/debug/app-debug.apk"
