@@ -43,6 +43,49 @@ class AndroidPresetStoreTest {
     }
 
     @Test
+    fun explicitOpeningGroupBreaksRoundTripAndOldPresetsStillRead() {
+        val rules = SessionRules(
+            id = "grouped", name = "Opening breaks",
+            totalSeconds = 180 * 60, summarySeconds = 15 * 60,
+            openingGroups = listOf(
+                OpeningPoseGroup("first", 4, 60, 0),
+                OpeningPoseGroup("second", 4, 4 * 60, 5 * 60),
+            ),
+            poseSeconds = 25 * 60, shortBreakSeconds = 5 * 60,
+            specialBreakCount = 1, cycleStart = CycleStart.BREAK_FIRST,
+        )
+        val engine = ScheduleEngine()
+        val modern = engine.approve(
+            engine.generate(rules, FinalPoseChoice.remainder())
+        )
+        val fresh = catalog()
+        val modernSaved = fresh.save(modern, "New group breaks")
+        val legacyRules = rules.copy(
+            openingGroups = rules.openingGroups.map {
+                it.copy(breakAfterSeconds = null)
+            }
+        )
+        val legacy = engine.approve(
+            engine.generate(legacyRules, FinalPoseChoice.remainder())
+        )
+        val legacySaved = fresh.save(legacy, "Original A")
+        val reopened = catalog()
+        assertEquals(
+            listOf(0, 5 * 60),
+            reopened.open(modernSaved.id).rules.openingGroups.map {
+                it.breakAfterSeconds
+            },
+        )
+        assertTrue(reopened.open(legacySaved.id).rules.openingGroups.all {
+            it.breakAfterSeconds == null
+        })
+        assertEquals(modernSaved.timelineSignature,
+            PresetCatalog.signature(reopened.open(modernSaved.id)))
+        assertEquals(legacySaved.timelineSignature,
+            PresetCatalog.signature(reopened.open(legacySaved.id)))
+    }
+
+    @Test
     fun savedPresetPersistsAcrossFreshStoreInstance() {
         val initial = catalog()
         val entry = initial.save(approvedExample(), "Afternoon atelier")
