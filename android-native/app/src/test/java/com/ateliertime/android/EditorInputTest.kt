@@ -13,6 +13,33 @@ class EditorInputTest {
         automaticPlacement = true, manualOrdinals = "3",
     )
 
+    @Test fun parsesConfigurableOpeningBreakMinutesIncludingEarlierZero() {
+        val rules = defaults().copy(
+            cycleStart = CycleStart.BREAK_FIRST,
+            opening = listOf(
+                OpeningDraft(4, "3", "2", "0"),
+                OpeningDraft(5, "2", "4", "5"),
+            ),
+        ).toRules()
+        assertEquals(listOf(0, 5 * 60),
+            rules.openingGroups.map { it.breakAfterSeconds })
+        val candidate = ScheduleEngine().generate(rules)
+        assertFalse(candidate.hasBlockingIssues)
+    }
+
+    @Test fun zeroFinalGroupRestBlocksApprovalWhileLegacyDraftRemainsReadable() {
+        val rules = defaults().copy(opening = listOf(
+            OpeningDraft(7, "2", "2", "0"),
+        )).toRules()
+        assertTrue(ScheduleEngine().generate(rules).issues.any {
+            it.code == "final_opening_break_required"
+        })
+        val legacy = defaults().copy(opening = listOf(
+            OpeningDraft(7, "2", "2"),
+        )).toRules()
+        assertNull(legacy.openingGroups.single().breakAfterSeconds)
+    }
+
     @Test fun exactMinuteFields() {
         val rules = defaults().toRules()
         assertEquals("Drawing session", rules.name)
