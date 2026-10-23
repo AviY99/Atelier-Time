@@ -1,5 +1,8 @@
 # Atelier Time
 
+> **LATEST STACK DECISION D-067 (2026-10-23):** Android FIRST **Kotlin + Jetpack Compose + Gradle** as the industry-standard native Android code stack; develop/build the actual Android application on the phone using maintained **Code on the Go** (on-phone IDE, not the standard desktop Android Studio). Future portability planned with Kotlin Multiplatform / Compose Multiplatform for iOS/Windows/macOS. **User rejects disposable feasibility spikes**; the Dart-to-JS/Capacitor experimental branch and prior toy Kotlin APK gate are **historical, not current requirements**. Preserve prior 35+11 Dart regression test successes and Dart/Flutter branches for port parity. No Kotlin APK compiled yet; no paid GitHub Actions.
+
+
 > **2026-10-23 — D-064 SHORTLIST CORRECTED:** **Two unproven Android-phone candidates** now tracked: (A) keep 35+11 test-verified Dart business logic and prove a small Dart-JS browser app / later Termux Capacitor native APK; (B) build Kotlin Android directly using maintained Code on the Go, then explore Kotlin Multiplatform, accepting a substantial Dart-to-Kotlin port. **No APK has been built on this phone and no replacement stack has been selected.** Test first with the smallest isolated `spike-android-dart-web` proof, then verify an actual installed native APK and locked-screen alerts before full UI migration. See [D-064](docs/DECISIONS.md) and [spike README](https://github.com/AviY99/Atelier-Time/blob/spike-android-dart-web/spikes/android_dart_web/README.md).
 
 
