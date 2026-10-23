@@ -73,3 +73,7 @@ Next Step 2 QA: when a real Flutter-capable environment is available, run the th
 **Verification:** **11 new pure Dart tests WRITTEN BUT UNEXECUTED**. They are runnable on the user's existing Android Termux Dart 3.13.7 without Flutter and without any GitHub Actions charges. Root Stage 1 scheduling engine remains unchanged and previously passed 35/35; eight Flutter widget tests remain written/unexecuted. Source read-back and basic delimiter check are not compilation.
 
 **Next action:** User may (when convenient) fetch the Stage 2 branch into Termux and execute `dart test test/editor_draft_test.dart`, then report any errors for correction. Stage 2 UI compilation and widget tests still require a Flutter SDK. Do not mark Stage 2 complete or begin presets/timer.
+
+## 2026-10-23 — Stage 2 clean Dart test milestone (D-059)
+
+The user created a separate Git worktree `~/Atelier-Time-Stage2`; screenshots show HEAD `3bb2bad`, exactly the remote `stage-2-session-editor` tip per GitHub compare, and **`+11 All tests passed!`** for `dart test test/editor_draft_test.dart`. The earlier mixed-index test-run attribution is resolved. The Flutter-independent editor adapter is now **verified by 11 passing tests** on this exact branch commit, without reinstalling Dart or using GitHub Actions. **No full Stage 2 `dart analyze && dart test` result and no Flutter widget execution yet**. User's earlier dirty `~/Atelier-Time` worktree is preserved intentionally. Stage 2 remains in progress.
