@@ -1,8 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
-Version: 0.5 early execution evidence (2026-10-23). **Step 1.4 source/test files exist** on branch `stage-1-4-scheduling-core`. User installed **Dart 3.13.7 on Android Termux** and attempted `dart tool/smoke.dart`; compilation **FAILED** due to a `num` → `int?` mismatch at warning offset, corrected in development branch commit `0dedd95756b6d3984b2e16548a58599179fbf7ff`. **User now confirms the corrected Dart smoke check PASSED on Termux (D-048)**. No analyzer/full `dart test` results reported yet; no GitHub Actions/bills/builds. No Flutter app yet.
+Version: 0.6 Android user-reported test evidence (2026-10-23). **Step 1.4 source/test files exist** on branch `stage-1-4-scheduling-core`. User installed **Dart 3.13.7 on Android Termux** and attempted `dart tool/smoke.dart`; compilation **FAILED** due to a `num` → `int?` mismatch at warning offset, corrected in development branch commit `0dedd95756b6d3984b2e16548a58599179fbf7ff`. **User now confirms the corrected Dart smoke check PASSED on Termux (D-048)**. **User subsequently reports “All tests passed!” after `dart pub get && dart analyze && dart test` (D-049)**. This is a **user-reported pass of the branch's written suite** (34 Dart `test(...)` definitions); specific terminal logs/results and analyzer output were not provided. This does **NOT certify every separately planned acceptance item**, Flutter UI, builds or cross-platform compatibility. No GitHub Actions/bills/builds. No Flutter app yet.
 
-## Approved requirement tests: D-031 + D-036 (NOT EXECUTED)
+## Approved requirement tests: D-031 + D-036 (some covered by user-reported passing Dart suite; remaining plan-level acceptance items require mapping)
 
 **Latest D-036 supersedes D-031 only where the older rule allowed 0-minute breaks.** Session total must be >0; configured normal/active special break durations must be >0. The 25-minute accumulated-posing / >=5-minute qualifying rest rule remains advisory, warning-and-acknowledge for **otherwise valid** short rests/long poses. Default new-session breaks remain 5m normal and 15m special, both editable to other **positive** values.
 
@@ -118,3 +118,13 @@ At minimum T01–T12, T15–T18 passing on the selected core stack, with documen
 - **Actual:** Compiler error `lib/src/scheduling.dart:621:28`, `num` cannot be assigned to `int?` at `offsetSeconds: crossingOffset`.
 - **Fix committed:** `0dedd95756b6d3984b2e16548a58599179fbf7ff`; typed integer conditional instead of `math.max` inference.
 - **Next:** User runs `git pull --ff-only && dart tool/smoke.dart` from `~/Atelier-Time` (no reinstall). After smoke success, run `dart pub get`, `dart analyze`, `dart test`. **No pass evidence for updated code yet.**
+
+## 2026-10-23 — User-reported Step 1.4 Dart suite PASS (D-049)
+
+**Environment:** Android Termux Dart SDK 3.13.7 stable on `android_arm64`; existing development-branch clone.
+
+**Sequence:** Initial `dart tool/smoke.dart` compile FAIL in D-047 was fixed by `0dedd95756b6d3984b2e16548a58599179fbf7ff`, followed by user-confirmed smoke PASS (D-048). User was then instructed to run `dart pub get && dart analyze && dart test`, and responded **“All tests passed!”**.
+
+**Evidence and limits:** Record **USER-REPORTED PASS** of the written Dart unit test suite and apparent success of the preceding analyzer step if the chained command ran as supplied. The currently committed `test/scheduling_test.dart` defines **34 unit tests**; user did not supply exact runner test count, stdout, `dart analyze` transcript, or local git commit SHA. Do not call those independently verified or confuse them with a multi-platform app build.
+
+**Acceptance audit still needed:** Map current test source to Stage 1 required T01–T12, T15–T18 and any Step 1.3 policy acceptance tests not yet covered, adding and executing missing cases within authorized Step 1.4. Flutter UI, app packaging, OS-specific builds and device timer/audio behavior belong to later authorized stages. Do not mark Stage 1.4 completed, merge the branch, or initiate Stage 2 solely based on this high-level report. GitHub Actions budget remains untouched.
