@@ -1,5 +1,16 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 2.4: Termux 11 tests passed; Git branch switch failed (D-057)
+
+**Screenshot evidence:** User's Termux fetched `stage-2-session-editor` successfully into a remote ref, but `git switch --track origin/stage-2-session-editor` displayed `fatal: cannot set up tracking information; starting point ... is not a branch`. Subsequently `dart pub get && dart test test/editor_draft_test.dart` completed with **`00:00 +11: All tests passed!`**.
+
+**Important distinction:** Those are real passing tests from the current local working tree, **not proof of a successful Stage 2 branch checkout**. GitHub confirms `test/editor_draft_test.dart` on Stage 2 and not on Stage 1, making local branch/index status essential to understand the result. Do not claim all 11 tests ran on the latest Stage 2 Git commit until branch/HEAD verified.
+
+**Action:** No application code changed. D-057 and test plan recorded the result and open attribution. Next safe diagnostic is `git status --short --branch; git branch --show-current; git rev-parse --short HEAD; git ls-files test/editor_draft_test.dart`. If necessary repair checkout with a local Stage 2 branch created from fetched commit **after checking for untracked/modified files**. Original 35 Stage 1 tests pass and eight Flutter widget tests are still unrun. No paid GitHub Actions, merge, APK or later stage programming.
+
+---
+
+
 ## 2026-10-23 — Iteration 2.3: Stage 2 editor inputs made testable in plain Dart (D-056)
 
 **User request:** “Can you continue?” Continued only authorized Stage 2 session editor/preview development on the existing isolated `stage-2-session-editor` branch.
