@@ -1,0 +1,325 @@
+package com.ateliertime.android
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import com.ateliertime.domain.*
+
+/**
+ * Real Stage 2 Android editor/chronological schedule preview.
+ * No persistence, activation or live timer yet: those require separate implementation.
+ * Style is a neutral Material 3 baseline, NOT final branding.
+ */
+@Composable
+fun SessionEditorScreen() {
+    val engine = remember { ScheduleEngine() }
+    var name by remember { mutableStateOf("Atelier session") }
+    var total by remember { mutableStateOf("180") }
+    var summary by remember { mutableStateOf("15") }
+    var pose by remember { mutableStateOf("25") }
+    var normal by remember { mutableStateOf("5") }
+    var special by remember { mutableStateOf("15") }
+    var count by remember { mutableStateOf("1") }
+    var cycle by remember { mutableStateOf(CycleStart.POSE_FIRST) }
+    var automatic by remember { mutableStateOf(true) }
+    var manualOrdinals by remember { mutableStateOf("3") }
+    var ending by remember { mutableStateOf<FinalPoseChoice?>(null) }
+    var acceptedWarning by remember { mutableStateOf(false) }
+    var approved by remember { mutableStateOf<ApprovedSession?>(null) }
+    var nextOpeningId by remember { mutableIntStateOf(1) }
+    val opening = remember { mutableStateListOf<OpeningDraft>() }
+
+    fun invalidate() {
+        ending = null
+        acceptedWarning = false
+        approved = null
+    }
+    fun applyA() {
+        name = "Example A"
+        total = "180"; summary = "15"; pose = "25"
+        normal = "5"; special = "15"; count = "1"
+        cycle = CycleStart.BREAK_FIRST
+        automatic = true
+        opening.clear()
+        opening.add(OpeningDraft(nextOpeningId++, "4", "1"))
+        opening.add(OpeningDraft(nextOpeningId++, "4", "4"))
+        invalidate()
+    }
+    fun applyB() {
+        name = "Example B"
+        total = "180"; summary = "15"; pose = "25"
+        normal = "5"; special = "15"; count = "1"
+        cycle = CycleStart.POSE_FIRST
+        automatic = true
+        opening.clear()
+        invalidate()
+    }
+
+    var parseError: String? = null
+    val candidate = try {
+        engine.generate(EditorInput(
+            name, total, summary, pose, normal, special, count,
+            opening.toList(), cycle, automatic, manualOrdinals,
+        ).toRules(), ending)
+    } catch (error: IllegalArgumentException) {
+        parseError = error.message
+        null
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text("Atelier Time", style = MaterialTheme.typography.headlineMedium)
+        Text("Session editor · Android", style = MaterialTheme.typography.titleMedium)
+        Text("Every edit regenerates the schedule and cancels previous approval.")
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { applyA() }) { Text("Example A") }
+            OutlinedButton(onClick = { applyB() }) { Text("Example B") }
+        }
+        OutlinedTextField(
+            value = name, onValueChange = { name = it; invalidate() },
+            label = { Text("Session name") }, modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MinuteInput("Total (min)", total, { total = it; invalidate() }, Modifier.weight(1f))
+            MinuteInput("Summary (min)", summary, { summary = it; invalidate() }, Modifier.weight(1f))
+        }
+        Text("Opening pose groups", style = MaterialTheme.typography.titleMedium)
+        opening.toList().forEachIndexed { index, group ->
+            Text("Group " + (index + 1))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                MinuteInput("Count", group.count, {
+                    opening[index] = group.copy(count = it); invalidate()
+                }, Modifier.weight(1f))
+                MinuteInput("Each (min)", group.minutes, {
+                    opening[index] = group.copy(minutes = it); invalidate()
+                }, Modifier.weight(1f))
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = {
+                    if (index > 0) {
+                        opening[index] = opening[index - 1].also { opening[index - 1] = group }
+                        invalidate()
+                    }
+                }, enabled = index > 0) { Text("Up") }
+                TextButton(onClick = {
+                    if (index < opening.lastIndex) {
+                        opening[index] = opening[index + 1].also { opening[index + 1] = group }
+                        invalidate()
+                    }
+                }, enabled = index < opening.lastIndex) { Text("Down") }
+                TextButton(onClick = { opening.removeAt(index); invalidate() }) {
+                    Text("Remove")
+                }
+            }
+        }
+        OutlinedButton(onClick = {
+            opening.add(OpeningDraft(nextOpeningId++)); invalidate()
+        }) { Text("Add opening group") }
+
+        Text("Regular rhythm and breaks", style = MaterialTheme.typography.titleMedium)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MinuteInput("Pose (min)", pose, { pose = it; invalidate() }, Modifier.weight(1f))
+            MinuteInput("Normal rest (min)", normal,
+                { normal = it; invalidate() }, Modifier.weight(1f))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MinuteInput("Special rest (min)", special,
+                { special = it; invalidate() }, Modifier.weight(1f))
+            MinuteInput("Special count", count,
+                { count = it; invalidate() }, Modifier.weight(1f))
+        }
+        Text("Repeating sequence", style = MaterialTheme.typography.titleMedium)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(
+                selected = cycle == CycleStart.POSE_FIRST,
+                onClick = { cycle = CycleStart.POSE_FIRST; invalidate() },
+                label = { Text("Pose first") },
+            )
+            FilterChip(
+                selected = cycle == CycleStart.BREAK_FIRST,
+                onClick = { cycle = CycleStart.BREAK_FIRST; invalidate() },
+                label = { Text("Break first") },
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Automatic special-break placement", modifier = Modifier.weight(1f))
+            Switch(checked = automatic,
+                onCheckedChange = { automatic = it; invalidate() })
+        }
+        if (!automatic) {
+            OutlinedTextField(
+                value = manualOrdinals,
+                onValueChange = { manualOrdinals = it; invalidate() },
+                label = { Text("Break ordinals, e.g. 2,4") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        HorizontalDivider()
+        Text("Full schedule preview", style = MaterialTheme.typography.titleLarge)
+        if (parseError != null) {
+            Text(parseError ?: "", color = MaterialTheme.colorScheme.error)
+        } else if (candidate != null) {
+            candidate.issues.filter { it.severity == IssueSeverity.ERROR }.forEach {
+                Text(it.message, color = MaterialTheme.colorScheme.error)
+            }
+            if (candidate.finalPoseIsShort && !candidate.hasBlockingIssues) {
+                Text("Final pose: choose an ending", style = MaterialTheme.typography.titleMedium)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = ending?.mode == FinalPoseMode.REMAINDER,
+                        onClick = {
+                            ending = FinalPoseChoice.remainder()
+                            acceptedWarning = false; approved = null
+                        },
+                        label = { Text("Remainder") },
+                    )
+                    FilterChip(
+                        selected = ending?.mode == FinalPoseMode.EVEN_SPLIT,
+                        enabled = candidate.canSplitFinalTwo,
+                        onClick = {
+                            ending = FinalPoseChoice.even()
+                            acceptedWarning = false; approved = null
+                        },
+                        label = { Text("Even") },
+                    )
+                    FilterChip(
+                        selected = ending?.mode == FinalPoseMode.CUSTOM_SPLIT,
+                        enabled = candidate.canSplitFinalTwo,
+                        onClick = {
+                            val regular = candidate.phases.filter {
+                                it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+                            }
+                            val minutes = if (regular.size >= 2)
+                                (regular.takeLast(2).sumOf { it.durationSeconds } / 120)
+                            else 1
+                            ending = FinalPoseChoice.custom(minutes * SECONDS_PER_MINUTE)
+                            acceptedWarning = false; approved = null
+                        },
+                        label = { Text("Custom") },
+                    )
+                }
+                if (ending?.mode == FinalPoseMode.CUSTOM_SPLIT &&
+                    candidate.canSplitFinalTwo
+                ) {
+                    val regular = candidate.phases.filter {
+                        it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+                    }
+                    val available = regular.takeLast(2).sumOf { it.durationSeconds } / 60
+                    if (available > 2) {
+                        val first = ((ending?.firstPoseSeconds ?: 60) / 60)
+                            .coerceIn(1, available - 1)
+                        Text("First pose: " + first + " min; last: " +
+                            (available - first) + " min")
+                        Slider(
+                            value = first.toFloat(),
+                            onValueChange = {
+                                ending = FinalPoseChoice.custom(
+                                    it.toInt().coerceIn(1, available - 1) * 60
+                                )
+                                acceptedWarning = false; approved = null
+                            },
+                            valueRange = 1f..(available - 1).toFloat(),
+                            steps = (available - 2).coerceAtLeast(0),
+                        )
+                    }
+                }
+            }
+            if (!candidate.hasBlockingIssues) {
+                val warningCount = candidate.issues.count {
+                    it.severity == IssueSeverity.WARNING
+                }
+                if (warningCount > 0) {
+                    candidate.issues.filter { it.severity == IssueSeverity.WARNING }.forEach {
+                        Text(
+                            "Rest recommendation: " + it.message,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(checked = acceptedWarning, onCheckedChange = {
+                            acceptedWarning = it; approved = null
+                        })
+                        Text("I acknowledge the 25/5 rest warning")
+                    }
+                }
+                Text(
+                    "Poses: " + candidate.phases.filter {
+                        it.kind == PhaseKind.POSE
+                    }.sumOf { it.durationSeconds } / 60 +
+                        " min · Rest: " + candidate.phases.filter {
+                            it.kind == PhaseKind.SHORT_BREAK ||
+                                it.kind == PhaseKind.SPECIAL_BREAK
+                        }.sumOf { it.durationSeconds } / 60 + " min",
+                )
+                candidate.phases.forEach { phase ->
+                    val label = when (phase.kind) {
+                        PhaseKind.POSE -> "Pose " + phase.poseNumber
+                        PhaseKind.SHORT_BREAK -> "Normal break #" + phase.breakOrdinal
+                        PhaseKind.SPECIAL_BREAK -> "Special break #" + phase.breakOrdinal
+                        PhaseKind.SUMMARY -> "Final summary"
+                    }
+                    Text(
+                        formatOffset(phase.startSeconds) + "–" +
+                            formatOffset(phase.endSeconds) + "  " + label +
+                            "  (" + phase.durationSeconds / 60 + " min)",
+                    )
+                }
+                Button(
+                    onClick = {
+                        approved = engine.approve(
+                            candidate, acknowledgeWarnings = acceptedWarning
+                        )
+                    },
+                    enabled = candidate.canApprove &&
+                        (!candidate.needsSafetyAcknowledgement || acceptedWarning),
+                ) {
+                    Text("Approve exact timeline")
+                }
+                if (approved != null) {
+                    Text("Approved for this preview only. Offline saving " +
+                        "and timer activation are not implemented yet.")
+                }
+            }
+        }
+        Text(
+            "Current milestone: live schedule editing and in-memory approval. " +
+                "Saved presets, running timer and audio cues follow in later work.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+    }
+}
+
+@Composable
+private fun MinuteInput(
+    label: String,
+    value: String,
+    onChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedTextField(
+        value = value, onValueChange = onChange,
+        label = { Text(label) }, modifier = modifier,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        singleLine = true,
+    )
+}
+
+private fun formatOffset(seconds: Int): String {
+    val hours = seconds / 3600
+    val minutes = (seconds / 60) % 60
+    return hours.toString().padStart(2, '0') + ":" +
+        minutes.toString().padStart(2, '0')
+}
