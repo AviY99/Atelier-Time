@@ -1,5 +1,20 @@
 # Test and acceptance plan — Atelier Time
 
+> **2026-10-23 — D-061 CRITICAL PLATFORM FEASIBILITY GATE:** Original Flutter-only QA plan assumed supported native target runtimes sufficed. User explicitly requires **cross-platform development, test execution, native build/signing, installation and operation**, including accessible Android Termux development. **Do not run more Flutter widget QA as a substitute for checking the entire supported toolchain.** Platform solution is under re-review; see [feasibility assessment](PLATFORM_REASSESSMENT_2026_10_23.md). Historical 35/35 Dart core and 11/11 form-adapter passes remain valid, eight Flutter tests unrun. No new stack or paid cloud build authorized.
+
+## Newly required platform lifecycle acceptance checks (D-061; NOT EXECUTED)
+
+- F01 shared application/code and feature parity on Android, iOS/iPadOS, Windows, macOS (not just framework marketing support).
+- F02 reproducible development/edit/preview/test workflow accessible from Android Termux and other relevant workstations, avoiding unsupported SDK assumptions.
+- F03 one documented automated test command with real pass/fail output in the chosen developer workflow.
+- F04 real offline-capable installation method for all four OS families; **separate signed native packages remain the current spec**, and an installed browser PWA cannot be substituted without explicit approval. Document macOS/Xcode and Windows host or remote builder requirements, signing accounts and artifacts.
+- F05 offline persistence across reload/restart, corrupt preset handling and recovery.
+- F06 real timed pose/break/summary transitions and three distinct audible alerts across screen lock/background/interruption for each mobile OS; test actual devices, do not rely on PWA setTimeout under lock.
+- F07 no-surprise build infrastructure/cost, runner availability under blocked GitHub budget; no paid cloud builds before explicit authorization.
+- F08 exact schedule Examples A/B, final-pose choices, D-031/036/037/044 tests preserved and passing in any new runtime/port.
+
+**STOP:** no Stage 2 completion or platform migration until the technical decision has a proven cross-platform lifecycle path, not a list of supported runtimes. All checklist items are planned evidence gates, **none has newly passed**.
+
 **Current evidence — 2026-10-23 v0.8, D-052:** User's Android Termux screenshot confirms `git pull --ff-only && dart test` pulled new T09 regression (`8cf7a24..907f871`) and ended **`00:00 +35: All tests passed!`**. Earlier screenshots showed smoke PASS, `dart analyze` **No issues found!** and 34/34 tests PASS on the preceding checkout (D-048/D-050). Static analysis was **not shown rerun** after adding the 35th *test-only* change. Stage 1 Step 1.4 required acceptance core **PASS / VERIFIED on the isolated Dart branch**; no Flutter build/UI or other-platform validation. Wider Stage 1 optional/edge matrix T13/T14 remains partially covered for later QA.
 
 ## Approved requirement tests: D-031 + D-036 (some covered by user-reported passing Dart suite; remaining plan-level acceptance items require mapping)
