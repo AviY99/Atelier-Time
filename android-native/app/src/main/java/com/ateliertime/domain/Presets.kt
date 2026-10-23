@@ -151,6 +151,13 @@ class PresetCatalog(
             rules.openingGroups.forEach {
                 fields.addAll(listOf(it.id, it.count, it.poseSeconds))
             }
+            // Optional only: keep pre-D071 saved signatures EXACTLY unchanged,
+            // yet bind newly authored group-rest values into approval integrity.
+            rules.openingGroups.forEachIndexed { index, group ->
+                group.breakAfterSeconds?.let { rest ->
+                    fields.addAll(listOf("opening_rest", index, rest))
+                }
+            }
             fields.add(session.selectedChoice?.mode?.name)
             fields.add(session.selectedChoice?.firstPoseSeconds)
             fields.add(session.phases.size)
