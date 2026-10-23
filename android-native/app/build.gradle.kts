@@ -5,9 +5,10 @@ plugins {
 
 android {
     namespace = "com.ateliertime.android"
-    // Compose runtime 1.12.x (BOM 2026.09.00) requires API 37 at compile time.
-    // AGP 9.3.1 supports API 37; targetSdk/minSdk remain unchanged.
-    compileSdk = 37
+    // CoGo device currently provides Android SDK 35 and 36 (no sdkmanager CLI).
+    // Compose 1.11.x is the latest stable core line before 1.12 required API 37.
+    // Keep targetSdk/minSdk independent from this compile-only toolchain setting.
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.ateliertime.android"
@@ -26,9 +27,9 @@ android {
 }
 
 dependencies {
-    val composeBom = platform("androidx.compose:compose-bom:2026.09.00")
+    val composeBom = platform("androidx.compose:compose-bom:2026.06.01")
     implementation(composeBom)
-    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation("androidx.activity:activity-compose:1.12.4")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
