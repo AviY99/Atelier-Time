@@ -1,5 +1,18 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 1.9: T09 missing end-split endpoint test added, retest pending
+
+**Evidence from user screenshot:** Android Termux Dart 3.13.7 `dart analyze` completed **No issues found!**, `dart test` completed **00:01 +34: All tests passed!**, smoke check passed (D-050). No GitHub Actions used.
+
+**Required QA gap:** The Stage 1 minimum T09 expects both valid min-1-minute final-two-pose endpoints. The 34 passing unit tests already included explicit **34m+1m** and rejected 0m, but did not explicitly cover **1m+34m**.
+
+**Within authorized Step 1.4:** Added one regression test on isolated `stage-1-4-scheduling-core` branch: `T09: custom minimum first pose keeps a positive 34m last pose`, exact Example A times 125–126 pose, 126–131 rest, 131–165 pose, 165–180 summary; verifies valid positive phases, 25/5 safety warning, separate approval acknowledgment. Commit `4b2f5d9fdd8dabc6dea8dcc0204c5062c7b6916a`. Test definitions increased from **34 to 35**.
+
+**Verification:** Screenshot-proven **34 earlier tests PASS**, but **35th test NOT YET EXECUTED**; do not call 35 passing until new `git pull --ff-only && dart test` output is observed from user Termux. No source engine change, no UI, app builds, GitHub Actions, budget change, branch merge or Stage 2 authorization. Step 1.4 remains final QA. D-051 recorded and HANDOFF v1.9 refreshed.
+
+---
+
+
 ## 2026-10-23 — Iteration 1.8: User screenshot verifies Dart analyzer and all 34 tests PASS
 
 **Evidence received:** Three Android Termux screenshots displaying `dart pub get && dart analyze && dart test` on **Dart SDK 3.13.7, android_arm64**. Exact final output visible: `Changed 49 dependencies!`, `Analyzing Atelier-Time... No issues found!`, `Built test:test.`, `00:01 +34: All tests passed!`. Previous corrected smoke check also succeeded.
