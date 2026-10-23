@@ -1,5 +1,8 @@
 # Atelier Time — Stage 2 session editor and preview: implementation plan
 
+> **D-068/D-069 2026-10-23:** User approved Kotlin Android app implementation, **product rules unchanged**. Historic Flutter Stage2 code remains frozen/uncompiled, but native Compose session editor now exists under [android-native/](https://github.com/AviY99/Atelier-Time/tree/android-native-kotlin-compose/android-native) on separate branch/PR #3. Editable rules/openings, automatic/manual breaks, final pose split and warning acknowledgment use real Kotlin domain engine; in-memory approval only. **No compilation/UI test yet.** Stage2 acceptance moves to new [K01/K02 native QA](ANDROID_NATIVE_EXECUTION_AND_TEST.md); later offline presets and timer/sounds K03/K04 are still pending. No toy proof, paid actions or merges.
+
+
 > **LATEST D-067 NOTE:** Stage 2 historical Flutter draft is frozen; current native Android-first selected stack is **Kotlin+Jetpack Compose+Gradle** using Code on the Go on-device. User rejects new toy build/research tests; future Kotlin/Compose Multiplatform architecture should be preserved while actual Atelier Time Android editor is implemented and ordinarily tested. Old Flutter widget tests and UI remain unverified historical source. Preserve Dart 35+11 fixtures; do not merge old PRs automatically.
 
 
