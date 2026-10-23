@@ -1,5 +1,8 @@
 # Delivery roadmap and approval gates
 
+> **2026-10-23 — LATEST SELECTED ANDROID STACK D-064:** User rejected standalone capability tests and required an industry-standard choice. **Kotlin + Jetpack Compose + Gradle Android** is selected for Android-first development; **Code on the Go** is the dedicated phone-local IDE (not standard desktop Android Studio), and Kotlin/Compose Multiplatform is the prospective later shared-code/UI path. **No throwaway feasibility spike; real APK build/testing belongs to normal development.** Preserve verified Dart schedule/adapter baselines, migrate Kotlin behavior with regression parity, keep domain independent of Android framework APIs. No Kotlin APK exists yet. Do not resume Flutter draft UI or auto-merge old PRs; no paid Actions.
+
+
 > **2026-10-23 — LATEST USER-APPROVED DELIVERY PRIORITY D-062:** Replace D-061's universal day-one native-build requirement with **fast, efficient Android PHONE-ON-DEVICE development → test → preview → installable Android build FIRST**, preserving architecture for later efficient iOS/Windows/macOS port. **Feasibility spike now authorized**: original Dart engine compiled to browser JavaScript, then separate small Capacitor APK build on the phone, then native background/audio proof. All production UI migration waits for proof; no paid Actions or PR merges. See [ANDROID_FIRST_PLATFORM_SPIKE.md](ANDROID_FIRST_PLATFORM_SPIKE.md) and [isolated spike branch](https://github.com/AviY99/Atelier-Time/tree/spike-android-dart-web).
 
 
