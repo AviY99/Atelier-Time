@@ -1,5 +1,8 @@
 # Technical Decision TD-001 — Flutter + Dart, shared cross-platform application
 
+> **2026-10-23 — NEW DECISION D-064 SUPERSEDES THE FLUTTER IMPLEMENTATION CHOICE:** The accepted Android-first technology is **Kotlin + Jetpack Compose + Gradle**, authored/built on user's Android phone through maintained **Code on the Go**; future portability via Kotlin Multiplatform and Compose Multiplatform. Android Studio is the standard developer IDE in general industry, but cannot be run as normal native Android app; CoGo is the supported phone-focused alternative. No separate feasibility demo demanded. Flutter remains historical unmerged source; Dart scheduling and adapter tests retained for port-parity. See [D-064](DECISIONS.md) and [Android-first plan](ANDROID_FIRST_DEVELOPMENT_PLAN.md).
+
+
 > **2026-10-23 — UPDATED BY D-062:** Historical Flutter+Dart deployment recommendation remains documented here, but user has **changed delivery priorities**: develop Android app **on the Android phone** as fast and efficiently as possible, then port efficiently to iOS/Windows/macOS later; the unsupported universal all-host build premise of D-061 is no longer a day-one constraint. The Flutter-on-Termux path remains unverified and original Flutter editor code is preserved/frozen. **New bounded candidate** is to reuse the existing Dart core via `dart compile js` for a lightweight web-based UI, then build a native Android APK via Capacitor in Termux (community recipe), with later platform wrappers. This route is **not yet proven or formally selected**. See [Android-first feasibility spike](ANDROID_FIRST_PLATFORM_SPIKE.md) before further implementation.
 
 
