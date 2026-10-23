@@ -83,3 +83,7 @@ The second Stage 2 increment improved invalid-input feedback, guarded partial pr
 ## 2026-10-23 — Stage 2 pure-Dart form parsing (D-056)
 
 The Flutter editor delegates its input parsing to new `lib/src/editor_draft.dart` on `stage-2-session-editor`, preserving all configured minute fields and opening group order and deferring schedule validation to the tested core. The new adapter is testable with Android Termux Dart without Flutter. **11 additional Dart test cases are written but not yet run**; previously verified Stage 1 core remains 35/35 passing. Eight separate Flutter widget tests still await a Flutter SDK. Stage 2 is in progress; no paid builds, PR merges, persisted presets or timer work.
+
+## 2026-10-23 — Stage 2 form-adapter verified at clean HEAD (D-059)
+
+Android Termux screenshot confirms `~/Atelier-Time-Stage2` at commit `3bb2bad` and **11/11 pure-Dart editor adapter tests PASS**. GitHub comparison confirms `3bb2bad` equals current `stage-2-session-editor` tip. D-057/D-058 mixed-worktree issue resolved using a separate Git worktree, preserving the original files. Stage 1 core still has separately verified 35/35 tests. Next low-cost check is a full `dart analyze && dart test` from the clean Stage 2 worktree; eight Flutter widget tests still require Flutter SDK. Stage 2 NOT complete; no PR merges, APK, GitHub Actions, paid runners, or later-stage work.
