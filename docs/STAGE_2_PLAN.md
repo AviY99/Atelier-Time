@@ -1,5 +1,8 @@
 # Atelier Time — Stage 2 session editor and preview: implementation plan
 
+> **LATEST D-067 NOTE:** Stage 2 historical Flutter draft is frozen; current native Android-first selected stack is **Kotlin+Jetpack Compose+Gradle** using Code on the Go on-device. User rejects new toy build/research tests; future Kotlin/Compose Multiplatform architecture should be preserved while actual Atelier Time Android editor is implemented and ordinarily tested. Old Flutter widget tests and UI remain unverified historical source. Preserve Dart 35+11 fixtures; do not merge old PRs automatically.
+
+
 > **LATEST D-064:** Stage 2 Flutter screen source remains historical uncompiled prototype. New implementation uses **Kotlin + Jetpack Compose + Gradle**, designed with pure Kotlin domain and future KMP reuse. CoGo is phone IDE (not industry-standard IDE; Android Studio is). **No separate toy APK build gate**—write real Atelier Time Android code and build/test it routinely. Dart 35/35 core + 11/11 adapter regressions stay the migration reference; no paid Actions.
 
 
