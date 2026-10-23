@@ -1,5 +1,8 @@
 # Atelier Time
 
+> **CURRENT 2026-10-23 D-068/D-069 — REQUIREMENTS UNCHANGED, REAL ANDROID KOTLIN IMPLEMENTATION STARTED:** User authorized continuing with Kotlin+Jetpack Compose+Gradle on Android phone and confirmed all previously approved Atelier Time scheduling/product behavior should remain unchanged. [New native Android project](https://github.com/AviY99/Atelier-Time/tree/android-native-kotlin-compose/android-native) in isolated branch/draft [PR #3](https://github.com/AviY99/Atelier-Time/pull/3) has actual deterministic pure Kotlin scheduling core, Compose editor and **21 Kotlin JUnit test methods WRITTEN, NOT EXECUTED**. No APK compiled/installed yet; no preset storage, timer or sound code. New [developer workflow, acceptance tests K01–K06 and frozen product requirements](docs/ANDROID_NATIVE_EXECUTION_AND_TEST.md) supersede historical Flutter/Dart-Web plans below. Existing 35/35 scheduling and 11/11 Dart adapter tests remain separately verified. No paid GitHub Actions or merges.
+
+
 > **LATEST STACK DECISION D-067 (2026-10-23):** Android FIRST **Kotlin + Jetpack Compose + Gradle** as the industry-standard native Android code stack; develop/build the actual Android application on the phone using maintained **Code on the Go** (on-phone IDE, not the standard desktop Android Studio). Future portability planned with Kotlin Multiplatform / Compose Multiplatform for iOS/Windows/macOS. **User rejects disposable feasibility spikes**; the Dart-to-JS/Capacitor experimental branch and prior toy Kotlin APK gate are **historical, not current requirements**. Preserve prior 35+11 Dart regression test successes and Dart/Flutter branches for port parity. No Kotlin APK compiled yet; no paid GitHub Actions.
 
 
