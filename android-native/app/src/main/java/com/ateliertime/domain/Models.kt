@@ -9,7 +9,17 @@ enum class PoseSource { OPENING, REGULAR }
 enum class IssueSeverity { ERROR, WARNING }
 enum class FinalPoseMode { REMAINDER, EVEN_SPLIT, CUSTOM_SPLIT }
 
-data class OpeningPoseGroup(val id: String, val count: Int, val poseSeconds: Int)
+/**
+ * breakAfterSeconds: null is the pre-D071 legacy model; it retains the old
+ * approved timeline for existing saved presets. New editor revisions always
+ * provide an explicit 0+ duration (last opening group must be positive).
+ */
+data class OpeningPoseGroup(
+    val id: String,
+    val count: Int,
+    val poseSeconds: Int,
+    val breakAfterSeconds: Int? = null,
+)
 data class SpecialBreakPlacement(
     val automatic: Boolean = true,
     val breakOrdinals: List<Int> = emptyList(),
