@@ -1,5 +1,25 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 2.1: Finish Stage 1 documentation and continue into Stage 2 prototype (D-053/D-054)
+
+**User instruction:** “What's going on u dont respond to actions ??? I want you to finish documentation and continue.” Responded by acting in GitHub rather than requesting another approval for work already authorized.
+
+**Confirmed Stage 1 baseline:** Stage 1 Step 1.4 **COMPLETE/VERIFIED** on `stage-1-4-scheduling-core` (D-052). The user's screenshot shows **35/35 Dart tests passed** on Android Termux Dart 3.13.7 after pulling the added T09 regression; preceding checkout had `dart analyze` with **No issues found!** and successful smoke test. No Flutter runtime or app build is claimed.
+
+**Integration:** Opened [PR #1](https://github.com/AviY99/Atelier-Time/pull/1), proposing isolated tested Dart core for `main`; **NOT merged**. Main has separate documentation history; review mergeability before integration. User instruction to “continue” is treated as permission to **begin Stage 2 design/source work**, not automatic merge or paid builds.
+
+**Stage 2 start:** Created [docs/STAGE_2_PLAN.md](STAGE_2_PLAN.md) on `main`. Branched `stage-2-session-editor` from the verified Stage 1 code and authored `apps/atelier_time_flutter/` (nested Flutter pubspec with path dependency on core; Material 3 main app; responsive form + phase preview; branch README). Opened [draft Stage 2 PR #2](https://github.com/AviY99/Atelier-Time/pull/2) targeting the pure Dart core branch.
+
+**Prototype behavior authored:** Editable session name, total/summary, ordered opening group count/duration with add/remove/reorder, regular pose and short/special break duration/count, automatic/manual break ordinal mode, pose-first/break-first, exact chronological timeline, errors distinct from D-031 advisory warnings, remainder/even/custom 1m slider endings and separate explicit warning acknowledgment/approval. Any edit resets choice/acknowledgment/approval. All approvals are in-memory only: NO Stage 3 saving/persistence or Stage 4 countdown/audio.
+
+**Verification:** GitHub branch source read-back and elementary balanced-delimiter inspection only. The assistant runtime has no Flutter SDK. **NO `flutter analyze`, widget tests, Flutter builds, platform scaffold or APK has executed; Stage 2 IN PROGRESS, NOT COMPLETE.** The tested 35/35 Dart core was not modified. No GitHub Actions, paid runners, budget changes, PR merges or subsequent Stage 3+ coding.
+
+**Next:** Obtain Flutter-capable environment safely without using paid Actions, validate compile/UI behavior, and review temporary editor interaction and visual direction. Handoff updated to v2.1.
+
+---
+
+
+
 ## 2026-10-23 — Iteration 2.0: Stage 1 Step 1.4 VERIFIED/COMPLETE on isolated development branch (D-052)
 
 **User evidence:** New Android Termux screenshot shows `git pull --ff-only && dart test`, fast-forwarding `stage-1-4-scheduling-core` **`8cf7a24..907f871`** and updating `test/scheduling_test.dart` plus branch progress. Terminal ends **`00:00 +35: All tests passed!`** on user's Android ARM64 Dart 3.13.7. This **confirms the new T09 valid 1m+34m final-pose split test PASSED** along with the previous 34. Earlier screenshots had **`dart analyze` “No issues found!”** and smoke PASS on the preceding checkout; the newer 35th test-only change was not shown re-analyzed.
