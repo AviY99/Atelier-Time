@@ -194,4 +194,35 @@ class ScheduleEngineTest {
         assertEquals(x.phases, y.phases)
         assertEquals(x.issues, y.issues)
     }
+    @Test fun replacementCanRescueInvalidOrdinaryEnding() {
+        val rules = SessionRules(
+            id = "rescue", name = "long replacements", totalSeconds = m(97),
+            openingGroups = listOf(OpeningPoseGroup("open", 3, m(5))),
+            poseSeconds = m(12), shortBreakSeconds = m(4),
+            specialBreakSeconds = m(17), specialBreakCount = 2,
+            cycleStart = CycleStart.BREAK_FIRST,
+        )
+        val c = result(rules, FinalPoseChoice.remainder())
+        contiguous(c)
+        val specials = c.phases.filter { it.kind == PhaseKind.SPECIAL_BREAK }
+        assertEquals(listOf(2, 3), specials.map { it.breakOrdinal })
+        assertEquals(listOf(m(31), m(60)), specials.map { it.startSeconds })
+        assertEquals(listOf(m(48), m(77)), specials.map { it.endSeconds })
+    }
+
+    @Test fun longCycleUsesDynamicProgrammingNotExponentialEnumeration() {
+        val rules = SessionRules(
+            id = "eight-hours", name = "Eight hours",
+            totalSeconds = m(480), poseSeconds = m(5),
+            shortBreakSeconds = m(1), specialBreakSeconds = m(5),
+            specialBreakCount = 5,
+        )
+        val c = result(rules, FinalPoseChoice.remainder())
+        contiguous(c)
+        assertEquals(
+            listOf(13, 26, 38, 51, 64),
+            c.phases.filter { it.kind == PhaseKind.SPECIAL_BREAK }
+                .map { it.breakOrdinal },
+        )
+    }
 }
