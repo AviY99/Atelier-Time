@@ -57,3 +57,10 @@ The user installed **Dart 3.13.7 on Android ARM64 via Termux**, successfully ran
 **Acceptance coverage checkpoint D-051:** A 35th unit test for the missing valid 1m+34m final-pose split was added on the development branch after the screenshots. **34 tests have screenshot-confirmed PASS; the new 35th test has NOT run.** To retest in existing Android Termux clone: `git pull --ff-only && dart test`.
 
 **Final Step 1.4 verification (D-052):** Screenshot-confirmed `00:00 +35: All tests passed!` on Android Termux after branch update `8cf7a24..907f871`. Existing 34-test analyzer screenshot reported no issues; updated test-only version was not re-analyzed in supplied evidence. **Step 1.4 core complete on branch, but not merged.** Future changes require separate user approval.
+
+
+## Stage 2 pure Dart editor-input tests (D-056; 2026-10-23)
+
+The [Stage 2 branch](https://github.com/AviY99/Atelier-Time/tree/stage-2-session-editor) now includes a Flutter-independent [text-to-schedule rules adapter](https://github.com/AviY99/Atelier-Time/blob/stage-2-session-editor/lib/src/editor_draft.dart) used by the Flutter editor. This enables [11 new form-input regression tests](https://github.com/AviY99/Atelier-Time/blob/stage-2-session-editor/test/editor_draft_test.dart) to be run with the existing Android Termux Dart SDK. **These 11 tests have not run yet.** The scheduling engine remains unchanged; its Stage 1 screenshot-verified 35 passing tests are a separate result. The eight Flutter widget tests also remain unexecuted because there is no Flutter SDK.
+
+From a Stage 2 branch checkout, a free targeted command is `dart test test/editor_draft_test.dart`. No GitHub Actions, paid runner or app build is needed for that test.
