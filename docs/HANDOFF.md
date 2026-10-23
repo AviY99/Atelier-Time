@@ -1,10 +1,45 @@
-# ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v2.4)
+# ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v2.5)
 
 **Updated:** 2026-10-23  
 **Repository:** https://github.com/AviY99/Atelier-Time (existing public repo; default `main`)  
 **Technology APPROVED:** **Flutter + Dart**, **ONE shared application codebase** for first release on **Android phones/tablets, Windows computers, iOS/iPadOS and macOS**. Different install artifacts per OS are acceptable; native-looking menus/graphics are OPTIONAL. No web or Linux release required initially.  
-**CURRENT AUTHORITATIVE STATUS — 2026-10-23 (D-052–D-057):** Stage 0 and Stage 1 Steps 1.1–1.4 COMPLETE/VERIFIED on `stage-1-4-scheduling-core` (Android Termux Dart 3.13.7 screenshots: **35/35 core Dart tests PASS**; earlier smoke/analyzer PASS). Core [PR #1](https://github.com/AviY99/Atelier-Time/pull/1) open/unmerged. User authorized Stage 2 editor/preview source work (D-053); development on isolated [stage-2-session-editor](https://github.com/AviY99/Atelier-Time/tree/stage-2-session-editor), [draft PR #2](https://github.com/AviY99/Atelier-Time/pull/2) unmerged. Editor source and eight Flutter widget test definitions exist, but **NO Flutter compilation/widget tests, APK or build** (Termux has only Dart). Stage 2 pure-Dart `SessionEditorDraft.toRules()` and 11 tests added in D-056. **NEW D-057:** Screenshot shows `dart pub get && dart test test/editor_draft_test.dart` **`00:00 +11: All tests passed!`**, BUT preceding `git switch --track origin/stage-2-session-editor` **FAILED** (`starting point ... is not a branch`) after successful fetch. Thus **11 tests passed in a local working tree, but its exact active branch/commit is UNVERIFIED**. GitHub file is on Stage 2, not Stage 1 branch. Get non-mutating Git status/HEAD and ensure correct checkout before declaring Stage 2 adapter verified at a particular revision. Stage 2 IN PROGRESS; no Stage 3 presets, Stage 4 timer/audio, native builds, paid GitHub Actions or budget changes. D-031 25/5, D-036 positive session/breaks, D-037 placement, D-044 any positive special length remain approved.
+**CURRENT AUTHORITATIVE STATUS — 2026-10-23 (D-052–D-058):** Stage 0 and Stage 1 Steps 1.1–1.4 COMPLETE/VERIFIED; 35 pure Dart core tests PASS on user Android Termux Dart 3.13.7 (screenshot). [PR #1](https://github.com/AviY99/Atelier-Time/pull/1) open/unmerged. Stage 2 editor/preview source work authorized and under way on remote [stage-2-session-editor](https://github.com/AviY99/Atelier-Time/tree/stage-2-session-editor), [draft PR #2](https://github.com/AviY99/Atelier-Time/pull/2) unmerged. Flutter source and 8 widget test definitions UNCOMPILED/UNRUN (no Flutter SDK). Flutter-independent `lib/src/editor_draft.dart` and 11 root Dart test definitions exist on Stage 2 remote branch. **User screenshot shows `+11 All tests passed!`**, but prior Git switch to Stage 2 FAILED. **New D-058 screenshot confirms user's local checkout remains Stage 1 branch at HEAD `907f871`, with Stage 2 files STAGED in its index** (plus untracked `pubspec.lock`). Thus 11 tests really ran and passed from **mixed Stage 1 working tree + staged Stage 2 files**; NOT proof of clean Stage 2 checkout/commit. **Safest repair is separate `~/Atelier-Time-Stage2` Git worktree**, preserving all existing files. No saved presets, timer/audio, APK, paid Actions, branch merges or Stage 3+ authority. D-031/036/037/044 remain approved.
 
+## Latest Termux diagnosis — D-058: staged Stage 2 files on Stage 1 HEAD (2026-10-23)
+
+**Full second screenshot evidence (read-only user commands):**
+
+```text
+## stage-1-4-scheduling-core...origin/stage-1-4-scheduling-core
+A  apps/atelier_time_flutter/README.md
+A  apps/atelier_time_flutter/lib/main.dart
+A  apps/atelier_time_flutter/lib/session_editor_page.dart
+A  apps/atelier_time_flutter/pubspec.yaml
+A  apps/atelier_time_flutter/test/session_editor_widget_test.dart
+M  docs/STAGE_1_4_PROGRESS.md
+M  lib/atelier_time.dart
+A  lib/src/editor_draft.dart
+A  test/editor_draft_test.dart
+?? pubspec.lock
+git branch --show-current -> stage-1-4-scheduling-core
+git rev-parse --short HEAD -> 907f871
+git ls-files test/editor_draft_test.dart -> test/editor_draft_test.dart
+```
+
+**Meaning:** `git switch --track` failed previously and left Stage 2 contents staged on the Stage 1 checkout. `git ls-files` includes staged additions, so it does NOT mean the test file is committed in Stage 1 HEAD. The prior `+11 All tests passed!` is a genuine local test run using Stage 2 files, but **not validated on a clean Stage 2 Git branch**. Do not tell the user the test failed or that switch succeeded.
+
+**Safest next instruction: create an entirely separate Stage 2 worktree while preserving existing dirty/staged and untracked files**. From Termux:
+```bash
+git -C ~/Atelier-Time fetch origin stage-2-session-editor
+git -C ~/Atelier-Time worktree add -b stage-2-session-editor ~/Atelier-Time-Stage2 FETCH_HEAD
+cd ~/Atelier-Time-Stage2
+git status --short --branch
+git rev-parse --short HEAD
+dart pub get && dart test test/editor_draft_test.dart
+```
+If worktree path/local branch already exists, **STOP and inspect**; never force/delete. The first original `~/Atelier-Time` and its staged files are untouched by this approach. Only after clean checkout succeeds may report a verified Stage 2 commit/test pass. The 8 Flutter widget tests still require Flutter, not available in Termux. No paid GitHub Actions, merge or Stage 3+.
+
+---
 ## New screenshot evidence and Git checkout issue — D-057 (2026-10-23)
 
 **User terminal screenshot shows:**
@@ -301,7 +336,7 @@ The user explicitly approved: **“allow any positive special break duration, ev
 - **[TECH_DECISION_001_PLATFORM.md](TECH_DECISION_001_PLATFORM.md)** records approved Flutter + Dart, four release targets and allowance for non-native UI.
 - **[DATA_MODEL.md](DATA_MODEL.md)** defines only **conceptual** Dart types: `SessionRules`, `OpeningPoseGroup`, `RegularCycle`, `LongBreakRule/Placement`, `SchedulePhase`, `ScheduleCandidate`, `EndPoseResolution`, `ApprovedSessionPreset`, `ScheduleIssue`. Internally integer seconds; whole-minute UI initially; records are not yet executable Dart.
 - **[TEST_PLAN.md](TEST_PLAN.md)** lists canonical T01–T18 and P-T/R-B edge cases; **current D-052 evidence: 35/35 Step 1.4 Dart unit tests PASS on Android ARM64** after the added T09 endpoint, prior analyzer no issues, prior smoke PASS. T13/T14 broader edge cases remain a future QA backlog.
-- **[PRODUCT_SPEC.md](PRODUCT_SPEC.md)** approved product scope, **[SCHEDULING_RULES.md](SCHEDULING_RULES.md)** core contract, **[ROADMAP.md](ROADMAP.md)** gates, **[DECISIONS.md](DECISIONS.md)** chronological register through **D-057**, **[WORK_LOG.md](WORK_LOG.md)** iterations, **[CHANGELOG.md](../CHANGELOG.md)** history. See branch-only [Stage 1.4 progress](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/docs/STAGE_1_4_PROGRESS.md).
+- **[PRODUCT_SPEC.md](PRODUCT_SPEC.md)** approved product scope, **[SCHEDULING_RULES.md](SCHEDULING_RULES.md)** core contract, **[ROADMAP.md](ROADMAP.md)** gates, **[DECISIONS.md](DECISIONS.md)** chronological register through **D-058**, **[WORK_LOG.md](WORK_LOG.md)** iterations, **[CHANGELOG.md](../CHANGELOG.md)** history. See branch-only [Stage 1.4 progress](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/docs/STAGE_1_4_PROGRESS.md).
 - **Decision precedence:** D-036 supersedes D-031's previous 0-minute break allowance, but D-031 25/5 warning remains. D-037 approves P-01–P-06 and within-one-session warning scope, with zero summary / zero special-break **count** permitted. **D-038 resolved by D-044**; engine now accepts positive shorter/equal replacements, with D-031 warnings. D-045 records unexecuted source/tests. **D-039** was the prior Step 1.4 gate; **D-040** subsequently authorizes Step 1.4 only; **D-041** prohibits GitHub Actions/paid workflow use under budget block; **D-042** documents unexecuted branch code. D-030/D-032/D-034/D-035 are earlier historical/proposal records, NOT permission for zero-minute break slots.
 - GitHub is the authoritative store. After every iteration, update decisions/roadmap/work log/changelog and **THIS HANDOFF**; verify GitHub read-back and link concrete commits. Do not create a duplicate repo.
 
@@ -311,4 +346,4 @@ The user explicitly approved: **“allow any positive special break duration, ev
 
 **Stage 2 STARTED (D-053/D-054), NOT COMPLETE.** The user directly instructed finishing documentation and continuing. Stage 1 [PR #1](https://github.com/AviY99/Atelier-Time/pull/1) and Stage 2 [draft PR #2](https://github.com/AviY99/Atelier-Time/pull/2) are OPEN, not merged. Provisional Flutter editor source is on `stage-2-session-editor` and has never been compiled or run. No release/APK, no Flutter platform scaffolding, no paid Actions, no Stage 3–6 work. D-031, D-036, D-037, D-044 remain product invariants.
 
-**Immediate next action in a future chat:** User screenshot shows `+11 All tests passed!` from `test/editor_draft_test.dart` on Android Termux, but `git switch --track origin/stage-2-session-editor` failed right beforehand. **Branch and commit attribution unresolved (D-057)**. First ask for local non-mutating `git status --short --branch; git branch --show-current; git rev-parse --short HEAD; git ls-files test/editor_draft_test.dart`; then repair checkout safely using fetched Stage 2 commit without discarding work. Do not claim user is on Stage 2 or that 11 tests passed on its checked-out commit until confirmed. Preserve earlier 35 verified core passes and 8 unrun Flutter widget tests. No GitHub Actions, PR auto-merge, app build, presets/timer or later stages. Continue already-authorized Stage 2 and keep this handoff current.
+**Immediate next action in a future chat:** User's second screenshot proves local `~/Atelier-Time` remains **Stage 1 HEAD `907f871` with multiple Stage 2 files STAGED** plus untracked `pubspec.lock`, despite 11 adapter tests passing. Do NOT run reset/clean/stash blindly or claim Stage 2 checkout succeeded. Give the non-destructive separate worktree commands above, review `git status`, `git rev-parse` and a new `dart test test/editor_draft_test.dart` result from `~/Atelier-Time-Stage2`. Preserve original dirty worktree until user chooses what to do with it. No APK, paid builds, PR merge, Flutter widget tests or Stage 3+ coding. Preserve 35 passing Stage 1 core tests; do not ask user to reinstall Dart.
