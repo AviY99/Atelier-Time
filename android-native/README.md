@@ -33,3 +33,25 @@ No runtime tests, APK builds, paid GitHub Actions/CI, branch merges or desktop r
 ## External toolchain source
 
 [Code on the Go releases (26.43)](https://github.com/appdevforall/CodeOnTheGo/releases), [CoGo on-device AGP 9.3.1 / Kotlin 2.3.21 / Gradle 9.6.1 documentation](https://github.com/appdevforall/CodeOnTheGo/blob/stage/docs/PLUGIN_AUTHORING.md), [Google AGP 9 built-in Kotlin](https://developer.android.com/build/migrate-to-built-in-kotlin), [Google official Compose compiler setup](https://developer.android.com/develop/ui/compose/setup-compose-dependencies-and-compiler), [Compose BOM](https://developer.android.com/develop/ui/compose/bom).
+
+
+## 2026-10-23 — K03 offline saved session increment (source only, NOT device-verified)
+
+**Added to this real Android project:**
+- `domain/Presets.kt`: platform-neutral `PresetStore` interface and `PresetCatalog` with save approved / update / load / duplicate / rename / delete / activate-as-selected; rejects invalid, unresolved and unacknowledged warning schedules. Saved approval is revalidated against the scheduling engine whenever loaded; a full-revision length-prefixed consistency signature covers **all** rules (including inactive settings), final choice, phase boundaries and warning offsets. This is consistency detection, **not a cryptographic security signature**.
+- `android/AndroidPresetStore.kt`: a versioned offline JSON persistence adapter using one committed private `SharedPreferences` value for the library and selected ID. Corrupt/unrecognized storage is **not replaced** with empty data. A configurable test-only preferences namespace avoids touching real user presets.
+- `android/PresetLibrarySection.kt` and updated `SessionEditorScreen.kt`: Compose UI to save an explicitly approved plan, update, load, duplicate, rename, confirm deletion, and select the plan for **future** timer activation. Editing still clears the prior approval. New names are nonblank. Saved sessions can be loaded after restart.
+- Input parser now uses checked `Long` multiplication to reject minute-to-second overflow instead of silently wrapping.
+
+**Tests added:** 10 pure Kotlin JUnit preset lifecycle/integrity cases, 1 overflow JUnit case, **four** Android instrumentation cases for persistence/restart, CRUD, unreadable data and future storage schema. All written, **NONE RUN**. Total now **32 JVM `@Test` methods** (16 scheduler + 6 input + 10 preset) and **4 Android instrumentation tests**. Original Dart 35+11 passing evidence does not verify these Kotlin tests.
+
+**Scope:** K03 code authored but no actual CoGo compiler, Gradle tasks, APK install, SQLite/DataStore migration, phone storage restart test, or Android emulator run. The K03 milestone is **NOT COMPLETE until real device checks pass**. Loading/activating selects an approved session; it does NOT start a countdown or play sound. K04 timer/3 audio cues remain unimplemented.
+
+**Ordinary local on-phone QA tasks in Code on the Go:**
+```text
+:app:testDebugUnitTest
+:app:assembleDebug
+:app:connectedDebugAndroidTest  (when an instrumentation device is available)
+```
+
+Open the `android-native/` folder on branch `android-native-kotlin-compose`; no throwaway project, no GitHub Actions, no paid remote builds.
