@@ -132,19 +132,43 @@ class PresetCatalog(
 
     companion object {
         /**
-         * Non-cryptographic consistency signature covering boundaries, ids,
-         * sources, break ordinals and warning offsets. Corruption detection,
-         * NOT a security/authentication mechanism.
+         * Complete approved-revision consistency signature. Includes all input
+         * fields (even currently inactive defaults), phase times/IDs/sources
+         * and acknowledged warning offsets. Length-prefix avoids ambiguity
+         * from user-entered punctuation. NOT cryptographic authentication.
          */
-        fun signature(session: ApprovedSession): String =
-            session.phases.joinToString("|") {
-                listOf(
+        fun signature(session: ApprovedSession): String {
+            val rules = session.rules
+            val fields = mutableListOf<Any?>(
+                rules.id, rules.name, rules.totalSeconds, rules.summarySeconds,
+                rules.poseSeconds, rules.shortBreakSeconds,
+                rules.specialBreakSeconds, rules.specialBreakCount,
+                rules.cycleStart.name, rules.placement.automatic,
+                rules.placement.breakOrdinals.size,
+            )
+            fields.addAll(rules.placement.breakOrdinals)
+            fields.add(rules.openingGroups.size)
+            rules.openingGroups.forEach {
+                fields.addAll(listOf(it.id, it.count, it.poseSeconds))
+            }
+            fields.add(session.selectedChoice?.mode?.name)
+            fields.add(session.selectedChoice?.firstPoseSeconds)
+            fields.add(session.phases.size)
+            session.phases.forEach {
+                fields.addAll(listOf(
                     it.id, it.kind.name, it.startSeconds, it.endSeconds,
                     it.poseNumber, it.poseSource?.name, it.openingGroupId,
                     it.breakOrdinal,
-                ).joinToString(",")
-            } + "#" + session.acknowledgedWarnings.joinToString("|") {
-                listOf(it.code, it.offsetSeconds).joinToString(",")
+                ))
             }
+            fields.add(session.acknowledgedWarnings.size)
+            session.acknowledgedWarnings.forEach {
+                fields.addAll(listOf(it.code, it.offsetSeconds))
+            }
+            return fields.joinToString(separator = "") { value ->
+                val encoded = value?.toString() ?: "<null>"
+                encoded.length.toString() + ":" + encoded
+            }
+        }
     }
 }
