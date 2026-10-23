@@ -1,5 +1,15 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v3.4)
 
+## LATEST — 2026-10-24: INSTALLED ANDROID UI OBSERVED, K04 TIMER SOURCE ADDED / UNVERIFIED
+
+User uploaded screenshot of the **installed Atelier Time Compose app running on their Android phone**, showing live session editor, Example A preview, explicit approval and an existing saved preset. This is first confirmed **K02 on-device launch/visual output**, not proof of exhaustive editor operations or K03 persistence through relaunch. Earlier phone screenshots verified `:app:testDebugUnitTest`, `:app:assembleDebug` and APK file hash at prior source commit.
+
+After explicit user request to **build timer/clock with three sounds**, new source on `android-native-kotlin-compose` adds platform-independent `MonotonicSessionTimer.kt`, `SessionTimerScreen.kt`, approval-to-timer navigation, and **5 NEW JUnit clock methods** (total now 37 JVM source tests; 6 Android instrumentation sources). Editor labels and section/group Help improved, with a proposed copy review. New K04 code is **NOT COMPILED/TESTED ON PHONE YET**, locked-screen/background sound reliability unimplemented; D-016 per-opening-pose vs group remains open, and code deliberately emits no sound between consecutive opening poses. D-071 records user's new requirement for configurable rests following each opening group (earlier group boundary may be 0; last cannot be 0) with final placement/compatibility review needed before changing approved scheduling fixtures or saved JSON. Draft PR #3 remains unmerged; no Actions/CI expense.
+
+Next: phone `git pull --ff-only`, `gradle :app:testDebugUnitTest :app:assembleDebug` via Bash with local native AAPT2 override, fix any **actual** errors, reinstall, verify timer/sounds and K03 cold restart. No claim of source-only features already working on device.
+
+---
+
 ## ACTUAL PHONE APK FILE VERIFIED — 2026-10-23
 
 After screenshot-verified `:app:assembleDebug BUILD SUCCESSFUL`, user ran on-phone `ls -lh app/build/outputs/apk/debug/app-debug.apk && sha256sum app/build/outputs/apk/debug/app-debug.apk`. Both succeeded: real `app-debug.apk` exists at the expected project path, reported **12M**, with SHA-256 **`d793f6f322000307fb4d636ff3c6d842dad5c3724517776ba3de81dedd78ae77`** (screenshot). **Build + APK filesystem verification PASS, installation and execution NOT yet verified.** Next install APK and verify launch/editor, then offline K03 save/restart/load and available instrumentation. No background timer K04 yet. Historical old "no APK" statements below predate this evidence. See [WORK_LOG](WORK_LOG.md) and [TEST_PLAN](TEST_PLAN.md).
