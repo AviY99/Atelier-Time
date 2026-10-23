@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **APK FILE VERIFIED ON PHONE — 2026-10-23:** User-provided terminal screenshot confirms file `android-native/app/build/outputs/apk/debug/app-debug.apk` exists, reported **12M** and generated SHA-256 `d793f6f322000307fb4d636ff3c6d842dad5c3724517776ba3de81dedd78ae77`. `:app:assembleDebug` previously finished **BUILD SUCCESSFUL in 47s**. **APK compilation, file existence and checksum PASS**; installation, initial launch, editor/UI and offline preset storage/reopen **NOT YET VERIFIED**, as are six Android instrumentation tests. K04 not implemented.
+
+
 > **LATEST K02 BUILD EVIDENCE (2026-10-23):** Android phone screenshot confirms **`:app:assembleDebug` BUILD SUCCESSFUL in 47s**, 36 Gradle tasks (18 executed, 18 up-to-date), including `:app:packageDebug`. Previous real on-phone `:app:testDebugUnitTest` **BUILD SUCCESSFUL in 34s**. Unstripped `libandroidx.graphics.path.so` warning is nonblocking. APK filesystem metadata/size/hash, installation, editor UI and K03 persistence checks remain **NOT YET VERIFIED**; exact JUnit XML count and six Android instrumentation cases are also pending. **K01 Gradle test gate PASS; K02 assembly PASS, install/UI acceptance OPEN; K03 OPEN; K04 not implemented.** No Actions or merge.
 
 
