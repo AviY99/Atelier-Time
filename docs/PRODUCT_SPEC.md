@@ -1,5 +1,8 @@
 # Product specification — Atelier Time
 
+> **LATEST DEVELOPMENT DECISION D-064 (2026-10-23):** The approved Android-on-phone priority (D-062) will use **industry-standard Kotlin + Jetpack Compose + Gradle**, with future Kotlin Multiplatform/Compose Multiplatform portability engineered through a platform-free scheduling/domain layer. CoGo is the on-phone IDE, **not** a claim of industry-standard mobile IDE; Android Studio is official professional IDE. The user explicitly declined pre-development toy APK experiments. Real app build/test becomes the normal engineering loop. No framework code migrated yet, existing Dart scheduling 35/35 and adapter 11/11 test passes remain valid.
+
+
 > **2026-10-23 — ANDROID-ON-PHONE IMPLEMENTATION DECISION D-064:** App behavior/features unchanged. **Selected Android implementation: Kotlin + Jetpack Compose + Gradle**, developed with phone-local Code on the Go. Architecture should preserve portable pure Kotlin domain for future Kotlin Multiplatform / Compose Multiplatform iOS/Windows/macOS reuse. **Code on the Go is a specialized mobile IDE, not the industry-standard desktop Android Studio.** User explicitly does not want standalone toolchain demos; actual Atelier Time development/build/QA is next. No Kotlin build or APK claimed yet; historical Dart regression evidence remains.
 
 
