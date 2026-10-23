@@ -1,5 +1,8 @@
 # Product specification — Atelier Time
 
+> **2026-10-23 — D-061 PLATFORM FEASIBILITY HOLD:** The application requirements **remain** offline, installable, same maintained product/features on Android/iOS/Windows/macOS, reliable clock and three audio cues. User explicitly clarified that **development, automated tests, builds, signing and deployment must also be workable cross-platform**, including the currently available Android Termux environment. The historical Flutter+Dart approval is **under reconsideration** because it did not prove that complete lifecycle; no framework replacement or relaxation of separate native installers has been authorized. See [reassessment](PLATFORM_REASSESSMENT_2026_10_23.md). Pause additional Flutter-specific UI coding pending feasibility proof. Preserve verified Dart logic, documentation and tests.
+
+
 Status: **Approved product scope** on 2026-10-22. Stage 1 pure-Dart scheduling core subsequently implemented and screenshot-verified 35/35 tests PASS on Android Termux (D-052), on an unmerged branch. Stage 2 user subsequently authorized initial editor/preview SOURCE work (D-053/D-054), not yet Flutter-compiled/tested. No installable app, persistence or runtime timer/audio exists.
 
 ## Purpose and audience
