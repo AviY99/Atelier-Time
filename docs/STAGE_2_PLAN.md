@@ -1,5 +1,8 @@
 # Atelier Time — Stage 2 session editor and preview: implementation plan
 
+> **2026-10-23 — LATEST GATE D-062/D-063:** Android is now the FIRST target; the user requires building/testing/installing directly on their Android phone, with later efficient portability to iOS/Windows/macOS. The prior Flutter editor plan and draft PR #2 are preserved as **uncompiled historical prototype**; this is **NOT** a green light for more Flutter UI code. Before any port, prove an Android Kotlin APK builds and runs in the actively maintained Code on the Go IDE on user's device. Preserve canonical Dart 35/35+11/11 tests as migration oracle. See [Android-first plan](ANDROID_FIRST_DEVELOPMENT_PLAN.md).
+
+
 > **2026-10-23 PAUSE — D-061:** Stage 2 Flutter implementation was started before the full cross-platform development/build pipeline was validated. Stop further Flutter-specific source work, UI/widget test expansion and platform packaging pending [cross-platform feasibility re-assessment](PLATFORM_REASSESSMENT_2026_10_23.md) and a revised approved platform decision. Draft PR #2 remains open but UNVERIFIED; no automatic merges. Tested Dart scheduling and form-adapter source is preserved. No assumption that a PWA can fulfill locked-screen audio or native installer requirements.
 
 
