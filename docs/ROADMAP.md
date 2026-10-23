@@ -1,5 +1,8 @@
 # Delivery roadmap and approval gates
 
+> **NEXT STAGE SOURCE PROGRESS D-070 — 2026-10-23:** K03 offline approved-session catalog, phone-private versioned JSON storage and Compose saved-session actions implemented in [native Android branch](https://github.com/AviY99/Atelier-Time/tree/android-native-kotlin-compose/android-native); includes 32 Kotlin JVM tests and 4 Android instrumentation tests **written but unexecuted**. Regenerated approved timelines checked for unchanged rules/phase/warning signature, errors preserved. **K03 NOT YET VERIFIED ON DEVICE; NO APK**. K01/K02 also await Gradle/device evidence. K04 accurate countdown, pause/resume/stop and 3 audio cues remain next source stage. Rules/examples unchanged; no Actions, paid CI, PR merges.
+
+
 > **CURRENT STATUS — 2026-10-23 D-068/D-069:** The user APPROVED continued work on actual Android Kotlin+Jetpack Compose+Gradle application, explicitly confirmed product/scheduling settings unchanged. Isolated [android-native-kotlin-compose](https://github.com/AviY99/Atelier-Time/tree/android-native-kotlin-compose) with [draft PR #3](https://github.com/AviY99/Atelier-Time/pull/3) now contains native Gradle source, platform-independent Kotlin domain/DP scheduler, Android editor and **21 Kotlin tests written, NOT executed**. [New process/QA gates K01–K06](ANDROID_NATIVE_EXECUTION_AND_TEST.md) replaces old Flutter SDK test dependencies. Next: real phone Gradle unit tests/debug APK, then offline persistence/runtime timer/audio. **Do not change original accepted product rules.** Old Flutter/Stage2 items below are historical; current Android milestones are pending device evidence. No paid Actions or automatic merges.
 
 
