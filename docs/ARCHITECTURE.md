@@ -1,6 +1,6 @@
-# Architecture and design constraints (pre-implementation)
+# Architecture and design constraints — implemented core, Stage 2 editor underway
 
-Status: **Flutter + Dart and four OS targets approved at Stage 1 Step 1.1.** A source-level data-model **design proposal has now been prepared** under Step 1.2 in [DATA_MODEL.md](DATA_MODEL.md). It is not implemented code; user review and separate authorization are required before Step 1.3.
+**Current status (2026-10-23, D-052–D-054):** Flutter + Dart and four target OS families approved. The Stage 1 pure-Dart scheduling core is **implemented and screenshot-verified 35/35 tests PASS** on isolated branch `stage-1-4-scheduling-core`; see [core integration PR #1](https://github.com/AviY99/Atelier-Time/pull/1). Stage 2 responsive editor/preview was subsequently authorized for preliminary source work and drafted on `stage-2-session-editor`; see [plan](STAGE_2_PLAN.md), [draft PR #2](https://github.com/AviY99/Atelier-Time/pull/2). **Neither PR is merged. Flutter UI has not compiled or run.** No saved presets, live timer, audio, APK, GitHub Actions or paid build.
 
 ## Required layers
 1. **Rules/input validation**: validate editable counts, durations and cycle order.
