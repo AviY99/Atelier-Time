@@ -58,3 +58,18 @@ The user's instruction to “finish documentation and continue” is interpreted
 The assistant runtime has no Flutter SDK; user's Termux installs only the pure **Dart** SDK. `flutter pub get`, `flutter analyze`, `flutter test` and native-app runs have **NOT** been executed. **No widget tests have passed yet**. Static text structural checks are not Flutter compilation.
 
 Next Step 2 QA: when a real Flutter-capable environment is available, run the three commands from `apps/atelier_time_flutter/` and correct resulting compile/test problems. Then have the user review visual direction. Do not initiate GitHub Actions/paid builds, auto-merge PRs, or work on Stages 3+.
+
+
+## 2026-10-23 — Third Stage 2 increment: tested-core-compatible pure Dart form adapter (D-056)
+
+**Scope:** Continue the already-authorized Stage 2 editor/preview work without Flutter execution, paid GitHub Actions, PR merges or later stages.
+
+**Source changes on `stage-2-session-editor`:**
+- Created [lib/src/editor_draft.dart](https://github.com/AviY99/Atelier-Time/blob/stage-2-session-editor/lib/src/editor_draft.dart), a Flutter-free immutable text-to-`SessionRules` adapter, and exported it through `lib/atelier_time.dart`.
+- Editor `_readRules` delegates to `SessionEditorDraft.toRules()`. User-entered whole-minute fields, opening groups and cycle choices are preserved; malformed values throw `FormatException` and core scheduling constraints still return blocking validation errors. The adapter does not invent defaults or approval.
+- An inactive manual ordinal field does not block an **N=0** schedule, even when the manual input contains nonnumeric old text; active manual ordinals are parsed explicitly and then checked by the scheduler.
+- Added [11 pure Dart test definitions](https://github.com/AviY99/Atelier-Time/blob/stage-2-session-editor/test/editor_draft_test.dart): exact Example B, custom values, D-036 zero-duration hard failures, malformed text, opening group order, active/manual/inactive ordinals, and D-044 3m special replacement warning.
+
+**Verification:** **11 new pure Dart tests WRITTEN BUT UNEXECUTED**. They are runnable on the user's existing Android Termux Dart 3.13.7 without Flutter and without any GitHub Actions charges. Root Stage 1 scheduling engine remains unchanged and previously passed 35/35; eight Flutter widget tests remain written/unexecuted. Source read-back and basic delimiter check are not compilation.
+
+**Next action:** User may (when convenient) fetch the Stage 2 branch into Termux and execute `dart test test/editor_draft_test.dart`, then report any errors for correction. Stage 2 UI compilation and widget tests still require a Flutter SDK. Do not mark Stage 2 complete or begin presets/timer.
