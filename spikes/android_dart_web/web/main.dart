@@ -65,7 +65,7 @@ void main() {
               '-' + _stamp(phase.endSeconds) + ' ' +
               phase.kind.name + ' | ' +
               (phase.durationSeconds ~/ secondsPerMinute).toString() + 'm',
-      ].join('\\n');
+      ].join('\n');
     }
   } catch (error) {
     if (status != null) {
