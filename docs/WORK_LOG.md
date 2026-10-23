@@ -1,5 +1,20 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 2.7: Mass Termux analyzer errors from nested Flutter source; split analysis scope (D-060)
+
+**User evidence:** User ran `dart analyze && dart test` from clean Stage 2 Termux checkout and uploaded a very tall screenshot with hundreds of diagnostic lines, saying in Hebrew “This is only a tenth of the errors.” Do not request all screenshots; do not conflate massive analyzer failures with failing unit tests. Since `&&` follows `dart analyze`, the full Dart suite did **not** run on this attempt.
+
+**Diagnosis:** The repository contains TWO packages: pure Dart `atelier_time_core` at root and nested `apps/atelier_time_flutter` requiring SDK `flutter` / `flutter_test`. Android Termux has only the Dart SDK and therefore cannot resolve Flutter imports/types. The root analyzer may traverse these nested sources and cause cascading diagnostics. Due to image resolution, individual errors cannot all be audited; additional root Dart errors, if any, must be evaluated on rerun.
+
+**Committed fix on `stage-2-session-editor`:** Added root `analysis_options.yaml` excluding nested `apps/atelier_time_flutter/**` from root Dart-only static analysis, plus nested independent `apps/atelier_time_flutter/analysis_options.yaml` retaining Flutter code in scope when a real Flutter SDK runs `flutter analyze` from the app. No scheduling core or editor logic changes; previous Stage 1 35/35 and clean Stage 2 adapter 11/11 passes remain valid.
+
+**Verification still needed:** Update existing `~/Atelier-Time-Stage2` via `git pull --ff-only`; rerun `dart analyze && dart test`. Until actual output, do **not** claim analysis repaired or 46 root tests passed. Eight Flutter widget tests remain uncompiled/unrun. No Actions/paid resources, merge, APK or Stage 3+.
+
+**Documentation:** D-060, test plan, roadmap, Stage 2 plan, README, changelog and HANDOFF v2.7 updated.
+
+---
+
+
 ## 2026-10-23 — Iteration 2.6: Stage 2 test verification completed on clean Git worktree (D-059)
 
 **Screenshot evidence:** User successfully created separate `~/Atelier-Time-Stage2` worktree, and Git output shows current HEAD `3bb2bad`. In this folder `dart pub get && dart test test/editor_draft_test.dart` returned **`00:01 +11: All tests passed!`**. GitHub `compare_commits` confirmed the exact commit `3bb2bade992fddab7dc3d7ece31d9aa58231380f` is IDENTICAL to `stage-2-session-editor` current tip (0 ahead/behind).
