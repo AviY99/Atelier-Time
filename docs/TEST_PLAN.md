@@ -201,3 +201,10 @@ Run `flutter pub get`, `flutter analyze`, `flutter test`, and manual preview che
 The isolated Stage 2 branch now contains `lib/src/editor_draft.dart`, an editor text-to-rules adapter independent of Flutter, and **11 new Dart unit-test definitions** in `test/editor_draft_test.dart`. They cover Example B fields, altered minute values, zero-duration error handling, malformed numeric inputs, ordered opening groups, manual replacement ordinals, N=0 inactive ordinals and D-044 shorter positive special breaks.
 
 These eleven new tests have **NOT been executed**. They may run with the user's existing Android Termux Dart SDK: from the Stage 2 branch repository root use `dart pub get && dart test test/editor_draft_test.dart`. The old Stage 1 suite's 35 passing tests do not establish the new adapter's results. Separately, the eight Flutter widget tests still require a Flutter SDK and have not run.
+
+
+## 2026-10-23 — Android editor-adapter test run: 11 PASS, Git checkout unresolved (D-057)
+
+User's Termux screenshot visibly reports `Got dependencies!` and `00:00 +11: All tests passed!` following `dart pub get && dart test test/editor_draft_test.dart`. This **confirms 11 tests passed in that local working tree**.
+
+**Provenance qualifier:** Immediately beforehand, `git fetch` of the Stage 2 remote branch succeeded, but `git switch --track origin/stage-2-session-editor` **FAILED** (`starting point ... is not a branch`). The screenshot does not show the active local branch, HEAD SHA, or tracked status of `test/editor_draft_test.dart`. The file is present in the Stage 2 GitHub branch and absent from the Stage 1 branch, so **do not assign the success to the Stage 2 checked-out commit without verification**. Request the non-mutating branch/status output before attempting a safe checkout repair. No Flutter widget tests have run; the 35 confirmed Stage 1 tests remain valid.
