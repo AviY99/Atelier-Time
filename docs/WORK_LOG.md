@@ -1,5 +1,17 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-24 — User APPROVED D-071; opening-group rest source implemented (pending Android validation)
+
+**Approval:** After review of the explicit diagram and question, user answered **“כן”**. This approves break-after-every-opening-group semantics: configurable whole-minute rest `>=0` between earlier groups; **last group requires `>=1m` rest**; existing initial regular rest counts once when matching the configured last-group value (Example A 00:20–00:25), with **no duplicate break**. If last-group rest differs, it replaces that initial slot instead of adding adjacent rest; custom group rests have no normal-replacement ordinal. Existing 25m/5m warning still applies to all real breaks. Approval added to [DECISIONS D-071](DECISIONS.md).
+
+**Committed implementation on `android-native-kotlin-compose`:** `OpeningPoseGroup.breakAfterSeconds: Int?` (null = exact historical legacy behavior); scheduling-engine validation and actual group-break phases, no double break, deterministic manual/automatic special break slot handling; `OpeningDraft.breakAfterMinutes` parsing, editable per-group controls and help; version-1 JSON optional field round-trip; optional signature field only for **new explicit** group-break configuration, preserving approved legacy preset signatures. Newly created Example A uses first after-break 0m and last 5m and is expected to retain canonical phases. Previous saved records still deserialize without the new field and validate under the old signature. [Copy/technical rule review](EDITOR_LABEL_REVIEW_2026_10_24.md).
+
+**Regression tests added but NOT RUN:** Six scheduler cases (Example A exact legacy time parity, earlier positive vs zero, different last rest, pose-first rest, explicit negative/zero validation, fit after last), two text adapter cases, one signed preset mutation/reload case, one Android instrumentation storage round-trip case. **Current source count: 46 JVM JUnit methods and 7 Android instrumentation methods**; only 32 old JVM tests were previously run on the phone and finished with `BUILD SUCCESSFUL` at an earlier checkout. New break and K04 source **NOT compiled or APK-installed yet**; no new PASS claims. Background timer/sound and D-016 still outstanding.
+
+**Required next actual phone gate:** `git pull --ff-only` from real CoGo Android branch, then Gradle tasks `:app:testDebugUnitTest :app:assembleDebug` via Bash with `-Pandroid.aapt2FromMavenOverride=$ANDROID_HOME/build-tools/36.0.0/aapt2`. Stop on first real failed test/compile; fix exact error before updating APK. Preserve PR #3 draft, historical sources and all existing user data; do not run paid Actions.
+
+---
+
 ## 2026-10-24 — Installed phone UI verified; K04 timer source and editor copy/help authored (UNTESTED)
 
 **User device screenshot evidence:** Atelier Time **installed and launched on Android phone**. Screen visibly shows native Compose session editor, opening 4×1 and 4×4 groups, full exact Example A timeline, final ending selection, explicit "Approve exact timeline", approved state, and saved preset "Draw1425" marked as selected. This is actual **K02 first-launch/editor/preview proof**, but not a comprehensive K02 editing regression. A saved preset appears, yet **persistence after force-close/relaunch/offline and full K03 CRUD have NOT been observed/verified**. Earlier Gradle `:app:testDebugUnitTest` and `:app:assembleDebug` passed on-device at the previous commit.
