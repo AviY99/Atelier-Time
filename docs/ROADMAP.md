@@ -73,3 +73,8 @@ An acceptance-mapping gap in T09 was closed at the **test-source** level by addi
 - Prepared [Stage 2 design/implementation plan](STAGE_2_PLAN.md); created [isolated Stage 2 branch](https://github.com/AviY99/Atelier-Time/tree/stage-2-session-editor) from tested core with a nested Flutter editor prototype and [draft PR #2](https://github.com/AviY99/Atelier-Time/pull/2) targeting the core branch.
 - **Flutter editor source is NOT compiled, analyzed or widget-tested** (no accessible Flutter SDK); no Android APK, platform folder builds or installed app. It includes only in-memory approval, not saved presets or a runtime timer. Those remain future stages.
 - **Next Stage 2 gate:** review editor interaction against T19–T23, run Flutter tests using a suitable Flutter SDK without paid Actions, revise visual direction with user's input before freezing design. Do not auto-merge PRs or begin Stage 3.
+
+
+## Stage 2 source hardening and test preparation (D-055, 2026-10-23)
+
+The second Stage 2 increment improved invalid-input feedback, guarded partial previews, made mobile preview scrolling stable, and added **eight Flutter widget test sources** on `stage-2-session-editor` (draft [PR #2](https://github.com/AviY99/Atelier-Time/pull/2)). These test cases have **not run**, because Flutter SDK is unavailable. Existing Android Termux 35/35 *Dart core* success is not a Flutter test. Next prerequisite is a Flutter-capable machine for analyzer/widget runs and then design review. Stage 2 IN PROGRESS; Stages 3–6, releases, automatic merges and paid Actions remain not authorized.
