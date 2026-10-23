@@ -1,5 +1,20 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 2.9: revised Android-phone-first requirement; bounded Dart-Web feasibility code (D-062)
+
+**User requirement change:** Android development must happen **quickly and efficiently on the Android PHONE** and produce an installable Android build; architecture must permit efficient later migration to iOS, Windows and macOS. This replaces D-061's strict universal all-host day-one build criterion, without waiving offline presets, accurate timer or three alerts.
+
+**Evidence-backed choice of spike candidate (not approved final stack):** The installed Termux Dart SDK can theoretically compile Dart to browser JavaScript using officially documented `dart compile js`; `package:web` is supported. Existing 35/35 verified scheduling engine and 11/11 verified adapter can be reused **without a language port**. A community Termux Capacitor guide documents Android APK builds via JDK/SDK/aapt2/Gradle on one Android device, but has **not been tried on user's phone**; we do not promise success or background notification correctness. Other options (Flutter unofficial Termux port, Kotlin/Compose Android-first, TS+Capacitor, Godot) evaluated in [ANDROID_FIRST_PLATFORM_SPIKE.md](ANDROID_FIRST_PLATFORM_SPIKE.md).
+
+**Actions:** Registered D-062; opened isolated `spike-android-dart-web` based on unchanged Stage 2 source. Committed nested `spikes/android_dart_web/`: `pubspec.yaml` local core and package:web, `web/main.dart` renders and checks real canonical Example B 01:25–01:40 break and 02:45–03:00 summary, `www/index.html` browser proof, pure Dart localhost `tool/serve.dart`, README with safe separate worktree/Termux commands. **Source CREATED but NOT COMPILED/RUN**; no APK exists. Step A browser proof before attempting Step B phone-built Capacitor APK, then Step C native background audio/clock.
+
+**Preserved:** Existing Stage 1 branch/PR #1, Stage 2 branch/draft PR #2 and prior user working folders remain untouched; Flutter UI remains paused, no rewrite of scheduler or automatic merge, no GitHub Actions/paid resources, no Stage 3/4 implementation.
+
+**Next user-proof action:** Using independent `~/Atelier-Time-Spike` worktree on phone, `dart pub get`, `dart compile js ...`, `dart run tool/serve.dart`, open localhost page. Fix actual errors if any, don't claim pass until observed; do not install heavier Android build SDK until proof succeeds.
+
+---
+
+
 ## 2026-10-23 — Iteration 2.9: User approved Android-first development ON THE PHONE (D-062/D-063)
 
 **New requirement in user's own words:** “פיתוח לאנדרואיד על הטלפון מהיר ויעיל שניתן אחכ להסב ביעילות לסביבות אחרות”. Prioritize **fast local Android development, testing, debug APK builds and install directly on Android ARM64 phone NOW**, architect efficiently for **later** iOS/iPadOS/Windows/macOS. This supersedes D-061's all-target-at-once constraints and D-019's original simultaneous four-platform first release, but NOT product features or safety rules.
