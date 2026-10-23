@@ -151,7 +151,16 @@ fun SessionEditorScreen() {
             }) { Text("Help") }
         }
         opening.toList().forEachIndexed { index, group ->
-            Text("Opening group " + (index + 1))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Opening group " + (index + 1), modifier = Modifier.weight(1f))
+                TextButton(onClick = {
+                    helpSection = "Opening group " + (index + 1) to
+                        "Number of poses means how many consecutive poses this group contains. " +
+                        "Each pose duration sets the time of one pose in minutes. " +
+                        "A new required break after each group is being specified separately, " +
+                        "so no duration is inserted into the approved schedule without review."
+                }) { Text("Help") }
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 MinuteInput("Number of poses", group.count, {
                     opening[index] = group.copy(count = it); invalidate()
