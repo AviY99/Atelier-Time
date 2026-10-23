@@ -1,5 +1,13 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — First real Kotlin Gradle task FAILED on phone: compile SDK/AAR metadata incompatibility
+
+**User phone screenshot evidence:** Code on the Go (Android ARM64) executed `cd android-native && bash "$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle" :app:testDebugUnitTest --no-daemon --console=plain`. Gradle printed `BUILD FAILED in 5m 1s` and `8 actionable tasks: 8 executed`. Visible dependency metadata diagnostics require `compileSdk` at least **36** for `androidx.core:core:1.18.0` and at least **37** for `androidx.compose.runtime:runtime-saveable-android:1.12.1`, but the Android app was configured with **35**. This is a **confirmed failed build** at dependency metadata validation; **32 Kotlin unit tests did NOT demonstrate PASS**. Screenshot shows only part of output, so any other errors remain unknown.
+
+**Source fix:** After verifying official Android Gradle Plugin 9.3 support for API 37 and Compose 1.12's API 37 requirement, changed *only* `android-native/app/build.gradle.kts` from `compileSdk = 35` to **37**, preserving `targetSdk = 35` and `minSdk = 26`. Commit [`10272bf`](https://github.com/AviY99/Atelier-Time/commit/10272bfafedce9697e82b7ef9011e2333f2dc6ee) on `android-native-kotlin-compose`; GitHub source readback verified. **Change has NOT yet been rebuilt on phone; API 37 SDK platform presence unverified**. No Kotlin tests, APK, instrumented tests, install, device-persistence acceptance, GitHub Actions or PR merge passed/occurred. Next: inspect `$ANDROID_HOME/platforms`, install platform 37 only if missing via supported CoGo SDK Manager, fast-forward phone checkout, re-run same Gradle unit-test task and capture first failing error or success.
+
+---
+
 ## 2026-10-23 — CoGo on-phone Gradle 9.6.1 launcher verified; runner adapted
 
 **User screenshot evidence on actual ARM64 Android phone:** In Code on the Go terminal, `python3` 3.12.12, Git and Java were available and the environment exported an Android SDK path. Gradle script found at `$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle`, but `gradle --version` after putting it in PATH failed `Permission denied`. Direct `bash "$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle" --version` **succeeded**, displaying **Gradle 9.6.1**, embedded Kotlin **2.3.21**, **Launcher JVM 21.0.10**, OS `Linux ... android14 ... aarch64`. This validates **Gradle launcher only**, not Atelier Time compilation, APK production or tests.
