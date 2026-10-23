@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **LATEST K03 QA CHECKPOINT — 2026-10-23, AFTER D-070:** Committed an actual Android storage safeguard against wrong-type SharedPreferences values and direct overwrite of corrupt/future-version data on branch `android-native-kotlin-compose`. Added two Android instrumentation regression methods. **32 JVM JUnit + 6 instrumentation tests written, 0 executed in this follow-up; no Android SDK/Gradle/device available here.** GitHub source readback succeeded, which does *not* verify Kotlin compilation. Acceptance tasks are still `:app:testDebugUnitTest`, `:app:assembleDebug`, phone install/relaunch and saved-session manual QA, and `:app:connectedDebugAndroidTest`. **K01–K03 unverified; K04 not implemented.** The historical 4-instrumentation count below is superseded.
+
+
 > **LATEST K03 D-070:** Approved offline preset lifecycle now has a new pure Kotlin `PresetCatalog` with approval/regeneration integrity, plus local Android `SharedPreferences` JSON adapter, and Compose saved preset actions. Wrote **32 JVM JUnit methods** (16 schedule, 6 input, 10 catalog) and **4 Android device instrumentation methods** verifying persisted reload, CRUD, corrupt/future JSON. **No Kotlin, Gradle, Compose or instrumented test has been executed**. Native evidence gates remain `:app:testDebugUnitTest`, `:app:assembleDebug`, on-phone install + persistence across Activity/device restart, and `:app:connectedDebugAndroidTest` when supported. Explicitly isolate test preferences namespace to avoid erasing real user's saved data. Original Dart 35+11 pass evidence remains distinct. See [K01–K06 acceptance requirements](ANDROID_NATIVE_EXECUTION_AND_TEST.md).
 
 
