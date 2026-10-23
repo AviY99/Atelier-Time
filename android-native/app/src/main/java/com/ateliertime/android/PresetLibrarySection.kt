@@ -38,12 +38,14 @@ fun PresetLibrarySection(
             error = failure.message ?: "Cannot read local sessions."
         }
     }
-    fun action(block: () -> Unit) {
-        try {
+    fun action(block: () -> Unit): Boolean {
+        return try {
             block()
             refresh()
+            true
         } catch (failure: Exception) {
             error = failure.message ?: "Local session operation failed."
+            false
         }
     }
 
@@ -58,7 +60,10 @@ fun PresetLibrarySection(
             color = MaterialTheme.colorScheme.error,
         )
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         Button(
             enabled = approved != null && selectedId == null,
             onClick = {
@@ -142,13 +147,14 @@ fun PresetLibrarySection(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    action {
+                    if (action {
                         val renamed = catalog.rename(renameTarget, renameText)
                         if (selectedId == renameTarget) {
                             onSelected(renamed, catalog.open(renameTarget))
                         }
+                    }) {
+                        renameId = null
                     }
-                    renameId = null
                 }) { Text("Rename") }
             },
             dismissButton = {
