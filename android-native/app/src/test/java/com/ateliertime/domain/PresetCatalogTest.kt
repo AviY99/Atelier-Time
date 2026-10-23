@@ -165,4 +165,23 @@ class PresetCatalogTest {
             fail("Duplicate records are not valid")
         } catch (_: IllegalStateException) { }
     }
+    @Test fun unusedConfiguredFieldChangeIsDetectedEvenWhenPhasesMatch() {
+        val store = MemoryStore()
+        val service = catalog(store)
+        val plan = exampleB().copy(specialBreakCount = 0)
+        val approved = engine.approve(
+            engine.generate(plan, FinalPoseChoice.remainder())
+        )
+        val record = service.save(approved, "No special breaks")
+        // No special phase is present, so the timeline stays identical,
+        // but changing even an inactive configured value is not approved.
+        store.saved = store.saved.copy(entries = listOf(record.copy(
+            rules = record.rules.copy(specialBreakSeconds = 7 * m)
+        )))
+        try {
+            service.state()
+            fail("Rule changes must be caught even with identical phases")
+        } catch (_: IllegalStateException) { }
+    }
+
 }
