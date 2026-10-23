@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **2026-10-24 ACTUAL UI / K04 SOURCE UPDATE:** User screenshot shows Atelier Time **installed/running on Android** with Compose editor/Example A timeline, approved state and one saved selected preset. **K02 first launch/preview observed**, but full editing checks and K03 cold relaunch/offline CRUD pending. New K04 first source increment adds `MonotonicSessionTimer`, timer page/start-pause-resume-stop, three distinct Android tones and contextual editor/group help. **Five additional JVM test methods WRITTEN NOT RUN; total 37 JVM source tests, six Android instrumentation.** New code not built/installed; prior `:app:testDebugUnitTest` 32-method-era Gradle task and `:app:assembleDebug` succeeded on phone at earlier commit. The D-071 new per-opening-group break rule is logged for scheduling-policy specification; Example A remains unchanged. K04 background/locked-screen sound reliability and D-016 granularity are still pending.
+
+
 > **APK FILE VERIFIED ON PHONE — 2026-10-23:** User-provided terminal screenshot confirms file `android-native/app/build/outputs/apk/debug/app-debug.apk` exists, reported **12M** and generated SHA-256 `d793f6f322000307fb4d636ff3c6d842dad5c3724517776ba3de81dedd78ae77`. `:app:assembleDebug` previously finished **BUILD SUCCESSFUL in 47s**. **APK compilation, file existence and checksum PASS**; installation, initial launch, editor/UI and offline preset storage/reopen **NOT YET VERIFIED**, as are six Android instrumentation tests. K04 not implemented.
 
 
