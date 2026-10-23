@@ -1,5 +1,13 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Phone-first Dart reuse proof and Kotlin alternative reconciled / Handoff v3.0 (D-064)
+
+- User-approved requirement D-062 now prioritizes fast, efficient Android development/build/install ON PHONE, with iOS/Windows/macOS ports efficiently later; D-061 strict universal build host condition superseded.
+- Evaluated supported on-phone Kotlin / Code on the Go candidate (D-063) versus preserving Dart core via Dart-to-JS and community Termux Capacitor APK pipeline (D-064). **Neither Android APK route has passed on user's phone**. Kotlin would require porting verified Dart scheduler; Dart web may reuse it but native Android alerts remain a major unknown.
+- Committed small UNEXECUTED browser feasibility project on isolated [spike-android-dart-web](https://github.com/AviY99/Atelier-Time/tree/spike-android-dart-web), checking canonical Example B using unchanged Dart core, plus pure Dart local server. No installable APK or migrated production UI.
+- Deduplicated same-number D-062 entries in the decision register, recorded D-064, updated Android-first plans, docs and self-contained handoff v3.0. No GitHub Actions costs, migrations, or PR merges.
+
+
 ## 2026-10-23 — Android PHONE-first requirement and unexecuted Dart-web feasibility spike / Handoff v2.9
 
 - User relaxed D-061 universal all-host native-build requirement: **fast efficient Android development directly on the phone FIRST**, with later efficient iOS/Windows/macOS reuse (D-062). Offline scheduling/presets/background-alert product features remain required.
