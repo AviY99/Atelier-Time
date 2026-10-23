@@ -77,3 +77,12 @@ Next Step 2 QA: when a real Flutter-capable environment is available, run the th
 ## 2026-10-23 — Stage 2 clean Dart test milestone (D-059)
 
 The user created a separate Git worktree `~/Atelier-Time-Stage2`; screenshots show HEAD `3bb2bad`, exactly the remote `stage-2-session-editor` tip per GitHub compare, and **`+11 All tests passed!`** for `dart test test/editor_draft_test.dart`. The earlier mixed-index test-run attribution is resolved. The Flutter-independent editor adapter is now **verified by 11 passing tests** on this exact branch commit, without reinstalling Dart or using GitHub Actions. **No full Stage 2 `dart analyze && dart test` result and no Flutter widget execution yet**. User's earlier dirty `~/Atelier-Time` worktree is preserved intentionally. Stage 2 remains in progress.
+
+
+## 2026-10-23 — Analyzer-scope blocker, fix committed for Termux (D-060)
+
+The user supplied a very long error screenshot after `dart analyze && dart test` from the clean Stage 2 Android Termux worktree. With only Dart installed, root analysis erroneously traversed the nested Flutter package and hit unavailable `package:flutter`/`package:flutter_test` SDK imports. The chained `dart test` did not run.
+
+**Stage 2 branch changes:** root `analysis_options.yaml` now excludes the separate Flutter subpackage `apps/atelier_time_flutter/**`; the nested Flutter app also has its own `analysis_options.yaml` to allow full Flutter analysis when the Flutter SDK is available. This is a toolchain separation, not a hidden runtime-code change or a claim of Flutter correctness. See official [Dart analysis configuration](https://dart.dev/tools/analysis).
+
+**Next check:** User can update the existing `~/Atelier-Time-Stage2` worktree and run `dart analyze && dart test` using bare Dart. The expected combined suite has 46 test definitions, but this specific updated commit has **NOT** been analyzed/tested on device yet. The independent Flutter widget suite remains UNEXECUTED and requires Flutter SDK separately. No Actions or paid services.
