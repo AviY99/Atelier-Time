@@ -1,5 +1,13 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Termux branch/index diagnosis clarified / Handoff v2.5
+
+- User's read-only Git screenshot proves checkout remains `stage-1-4-scheduling-core` at `907f871`, despite successful fetch and failed Stage 2 switch. Stage 2 files including the 11-test adapter are **staged additions** in the old Stage 1 working tree; `pubspec.lock` remains untracked.
+- Earlier screenshot of `+11 All tests passed!` is real execution from a **mixed Stage 1 HEAD plus staged Stage 2 files**, not a verified clean Stage 2 commit.
+- Recommended non-destructive repair: separate `~/Atelier-Time-Stage2` Git worktree based on fetched Stage 2 commit, leaving all original staged/untracked user files untouched; confirm HEAD and rerun 11 tests there. No code changes or forced cleanup.
+- Logged D-058, updated QA plan, work log and self-contained handoff v2.5. No Flutter widget tests, paid Actions, merges, APK or later-stage programming.
+
+
 ## 2026-10-23 — Termux editor-draft tests pass; branch switch discrepancy / Handoff v2.4
 
 - Screenshot from user's Android Termux shows **`00:00 +11: All tests passed!`** after `dart pub get && dart test test/editor_draft_test.dart` (D-057).
