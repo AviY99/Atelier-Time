@@ -1,5 +1,16 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 3.0: reconcile Android-first Kotlin and Dart-web candidates (D-064)
+
+**Concurrently researched candidate:** Maintained Code on the Go Kotlin IDE/Android native tooling (D-063), possible later Kotlin/Compose Multiplatform reuse. Native APK build on user's phone unverified. **Tradeoff:** 35/35 validated scheduling tests + 11/11 validated input parser are Dart; a Kotlin migration requires port and complete parity revalidation.
+
+**Additional bounded candidate:** Official Dart `dart compile js` and `package:web` enable direct reuse of existing Dart scheduling code in a browser. A recent **community** Termux Capacitor/JDK/Android SDK/aapt2 guide documents an APK build on another phone; not yet proved here. Created isolated `spike-android-dart-web` branch with nested minimal Dart page, Example B phase assertions, HTML, pure Dart localhost server and README. **No compile/browser run or APK build yet.** D-064 reconciles both routes without prematurely choosing a framework.
+
+**Controls:** User-approved requirement D-062 is Android phone-first speed and efficient later portability, not universal OS builds now. Code on the Go native path and Dart reuse path remain conditional pending actual phone proof. Existing verified assets, staged user files, Flutter branch and PRs preserved. No paid workflows or unsolicited large framework rewrite. Handoff v3.0 and decision register updated.
+
+---
+
+
 ## 2026-10-23 — Iteration 2.9: revised Android-phone-first requirement; bounded Dart-Web feasibility code (D-062)
 
 **User requirement change:** Android development must happen **quickly and efficiently on the Android PHONE** and produce an installable Android build; architecture must permit efficient later migration to iOS, Windows and macOS. This replaces D-061's strict universal all-host day-one build criterion, without waiving offline presets, accurate timer or three alerts.
