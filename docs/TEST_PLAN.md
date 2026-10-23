@@ -74,7 +74,7 @@ The user **approved these scheduling-policy test expectations in D-037** as desc
 - T17 Numerical rounding, especially near-equal odd total => floor/ceil; no cumulative drift.
 - T18 No silent auto-approval of a shortened final pose.
 
-## Stage 2: editor and approval
+## Stage 2: editor and approval (SOURCE DRAFTED D-054; no Flutter tests run)
 - T19 All editable fields accept valid values; changes force fresh preview and approval.
 - T20 Preview displays each phase type, duration, start, end and the long break replacing a short one.
 - T21 Three final-pose options visible with accurate times; moving ruler updates both last poses and break times instantly.
@@ -175,3 +175,15 @@ Commit [`4b2f5d9`](https://github.com/AviY99/Atelier-Time/commit/4b2f5d9fdd8dabc
 - **Previously observed** `dart analyze` `No issues found!` before the 35th test-only addition; don't claim it ran on the updated checkout. Previous smoke also passed.
 - Gate mapping: required Stage 1 **T01–T12, T15–T18 COVERED/PASS by 35 source tests** with both T09 endpoints. `T13/T14` broad stress/invalid-input combinations **PARTIAL** and recorded as extended later QA; they are *not* part of minimum Stage 1 gate.
 - **Outcome:** Step 1.4 **COMPLETE/VERIFIED ON DEVELOPMENT BRANCH**. Branch unmerged; full Flutter editor, persistence, timer/audio, Android APK and Windows/Apple releases unimplemented and unauthorized in this step.
+
+## 2026-10-23 — New Stage 2 source QA checklist (D-053/D-054)
+
+Prototype: [apps/atelier_time_flutter/lib/session_editor_page.dart](https://github.com/AviY99/Atelier-Time/blob/stage-2-session-editor/apps/atelier_time_flutter/lib/session_editor_page.dart) on isolated Stage 2 branch, integrating the **35/35 verified pure Dart scheduling core**. **No Flutter compilation or widget execution has occurred**.
+
+- **T19 editor/regeneration — PLANNED/UNRUN:** Enter valid/invalid whole-minute totals (including 0 full session), summary 0 and overrun, pose >0, normal/special break >0, replacement count 0/positive, add/edit/remove/reorder opening groups, pose-first/break-first, automatic/manual ordinals. Every edit regenerates and invalidates prior ending selection and approval.
+- **T20 preview — PLANNED/UNRUN:** Exact A/B phase timeline with durations/elapsed boundaries, chronological phase kinds and break ordinal, pose/rest/summary totals, explicit blocking errors vs D-031 advisory warnings.
+- **T21 ending ruler — PLANNED/UNRUN:** Remainder/even/custom ending choices, one-minute slider endpoints, positive two-pose window, and no phantom intervening break; disable unavailable pair choices and require final selection if shortened.
+- **T22 explicit approval — PLANNED/UNRUN:** Block invalid or unresolved candidates; require separate 25/5 acknowledgment; approve exact timeline in memory; changing any input/slider invalidates prior approval. No preset persistence, which belongs to Stage 3.
+- **T23 responsive/accessibility — PLANNED/UNRUN:** Single-column Android phone layout, 2-pane tablet/desktop layout, keyboard/numeric fields, readable contrast/text and screen-reader labeling. Temporary Material theme is not final branding.
+
+Run `flutter pub get`, `flutter analyze`, `flutter test`, and manual preview checks on an actual Flutter-capable environment when one is available. User's Termux Dart installation validates the pure Dart scheduling engine but **does not validate this Flutter UI**. Avoid paid GitHub Actions. PR #1 verified core and draft PR #2 prototype remain unmerged.
