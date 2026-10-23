@@ -1,5 +1,15 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — FIRST VERIFIED REAL ON-PHONE KOTLIN GRADLE UNIT-TEST SUCCESS (K01)
+
+**Evidence:** User-provided Code on the Go Android ARM64 terminal screenshot, project checkout at previously reported `a4b9469` (most recent screenshot-confirmed phone Git pull). Ran **`:app:testDebugUnitTest`** using CoGo Gradle 9.6.1 through Bash and CoGo native Android AAPT2 override (`-Pandroid.aapt2FromMavenOverride=$ANDROID_HOME/build-tools/36.0.0/aapt2`). Gradle log visibly contains `:app:compileDebugKotlin UP-TO-DATE`, `:app:processDebugResources`, `:app:compileDebugUnitTestKotlin`, `:app:testDebugUnitTest`, and **`BUILD SUCCESSFUL in 34s`**; **24 actionable tasks (10 executed, 14 up-to-date)**. This establishes successful Android Kotlin compilation/resource processing and completion of the JVM test Gradle task on the actual phone. The screenshot does *not* show the JUnit XML numerical count, so the precise number of test methods executed is **not yet independently confirmed by test report** (32 methods are defined in source).
+
+**Status:** **K01 Gradle test gate passed on device** (numeric case count/report pending); `assembleDebug` APK **NOT RUN**, installation/editor visual behavior K02 **UNVERIFIED**, persistent saved presets K03 **UNVERIFIED**. Six Android instrumentation test methods unexecuted; K04 runtime timer and cues unimplemented. No GitHub Actions, paid builders or PR merges.
+
+**Next actual phone task:** Using same Bash Gradle and native AAPT2 override, execute `:app:assembleDebug`, inspect `app/build/outputs/apk/debug/app-debug.apk`, then install and manually test editor and K03 CRUD/relaunch. For exact JUnit totals inspect `app/build/test-results/testDebugUnitTest/TEST-*.xml` when convenient. Do not claim an APK exists before a successful build.
+
+---
+
 ## 2026-10-23 — K01 on-phone Gradle progressed to Kotlin compile; AAPT2 wrong-architecture failure diagnosed
 
 **Observed source:** Full additional screenshot of phone `:app:testDebugUnitTest` after SDK-36/BOM alignment at code `a4b9469`. `:app:compileDebugKotlin` ran and emitted a Kotlin **warning** at `SessionEditorScreen.kt:207:29` (unnecessary Elvis operator). Task `:app:processDebugResources` FAILED during AndroidX `core-1.16.0.aar` AAPT2 resource processing. **Literal:** `AAPT2 aapt2-9.3.1-15703166-linux Daemon #0: Unexpected error output ... Syntax error: word unexpected (expecting ")")`; `BUILD FAILED in 3m 40s`, `18 actionable tasks: 13 executed, 5 up-to-date`. **NO 32 JVM tests passed, NO APK, NO Android persistence test.**
