@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **LATEST REAL K01 RESULT — PASS ON ANDROID PHONE (2026-10-23):** User screenshot confirms Code on the Go `:app:testDebugUnitTest` with the **native CoGo AAPT2 override** finished `BUILD SUCCESSFUL in 34s` (24 Gradle tasks, 10 executed and 14 up-to-date). Android resources, Kotlin compilation and JVM test task completed on-phone. **The screenshot does not expose exact JUnit XML per-method count**, though 32 JVM tests are defined in code. K01 unit-test Gradle gate **PASSED**; APK build `:app:assembleDebug`, real install/UI, K03 offline persistence and six instrumented device tests remain **NOT VERIFIED**. Previous failed-build notes below are historical and superseded for this task.
+
+
 > **K01 FAILURE ON REAL PHONE (2026-10-23) — AAPT2 ARCHITECTURE, FIX PENDING RETEST:** Gradle `:app:testDebugUnitTest` progressed to Kotlin compile (nonblocking Elvis warning) but FAILED in `:app:processDebugResources` because `aapt2-9.3.1-15703166-linux` could not launch on ARM64 (`Syntax error: word unexpected`; `BUILD FAILED in 3m 40s`). CoGo vendor's native Android AAPT2 flag was omitted from manual Gradle invocation. [Phone runner fix dcb4887](https://github.com/AviY99/Atelier-Time/commit/dcb4887c7e18e1c88e8ac7c23e007e3408f6af51) now adds `-Pandroid.aapt2FromMavenOverride=${ANDROID_HOME}/build-tools/36.0.0/aapt2`, which still requires on-phone binary validation and real retest. **32 JVM tests NOT PASSED / acceptance OPEN; six instrumentation tests NOT RUN; no APK.**
 
 
