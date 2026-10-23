@@ -82,62 +82,29 @@ class _SessionEditorPageState extends State<SessionEditorPage> {
     super.dispose();
   }
 
-  int _minutes(String key) => _wholeMinute(
-        _numbers[key]!.text,
-        key,
-      );
-
-  int _wholeMinute(String raw, String label) {
-    final value = int.tryParse(raw.trim());
-    if (value == null) {
-      throw FormatException('Enter a whole number for ' + label + '.');
-    }
-    return value;
-  }
-
-  SessionRules _readRules() {
-    if (_name.text.trim().isEmpty) {
-      throw const FormatException('Enter a session name.');
-    }
-
-    final opening = <OpeningPoseGroup>[];
-    for (var i = 0; i < _openings.length; i++) {
-      final group = _openings[i];
-      opening.add(OpeningPoseGroup(
-        id: group.id,
-        count: _wholeMinute(group.count.text, 'opening pose count'),
-        poseSeconds:
-            _wholeMinute(group.minutes.text, 'opening pose minutes') *
-                secondsPerMinute,
-      ));
-    }
-
-    SpecialBreakPlacement placement = const SpecialBreakPlacement.automatic();
-    if (!_automaticPlacement) {
-      final typed = _manualOrdinals.text.trim();
-      final ordinals = <int>[];
-      if (typed.isNotEmpty) {
-        for (final token in typed.split(',')) {
-          ordinals.add(_wholeMinute(token, 'manual break ordinal'));
-        }
-      }
-      placement = SpecialBreakPlacement.manual(ordinals);
-    }
-
-    return SessionRules(
-      id: 'current-preview',
-      name: _name.text.trim(),
-      totalSeconds: _minutes('total') * secondsPerMinute,
-      summarySeconds: _minutes('summary') * secondsPerMinute,
-      openingGroups: opening,
-      poseSeconds: _minutes('pose') * secondsPerMinute,
-      shortBreakSeconds: _minutes('normal') * secondsPerMinute,
-      specialBreakSeconds: _minutes('special') * secondsPerMinute,
-      specialBreakCount: _minutes('count'),
-      cycleStart: _cycle,
-      placement: placement,
-    );
-  }
+  /// Parse the editable text using the Flutter-independent adapter.
+  /// This is also exercised by pure Dart tests on Android Termux.
+  SessionRules _readRules() => SessionEditorDraft(
+        id: 'current-preview',
+        name: _name.text,
+        totalMinutes: _numbers['total']!.text,
+        summaryMinutes: _numbers['summary']!.text,
+        poseMinutes: _numbers['pose']!.text,
+        normalBreakMinutes: _numbers['normal']!.text,
+        specialBreakMinutes: _numbers['special']!.text,
+        specialBreakCount: _numbers['count']!.text,
+        openingGroups: [
+          for (final group in _openings)
+            OpeningGroupDraft(
+              id: group.id,
+              count: group.count.text,
+              minutes: group.minutes.text,
+            ),
+        ],
+        cycleStart: _cycle,
+        automaticPlacement: _automaticPlacement,
+        manualBreakOrdinals: _manualOrdinals.text,
+      ).toRules();
 
   void _recompute() {
     try {
