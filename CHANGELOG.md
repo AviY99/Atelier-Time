@@ -1,5 +1,14 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Full-lifecycle platform reassessment / Handoff v2.8 (D-061)
+
+- At the user's demand, re-evaluated Flutter against **cross-platform development, tests, builds, signing, installation, and live operation**, not only app runtime.
+- Official Flutter supports the four deployment targets but **not Android Termux as an official Flutter development host**; Apple iOS builds/signing require macOS/Xcode and desktop targets need their toolchains.
+- Documented [PLATFORM_REASSESSMENT_2026_10_23.md](docs/PLATFORM_REASSESSMENT_2026_10_23.md), including F01–F08 hard criteria, Flutter/PWA/web+native wrappers/Expo/cloud-host comparison, PWA timer/background/installer risks and a required pre-code feasibility proof.
+- **Original Flutter platform suitability reopened (D-061); further Stage 2 Flutter-specific implementation PAUSED**, draft PRs remain unmerged. No unilateral replacement, migration, new APK, GitHub Actions or paid builders.
+- Prior 35/35 pure Dart scheduling and 11/11 pure Dart adapter successes preserved. Updated architecture, product, TD-001, roadmap, Stage 2 plan, decisions, README and self-contained HANDOFF v2.8.
+
+
 ## 2026-10-23 — Stage 2 Dart/Flutter analyzer isolation / Handoff v2.7
 
 - Investigated user screenshot showing massive `dart analyze` failures on Android Termux Stage 2. Distinct nested Flutter package imports require Flutter SDK; bare Dart cannot resolve them. Chained `dart test` did not start after analyzer failure.
