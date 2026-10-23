@@ -1,5 +1,8 @@
 # Product specification — Atelier Time
 
+> **2026-10-23 — ANDROID-ON-PHONE IMPLEMENTATION DECISION D-064:** App behavior/features unchanged. **Selected Android implementation: Kotlin + Jetpack Compose + Gradle**, developed with phone-local Code on the Go. Architecture should preserve portable pure Kotlin domain for future Kotlin Multiplatform / Compose Multiplatform iOS/Windows/macOS reuse. **Code on the Go is a specialized mobile IDE, not the industry-standard desktop Android Studio.** User explicitly does not want standalone toolchain demos; actual Atelier Time development/build/QA is next. No Kotlin build or APK claimed yet; historical Dart regression evidence remains.
+
+
 > **2026-10-23 — NEW USER REQUIREMENT D-062 (HIGHEST PRIORITY):** Deliver **Android-first**, with **fast efficient development, tests, browser preview and ultimately installable APK directly on the user's Android phone**. Later efficient migration/reuse on **iOS/iPadOS, Windows and macOS** remains required as a design goal but their native builds need **not** be available locally on Android from day one. This **supersedes D-061's strict all-host full-lifecycle builder constraint**, not the product features. Offline session presets, reliable active/background timer and three alerts remain mandatory; an installed PWA alone is not automatically enough. **Bounded proposed feasibility route**, not yet approved final stack: preserve existing Dart scheduling 35/35 and editor parser 11/11; compile minimal Dart browser proof in Termux; verify actual Android APK via Capacitor/Gradle; test background alerts before committing to full UI migration. See [Android-first plan](ANDROID_FIRST_PLATFORM_SPIKE.md). Historical Flutter draft remains frozen.
 
 
