@@ -1,5 +1,8 @@
 # Atelier Time
 
+> **CURRENT APPROVED REQUIREMENT (D-062, 2026-10-23):** Android FIRST, **develop/debug/test/build/install an APK directly on the user's Android ARM64 phone efficiently**. Preserve efficient LATER portability to iOS/iPadOS, Windows, macOS; those are no longer first-release blockers. [Android-first development plan](docs/ANDROID_FIRST_DEVELOPMENT_PLAN.md) identifies **Kotlin + actively maintained Code on the Go** as a preferred **candidate pending one real on-device APK proof** (D-063), then Kotlin/Compose Multiplatform as a later port option. NO migration/installed APK/verified CoGo build yet. Keep existing **35/35 Dart scheduling and 11/11 Dart editor adapter** test evidence; Flutter draft source remains uncompiled, PRs unmerged, no paid GitHub Actions. Older platform status sections below are historical only.
+
+
 > **2026-10-23 — D-061 PLATFORM DECISION REOPENED:** The user requires cross-platform compatibility **from development and automated testing through native builds/signing, installation, and live operation**, not just a shared Flutter runtime on four targets. The original Flutter recommendation did NOT verify Android Termux as a supported developer host or establish viable Apple/Windows/macOS builders. **Pause further Stage 2 Flutter-specific coding and PR merges.** See [full documented feasibility assessment](docs/PLATFORM_REASSESSMENT_2026_10_23.md) and [updated handoff](docs/HANDOFF.md). No PWA/native-wrapper replacement has been approved. Previously verified 35/35 core Dart and 11/11 Stage 2 form-adapter test evidence is preserved; eight Flutter widget tests have never run. No GitHub Actions/paid builds.
 
 
