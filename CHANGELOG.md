@@ -1,5 +1,13 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Termux editor-draft tests pass; branch switch discrepancy / Handoff v2.4
+
+- Screenshot from user's Android Termux shows **`00:00 +11: All tests passed!`** after `dart pub get && dart test test/editor_draft_test.dart` (D-057).
+- The immediately preceding fetch of Stage 2 branch succeeded, but **`git switch --track origin/stage-2-session-editor` failed** (`starting point ... is not a branch`). Exact local branch/HEAD and tracked status of test file therefore remain unconfirmed; do not falsely state the checkout switched or attribute the test run to a particular commit.
+- GitHub confirms `test/editor_draft_test.dart` exists on Stage 2 branch but not the Stage 1 branch. Next safe step is to inspect local Git status/branch/HEAD and repair the checkout if needed, then rerun targeted tests once on identified Stage 2 commit.
+- No code changes, paid Actions, PR merges, APK, Stage 3 or Stage 4. Previous Stage 1 35/35 remains verified; eight Flutter widget tests are still unexecuted.
+
+
 ## 2026-10-23 — Stage 2 Flutter-independent editor-input tests / Handoff v2.3
 
 - Continued Stage 2 on isolated `stage-2-session-editor` branch after user asked to continue.
