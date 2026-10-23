@@ -124,3 +124,12 @@ This is **SCREENSHOT-CONFIRMED Dart analyzer success and 34 passing tests on And
 **Acceptance audit:** Of required Stage 1 T01–T12 and T15–T18, the existing suite explicitly covers canonical A/B, normal/even/custom endings, 34m+1m custom extreme, rejected zero-minute pose, exact-fit behavior, replacement ordinals, determinism and contiguous timeline, and 25/5 advisory/positive-break rules. **Missing specific T09 counterpart:** valid 1m+34m custom ending. Before Step 1.4 is marked complete, add that test and run Dart suite again; broad T13–T14 edge matrix remains partially covered and can be tracked separately. Do not claim Stage 1.4 COMPLETE based solely on the original 34 successes.
 
 **Gate remains:** Step 1.4 on isolated branch; no merge, Stage 2, UI, APK, Actions, paid runners or budget changes.
+
+
+## 2026-10-23 — T09 missing endpoint added as 35th test (D-051)
+
+Following screenshot-verified `dart analyze` **No issues found!** and `dart test` **+34 All tests passed!** on Android Termux Dart 3.13.7 (D-050), the Stage 1 minimum T09 acceptance audit found the positive **1m+34m custom final-two-pose split** was not explicitly tested (34m+1m was).
+
+**Added only a test**, no scheduling engine changes: `test/scheduling_test.dart` now has **35** unit test definitions. New test `T09: custom minimum first pose keeps a positive 34m last pose` asserts exact Example A times: 125–126 pose, 126–131 rest, 131–165 pose, 165–180 summary; also confirms D-031 warning and affirmative acknowledgment. Commit `4b2f5d9fdd8dabc6dea8dcc0204c5062c7b6916a`.
+
+**New test NOT RUN YET.** Existing original 34 PASS screenshot evidence remains valid; no verified 35-test pass exists. User's existing Termux clone can fetch and run using `git pull --ff-only && dart test`. No paid Actions, UI, builds, main merge or Stage 2. **Step 1.4 remains in final QA.**
