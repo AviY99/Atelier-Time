@@ -94,3 +94,14 @@ Continue to verify and fix **this Step 1.4 code**, ideally with a Dart-capable l
 
 **Next action before marking Step 1.4 complete:** Execute `dart tool/smoke.dart`, `dart pub get`, `dart analyze`, and `dart test` on an actual Dart SDK (locally or a non-billable Dart-capable machine), then correct any real errors. Do not claim test passes based on the Python model comparison or delimiter checks. Keep the Step 1.4 branch isolated until verified; Stage 2 remains unapproved.
 
+
+
+## 2026-10-23 — User's real Android Dart compiler result: FAIL, fix committed
+
+- User ran **Dart 3.13.7 stable on Android ARM64 in Termux**, cloned this branch successfully and ran `dart tool/smoke.dart`.
+- **Observed FAIL (before fix):** `lib/src/scheduling.dart:621:28: Error: The argument type 'num' can't be assigned to the parameter type 'int?'` at `offsetSeconds: crossingOffset`. This was a genuine **Dart compile error**, not a test pass or Termux installation failure.
+- Cause: `math.max(0, _maxUnbrokenPoseSeconds - previousAccumulated)` was typed as `num` rather than `int` in this Dart context.
+- **Code fixed on branch:** commit `0dedd95756b6d3984b2e16548a58599179fbf7ff` replaces `math.max` with an integer-typed conditional; warning-offset calculation remains the same. The **corrected Dart code has not yet been executed**.
+- **Next user command from `~/Atelier-Time`:** `git pull --ff-only && dart tool/smoke.dart`. Share the full result. On success: `dart pub get`, `dart analyze`, `dart test`. Dart SDK already installed; no reinstall required.
+- No Actions/paid runs, no merge, no Flutter UI, no Stage 2. Stage 1 Step 1.4 stays **IN PROGRESS** until real Dart tests pass.
+
