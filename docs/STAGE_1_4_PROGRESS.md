@@ -1,9 +1,9 @@
-# Stage 1 Step 1.4 — First coding increment (IN PROGRESS)
+# Stage 1 Step 1.4 — Scheduling core COMPLETE / VERIFIED on isolated branch (D-052)
 
 **Started:** 2026-10-22 after the user's “Continue” following Step 1.3 approval.  
 **Development branch:** [stage-1-4-scheduling-core](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core)  
 **GitHub Actions:** **NOT started; no workflow files created or invoked** because the user reports their GitHub metered budget is blocking other project work.  
-**Status:** Source and tests committed, but **Dart tests have NOT BEEN RUN**; the available execution environment has no Dart or Flutter SDK. **Step 1.4 is NOT complete**.
+**CURRENT STATUS 2026-10-23:** **35/35 `dart test` PASS, screenshot-confirmed on user Android Termux Dart 3.13.7**, after fetching the T09 35th test. Earlier `dart analyze` **No issues found!** on 34-test checkout and smoke check passed. The 35th test-only revision was not shown re-analyzed. **Step 1.4 pure Dart scheduling engine and required acceptance checks COMPLETE/VERIFIED ON THIS BRANCH.** The branch remains unmerged; Flutter UI/app/build and Stage 2 are NOT authorized. Older status entries below describe historical, superseded interim states.
 
 ## 2026-10-22 — D-044 approved; continued Step 1.4 implementation
 
@@ -133,3 +133,23 @@ Following screenshot-verified `dart analyze` **No issues found!** and `dart test
 **Added only a test**, no scheduling engine changes: `test/scheduling_test.dart` now has **35** unit test definitions. New test `T09: custom minimum first pose keeps a positive 34m last pose` asserts exact Example A times: 125–126 pose, 126–131 rest, 131–165 pose, 165–180 summary; also confirms D-031 warning and affirmative acknowledgment. Commit `4b2f5d9fdd8dabc6dea8dcc0204c5062c7b6916a`.
 
 **New test NOT RUN YET.** Existing original 34 PASS screenshot evidence remains valid; no verified 35-test pass exists. User's existing Termux clone can fetch and run using `git pull --ff-only && dart test`. No paid Actions, UI, builds, main merge or Stage 2. **Step 1.4 remains in final QA.**
+
+## 2026-10-23 — Stage 1 Step 1.4 verification gate COMPLETE (D-052)
+
+**User screenshot (Android Termux, Dart 3.13.7 ARM64):**
+
+```text
+~/Atelier-Time $ git pull --ff-only && dart test
+...
+8cf7a24..907f871  stage-1-4-scheduling-core -> origin/stage-1-4-scheduling-core
+...
+Fast-forward
+  docs/STAGE_1_4_PROGRESS.md
+  test/scheduling_test.dart
+...
+00:00 +35: All tests passed!
+```
+
+The T09 opposite **1m+34m** final-two-pose regression has run and **PASSED** together with all 34 existing tests. Previous screenshots on prior 34-test version showed `dart analyze` **No issues found!**, `dart test` **+34 All tests passed!**, and smoke check passed. **Do not claim a new analyzer run following the test-only addition**.
+
+**Acceptance:** Stage 1 required T01–T12 and T15–T18 represented and passing. T13/T14 extended input combinations and testing on other operating systems are later QA; not asserted fully covered. **Step 1.4 scheduling core COMPLETE on this branch**; repository `main` still holds docs and not the Dart source. No GitHub Actions, paid runners, Android APK, installed Flutter app, timer/audio, preset persistence or Stage 2 authorization. **Stop before merge and Stage 2 until explicit user approval.**
