@@ -1,5 +1,8 @@
 # Product specification — Atelier Time
 
+> **D-068 REQUIREMENTS CONFIRMED — 2026-10-23:** The user approved Android native Kotlin implementation and requested a direct check that all existing settings and requirements are understood, recorded and unchanged. **Confirmed: NO approved product/scheduling requirement changes needed.** Existing D-031/036/037/043/044 and complete exact A/B fixtures, editable session inputs, all 3 ending choices, offline presets, timer and 3 cues stand. D-015 summary description and D-016 cue granularity remain unresolved, not silently decided. **Only the D-062 release priority (Android from phone now, others later) and D-067 framework (Kotlin Compose Gradle) change old Flutter implementation statements.** The real Kotlin source branch/draft PR #3 is underway but unbuilt/unverified. [Baseline and testing pipeline](ANDROID_NATIVE_EXECUTION_AND_TEST.md).
+
+
 > **LATEST DEVELOPMENT DECISION D-064 (2026-10-23):** The approved Android-on-phone priority (D-062) will use **industry-standard Kotlin + Jetpack Compose + Gradle**, with future Kotlin Multiplatform/Compose Multiplatform portability engineered through a platform-free scheduling/domain layer. CoGo is the on-phone IDE, **not** a claim of industry-standard mobile IDE; Android Studio is official professional IDE. The user explicitly declined pre-development toy APK experiments. Real app build/test becomes the normal engineering loop. No framework code migrated yet, existing Dart scheduling 35/35 and adapter 11/11 test passes remain valid.
 
 
