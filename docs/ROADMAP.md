@@ -1,5 +1,8 @@
 # Delivery roadmap and approval gates
 
+> **2026-10-23 — LATEST USER APPROVED PRIORITY D-062:** Replace immediate four-target release gate with **Android-first development on the phone**, test/debug/build/install Android APK locally and efficiently, while architecting for a later move to iOS, Windows, macOS. **D-063 recommended proof toolchain:** Kotlin with active Code on the Go mobile IDE, plus domain/UI separation for later Kotlin/Compose Multiplatform reuse, ONLY AFTER demonstrated on-device APK build. The former D-061 freeze while requiring all OS toolchains immediately is superseded; **do not resume Flutter feature coding or migrate to Kotlin before feasibility proof**. See [new plan](ANDROID_FIRST_DEVELOPMENT_PLAN.md). No stage beyond the authorized Android-first proof, no paid Actions or release claims.
+
+
 > **2026-10-23 — D-061 CRITICAL GATE BEFORE ANY FURTHER STAGE 2 CODE:** User requires **full-lifecycle cross-platform development, tests, release builds, signing, installability and runtime**, not just source/runtime portability. The original Flutter platform evaluation did not satisfy the development/build-host requirement and is **UNDER REASSESSMENT**. **Stage 2 platform-specific implementation PAUSED**; no PR merges, GitHub Actions, cloud build spending or additional UI scaffolding until [platform audit](PLATFORM_REASSESSMENT_2026_10_23.md) demonstrates a viable path and user approves it. Stage 1 Dart scheduling 35/35 and Stage 2 Dart adapter 11/11 previous passes remain valid. No platform migration decided.
 
 
