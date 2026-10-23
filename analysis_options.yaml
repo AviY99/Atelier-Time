@@ -1,0 +1,12 @@
+# Root package = pure Dart scheduling engine + editor input adapter.
+#
+# Flutter is a SEPARATE nested package. Android Termux has Dart, not Flutter,
+# so the root analyzer must not traverse the Flutter package and emit hundreds
+# of cascading unresolved Flutter SDK imports/type errors.
+#
+# Flutter sources are NOT waived from verification: from the nested package,
+# a real Flutter toolchain must independently run flutter analyze and
+# flutter test. See apps/atelier_time_flutter/analysis_options.yaml.
+analyzer:
+  exclude:
+    - apps/atelier_time_flutter/**
