@@ -1,5 +1,8 @@
 # Technical Decision TD-001 — Flutter + Dart, shared cross-platform application
 
+> **2026-10-23 — UPDATED BY D-062:** Historical Flutter+Dart deployment recommendation remains documented here, but user has **changed delivery priorities**: develop Android app **on the Android phone** as fast and efficiently as possible, then port efficiently to iOS/Windows/macOS later; the unsupported universal all-host build premise of D-061 is no longer a day-one constraint. The Flutter-on-Termux path remains unverified and original Flutter editor code is preserved/frozen. **New bounded candidate** is to reuse the existing Dart core via `dart compile js` for a lightweight web-based UI, then build a native Android APK via Capacitor in Termux (community recipe), with later platform wrappers. This route is **not yet proven or formally selected**. See [Android-first feasibility spike](ANDROID_FIRST_PLATFORM_SPIKE.md) before further implementation.
+
+
 > **2026-10-23 — LATEST D-062/D-063:** This is the historical Flutter platform selection for four simultaneous release targets, NOW **SUPERSEDED IN PRIORITY** by user-approved **Android first, developed/tested/built on the Android phone itself**, with efficient future expansion to iOS/iPadOS, Windows, macOS. Flutter has not been demonstrated as a reliable on-device toolchain in current Termux. **Preferred proof candidate** is Kotlin Android in actively maintained Code on the Go, future KMP/Compose sharing; see [Android-first plan](ANDROID_FIRST_DEVELOPMENT_PLAN.md). **No code migration until actual APK builds/installs on user phone and regression parity is planned; Flutter source preserved as historical draft.**
 
 
