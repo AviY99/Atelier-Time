@@ -1,5 +1,18 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-23 — Iteration 1.7: User reports complete Dart unit suite passing in Termux (D-049)
+
+**User follow-up:** After confirmed `dart tool/smoke.dart` success (D-048), user was asked to run `dart pub get && dart analyze && dart test` in the existing Android Termux Dart 3.13.7 installation and replied exactly **“All tests passed!”**.
+
+**Evidence:** Record **USER-REPORTED full written unit test suite PASS**; 34 `test(...)` definitions exist in `test/scheduling_test.dart` on the development branch. The command chain includes analysis before unit tests; user supplied no screenshot of unit test summary, analyzer output, test count or checked-out SHA. Therefore do not claim independently confirmed test transcript/commit/platform matrix, and do not suggest tests are still unexecuted.
+
+**Step 1.4 status:** Tested scheduling core is now an important functional milestone but **Step 1.4 remains in acceptance review**, pending explicit coverage mapping and any missing Stage 1 acceptance tests from `docs/TEST_PLAN.md`, and a completion checkpoint. The branch has not been merged into `main`. Flutter UI, APK, timed engine, audio, saved preset library and multi-platform app builds remain later stages requiring user authorization.
+
+**Process controls:** Recorded D-049; README, roadmap, test plan, changelog and HANDOFF v1.7 updated in GitHub. No GitHub Actions, paid resources or user budget changes.
+
+---
+
+
 ## 2026-10-23 — Iteration 1.6: Android Dart smoke test PASS, full checks pending
 
 **User-reported execution:** After the previous integer-type fix in commit `0dedd95756b6d3984b2e16548a58599179fbf7ff`, user reported **“Scheduling smoke checks succeeded.”** This is a **real positive smoke-test result** from Termux Dart 3.13.7 on Android ARM64. It confirms the corrected scheduling source compiled and the smoke assertions completed. The old D-047 `num` → `int?` compile error is no longer observed in that run.
