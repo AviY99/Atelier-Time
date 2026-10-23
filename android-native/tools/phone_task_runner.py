@@ -57,15 +57,44 @@ def setup():
     print("Token saved on device only. Never share it in chat.")
 
 
+def gradle_command():
+    """CoGo's pinned Gradle script may lack execute permission on Android.
+
+    Run it via Bash, as successfully confirmed on the user's ARM64 phone.
+    """
+    managed = Path.home() / ".cg/gradle-dists/gradle-9.6.1/bin/gradle"
+    if managed.is_file():
+        bash = shutil.which("bash")
+        if not bash:
+            raise RuntimeError("Bash is unavailable for Code on the Go's Gradle launcher")
+        return [bash, str(managed)]
+    executable = shutil.which("gradle")
+    if executable:
+        return [executable]
+    raise RuntimeError("Gradle not found; first check CoGo's managed Gradle distribution")
+
+
 def doctor():
     lines = ["Real on-phone build toolchain:", "Python: " + sys.version.split()[0]]
-    for executable in ("git", "java", "gradle", "adb"):
+    for executable in ("git", "java", "adb"):
         lines.append(executable + ": " + str(shutil.which(executable)))
     for env in ("ANDROID_HOME", "ANDROID_SDK_ROOT", "JAVA_HOME", "GRADLE_HOME"):
         lines.append(env + ": " + str(os.environ.get(env)))
     sdk = os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT")
-    ok = all(shutil.which(t) for t in ("git", "java", "gradle")) and sdk and Path(sdk).is_dir()
-    lines.append("CLI toolchain ready: " + str(bool(ok)))
+    gradle_ok = False
+    try:
+        launcher = gradle_command()
+        lines.append("Gradle invocation: " + " ".join(launcher))
+        code, output = command(launcher + ["--version"], timeout=90)
+        gradle_ok = code == 0
+        lines.append("Gradle --version: " + ("PASS" if gradle_ok else "FAILED"))
+        lines.extend(output.splitlines()[:35])
+    except Exception as exc:
+        lines.append("Gradle: " + str(exc))
+    sdk_ok = bool(sdk and Path(sdk).is_dir())
+    lines.append("Android SDK directory exists: " + str(sdk_ok))
+    ok = bool(shutil.which("git") and shutil.which("java") and gradle_ok and sdk_ok)
+    lines.append("CLI toolchain ready: " + str(ok))
     return (0 if ok else 2), "\n".join(lines)
 
 
@@ -110,10 +139,8 @@ def execute(task, sha):
         code, output = doctor()
         return code, output, None
     project = project_at(sha)
-    gradle = shutil.which("gradle")
-    if not gradle:
-        raise RuntimeError("Gradle CLI not available inside phone terminal")
-    exit_code, output = command([gradle, TASKS[task], "--no-daemon", "--console=plain"], cwd=project)
+    launcher = gradle_command()
+    exit_code, output = command(launcher + [TASKS[task], "--no-daemon", "--console=plain"], cwd=project)
     apk_info = None
     if task == "debug-apk" and exit_code == 0:
         apk = project / "app/build/outputs/apk/debug/app-debug.apk"
