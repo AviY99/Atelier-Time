@@ -3,7 +3,13 @@ package com.ateliertime.android
 import com.ateliertime.domain.*
 
 /** UI text adapter, separate from Compose. Keep scheduler itself Android-independent. */
-data class OpeningDraft(val id: Int, val count: String = "4", val minutes: String = "1")
+data class OpeningDraft(
+    val id: Int,
+    val count: String = "4",
+    val minutes: String = "1",
+    // Null is reserved for untouched legacy presets; all new groups set a value.
+    val breakAfterMinutes: String? = null,
+)
 data class EditorInput(
     val name: String,
     val totalMinutes: String,
@@ -46,6 +52,9 @@ data class EditorInput(
                     "opening_" + it.id,
                     read(it.count, "opening pose count"),
                     seconds(it.minutes, "opening pose minutes"),
+                    it.breakAfterMinutes?.let { input ->
+                        seconds(input, "break after opening group")
+                    },
                 )
             },
             poseSeconds = seconds(poseMinutes, "pose minutes"),
