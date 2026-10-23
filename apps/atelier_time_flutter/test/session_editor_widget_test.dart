@@ -42,6 +42,27 @@ void main() {
     expect(approvalButton(tester).onPressed, isNull);
   });
 
+  testWidgets('T20: preview uses the verified Example B phase boundaries',
+      (tester) async {
+    await tester.pumpWidget(const AtelierTimeApp());
+
+    // These come from the approved core engine, not a hardcoded UI table.
+    expect(find.text('Special break #3'), findsOneWidget);
+    expect(find.text('01:25 – 01:40'), findsOneWidget);
+    expect(find.text('02:45 – 03:00'), findsOneWidget);
+    expect(find.text('Final summary'), findsOneWidget);
+  });
+
+  testWidgets('T19: zero-minute normal rest is a hard validation error',
+      (tester) async {
+    await tester.pumpWidget(const AtelierTimeApp());
+    await editMinutes(tester, 'normal', '0');
+    expect(find.text('Blocking validation error'), findsWidgets);
+    expect(find.text('The inputs are blocked. No schedule can be approved.'),
+        findsOneWidget);
+    expect(approvalButton(tester).onPressed, isNull);
+  });
+
   testWidgets('T19: opening groups are dynamically editable and removable',
       (tester) async {
     await tester.pumpWidget(const AtelierTimeApp());
