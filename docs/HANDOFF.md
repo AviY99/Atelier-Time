@@ -1,5 +1,11 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v3.4)
 
+## ACTUAL PHONE APK FILE VERIFIED — 2026-10-23
+
+After screenshot-verified `:app:assembleDebug BUILD SUCCESSFUL`, user ran on-phone `ls -lh app/build/outputs/apk/debug/app-debug.apk && sha256sum app/build/outputs/apk/debug/app-debug.apk`. Both succeeded: real `app-debug.apk` exists at the expected project path, reported **12M**, with SHA-256 **`d793f6f322000307fb4d636ff3c6d842dad5c3724517776ba3de81dedd78ae77`** (screenshot). **Build + APK filesystem verification PASS, installation and execution NOT yet verified.** Next install APK and verify launch/editor, then offline K03 save/restart/load and available instrumentation. No background timer K04 yet. Historical old "no APK" statements below predate this evidence. See [WORK_LOG](WORK_LOG.md) and [TEST_PLAN](TEST_PLAN.md).
+
+---
+
 ## PHONE DEBUG APK ASSEMBLY SUCCESS — 2026-10-23
 
 New screenshot-verified phone milestone: native `android-native/` `:app:assembleDebug` with CoGo's Android-native AAPT2 property finished **`BUILD SUCCESSFUL in 47s`**, 36 actionable tasks (18 executed, 18 up-to-date), including packaging/signing task stages. `:app:testDebugUnitTest` earlier passed Gradle task in 34 seconds on same phone. **Debug APK build Gradle task now PASSED**, but actual APK path/hash, installation, app launch, canonical editor UI and persisted-session acceptance have **not yet been demonstrated**. Verify `app/build/outputs/apk/debug/app-debug.apk`, install/open, and check K03 offline preset operations/relaunch next. Six Android instrumentation tests and numerical JUnit XML evidence remain outstanding; K04 unimplemented; PR #3 draft/unmerged. Source/build changes not required solely to record successful build.
