@@ -1,5 +1,14 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Android PHONE-first requirement and unexecuted Dart-web feasibility spike / Handoff v2.9
+
+- User relaxed D-061 universal all-host native-build requirement: **fast efficient Android development directly on the phone FIRST**, with later efficient iOS/Windows/macOS reuse (D-062). Offline scheduling/presets/background-alert product features remain required.
+- Recommended **bounded Dart web → Capacitor Android APK** candidate, not finalized: officially supported Dart JS compilation can potentially reuse already-verified 35/35 scheduler and 11/11 adapter; community Termux Capacitor build guide exists but is unverified on user's device.
+- Created isolated [spike-android-dart-web](https://github.com/AviY99/Atelier-Time/tree/spike-android-dart-web) with nested Dart web package, canonical Example B browser schedule, plain Dart localhost server and non-destructive Termux instructions. **NOT COMPILED/RUN; NO APK BUILT**.
+- New [Android-first feasibility plan](docs/ANDROID_FIRST_PLATFORM_SPIKE.md), updated platform assessment, historic TD-001, product specification, architecture, roadmap, test plan, Stage 2 plan, decision register and self-contained handoff v2.9.
+- Preserved old branches/PRs and all confirmed test evidence; no GitHub Actions, paid services, UI migration or native audio/timer implementation.
+
+
 ## 2026-10-23 — Android-first, develop/build on the phone; portability later / Handoff v2.9
 
 - User changed primary delivery requirement: **develop, debug, test, build and install Android directly on Android phone efficiently**, design for efficient future iOS/Windows/macOS port, no simultaneous four-platform first release obligation (D-062).
