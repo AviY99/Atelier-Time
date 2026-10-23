@@ -77,7 +77,7 @@ class MonotonicSessionTimerTest {
 
     @Test fun openingPoseTransitionsRemainSilentUntilD016Resolution() {
         val rules = SessionRules(
-            id = "opening", name = "Opening", totalSeconds = 6 * minute,
+            id = "opening", name = "Opening", totalSeconds = 5 * minute,
             openingGroups = listOf(OpeningPoseGroup("o", 2, minute)),
             poseSeconds = minute, shortBreakSeconds = minute,
             specialBreakCount = 0,
