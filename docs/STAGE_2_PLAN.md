@@ -39,3 +39,22 @@
 The user's instruction to “finish documentation and continue” is interpreted as permission to **start the next Stage 2 editor/preview work**, not to skip the feature-review process, automatically merge PR #1, use paid workflows or begin Stages 3–6. The temporary design is subject to review. Record further approvals explicitly. Preserve all Stage 1 examples and safety rules.
 
 **Immediate task:** author initial editor/preview source on the isolated Stage 2 branch, update this plan, work log and [HANDOFF.md](HANDOFF.md), and accurately report missing Flutter SDK rather than inventing builds.
+
+
+## 2026-10-23 — Second source increment / review checkpoint (D-055)
+
+**Implementation branch:** [stage-2-session-editor](https://github.com/AviY99/Atelier-Time/tree/stage-2-session-editor), [draft PR #2](https://github.com/AviY99/Atelier-Time/pull/2). The nested Flutter editor is still **source-only**.
+
+### Added and revised
+
+- Stable widget keys for session/regular-break fields, opening group fields, selected final-pose mode and slider, warning acknowledgment and approval.
+- Distinguish malformed text inputs from engine validation errors; disallow approval of either and hide any partial invalid timeline.
+- Keep mobile edit and preview columns mounted together in one scrollable page so the latest errors and ending controls are reachable. Wide-layout separate columns remain.
+- Added `flutter_test` SDK dependency and **eight draft widget tests** in [session_editor_widget_test.dart](https://github.com/AviY99/Atelier-Time/blob/stage-2-session-editor/apps/atelier_time_flutter/test/session_editor_widget_test.dart): initial invalid/unresolved approval state; malformed/zero inputs; exact Example B break/summary boundaries; add/change/remove opening group; remainder and custom/even ending, editing invalidation; 25/5 warning acknowledgment; two-pane layout.
+- Verified by source inspection against the actual Dart core API; no changes made to the tested pure Dart core.
+
+### Verification / gate
+
+The assistant runtime has no Flutter SDK; user's Termux installs only the pure **Dart** SDK. `flutter pub get`, `flutter analyze`, `flutter test` and native-app runs have **NOT** been executed. **No widget tests have passed yet**. Static text structural checks are not Flutter compilation.
+
+Next Step 2 QA: when a real Flutter-capable environment is available, run the three commands from `apps/atelier_time_flutter/` and correct resulting compile/test problems. Then have the user review visual direction. Do not initiate GitHub Actions/paid builds, auto-merge PRs, or work on Stages 3+.
