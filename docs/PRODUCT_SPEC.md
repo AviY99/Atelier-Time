@@ -1,5 +1,8 @@
 # Product specification — Atelier Time
 
+> **D-071 APPROVED 2026-10-24 — Opening-group after-break rule (new product requirement):** User explicitly confirmed: each ordered opening pose group has editable whole-minute break duration afterwards; **earlier groups may have 0 minutes**, while **after the final opening group a positive rest (>=1m) is mandatory** for newly configured group-break sessions. When BREAK_FIRST regular cycle already supplies a break matching the final group's after-break setting (e.g. Example A's 00:20–00:25 five-minute regular break), it **satisfies the rule without adding another phase**; other explicit last group rests replace the initial BREAK_FIRST rest rather than being doubled. Special break replacement ordinals refer to ordinary recurring breaks only, not custom group boundary breaks; 25/5 safety still applies. Legacy saved sessions without the added field retain exact older approved timelines and signatures. Source change written, phone rebuild pending. See [D-071](DECISIONS.md) and [review](EDITOR_LABEL_REVIEW_2026_10_24.md).
+
+
 > **D-070 IMPLEMENTATION STATUS (2026-10-23):** Product requirements unchanged. The existing offline preset requirement is now **coded** in native Android Kotlin (approved-only save/update/load/duplicate/rename/delete/select, local versioned persistent JSON, integrity checking); not yet compiled or run on a phone, so **NOT ACCEPTED/VERIFIED**. 32 JVM + 4 Android instrumentation test cases written/unrun. Running timer/three distinct audio cues and lock/background behavior remain future code, not changed requirements. See [native QA plan](ANDROID_NATIVE_EXECUTION_AND_TEST.md).
 
 
