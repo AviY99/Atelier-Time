@@ -1,5 +1,8 @@
 # Scheduling contract and algorithm design
 
+> **2026-10-24 APPROVED D-071 opening-group breaks:** Every *newly configured* opening group carries an editable break-after value in whole minutes. Earlier group boundary may be 0 (directly adjacent poses); after final group must be >=1m and must leave enough work time for a subsequent regular pose. Existing BREAK_FIRST regular break **counts once** if it matches the last configured group rest (Example A still 00:20–00:25 with no duplicate); custom final group rest replaces that initial slot rather than adding an adjacent duplicate. Custom group break is a rest phase but not a numbered regular-break replacement slot; all actual positive rests count under 25/5 safety. Legacy saved sessions with no explicit break values keep their old approval signatures/timeline. New source written, Kotlin rebuild/new tests pending. Details [D-071](DECISIONS.md), [editor review](EDITOR_LABEL_REVIEW_2026_10_24.md).
+
+
 Status: Core product behavior and **Step 1.3 scheduling placement/edge policies APPROVED (D-037)**. See [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) and [approved review](STEP_1_3_REVIEW.md). D-036 invalidates 0-minute sessions/configured breaks. **Pure Dart scheduling engine and test SOURCES now exist on branch `stage-1-4-scheduling-core` (D-040); no test execution, analyzer or build yet; Stage 1 Step 1.4 is IN PROGRESS.**
 
 ## Time vocabulary
