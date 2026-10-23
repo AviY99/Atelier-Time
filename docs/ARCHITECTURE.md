@@ -1,5 +1,8 @@
 # Architecture and design constraints — implemented core, Stage 2 editor underway
 
+> **2026-10-23 — ARCHITECTURE SELECTED D-064:** Android-first **Kotlin, Jetpack Compose, standard Android Gradle plugins/builds**; author/debug/build directly on Android ARM64 phone using maintained **Code on the Go**. Android Studio remains conventional *desktop* IDE and CoGo is phone-specific, not the official industry standard. Establish portable **pure Kotlin** scheduling domain + rules validation + regression cases, separated from Jetpack Compose screens, local persistence, and Android foreground/background timer/audio adapters. Future Kotlin Multiplatform for shared domain and Compose Multiplatform UI on iOS/Windows/macOS. **Do not copy Dart code as if it were Kotlin**, and do not port unverified Flutter source blindly. No proof-spike prereq per user's instruction; build the real app with normal tests. Earlier Flutter architecture sections retained historically.
+
+
 > **2026-10-23 — D-062 LATEST ANDROID-PHONE-FIRST PRIORITY:** The user now requires **fast on-phone Android development and installability first**, while making iOS/Windows/macOS port efficient later. D-061's universal build-on-every-host restriction is superseded. Maintain platform-independent tested Dart scheduling and editor parsing; prototype [Dart-to-JavaScript browser proof](ANDROID_FIRST_PLATFORM_SPIKE.md) on an isolated branch, then verify phone-built Capacitor APK and background notifications before choosing a migration. **Do not redesign the core or delete the existing Flutter prototype** without results/approval.
 
 
