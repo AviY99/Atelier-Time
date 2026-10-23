@@ -1,5 +1,8 @@
 # Architecture and design constraints — implemented core, Stage 2 editor underway
 
+> **2026-10-23 — CURRENT D-062/D-063 DESIGN PRIORITY:** Build/run Android APP and APK **on user's own phone** first; plan efficient future port to iOS/iPadOS, Windows, macOS. The earlier Flutter-only UI architecture is **historical draft, NOT selected for the new Android-first gate**. Candidate is Kotlin Android + Code on the Go; isolate domain from UI/Android APIs, evaluate Jetpack Compose with future Compose Multiplatform after a REAL first APK build. Preserve all deterministic timing requirements and existing Dart fixtures for parity testing. See [ANDROID_FIRST_DEVELOPMENT_PLAN.md](ANDROID_FIRST_DEVELOPMENT_PLAN.md). No Kotlin/KMP compilation claimed yet.
+
+
 > **2026-10-23 — D-061 CROSS-PLATFORM LIFE-CYCLE AUDIT SUPERSEDES THE PLATFORM ASSUMPTION BELOW:** Flutter is a supported **deployment** framework for the targets but not an officially supported **Android/Termux development host**. The user now explicitly requires viable cross-platform work from development/tests through packaging, installation and operation. This document's Flutter layer/packaging choice is **PROVISIONAL / UNDER REVIEW**, not final implementation permission. See [PLATFORM_REASSESSMENT_2026_10_23.md](PLATFORM_REASSESSMENT_2026_10_23.md). Do not modify tested scheduling formulas; stop adding Flutter UI until the platform feasibility gate is resolved.
 
 
