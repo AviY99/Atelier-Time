@@ -1,5 +1,12 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Full Android Dart unit suite user-reported passing / Handoff v1.7
+
+- Following user-confirmed Termux smoke test PASS (D-048), user reports **“All tests passed!”** after requested `dart pub get && dart analyze && dart test` on Android Dart 3.13.7 (D-049). Written suite currently defines **34 tests**. No full analyzer/test transcript or local commit ID supplied; preserve as **USER-REPORTED PASS**, not independently reproduced.
+- Step 1.4 scheduling implementation has real positive test feedback. Remains in acceptance/coverage review; do not merge as final or start Stage 2 without appropriate checkpoints.
+- No GitHub Actions, paid runners, builds, Flutter UI, APK or budget modifications. Updated test plan, roadmap, work log and self-contained HANDOFF v1.7.
+
+
 ## 2026-10-23 — Android Dart smoke pass / Handoff v1.6
 
 - User confirms **“Scheduling smoke checks succeeded.”** on Android Termux Dart 3.13.7 following Step 1.4 warning-offset integer fix. This is a **user-confirmed successful Dart smoke run**, including compilation and the smoke assertions.
