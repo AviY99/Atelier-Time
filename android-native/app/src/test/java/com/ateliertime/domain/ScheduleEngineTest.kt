@@ -37,6 +37,105 @@ class ScheduleEngineTest {
         }
     }
 
+    @Test fun exampleAWithExplicitGroupBreaksKeepsCanonicalTimes() {
+        val revised = a().copy(openingGroups = listOf(
+            OpeningPoseGroup("one", 4, m(1), breakAfterSeconds = 0),
+            OpeningPoseGroup("four", 4, m(4), breakAfterSeconds = m(5)),
+        ))
+        val current = result(revised, FinalPoseChoice.remainder())
+        val historical = result(a(), FinalPoseChoice.remainder())
+        contiguous(current)
+        assertEquals(spans(historical), spans(current))
+        assertEquals(listOf(m(80)),
+            current.phases.filter { it.kind == PhaseKind.SPECIAL_BREAK }
+                .map { it.startSeconds })
+        assertEquals(1, current.phases.count {
+            it.kind == PhaseKind.SHORT_BREAK && it.startSeconds == m(20)
+        })
+        assertEquals(8, current.phases.count { it.poseSource == PoseSource.OPENING })
+    }
+
+    @Test fun optionalInterGroupPauseIsInsertedAndChangesNoRegularBreakOrdinals() {
+        val rules = a().copy(
+            specialBreakCount = 0,
+            openingGroups = listOf(
+                OpeningPoseGroup("one", 4, m(1), breakAfterSeconds = m(3)),
+                OpeningPoseGroup("four", 4, m(4), breakAfterSeconds = m(5)),
+            ),
+        )
+        val c = result(rules, FinalPoseChoice.remainder())
+        contiguous(c)
+        assertEquals(listOf(m(4), m(7)),
+            listOf(c.phases[4].startSeconds, c.phases[4].endSeconds))
+        assertEquals("one", c.phases[4].openingGroupId)
+        assertEquals(PhaseKind.SHORT_BREAK, c.phases[4].kind)
+        assertNull(c.phases[4].breakOrdinal)
+        val repeatingBreaks = c.phases.filter {
+            it.kind == PhaseKind.SHORT_BREAK && it.openingGroupId == null
+        }
+        assertEquals(1, repeatingBreaks.first().breakOrdinal)
+        assertEquals(m(23), repeatingBreaks.first().startSeconds)
+    }
+
+    @Test fun customLastGroupRestReplacesFirstRegularBreakInsteadOfDoubling() {
+        val rules = a().copy(
+            specialBreakCount = 0,
+            openingGroups = listOf(
+                OpeningPoseGroup("one", 4, m(1), breakAfterSeconds = 0),
+                OpeningPoseGroup("four", 4, m(4), breakAfterSeconds = m(7)),
+            ),
+        )
+        val c = result(rules, FinalPoseChoice.remainder())
+        contiguous(c)
+        val rest = c.phases.single {
+            it.openingGroupId == "four" && it.kind == PhaseKind.SHORT_BREAK
+        }
+        assertEquals(m(20), rest.startSeconds)
+        assertEquals(m(27), rest.endSeconds)
+        assertNull(rest.breakOrdinal)
+        assertEquals(PhaseKind.POSE, c.phases[c.phases.indexOf(rest) + 1].kind)
+        assertEquals(m(27), c.phases[c.phases.indexOf(rest) + 1].startSeconds)
+    }
+
+    @Test fun poseFirstOpeningStillRequiresLastGroupRest() {
+        val rules = b().copy(
+            totalSeconds = m(90), summarySeconds = 0, specialBreakCount = 0,
+            openingGroups = listOf(OpeningPoseGroup("first", 2, m(2), m(4))),
+        )
+        val c = result(rules, FinalPoseChoice.remainder())
+        contiguous(c)
+        assertEquals(listOf("POSE:0-2", "POSE:2-4", "SHORT_BREAK:4-8"),
+            spans(c).take(3))
+        assertEquals(PhaseKind.POSE, c.phases[3].kind)
+    }
+
+    @Test fun explicitFinalZeroAndNegativeGroupBreaksAreBlocked() {
+        val groups = listOf(
+            OpeningPoseGroup("one", 4, m(1), 0),
+            OpeningPoseGroup("four", 4, m(4), 0),
+        )
+        val invalidLast = result(a().copy(openingGroups = groups))
+        assertTrue(invalidLast.hasBlockingIssues)
+        assertTrue(invalidLast.issues.any { it.code == "final_opening_break_required" })
+        val invalidEarlier = result(a().copy(openingGroups = groups.mapIndexed { i, g ->
+            if (i == 0) g.copy(breakAfterSeconds = -m(1))
+            else g.copy(breakAfterSeconds = m(5))
+        }))
+        assertTrue(invalidEarlier.issues.any { it.code == "negative_opening_break" })
+    }
+
+    @Test fun groupBreakMustLeaveFollowingRegularPose() {
+        val r = SessionRules(
+            id = "tight", name = "Tight", totalSeconds = m(10),
+            openingGroups = listOf(OpeningPoseGroup("first", 4, m(2), m(2))),
+            poseSeconds = m(5), specialBreakCount = 0,
+            cycleStart = CycleStart.POSE_FIRST,
+        )
+        val result = result(r)
+        assertTrue(result.hasBlockingIssues)
+        assertTrue(result.issues.any { it.code == "unbuildable_timeline" })
+    }
+
     @Test fun exampleBBaselineExact() {
         val c = result(b(), FinalPoseChoice.remainder())
         contiguous(c)
