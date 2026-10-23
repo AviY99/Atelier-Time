@@ -26,3 +26,24 @@ flutter analyze
 `flutter create` must be reviewed first for changes to existing prototype source files and configuration. iOS/macOS builds require macOS/Xcode, Windows builds require Windows developer tools, Android needs Android SDK. No paid GitHub Actions runners, build services or account budget increases.
 
 **Gate:** Actual Flutter compile/analyzer output, widget tests, input/preview accessibility review and user acceptance are required before calling Stage 2 complete. The underlying Dart core's 35 passing tests do **not** prove this Flutter UI compiles.
+
+
+## 2026-10-23 — Second Stage 2 source increment (NOT tested)
+
+- The editor now exposes stable keyed controls for session duration, break settings, ending choices/slider, explicit warning acknowledgment and approval.
+- Parsing errors render an explicit **blocking input error**; mathematically invalid schedules show blocking validation errors and do not display a misleading incomplete phase timeline or permit approval.
+- Phone layout keeps both the rules and full preview mounted inside a scrollable column so the ending controls remain reachable; wide screen still has independent two-pane scrolling.
+- Added `flutter_test` SDK dependency and [eight written widget tests](test/session_editor_widget_test.dart) covering: hard zero-minute and non-numeric errors, exact approved Example B preview boundaries, dynamic opening group edit/remove, final-pose selection and approval invalidation, even/custom slider, D-031 rest-warning acknowledgment, and wide layout.
+- **NO Flutter SDK is available to execute these tests** in this environment, and Termux Dart-only checks do not compile Flutter widgets. These are written assertions, **NOT passed tests**. The 35/35 passing original pure-Dart core is unchanged.
+- `main` and PR #1 remain unmerged; draft Stage 2 PR #2 is for review only. No GitHub Actions or paid services.
+
+### Testing when Flutter is available
+
+```bash
+cd apps/atelier_time_flutter
+flutter pub get
+flutter analyze
+flutter test
+```
+
+On the first Flutter-capable run, correct any compilation, responsive-layout, focus/scrolling, widget-finder, or semantics errors before reporting results. Then review appearance with the user; the current neutral theme is not final branding.
