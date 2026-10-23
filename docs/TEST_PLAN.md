@@ -220,3 +220,12 @@ Safest fix is to preserve that original worktree and create a **separate Stage 2
 Two new user screenshots show Android Termux working in **`~/Atelier-Time-Stage2`**, with `git rev-parse --short HEAD` displaying **`3bb2bad`** immediately before `dart pub get && dart test test/editor_draft_test.dart`. Test output concludes **`00:01 +11: All tests passed!`**. GitHub commit comparison verifies short SHA `3bb2bad` is the **exact tip of `stage-2-session-editor`** (`3bb2bade992fddab7dc3d7ece31d9aa58231380f`, ahead/behind 0). Thus the Stage 2 form-adapter's 11 Dart tests are **SCREENSHOT-VERIFIED PASS on the correct branch commit**. The prior D-057/D-058 mixed-worktree caveat is historical and RESOLVED for this run.
 
 **Not yet verified:** Stage 2 branch full `dart analyze && dart test` combined result (the prior 35 Stage 1 tests were verified separately); all eight nested Flutter widget tests remain unrun due to lack of Flutter SDK. Suggested next free verification: `cd ~/Atelier-Time-Stage2 && dart analyze && dart test`. Do not treat Android Dart success as UI compilation or APK creation.
+
+
+## 2026-10-23 — Stage 2 Flutter SDK errors during root analyzer (D-060)
+
+The user ran `dart analyze && dart test` in Termux from the clean Stage 2 worktree; the analyzer produced very many diagnostics and failed, so the chained `dart test` did NOT run in that attempt. Root package is pure Dart; nested `apps/atelier_time_flutter/` needs Flutter SDK, which Termux lacks. These unavailable Flutter dependencies can produce cascading unresolved import/type errors; screenshot alone does not establish that every diagnostic has this cause.
+
+Committed `analysis_options.yaml` on Stage 2 branch to exclude the nested Flutter app from **root-only Dart analysis**, and a separate Flutter package `analysis_options.yaml` so the app's widgets are still examined when a real Flutter SDK can run `flutter analyze`. No scheduling/adapter behavior was changed.
+
+**Next verification pending**: user updates the Stage 2 worktree and runs `dart analyze && dart test` at the root. Expected 35 core + 11 editor adapter = 46 root Dart test definitions. **Not yet observed**. Eight Flutter widget tests also remain UNRUN; they cannot be validated by Dart alone. Earlier separate 35 and 11 passing suites remain valid evidence.
