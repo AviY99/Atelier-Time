@@ -1,6 +1,6 @@
 # Test and acceptance plan — Atelier Time
 
-Version: 0.7 Android screenshot-confirmed test evidence and Stage 1 coverage audit (2026-10-23). **Step 1.4 source/test files exist** on branch `stage-1-4-scheduling-core`. User installed **Dart 3.13.7 on Android Termux** and attempted `dart tool/smoke.dart`; compilation **FAILED** due to a `num` → `int?` mismatch at warning offset, corrected in development branch commit `0dedd95756b6d3984b2e16548a58599179fbf7ff`. **User now confirms the corrected Dart smoke check PASSED on Termux (D-048)**. **User subsequently reports “All tests passed!” after `dart pub get && dart analyze && dart test` (D-049)**. This is a **user-reported pass of the branch's written suite** (34 Dart `test(...)` definitions); specific terminal logs/results and analyzer output were not provided. This does **NOT certify every separately planned acceptance item**, Flutter UI, builds or cross-platform compatibility. No GitHub Actions/bills/builds. No Flutter app yet.
+**Current evidence — 2026-10-23 v0.8, D-052:** User's Android Termux screenshot confirms `git pull --ff-only && dart test` pulled new T09 regression (`8cf7a24..907f871`) and ended **`00:00 +35: All tests passed!`**. Earlier screenshots showed smoke PASS, `dart analyze` **No issues found!** and 34/34 tests PASS on the preceding checkout (D-048/D-050). Static analysis was **not shown rerun** after adding the 35th *test-only* change. Stage 1 Step 1.4 required acceptance core **PASS / VERIFIED on the isolated Dart branch**; no Flutter build/UI or other-platform validation. Wider Stage 1 optional/edge matrix T13/T14 remains partially covered for later QA.
 
 ## Approved requirement tests: D-031 + D-036 (some covered by user-reported passing Dart suite; remaining plan-level acceptance items require mapping)
 
@@ -167,3 +167,11 @@ Built test:test.
 Commit [`4b2f5d9`](https://github.com/AviY99/Atelier-Time/commit/4b2f5d9fdd8dabc6dea8dcc0204c5062c7b6916a) adds the **35th** unit test on `stage-1-4-scheduling-core`: T09 first custom adjusted pose **1 minute**, later pose **34 minutes**, intervening 5-minute short break, fixed 15-minute summary. Asserts exact Example A phase times, positive durations, 25/5 rest warning and acknowledgment. This complements existing 34m+1m and invalid 0m cases.
 
 **Execution:** The *older 34 tests* remain screenshot-confirmed PASS (D-050), static analysis showed no issues. **New test has NOT run**; it must be tested with `git pull --ff-only && dart test` on Android Termux. No Stage 2 authorization or Actions.
+
+## 2026-10-23 — T09 newly executed; all 35 Dart tests PASS (D-052)
+
+- Screenshot-visible terminal: `git pull --ff-only && dart test`; branch updated `8cf7a24..907f871` including the new T09 test file and branch progress notes.
+- **Observed:** `00:00 +35: All tests passed!` on Termux Dart 3.13.7 Android ARM64. This **supersedes** the earlier D-051 “new test not run” note above.
+- **Previously observed** `dart analyze` `No issues found!` before the 35th test-only addition; don't claim it ran on the updated checkout. Previous smoke also passed.
+- Gate mapping: required Stage 1 **T01–T12, T15–T18 COVERED/PASS by 35 source tests** with both T09 endpoints. `T13/T14` broad stress/invalid-input combinations **PARTIAL** and recorded as extended later QA; they are *not* part of minimum Stage 1 gate.
+- **Outcome:** Step 1.4 **COMPLETE/VERIFIED ON DEVELOPMENT BRANCH**. Branch unmerged; full Flutter editor, persistence, timer/audio, Android APK and Windows/Apple releases unimplemented and unauthorized in this step.
