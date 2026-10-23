@@ -43,6 +43,33 @@ class PresetCatalogTest {
         return engine.approve(pending, acknowledgeWarnings = true)
     }
 
+    @Test fun explicitGroupRestIsSignedAndSurvivesSaveReload() {
+        val store = MemoryStore()
+        val service = catalog(store)
+        val rules = exampleB().copy(
+            openingGroups = listOf(
+                OpeningPoseGroup("intro1", 2, m, 0),
+                OpeningPoseGroup("intro2", 2, 2 * m, 5 * m),
+            ),
+            cycleStart = CycleStart.BREAK_FIRST,
+        )
+        val original = engine.approve(engine.generate(rules, FinalPoseChoice.remainder()))
+        val saved = service.save(original, "With groups")
+        assertEquals(listOf(0, 5 * m),
+            service.open(saved.id).rules.openingGroups.map { it.breakAfterSeconds })
+        store.saved = store.saved.copy(entries = listOf(saved.copy(
+            rules = saved.rules.copy(
+                openingGroups = saved.rules.openingGroups.mapIndexed { index, g ->
+                    if (index == 0) g.copy(breakAfterSeconds = m) else g
+                }
+            )
+        )))
+        try {
+            service.open(saved.id)
+            fail("Changing the first group rest must invalidate the approved revision")
+        } catch (_: IllegalStateException) { }
+    }
+
     @Test fun saveAndReloadApprovedExactTimeline() {
         val store = MemoryStore()
         val service = catalog(store)
