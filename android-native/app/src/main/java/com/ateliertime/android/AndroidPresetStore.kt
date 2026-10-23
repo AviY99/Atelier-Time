@@ -19,8 +19,10 @@ class AndroidPresetStore(
     )
 
     override fun read(): PresetCollection {
-        val source = preferences.getString(KEY, null) ?: return PresetCollection()
         try {
+            // Include getString in the corruption guard: malformed storage can
+            // contain a non-String preference value, not only invalid JSON.
+            val source = preferences.getString(KEY, null) ?: return PresetCollection()
             val root = JSONObject(source)
             check(root.getInt("version") == VERSION) {
                 "Unsupported saved-session version. Data was not changed."
@@ -39,6 +41,9 @@ class AndroidPresetStore(
     }
 
     override fun write(value: PresetCollection) {
+        // Refuse to overwrite unreadable or future-version records even when a
+        // caller uses this adapter directly instead of PresetCatalog.state().
+        read()
         val root = JSONObject()
             .put("version", VERSION)
             .put("activeId", value.activeId ?: JSONObject.NULL)
