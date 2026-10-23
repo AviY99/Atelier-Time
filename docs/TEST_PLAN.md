@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **2026-10-23 K01 ON-PHONE BUILD BLOCKER, CORRECTION PENDING RETEST:** User's first real CoGo Gradle `:app:testDebugUnitTest` ended `BUILD FAILED in 5m 1s` because `compileSdk=35` was lower than AndroidX Core API 36 and Compose Runtime 1.12 API 37 metadata requirements. Phone screenshot subsequently confirmed only Android SDK platforms **35 and 36** installed and no `sdkmanager` found via CLI. Changed native branch `app/build.gradle.kts` to `compileSdk=36`, Compose BOM `2026.06.01` (pre-API37 Compose 1.12), Activity Compose `1.12.4` in [commit a4b9469](https://github.com/AviY99/Atelier-Time/commit/a4b94692d14796e9090420e6f389a64eee31c3cf), preserving `targetSdk=35` and `minSdk=26`. **Source committed but NOT retested; no PASS may be claimed.**
+
+
 > **PHONE TEST RUNNER PREPARED — NOT EXECUTED (2026-10-23):** [Code on the Go phone runner instructions](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/android-native/PHONE_RUNNER.md) and [restricted task runner](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/android-native/tools/phone_task_runner.py) are in the implementation branch. The GitHub-Issues **doctor** task is queued at [Issue #4](https://github.com/AviY99/Atelier-Time/issues/4) but has not been executed. The user's actual CoGo/Gradle command-line integration, all **32 JVM + 6 device instrumentation methods**, debug APK/install and persistence checks remain **UNVERIFIED**. Do not count infrastructure source creation as a test pass.
 
 
