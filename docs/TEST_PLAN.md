@@ -160,3 +160,10 @@ Built test:test.
 | Wider T13–T14 and P-T edge matrix | Representative edge cases present; many combinatorial extremes not exhaustive | **Partial / remains in QA backlog** |
 
 **Gate:** Step 1.4 scheduling core has strong real Android Dart success. **The written test plan still calls for T09 both endpoints. Do not mark Step 1.4 complete or merge into main until remaining required edge coverage is addressed and retested.** Flutter UI, APK, cross-platform builds and Stage 2 are not covered or authorized.
+
+
+## 2026-10-23 — T09 opposite endpoint regression now WRITTEN, NOT RUN (D-051)
+
+Commit [`4b2f5d9`](https://github.com/AviY99/Atelier-Time/commit/4b2f5d9fdd8dabc6dea8dcc0204c5062c7b6916a) adds the **35th** unit test on `stage-1-4-scheduling-core`: T09 first custom adjusted pose **1 minute**, later pose **34 minutes**, intervening 5-minute short break, fixed 15-minute summary. Asserts exact Example A phase times, positive durations, 25/5 rest warning and acknowledgment. This complements existing 34m+1m and invalid 0m cases.
+
+**Execution:** The *older 34 tests* remain screenshot-confirmed PASS (D-050), static analysis showed no issues. **New test has NOT run**; it must be tested with `git pull --ff-only && dart test` on Android Termux. No Stage 2 authorization or Actions.
