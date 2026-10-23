@@ -1,5 +1,13 @@
 # Changelog — Atelier Time
 
+## 2026-10-23 — Stage 1 Step 1.4 T09 edge regression added / Handoff v1.9
+
+- Screenshot-confirmed Android `dart analyze`: **No issues found!** and `dart test`: **34 tests all passed** (D-050). Separate smoke check passed.
+- Required Stage 1 T09 custom final-pose endpoint audit identified untested 1m+34m (the complementary 34m+1m and zero-duration rejection were covered). Added a **35th** regression test including exact phase times and 25/5 warning acknowledgement on the same isolated code branch, commit `4b2f5d9fdd8dabc6dea8dcc0204c5062c7b6916a`.
+- **35th test NOT EXECUTED YET**. User's free Android Termux command: `git pull --ff-only && dart test`. Retain 34-test screenshot PASS, no new success claim.
+- Decision D-051, test plan, roadmap, README, branch progress, WORK_LOG and HANDOFF v1.9 updated. Stage 1 Step 1.4 still in final QA; no main merge, Stage 2 authorization, GitHub Actions, paid runners, builds or budget modification.
+
+
 ## 2026-10-23 — Screenshot-verified 34 Dart tests / Handoff v1.8
 
 - Received Termux screenshots proving `dart pub get` succeeded, `dart analyze` reports **No issues found!**, and `dart test` ends **00:01 +34: All tests passed!** on Android Dart 3.13.7. The earlier smoke check also passed.
