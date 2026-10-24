@@ -15,6 +15,18 @@ object DesignClock {
     const val MIN_NIGHT_HOUR = 12
     const val MAX_NIGHT_HOUR = 23
 
+    /**
+     * The Auto slider is a visual preview: left half = Day, right half =
+     * Night. It must NOT use the real clock (which runs in the opposite
+     * direction as the selected night-start threshold moves).
+     * Automatic scheduling itself continues to use resolve().
+     */
+    fun sliderPreview(hour: Int): DesignPalette {
+        val threshold = (MIN_NIGHT_HOUR + MAX_NIGHT_HOUR + 1) / 2
+        return if (hour.coerceIn(MIN_NIGHT_HOUR, MAX_NIGHT_HOUR) < threshold)
+            DesignPalette.DAY else DesignPalette.NIGHT
+    }
+
     fun resolve(preferences: DesignPreferences, hourOfDay: Int): DesignPalette {
         val hour = hourOfDay.coerceIn(0, 23)
         return when (preferences.mode) {
