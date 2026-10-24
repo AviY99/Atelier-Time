@@ -23,6 +23,61 @@ data class CompensatedTimeline(
 )
 
 object FinalPairCompensation {
+    /**
+     * Restarting the break BETWEEN the final two sessions is still allowed:
+     * the first final Session is already completed and must never be rewritten.
+     * Only the not-yet-started last Session can absorb the additional delay.
+     *
+     * Ordinary earlier restarts use adjust() and honor the original ending
+     * distribution across BOTH future final Sessions. This late-stage fallback
+     * deliberately retains the first final Session's already-observed length.
+     */
+    fun adjustLastOnly(
+        session: ApprovedSession,
+        active: List<SchedulePhase>,
+        newCorrectionSeconds: Int,
+    ): CompensatedTimeline {
+        require(active.size == session.phases.size) { "Active class phases do not match approval." }
+        val pair = active.indices.filter {
+            active[it].kind == PhaseKind.POSE &&
+                active[it].poseSource == PoseSource.REGULAR
+        }.takeLast(2)
+        require(pair.size == 2 && pair[1] == pair[0] + 2) {
+            "A final pair and its intervening break are required."
+        }
+        val first = active[pair[0]]
+        val last = active[pair[1]]
+        val oldCorrection = session.rules.totalSeconds.toLong() -
+            active.last().endSeconds.toLong()
+        val addedCorrection = newCorrectionSeconds.toLong() - oldCorrection
+        val newLastLength = last.durationSeconds.toLong() - addedCorrection
+        require(newLastLength in SECONDS_PER_MINUTE.toLong()..Int.MAX_VALUE.toLong()) {
+            "The final Session cannot absorb this break restart while retaining " +
+                "its one-minute minimum."
+        }
+        val revised = active.toMutableList()
+        var cursor = last.startSeconds.toLong() + newLastLength
+        require(cursor <= Int.MAX_VALUE.toLong()) { "Class timeline exceeds supported range." }
+        revised[pair[1]] = last.shifted(last.startSeconds, cursor.toInt())
+        for (i in pair[1] + 1 until revised.size) {
+            require(revised[i].kind == PhaseKind.SUMMARY) {
+                "Unexpected phase after the final regular Session."
+            }
+            val duration = active[i].durationSeconds
+            val end = cursor + duration
+            require(end <= Int.MAX_VALUE.toLong()) { "Class timeline exceeds supported range." }
+            revised[i] = active[i].shifted(cursor.toInt(), end.toInt())
+            cursor = end
+        }
+        check(cursor == session.rules.totalSeconds.toLong() - newCorrectionSeconds.toLong())
+        return CompensatedTimeline(
+            phases = revised,
+            totalSeconds = cursor.toInt(),
+            recoveredSeconds = newCorrectionSeconds,
+            firstFinalPoseSeconds = first.durationSeconds,
+            lastFinalPoseSeconds = newLastLength.toInt(),
+        )
+    }
     fun adjust(session: ApprovedSession, lostSeconds: Int): CompensatedTimeline {
         // A negative correction means a phase was intentionally skipped.
         // Preserve its saved approval; expand only the end pair at runtime.
