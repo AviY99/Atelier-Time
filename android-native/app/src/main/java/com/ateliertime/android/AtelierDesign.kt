@@ -213,6 +213,14 @@ fun DesignSettingsPanel(
 
 @Composable
 fun AtelierAboutPanel() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    // Read actual installed APK metadata: never show an invented app version.
+    val version = androidx.compose.runtime.remember(context) {
+        runCatching {
+            context.packageManager.getPackageInfo(context.packageName, 0)
+                .versionName ?: "unknown"
+        }.getOrDefault("unknown")
+    }
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(20.dp),
@@ -221,10 +229,19 @@ fun AtelierAboutPanel() {
         Text("About", style = MaterialTheme.typography.headlineSmall)
         ElevatedCard(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Atlier Time", style = MaterialTheme.typography.headlineMedium)
+                Text("Version $version  ·  © 2026",
+                    style = MaterialTheme.typography.bodyMedium)
                 Text("פותח ע״י Avi Yosfan בסיוע Open AI",
                     style = MaterialTheme.typography.titleMedium)
+                HorizontalDivider()
+                Text(
+                    "Atlier Time מאפשרת לתכנן שיעורי סטודיו, לקבוע מקטעי עבודה " +
+                        "והפסקות, לשמור מערכי שיעור ולהפעיל טיימר עם התראות " +
+                        "קוליות ומעקב זמנים בזמן אמת.",
+                    style = MaterialTheme.typography.bodyLarge,
+                )
             }
         }
     }
