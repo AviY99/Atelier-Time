@@ -111,7 +111,15 @@ class MonotonicSessionTimerTest {
 
     @Test fun interruptionCannotSilentlyRewriteFinalPairAlreadyInProgress() {
         var now = 0L
-        val timer = MonotonicSessionTimer(approved()) { now }
+        val evenRules = SessionRules(
+            id = "even", name = "Even", totalSeconds = 180 * minute,
+            summarySeconds = 15 * minute, poseSeconds = 25 * minute,
+            specialBreakCount = 1,
+        )
+        val even = engine.approve(
+            engine.generate(evenRules, FinalPoseChoice.even())
+        )
+        val timer = MonotonicSessionTimer(even) { now }
         timer.start()
         now = 140L * minute * 1000L
         timer.update()
