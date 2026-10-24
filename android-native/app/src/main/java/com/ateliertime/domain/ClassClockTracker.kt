@@ -53,7 +53,6 @@ class ClassClockTracker {
         }
         phaseId = null
         phaseStarted = null
-        wasFinished = false
         return observe(view, nowEpochMs)
     }
 
