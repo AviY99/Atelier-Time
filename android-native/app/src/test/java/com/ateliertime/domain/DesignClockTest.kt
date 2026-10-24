@@ -54,14 +54,18 @@ class DesignClockTest {
         assertEquals(1f, DesignMotion.fillFraction(PhaseKind.SHORT_BREAK, 100L, 150L))
     }
 
-    @Test fun horizontalRemainingBarStartsFullAndEmptiesAsTimePasses() {
-        assertEquals(1f, DesignMotion.remainingFraction(60_000L, 60_000L))
-        assertEquals(0.75f, DesignMotion.remainingFraction(60_000L, 45_000L))
-        assertEquals(0.5f, DesignMotion.remainingFraction(60_000L, 30_000L))
-        assertEquals(0f, DesignMotion.remainingFraction(60_000L, 0L))
-        assertEquals(1f, DesignMotion.remainingFraction(60_000L, 90_000L))
-        assertEquals(0f, DesignMotion.remainingFraction(60_000L, -1L))
-        assertEquals(0f, DesignMotion.remainingFraction(0L, 15_000L))
+    @Test fun horizontalPhaseBarStartsEmptyAndFillsWithElapsedTime() {
+        // The bar tracks elapsed in BOTH session and break, never remaining.
+        assertEquals(0f, DesignMotion.elapsedFraction(60_000L, 60_000L))
+        assertEquals(0.25f, DesignMotion.elapsedFraction(60_000L, 45_000L))
+        assertEquals(0.5f, DesignMotion.elapsedFraction(60_000L, 30_000L))
+        assertEquals(1f, DesignMotion.elapsedFraction(60_000L, 0L))
+        assertEquals(0f, DesignMotion.elapsedFraction(60_000L, 90_000L))
+        assertEquals(1f, DesignMotion.elapsedFraction(60_000L, -1L))
+        assertEquals(0f, DesignMotion.elapsedFraction(0L, 15_000L))
+        // Background has deliberately different behavior per phase kind.
+        assertEquals(0.25f, DesignMotion.fillFraction(PhaseKind.POSE, 60_000L, 45_000L))
+        assertEquals(0.75f, DesignMotion.fillFraction(PhaseKind.SHORT_BREAK, 60_000L, 45_000L))
     }
 
     @Test fun corruptedHourClampsToValidRange() {
