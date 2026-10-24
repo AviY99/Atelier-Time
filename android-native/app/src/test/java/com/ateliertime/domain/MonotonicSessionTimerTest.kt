@@ -86,6 +86,114 @@ class MonotonicSessionTimerTest {
         assertEquals(180 * minute, timer.view().totalSeconds)
     }
 
+    @Test fun nextFromPoseStartsBreakAndExtendsFinalPairWithoutChangingFinishClock() {
+        var now = 0L
+        val original = approved()
+        val timer = MonotonicSessionTimer(original) { now }
+        timer.start()
+        now = 10L * minute * 1000L
+        val result = timer.nextPhase()
+        assertEquals(TimerCue.POSE_FINISHED, result.cue)
+        assertEquals(PhaseKind.SHORT_BREAK, result.view.phase?.kind)
+        assertEquals(25 * minute, result.view.elapsedSeconds)
+        assertEquals(-15 * minute, result.view.recoveredSeconds)
+        assertEquals(195 * minute, result.view.totalSeconds)
+        assertEquals((25 * minute) to (20 * minute), timer.finalTwoPoseDurations())
+        assertNull(timer.update().cue)
+        now += result.view.totalRemainingSeconds.toLong() * 1000L
+        assertEquals(TimerCue.SESSION_FINISHED, timer.update().cue)
+        assertEquals(original.rules.totalSeconds.toLong() * 1000L, now)
+        assertEquals(original.rules.totalSeconds, original.phases.last().endSeconds)
+    }
+
+    @Test fun nextFromBreakStartsPoseAndPlaysBreakEndOnlyOnce() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        timer.start()
+        now = 25L * minute * 1000L
+        assertEquals(TimerCue.POSE_FINISHED, timer.update().cue)
+        now += 1L * minute * 1000L
+        val result = timer.nextPhase()
+        assertEquals(TimerCue.BREAK_FINISHED, result.cue)
+        assertEquals(PhaseKind.POSE, result.view.phase?.kind)
+        assertEquals(-4 * minute, result.view.recoveredSeconds)
+        assertNull(timer.update().cue)
+    }
+
+    @Test fun nextDuringPauseOffsetsLostTimeAgainstSkippedTime() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        timer.start()
+        now = 1L * minute * 1000L
+        timer.pause()
+        now = 3L * minute * 1000L
+        val skipped = timer.nextPhase()
+        assertEquals(TimerStatus.RUNNING, skipped.view.status)
+        assertEquals(-22 * minute, skipped.view.recoveredSeconds)
+        assertEquals(PhaseKind.SHORT_BREAK, skipped.view.phase?.kind)
+        assertEquals(TimerCue.POSE_FINISHED, skipped.cue)
+        now += 1L * minute * 1000L
+        timer.pause()
+        now += 5L * minute * 1000L
+        val resumed = timer.resume()
+        assertEquals(-17 * minute, resumed.recoveredSeconds)
+        assertEquals(197 * minute, resumed.totalSeconds)
+    }
+
+    @Test fun nextSupportsConsecutiveOpeningPosesAndLaterOpeningBreak() {
+        val rules = SessionRules(
+            id = "steps", name = "Steps", totalSeconds = 60 * minute,
+            openingGroups = listOf(OpeningPoseGroup("group", 2, minute, 5 * minute)),
+            poseSeconds = 10 * minute, shortBreakSeconds = 5 * minute,
+            specialBreakCount = 0, cycleStart = CycleStart.BREAK_FIRST,
+        )
+        val session = engine.approve(engine.generate(rules))
+        var now = 0L
+        val timer = MonotonicSessionTimer(session) { now }
+        timer.start()
+        now += 15_000L
+        val first = timer.nextPhase()
+        assertEquals(PhaseKind.POSE, first.view.phase?.kind)
+        assertEquals(TimerCue.POSE_FINISHED, first.cue)
+        now += 20_000L
+        val second = timer.nextPhase()
+        assertEquals(PhaseKind.SHORT_BREAK, second.view.phase?.kind)
+        assertEquals(TimerCue.POSE_FINISHED, second.cue)
+    }
+
+    @Test fun nextFromEndSummaryFinishesWithMelodyCExactlyOnce() {
+        val session = approved()
+        var now = 0L
+        val timer = MonotonicSessionTimer(session) { now }
+        timer.start()
+        now = (session.rules.totalSeconds - session.rules.summarySeconds).toLong() * 1000L
+        timer.update()
+        val finished = timer.nextPhase()
+        assertEquals(TimerCue.SESSION_FINISHED, finished.cue)
+        assertEquals(TimerStatus.FINISHED, finished.view.status)
+        assertEquals(0, finished.view.totalRemainingSeconds)
+        assertNull(timer.update().cue)
+    }
+
+    @Test fun nextCannotRewriteAlreadyStartedFinalPairAndLeavesTimerIntact() {
+        var now = 0L
+        val session = approved()
+        val firstFinal = session.phases.filter {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.takeLast(2).first()
+        val timer = MonotonicSessionTimer(session) { now }
+        timer.start()
+        now = (firstFinal.startSeconds + 5).toLong() * 1000L
+        timer.update()
+        try {
+            timer.nextPhase()
+            fail("Must preserve already started final pose, not silently rewrite it.")
+        } catch (_: IllegalStateException) { }
+        assertEquals(firstFinal.id, timer.view().phase?.id)
+        assertEquals(0, timer.view().recoveredSeconds)
+        assertEquals(TimerStatus.RUNNING, timer.view().status)
+    }
+
     @Test fun emitsDifferentSingleCuesOnPoseAndBreakEdges() {
         var now = 0L
         val timer = MonotonicSessionTimer(approved()) { now }
@@ -180,9 +288,9 @@ class MonotonicSessionTimerTest {
     @Test fun defaultMelodiesAreDistinctAndFiveSecondsLong() {
         val choices = MelodySelections()
         assertEquals(6, MelodyPattern.entries.size)
-        assertEquals(10, choices.poseEnd.notesHz.size)
-        assertEquals(10, choices.breakEnd.notesHz.size)
-        assertEquals(10, choices.sessionEnd.notesHz.size)
+        assertEquals(20, choices.poseEnd.notesHz.size)
+        assertEquals(20, choices.breakEnd.notesHz.size)
+        assertEquals(20, choices.sessionEnd.notesHz.size)
         assertNotEquals(choices.poseEnd.notesHz, choices.breakEnd.notesHz)
         assertNotEquals(choices.sessionEnd.notesHz, choices.breakEnd.notesHz)
         assertEquals(MelodyPattern.SOFT_CHIMES,
