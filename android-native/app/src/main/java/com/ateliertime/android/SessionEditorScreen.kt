@@ -66,7 +66,8 @@ fun SessionEditorScreen() {
     }
     var timerView by remember(liveTimer) { mutableStateOf(liveTimer?.view()) }
     var wallClockMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    var deadlineMillis by remember(liveTimer) { mutableStateOf<Long?>(null) }
+    val classClockTracker = remember(liveTimer) { ClassClockTracker() }
+    var classClockTimes by remember(liveTimer) { mutableStateOf(ClassClockTimes()) }
     var timerError by remember(liveTimer) { mutableStateOf<String?>(null) }
     var helpSection by remember { mutableStateOf<Pair<String, String>?>(null) }
     var nextOpeningId by remember { mutableIntStateOf(1) }
@@ -137,11 +138,13 @@ fun SessionEditorScreen() {
 
     LaunchedEffect(liveTimer, melodySelections, soundEnabled) {
         while (true) {
-            wallClockMillis = System.currentTimeMillis()
+            val nowEpochMs = System.currentTimeMillis()
+            wallClockMillis = nowEpochMs
             val clock = liveTimer
             if (clock != null) {
                 val tick = clock.update()
                 timerView = tick.view
+                classClockTimes = classClockTracker.observe(tick.view, nowEpochMs)
                 if (soundEnabled && tick.cue != null) {
                     melodyPlayer.play(melodySelections.forCue(tick.cue)) {
                         message -> melodyError = message
@@ -154,7 +157,9 @@ fun SessionEditorScreen() {
 
     fun timerAction(block: () -> TimerView) {
         try {
-            timerView = block()
+            val updated = block()
+            timerView = updated
+            classClockTimes = classClockTracker.observe(updated, System.currentTimeMillis())
             timerError = null
         } catch (error: IllegalArgumentException) {
             timerError = error.message ?: "Cannot fit the interruption into the final two poses."
@@ -164,14 +169,17 @@ fun SessionEditorScreen() {
     }
 
     /** Play only an actually committed timer transition, never a failed action. */
-    fun runTimedCue(action: () -> TimerTick) {
+    fun runTimedCue(restartClass: Boolean = false, action: () -> TimerTick) {
         try {
             val event = action()
             timerView = event.view
-            timerError = null
-            if (event.view.status == TimerStatus.FINISHED) {
-                deadlineMillis = System.currentTimeMillis()
+            val nowEpochMs = System.currentTimeMillis()
+            classClockTimes = if (restartClass) {
+                classClockTracker.restartClass(event.view, nowEpochMs)
+            } else {
+                classClockTracker.observe(event.view, nowEpochMs)
             }
+            timerError = null
             if (soundEnabled && event.cue != null) {
                 melodyPlayer.play(melodySelections.forCue(event.cue)) {
                     error -> melodyError = error
@@ -561,13 +569,16 @@ fun SessionEditorScreen() {
                         timer = timer,
                         view = view,
                         wallClockMillis = wallClockMillis,
-                        deadlineEpochMillis = deadlineMillis,
+                        classClockTimes = classClockTimes,
                         timerError = timerError,
                         onStart = {
                             timerAction { timer.start() }
-                            if (timerView?.status == TimerStatus.RUNNING) {
-                                deadlineMillis = System.currentTimeMillis() +
-                                    timerView!!.totalRemainingSeconds * 1000L
+                            timerView?.takeIf {
+                                it.status == TimerStatus.RUNNING && it.elapsedSeconds == 0
+                            }?.let { startingView ->
+                                classClockTimes = classClockTracker.newClass(
+                                    startingView, System.currentTimeMillis()
+                                )
                             }
                         },
                         onPauseResume = {
@@ -579,7 +590,7 @@ fun SessionEditorScreen() {
                             }
                         },
                         onRestartSession = {
-                            runTimedCue {
+                            runTimedCue(restartClass = true) {
                                 TimerTick(timer.restartKeepingEndTime(),
                                     TimerCue.SESSION_FINISHED)
                             }
