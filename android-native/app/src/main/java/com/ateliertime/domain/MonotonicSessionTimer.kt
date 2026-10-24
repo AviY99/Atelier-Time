@@ -4,8 +4,9 @@ package com.ateliertime.domain
  * Monotonic elapsed-time engine. The approved plan is immutable; a separate
  * runtime copy compensates for pauses/stops before its last two regular poses.
  *
- * Pause/Stop freeze active phase time. When continued, the original wall-clock
- * finishing deadline is preserved by compressing only the selected final pair.
+ * Pause freezes active phase time; Resume shrinks the last two regular poses
+ * to retain the original finish clock. Next skips the CURRENT pose or break
+ * and extends/shrinks the final pair according to time gained/lost.
  * A restart after FINISHED begins a fresh whole session and new deadline.
  */
 enum class TimerStatus { READY, RUNNING, PAUSED, FINISHED, STOPPED }
@@ -166,6 +167,83 @@ class MonotonicSessionTimer(
         return if (final.size == 2)
             final[0].durationSeconds to final[1].durationSeconds
         else null
+    }
+
+    /**
+     * Next means the next scheduled PHASE of this same approved session:
+     * a pose, regular/special/opening-group break, or final summary.
+     *
+     * A click finishes the current phase and emits its normal cue (A pose,
+     * B break). Skipping remaining phase time GAINs time, therefore the final
+     * two regular poses are extended according to the chosen ending mode.
+     * If previously paused, paused wall time is deducted first; the net can
+     * be positive (shrink), zero or negative (extend).
+     *
+     * Once either final regular pose is in progress, changing both poses
+     * would overwrite work already seen by the user; safely refuse instead.
+     * The final summary can be ended early by Next: C sounds immediately.
+     * All validations happen BEFORE touching any live runtime field.
+     */
+    fun nextPhase(): TimerTick {
+        check(status == TimerStatus.RUNNING || status == TimerStatus.PAUSED) {
+            "Start or resume the session before using Next."
+        }
+        val previous = view()
+        val current = previous.phase
+            ?: error("There is no active phase to skip.")
+        val currentIndex = activePhases.indexOfFirst { it.id == current.id }
+        check(currentIndex >= 0) { "Active phase no longer exists." }
+        val nextIndex = currentIndex + 1
+        // End-of-summary has no next phase. Complete immediately with C.
+        if (nextIndex >= activePhases.size) {
+            status = TimerStatus.FINISHED
+            runningFromMs = null
+            suspendedFromMs = null
+            elapsedBeforeRunMs = activeTotalMs
+            lastPhaseIndex = null
+            return TimerTick(view(), TimerCue.SESSION_FINISHED)
+        }
+
+        val now = nowMillis()
+        val pausedMs = if (status == TimerStatus.PAUSED) {
+            (now - (suspendedFromMs ?: now)).coerceAtLeast(0L)
+        } else 0L
+        val pausedSeconds = (pausedMs + 999L) / 1000L
+        val skippedSeconds = previous.phaseRemainingSeconds.toLong()
+        val corrected = lostSeconds.toLong() + pausedSeconds - skippedSeconds
+        require(corrected in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
+            "Too much time was gained or lost to adjust the final poses."
+        }
+        val revision = FinalPairCompensation.adjust(session, corrected.toInt())
+        val finalFirstIndex = session.phases.indices.filter {
+            session.phases[it].kind == PhaseKind.POSE &&
+                session.phases[it].poseSource == PoseSource.REGULAR
+        }.takeLast(2).first()
+        check(currentIndex < finalFirstIndex || corrected == lostSeconds.toLong()) {
+            "The final poses have already started. Skipping now cannot adjust " +
+                "both without rewriting elapsed posing. Approve a revised end time."
+        }
+        // The start of the next phase is identical before/after a final-pair
+        // adjustment until the first final pose itself starts.
+        val target = revision.phases[nextIndex]
+        check(target.startSeconds == activePhases[nextIndex].startSeconds) {
+            "The next phase would move in time; refusing an unsafe skip."
+        }
+
+        activePhases = revision.phases
+        activeTotalMs = revision.totalSeconds.toLong() * 1000L
+        lostSeconds = revision.recoveredSeconds
+        elapsedBeforeRunMs = target.startSeconds.toLong() * 1000L
+        runningFromMs = now
+        suspendedFromMs = null
+        status = TimerStatus.RUNNING
+        lastPhaseIndex = nextIndex
+        val cue = when (current.kind) {
+            PhaseKind.POSE -> TimerCue.POSE_FINISHED
+            PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK -> TimerCue.BREAK_FINISHED
+            PhaseKind.SUMMARY -> TimerCue.SESSION_FINISHED
+        }
+        return TimerTick(view(), cue)
     }
 
     /** One alert per observed phase transition; no stale multi-phase replay. */
