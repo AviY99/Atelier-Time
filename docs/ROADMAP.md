@@ -1,5 +1,7 @@
 # Delivery roadmap and approval gates
 
+> **D-104 ON-PHONE GRADLE PASS — 2026-10-24, user screenshot:** Existing Code on the Go `android-native` worktree ran `:app:assembleDebug` and `:app:testDebugUnitTest` to **BUILD SUCCESSFUL in 34s**; 42 actionable tasks (9 executed, 33 up-to-date). Terminal `ls -lh` shows `/storage/emulated/0/Download/Atelier-Time-D104.apk` successfully copied (~12M; Oct 24 21:25). This confirms the JVM unit-test task and debug APK assembly succeeded; individual test case counts, exact local Git HEAD SHA and Android connected instrumentation were **not** shown. **D-104 APK update-install, About `Version 3` on device, saved Class persistence and real 3-minute A/B/C foreground cue QA are STILL PENDING.** Next: install the existing Downloads APK as an update **without uninstall/data clearing**; verify About Version 3, saved Classes/sound settings and 01:00 A / 02:00 B / 03:00 C cues once. Do not rebuild or copy again. Stable 3 `stable/android-d102` stays frozen; mandatory branding/icon gate remains before store publication. Historical 'source only/not yet built' notes below are superseded by this build evidence.
+
 > LATEST ACTIVE D-104 (2026-10-24): User added an explicit MANDATORY logo and launcher/store-icon design/approval stage before any Play publication, described in [ICON_LOGO_PRESTORE_GATE.md](ICON_LOGO_PRESTORE_GATE.md). Testing starts with four new pure Kotlin/JVM Timer regression methods (3m real-cue schedule simulated at 200ms ticks, 3h clock deadline, stale cue suppression and paused deadline) in TimerReliabilityGateTest.kt. Tests are WRITTEN, NOT YET EXECUTED on phone. Existing Timer code, Sound and UI are untouched. Next APK About Version 3 requirement is implemented in development app/build.gradle.kts as versionName="3" and versionCode=2; not built/installed yet, frozen Stable 3 D-102 stays unmodified. Next run on-device Gradle :app:testDebugUnitTest :app:assembleDebug with CoGo ARM64 AAPT2, record actual test PASS, then update-install keeping all saved Classes, verify About Version 3 and focused real Timer cues. Then background/lock/Doze, persistence, connected instrumented tests, long-run/accessibility, release candidate, mandatory icon/logo, publication only if explicitly approved. Canonical [TIMER_RELIABILITY_D104.md](TIMER_RELIABILITY_D104.md). PR #3 Draft/unmerged, no paid CI.
 
 ## CURRENT Android-first completion order — post-Stable 3 (2026-10-24)
@@ -8,7 +10,7 @@ Historical Flutter/Dart stage rows below are ARCHIVED context; native Kotlin + J
 
 | Current gate | Exit requirement | State |
 |---|---|---|
-| QA-1 Timer deterministic and manual reliability | D-104 JVM A/B/C, deadline tests and phone Pause/Resume/Next/Restart verification | **SOURCE WRITTEN; PHONE RUN OPEN** |
+| QA-1 Timer deterministic and manual reliability | D-104 JVM A/B/C, deadline tests and phone Pause/Resume/Next/Restart verification | **GRADLE/JVM BUILD PASS; APK INSTALL + MANUAL QA OPEN** |
 | QA-2 locked-screen/background/Doze | Real audio/notifications/service policy validated under Android system restrictions | **OPEN** |
 | QA-3 persistence/recovery | Saved Classes and sounds through app restarts, updates/reboot, corrupt/unsupported JSON safety | **OPEN** |
 | QA-4 connected instrumentation | Execute device Android test methods with per-test evidence | **OPEN** |
