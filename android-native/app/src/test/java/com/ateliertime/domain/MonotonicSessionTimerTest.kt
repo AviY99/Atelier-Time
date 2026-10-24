@@ -75,7 +75,7 @@ class MonotonicSessionTimerTest {
         assertEquals(TimerStatus.RUNNING, timer.view().status)
     }
 
-    @Test fun openingPoseTransitionsRemainSilentUntilD016Resolution() {
+    @Test fun consecutiveOpeningPoseTransitionsPlayPoseMelodyOnce() {
         val rules = SessionRules(
             id = "opening", name = "Opening", totalSeconds = 5 * minute,
             openingGroups = listOf(OpeningPoseGroup("o", 2, minute)),
@@ -87,6 +87,34 @@ class MonotonicSessionTimerTest {
         val timer = MonotonicSessionTimer(session) { now }
         timer.start()
         now = minute.toLong() * 1000L
+        assertEquals(TimerCue.POSE_FINISHED, timer.update().cue)
         assertNull(timer.update().cue)
+    }
+
+    @Test fun slightlyDelayedUiLoopStillEmitsCorrectAutomaticCue() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        timer.start()
+        now = 25L * minute * 1000L + 2_200L
+        assertEquals(TimerCue.POSE_FINISHED, timer.update().cue)
+        assertNull(timer.update().cue)
+        now = 30L * minute * 1000L + 1_000L
+        assertEquals(TimerCue.BREAK_FINISHED, timer.update().cue)
+    }
+
+    @Test fun defaultMelodiesAreDistinctAndFiveSecondsLong() {
+        val choices = MelodySelections()
+        assertEquals(6, MelodyPattern.entries.size)
+        assertEquals(10, choices.poseEnd.notesHz.size)
+        assertEquals(10, choices.breakEnd.notesHz.size)
+        assertEquals(10, choices.sessionEnd.notesHz.size)
+        assertNotEquals(choices.poseEnd.notesHz, choices.breakEnd.notesHz)
+        assertNotEquals(choices.sessionEnd.notesHz, choices.breakEnd.notesHz)
+        assertEquals(MelodyPattern.SOFT_CHIMES,
+            choices.forCue(TimerCue.POSE_FINISHED))
+        assertEquals(MelodyPattern.RISING_STEPS,
+            choices.forCue(TimerCue.BREAK_FINISHED))
+        assertEquals(MelodyPattern.CELEBRATION,
+            choices.forCue(TimerCue.SESSION_FINISHED))
     }
 }
