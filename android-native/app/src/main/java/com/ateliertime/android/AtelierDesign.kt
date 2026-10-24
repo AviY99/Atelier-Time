@@ -233,7 +233,7 @@ fun AtelierAboutPanel() {
             Column(modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Atlier Time", style = MaterialTheme.typography.headlineMedium)
-                Text(version, style = MaterialTheme.typography.titleMedium)
+                Text("Version $version", style = MaterialTheme.typography.titleMedium)
                 Text("© 2026", style = MaterialTheme.typography.bodyMedium)
                 Text("Developed by Avi Yosfan with assistance from Open AI",
                     style = MaterialTheme.typography.titleMedium)
