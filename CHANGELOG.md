@@ -1,5 +1,11 @@
 # Changelog — Atelier Time
 
+## 2026-10-24 — D-102 phone build 29s PASS; install and checkbox regression QA pending
+
+Phone screenshot verifies `BUILD SUCCESSFUL in 29s` for `:app:testDebugUnitTest` and `:app:assembleDebug` (42 Gradle tasks: 8 executed, 34 up-to-date), and a 12M `/storage/emulated/0/Download/Atelier-Time-D102.apk` copy dated October 24, 20:39. Screenshot does not show exact commit or individual JUnit case count. No user confirmation yet of installing D-102 or fixed same-for-all checkbox validation; only D-101 is installed and confirmed with that known defect. Next update-install D-102 without clearing saved Classes and verify dormant-mode source uncheck succeeds, mode switching re-enables needed sources, active source still cannot be disabled. Frozen Stable 2 unchanged.
+
+---
+
 ## 2026-10-24 — D-102 active-only sound source guard — source fix, on-phone Gradle/QA pending
 
 User screenshot from installed D-101 confirms compact Sound UI works overall but the source-disable error is triggered by a sound used only in the *hidden* mode. Current D-102 dev source now checks only Shared's single active sound or Separate's active A/B/C; persisted dormant choices do not block disabling their source. On mode switch, required libraries are auto-reenabled so the preserved sound can play. New pure JVM tests and Android preference persistence instrumentation test sources cover both mode directions and the still-required active/last-source protection. **Tests are written, not run; D-102 not yet phone built, installed or approved.** D-101 is accepted with this identified defect. User-approved `stable/android-d098` remains untouched. [Reproduction and QA](docs/SOUND_ACTIVE_SOURCE_D102.md).
