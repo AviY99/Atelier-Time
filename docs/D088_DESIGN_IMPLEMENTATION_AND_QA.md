@@ -1,5 +1,11 @@
 # D-088 — Design tabs, persisted palettes and static time / tahini motion
 
+## 2026-10-24 — D-088 38s Gradle PASS, device visual acceptance pending
+
+D-088 ON-PHONE BUILD AND JVM TEST TASK PASS (user screenshot, 2026-10-24): Gradle `:app:testDebugUnitTest :app:assembleDebug` ended **BUILD SUCCESSFUL in 38s**, 42 actionable tasks (10 executed, 32 up-to-date). Screenshot visibly includes `:app:compileDebugUnitTestKotlin`, `:app:testDebugUnitTest`, `:app:packageDebug`, `:app:assembleDebug`. Thus Android Kotlin build, JVM test task, and debug APK assembly succeeded after the D-088 source changes. Exact individual test counts and Android instrumentation results are NOT shown. D-088 APK is **not yet confirmed update-installed or visually/functionally accepted**. Next gate: copy APK to Downloads, update-install (no uninstall/clear data), inspect Design Day/Night/Auto persistence and local-hour threshold, solid tahini Session fill and Break drain, no digit animation/flashing, About spelling/version/©2026/credit and short summary. Keep stable Android D-086 snapshot untouched. PR #3 remains OPEN/DRAFT, no CI Actions.
+
+---
+
 **2026-10-24 · SOURCE WRITTEN, PHONE GRADLE BUILD AND APK QA PENDING**
 
 This work follows user-confirmed **Android Stable 1 D-086**, preserved unchanged on [`stable/android-d086`](https://github.com/AviY99/Atelier-Time/tree/stable/android-d086) at `d0a03d2792cc324aeeba39b6327136ba6d37fd0c`. This increment affects only UI, local design preferences, visual motion, and About; signed saved-class records, scheduling domain math, audio cues and original Class start/end clocks are not reworked. Implementation branch: `android-native-kotlin-compose`, PR #3 still Draft/unmerged, no paid CI.
