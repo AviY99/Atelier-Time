@@ -348,6 +348,19 @@ class MonotonicSessionTimer(
         return TimerTick(view(), cue)
     }
 
+    /** Finish a running Class when its original wall-time deadline is reached. */
+    fun finishAtDeadline(): TimerTick {
+        if (status != TimerStatus.RUNNING && status != TimerStatus.PAUSED) {
+            return TimerTick(view())
+        }
+        status = TimerStatus.FINISHED
+        runningFromMs = null
+        suspendedFromMs = null
+        elapsedBeforeRunMs = activeTotalMs
+        lastPhaseIndex = null
+        return TimerTick(view(), TimerCue.SESSION_FINISHED)
+    }
+
     /** One alert per observed phase transition; no stale multi-phase replay. */
     fun update(): TimerTick {
         if (status != TimerStatus.RUNNING) return TimerTick(view())
