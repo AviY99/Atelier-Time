@@ -98,4 +98,47 @@ class MelodyPreferencesTest {
         assertEquals(MelodyPattern.WARM_BELLS, separateAgain.breakEnd.melody)
     }
 
+
+    @Test fun sharedModeDisabledDormantSourceStaysDisabledAfterRestart() {
+        val store = MelodyPreferences(context, isolatedName)
+        val file = CueSound(source = SoundSource.FILE,
+            uri = "content://documents/document/audio3", displayName = "Dormant file")
+        val settings = store.loadSettings()
+            .setSourceEnabled(SoundSource.FILE, true)
+            .choose(TimerCue.BREAK_FINISHED, file)
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .setSourceEnabled(SoundSource.FILE, false)
+        store.saveSettings(settings)
+        val loaded = MelodyPreferences(context, isolatedName).loadSettings()
+        assertEquals(settings, loaded)
+        assertEquals(setOf(SoundSource.APP), loaded.enabledSources)
+        assertEquals(file, loaded.breakEnd)
+        val activeSeparate = loaded.setAssignmentMode(SoundAssignmentMode.SEPARATE)
+        assertEquals(file, activeSeparate.soundFor(TimerCue.BREAK_FINISHED))
+        assertEquals(true, SoundSource.FILE in activeSeparate.enabledSources)
+        store.saveSettings(activeSeparate)
+        assertEquals(activeSeparate, MelodyPreferences(context, isolatedName).loadSettings())
+    }
+
+    @Test fun separateModeDisabledDormantSharedSourceStaysDisabledAfterRestart() {
+        val store = MelodyPreferences(context, isolatedName)
+        val system = CueSound(source = SoundSource.SYSTEM,
+            uri = "content://settings/system/notification_sound",
+            displayName = "Stored system alert")
+        val settings = store.loadSettings()
+            .setSourceEnabled(SoundSource.SYSTEM, true)
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .chooseForVisibleMode(TimerCue.POSE_FINISHED, system)
+            .setAssignmentMode(SoundAssignmentMode.SEPARATE)
+            .setSourceEnabled(SoundSource.SYSTEM, false)
+        store.saveSettings(settings)
+        val loaded = MelodyPreferences(context, isolatedName).loadSettings()
+        assertEquals(settings, loaded)
+        assertEquals(setOf(SoundSource.APP), loaded.enabledSources)
+        assertEquals(system, loaded.sharedSound)
+        val restored = loaded.setAssignmentMode(SoundAssignmentMode.SHARED)
+        assertEquals(system, restored.soundFor(TimerCue.SESSION_FINISHED))
+        assertEquals(true, SoundSource.SYSTEM in restored.enabledSources)
+    }
+
 }
