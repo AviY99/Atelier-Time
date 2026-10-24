@@ -196,13 +196,13 @@ fun SessionEditorScreen() {
     }
 
     /** Play only an actually committed timer transition, never a failed action. */
-    fun runTimedCue(restartClass: Boolean = false, action: () -> TimerTick) {
+    fun runTimedCue(restartCurrentSession: Boolean = false, action: () -> TimerTick) {
         try {
             val event = action()
             timerView = event.view
             val nowEpochMs = System.currentTimeMillis()
-            classClockTimes = if (restartClass) {
-                classClockTracker.restartClass(event.view, nowEpochMs)
+            classClockTimes = if (restartCurrentSession) {
+                classClockTracker.restartCurrentSession(event.view, nowEpochMs)
             } else {
                 classClockTracker.observe(event.view, nowEpochMs)
             }
@@ -447,14 +447,20 @@ fun SessionEditorScreen() {
             }
             if (candidate.finalPoseIsShort && !candidate.hasBlockingIssues) {
                 Text("Final regular session: choose an ending", style = MaterialTheme.typography.titleMedium)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Last gets remaining time: keep the first of the final two " +
+                    "sessions at its planned length when possible; give the " +
+                    "remaining time to the last. Even splits the time equally; " +
+                    "Custom lets you choose the split.",
+                    style = MaterialTheme.typography.bodySmall)
+                Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(
                         selected = ending?.mode == FinalPoseMode.REMAINDER,
                         onClick = {
                             ending = FinalPoseChoice.remainder()
                             acceptedWarning = false; approved = null
                         },
-                        label = { Text("Remainder") },
+                        label = { Text("Last gets remaining time") },
                     )
                     FilterChip(
                         selected = ending?.mode == FinalPoseMode.EVEN_SPLIT,
@@ -661,9 +667,9 @@ fun SessionEditorScreen() {
                             }
                         },
                         onRestartSession = {
-                            runTimedCue(restartClass = true) {
-                                TimerTick(timer.restartKeepingEndTime(),
-                                    TimerCue.SESSION_FINISHED)
+                            runTimedCue(restartCurrentSession = true) {
+                                TimerTick(timer.restartCurrentSessionKeepingEndTime(),
+                                    TimerCue.POSE_FINISHED)
                             }
                         },
                         onNextPhase = {
