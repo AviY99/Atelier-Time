@@ -14,10 +14,11 @@ android {
         applicationId = "com.ateliertime.android"
         minSdk = 26
         targetSdk = 35
-        // D-104: next update after user-approved Stable 3.
-        // About reads the numeric installed versionName from PackageManager.
+        // Android versionCode is the monotonic package-upgrade integer.
+        // versionName is the real development iteration shown verbatim in About.
+        // Keep this D-identifier synchronized with each future APK build.
         versionCode = 2
-        versionName = "3"
+        versionName = "D-104"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
