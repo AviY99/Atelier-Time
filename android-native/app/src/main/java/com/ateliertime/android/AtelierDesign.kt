@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -85,11 +86,11 @@ fun AtelierDesignTheme(palette: DesignPalette, content: @Composable () -> Unit) 
         secondaryContainer = Color(0xFF42385E),
         onSecondaryContainer = Color(0xFFF0EBFF),
         tertiary = Color(0xFFF8C76D),
-        background = Color(0xFF0E1624),
+        background = Color(0xFF304D70),
         onBackground = Color(0xFFF5F8FF),
-        surface = Color(0xFF1D2B3D),
+        surface = Color(0xFF3B5A7A),
         onSurface = Color(0xFFF5F8FF),
-        surfaceVariant = Color(0xFF26384C),
+        surfaceVariant = Color(0xFF4A6A8A),
         onSurfaceVariant = Color(0xFFDBE5F2),
         outline = Color(0xFF8493A6),
         error = Color(0xFFFFA6AB),
@@ -224,14 +225,16 @@ fun AtelierAboutPanel() {
             context.packageManager.getPackageInfo(context.packageName, 0)
                 .versionName.orEmpty()
         }.getOrDefault("")
-        Regex("""\\d+(?:\\.\\d+)*""").find(installedVersion)?.value ?: "—"
+        Regex("""\d+(?:\.\d+)*""").find(installedVersion)?.value ?: "—"
     }
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("About", style = MaterialTheme.typography.titleLarge)
+        Text("About", modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleLarge)
         ElevatedCard(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(14.dp),
@@ -243,7 +246,7 @@ fun AtelierAboutPanel() {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
                     ) {
                         Text(
@@ -267,7 +270,9 @@ fun AtelierAboutPanel() {
                     }
                 }
                 Text(
-                    "Developed by Avi Yosfan with assistance from Open AI",
+                    "Developed by Avi Yosfan · with ChatGPT (OpenAI)",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 HorizontalDivider()
@@ -276,6 +281,8 @@ fun AtelierAboutPanel() {
                         "of an ongoing class—its work sessions, breaks and remaining " +
                         "time—and makes day-to-day class management easier. " +
                         "Timed sound cues help keep the class on track.",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Justify,
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
