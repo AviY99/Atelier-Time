@@ -40,6 +40,8 @@ class MonotonicSessionTimerTest {
         val resumed = timer.resume()
         assertEquals(300, resumed.recoveredSeconds)
         assertEquals(180 * minute - 300, resumed.totalSeconds)
+        assertEquals((24 * minute) to (1 * minute),
+            timer.finalTwoPoseDurations())
         now += 12_000L
         assertEquals(62, timer.update().view.elapsedSeconds)
         timer.stop()
