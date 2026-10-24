@@ -1,8 +1,6 @@
 package com.ateliertime.android
 
-import android.media.AudioManager
-import android.media.ToneGenerator
-import android.os.SystemClock
+ import android.os.SystemClock
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,13 +13,14 @@ import com.ateliertime.domain.*
 import kotlinx.coroutines.delay
 
 /**
- * K04 first real Android timer screen. Uses the EXACT approved phases rather
- * than recalculating an unapproved schedule. Background/lock-screen audible
- * reliability still needs foreground-service work and actual phone tests.
+ * K04 Android timer screen. Uses exact approved phases and user-selected
+ * five-second melodies. Lock-screen reliability still needs a foreground
+ * service and real phone tests.
  */
 @Composable
 fun SessionTimerScreen(
     session: ApprovedSession,
+    melodySelections: MelodySelections,
     onBackToEditor: () -> Unit,
 ) {
     val timer = remember(session) {
@@ -30,18 +29,14 @@ fun SessionTimerScreen(
     var snapshot by remember(timer) { mutableStateOf(timer.view()) }
     var soundEnabled by remember { mutableStateOf(true) }
     var confirmStop by remember { mutableStateOf(false) }
-    val audio = remember { runCatching { ToneGenerator(AudioManager.STREAM_MUSIC, 80) }.getOrNull() }
+    val audio = remember { MelodyAudioPlayer() }
+    var audioError by remember { mutableStateOf<String?>(null) }
     DisposableEffect(audio) {
-        onDispose { audio?.release() }
+        onDispose { audio.close() }
     }
 
     fun tone(cue: TimerCue) {
-        val kind = when (cue) {
-            TimerCue.POSE_FINISHED -> ToneGenerator.TONE_DTMF_1
-            TimerCue.BREAK_FINISHED -> ToneGenerator.TONE_DTMF_5
-            TimerCue.SESSION_FINISHED -> ToneGenerator.TONE_DTMF_9
-        }
-        runCatching { audio?.startTone(kind, 230) }
+        audio.play(melodySelections.forCue(cue)) { message -> audioError = message }
     }
 
     LaunchedEffect(timer, soundEnabled, audio) {
@@ -145,10 +140,14 @@ fun SessionTimerScreen(
             OutlinedButton(onClick = { tone(TimerCue.BREAK_FINISHED) }) { Text("Test B") }
             OutlinedButton(onClick = { tone(TimerCue.SESSION_FINISHED) }) { Text("Test C") }
         }
-        Text("A: pose to break  ·  B: break to pose  ·  C: session finished")
+        Text("A: end of each pose · B: end of break · C: session finished")
+        Text("Each event plays its five-second melody selected on the main editor.")
+        if (audioError != null) {
+            Text(audioError ?: "", color = MaterialTheme.colorScheme.error)
+        }
         Text(
-            "Consecutive opening-pose sounds await the separate cue policy decision. " +
-                "Background and locked-screen alerts still require device testing.",
+            "Melody volume uses device media volume. Playback while the phone is locked " +
+                "or the app is suspended still requires foreground-service validation.",
             style = MaterialTheme.typography.bodySmall,
         )
     }
