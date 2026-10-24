@@ -1,5 +1,11 @@
 # Changelog — Atelier Time
 
+## 2026-10-24 — D-084 segmented clock precision and tighter Class header (device QA pending)
+
+- User feedback: restore `HH:mm:ss` for active Session/Break Start/End while preserving `HH:mm` for Clock and Class start/end, and put **Class length** below Class end as the third equally styled compact line under Clock.
+- Android Compose source only: two timestamp formatters, separate immutable approved Class duration in HH:mm, three `WallClockRow` labels with 0dp row spacing. Existing Class remaining/elapsed/progress and phase countdown stay intact.
+- New source commit `5f0df02c169ba4134cad2a6603d2df288ad96dcc`; **unbuilt, untested, not yet accepted on phone** for D-084. D-083 earlier phone Gradle PASS does not validate this delta. No app-data or timer-engine changes; Draft PR #3 retained, no paid Actions.
+
 ## 2026-10-24 — D-083 compact Timer controls and non-blocking Next (new-source QA pending)
 
 - User confirmed D-082 updated Android app working on phone (“הכל עובד”); prior CoGo Gradle `BUILD SUCCESSFUL in 12s` with 42/42 UP-TO-DATE tasks.
