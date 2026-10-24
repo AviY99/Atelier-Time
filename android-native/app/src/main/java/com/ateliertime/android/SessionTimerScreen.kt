@@ -130,7 +130,12 @@ fun SessionTimerScreen(
                 Text("Adjusted final two sessions: " +
                     formatTime(pair.first) + " + " + formatTime(pair.second))
             }
-            Text("Ending choice: " + (session.selectedChoice?.mode?.name ?: "REMAINDER") +
+            val endingLabel = when (session.selectedChoice?.mode) {
+                FinalPoseMode.EVEN_SPLIT -> "Even split"
+                FinalPoseMode.CUSTOM_SPLIT -> "Custom split"
+                FinalPoseMode.REMAINDER, null -> "Last gets remaining time"
+            }
+            Text("Ending choice: " + endingLabel +
                 ". The intervening break, class summary and saved preset remain unchanged.")
         }
         timerError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
