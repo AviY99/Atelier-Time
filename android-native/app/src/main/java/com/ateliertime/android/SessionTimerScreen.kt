@@ -35,11 +35,10 @@ fun SessionTimerScreen(
     // Contextual help keeps the Timer compact on a phone. Nothing is hidden
     // from screen-reader users because each action has its own Help control.
     var helpFor by remember { mutableStateOf<String?>(null) }
-    val time = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
+    val time = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     fun showTime(value: Long?): String = value?.let {
         time.format(Date(it))
     } ?: "—"
-    val segmentLabel = classClockTimes.currentPhaseLabel ?: "Current segment"
     val isBreak = view.phase?.kind == PhaseKind.SHORT_BREAK ||
         view.phase?.kind == PhaseKind.SPECIAL_BREAK
     val canRestartSegment = view.phase?.kind == PhaseKind.POSE || isBreak
@@ -76,10 +75,8 @@ fun SessionTimerScreen(
                 verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text("Clock  " + showTime(wallClockMillis),
                     style = MaterialTheme.typography.headlineSmall)
-                Text("Class start  " + showTime(classClockTimes.classStartEpochMs),
-                    style = MaterialTheme.typography.labelSmall)
-                Text("Class end  " + showTime(classClockTimes.classEndEpochMs),
-                    style = MaterialTheme.typography.labelSmall)
+                WallClockRow("Class start", showTime(classClockTimes.classStartEpochMs))
+                WallClockRow("Class end", showTime(classClockTimes.classEndEpochMs))
                 Spacer(modifier = Modifier.height(6.dp))
                 Text("Class remaining  " + formatTime(view.totalRemainingSeconds),
                     style = MaterialTheme.typography.labelSmall)
@@ -108,13 +105,10 @@ fun SessionTimerScreen(
                         modifier = Modifier.weight(1f))
                     Column(horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                        Text("$segmentLabel start  " +
-                            showTime(classClockTimes.currentPhaseStartEpochMs),
-                            style = MaterialTheme.typography.labelSmall)
-                        Text("$segmentLabel end  " +
-                            (if (classClockTimes.paused) "— (paused)"
-                            else showTime(classClockTimes.currentPhaseEndEpochMs)),
-                            style = MaterialTheme.typography.labelSmall)
+                        // Phase name remains in the card heading; keep clock values legible.
+                        WallClockRow("Start", showTime(classClockTimes.currentPhaseStartEpochMs))
+                        WallClockRow("End", if (classClockTimes.paused) "— (paused)"
+                            else showTime(classClockTimes.currentPhaseEndEpochMs))
                     }
                 }
                 Text(formatTime(view.phaseRemainingSeconds),
@@ -180,15 +174,24 @@ fun SessionTimerScreen(
                     OutlinedButton(
                         enabled = underway && canRestartSegment,
                         onClick = { confirmation = "restart" },
-                        modifier = Modifier.weight(1.3f),
+                        modifier = Modifier.weight(1.45f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     ) { Text(restartTitle, style = MaterialTheme.typography.labelSmall) }
                     OutlinedButton(
                         enabled = underway,
                         onClick = onNextPhase,
-                        modifier = Modifier.weight(0.85f),
+                        modifier = Modifier.weight(0.8f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     ) { Text("Next", maxLines = 1) }
+                    Button(
+                        onClick = { confirmation = "exit" },
+                        modifier = Modifier.weight(0.85f),
+                        contentPadding = PaddingValues(horizontal = 3.dp, vertical = 6.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        ),
+                    ) { Text("Exit", maxLines = 1, style = MaterialTheme.typography.labelSmall) }
                 }
                 Row(modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -201,14 +204,14 @@ fun SessionTimerScreen(
                         Text("Restart help", style = MaterialTheme.typography.labelSmall)
                     }
                     TextButton(onClick = { helpFor = "next" },
-                        contentPadding = PaddingValues(horizontal = 4.dp)) {
+                        contentPadding = PaddingValues(horizontal = 2.dp)) {
                         Text("Next help", style = MaterialTheme.typography.labelSmall)
                     }
+                    TextButton(onClick = { helpFor = "exit" },
+                        contentPadding = PaddingValues(horizontal = 2.dp)) {
+                        Text("Exit help", style = MaterialTheme.typography.labelSmall)
+                    }
                 }
-                TextButton(onClick = { confirmation = "exit" },
-                    modifier = Modifier.align(Alignment.End),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                ) { Text("End & return to saved classes") }
             }
         }
     }
@@ -251,6 +254,7 @@ fun SessionTimerScreen(
         val title = when (selectedHelp) {
             "pause" -> "Pause / Resume"
             "restart" -> restartTitle
+            "exit" -> "Exit class"
             else -> "Next phase"
         }
         val explanation = when (selectedHelp) {
@@ -258,6 +262,11 @@ fun SessionTimerScreen(
                 "Pause holds the current session or break. Resume continues from the same point. " +
                     "Time spent paused is compensated, where feasible, by shortening " +
                     "only the final two regular sessions according to your chosen ending."
+            "exit" ->
+                "Exit ends the currently running Class now and returns to the saved " +
+                    "Class list in Timer. Your saved and approved Class, schedule, " +
+                    "sound selections and other saved Classes are not deleted or changed. " +
+                    "Exit asks for confirmation and does not play a completion melody."
             "restart" ->
                 "Restart only the currently active " +
                     (if (isBreak) "Break" else "Session") +
@@ -271,16 +280,15 @@ fun SessionTimerScreen(
                     " plays. Restart is unavailable in Class summary and rejected " +
                     "without sound if a safe adjustment is impossible."
             else ->
-                "Next immediately finishes the current session or break and starts the " +
-                    "very next phase of THIS class, whether it is a session, " +
-                    "regular break, special break, or class summary. It plays the " +
-                    "appropriate cue: A when leaving a session, B when leaving a " +
-                    "break, and C when finishing the class. Skipped time is " +
-                    "added to the final two regular sessions, or reduced if a pause " +
-                    "previously used more time. Their original ending choice is " +
-                    "preserved and the approved saved preset never changes. " +
-                    "If the final pair has already started or cannot be adjusted " +
-                    "safely, Next shows an explanation instead of changing the clock."
+                "Next advances to the next phase of this Class, not another saved Class. " +
+                    "Use it even during the final two Sessions: earlier completed work is " +
+                    "never rewritten. If you choose Next on the final work Session or " +
+                    "final Class summary, it completes the Class and returns to saved Classes " +
+                    "with melody C, just like finishing the Class. On other phase skips, " +
+                    "melody A plays after a Session and B after a Break. The original Class " +
+                    "finish target is maintained when feasible; if an interruption makes " +
+                    "that impossible, Next still advances and the displayed expected " +
+                    "finish adjusts. Your saved Class remains unchanged."
         }
         AlertDialog(
             onDismissRequest = { helpFor = null },
@@ -292,6 +300,18 @@ fun SessionTimerScreen(
         )
     }
 
+}
+
+/** Keep timestamp labels compact; show hour/minute values ~1.5x larger. */
+@Composable
+private fun WallClockRow(label: String, value: String) {
+    Row(
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("$label  ", style = MaterialTheme.typography.labelSmall)
+        Text(value, style = MaterialTheme.typography.bodyLarge)
+    }
 }
 
 private fun phaseLabel(phase: SchedulePhase?): String = when (phase?.kind) {
