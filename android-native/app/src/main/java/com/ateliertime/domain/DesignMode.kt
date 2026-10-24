@@ -31,3 +31,15 @@ object DesignClock {
         }
     }
 }
+
+/** Presentation-only fill level: work fills, rest drains. No clock is changed. */
+object DesignMotion {
+    fun fillFraction(kind: PhaseKind?, durationMillis: Long, remainingMillis: Long): Float {
+        if (durationMillis <= 0L) return 0f
+        val isBreak = kind == PhaseKind.SHORT_BREAK || kind == PhaseKind.SPECIAL_BREAK
+        if (kind != PhaseKind.POSE && !isBreak) return 0f
+        val remaining = remainingMillis.coerceIn(0L, durationMillis)
+        val elapsedRatio = 1f - remaining.toFloat() / durationMillis.toFloat()
+        return if (isBreak) 1f - elapsedRatio else elapsedRatio
+    }
+}
