@@ -335,36 +335,42 @@ fun AtelierAboutPanel() {
                 // configured for Hebrew RTL. The name shrinks if necessary;
                 // version and copyright never disappear off-screen.
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            "Atlier Time",
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.titleLarge,
-                            autoSize = TextAutoSize.StepBased(
-                                minFontSize = 11.sp,
-                                maxFontSize = 18.sp,
-                                stepSize = 0.5.sp,
-                            ),
-                            maxLines = 1,
-                            softWrap = false,
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                        // Identical title size for ALL three header values.
+                        // Use one shared responsive size, not individual autosizing.
+                        val identitySize = if (maxWidth < 300.dp) 13.sp else 15.sp
+                        val identityStyle = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = identitySize,
+                            fontWeight = FontWeight.SemiBold,
                         )
-                        Text("Version $version",
-                            style = MaterialTheme.typography.labelMedium,
-                            maxLines = 1, softWrap = false)
-                        Text("© 2026",
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1, softWrap = false)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                "Atlier Time",
+                                modifier = Modifier.weight(1f),
+                                style = identityStyle,
+                                maxLines = 1,
+                                softWrap = false,
+                            )
+                            Text("Version $version",
+                                style = identityStyle,
+                                maxLines = 1, softWrap = false)
+                            Text("© 2026",
+                                style = identityStyle,
+                                maxLines = 1, softWrap = false)
+                        }
                     }
                 }
                 Text(
                     "Developed by Avi Yosfan with OpenAI",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                    ),
                     autoSize = TextAutoSize.StepBased(
                         minFontSize = 10.sp,
                         maxFontSize = 14.sp,
