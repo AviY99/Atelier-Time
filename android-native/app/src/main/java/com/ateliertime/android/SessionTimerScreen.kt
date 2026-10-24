@@ -1,6 +1,11 @@
 package com.ateliertime.android
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clip
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -27,6 +32,7 @@ fun SessionTimerScreen(
     wallClockMillis: Long,
     classClockTimes: ClassClockTimes,
     timerError: String?,
+    designPalette: DesignPalette,
     onStart: () -> Unit,
     onPauseResume: () -> Unit,
     onRestartSession: () -> Unit,
@@ -48,6 +54,25 @@ fun SessionTimerScreen(
     val isBreak = view.phase?.kind == PhaseKind.SHORT_BREAK ||
         view.phase?.kind == PhaseKind.SPECIAL_BREAK
     val canRestartSegment = view.phase?.kind == PhaseKind.POSE || isBreak
+    val isWork = view.phase?.kind == PhaseKind.POSE
+    val tahini = tahiniFill(designPalette)
+    val durationMs = view.phase?.durationSeconds?.toLong()?.times(1_000L) ?: 0L
+    val msLeft = view.phaseRemainingMillis ?:
+        view.phaseRemainingSeconds.toLong() * 1_000L
+    val elapsedShare = if (durationMs > 0) {
+        (1f - msLeft.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f)
+    } else 0f
+    // Session fills; Break drains. Single shared tahini color, no gradients.
+    val targetFill = when {
+        isWork -> elapsedShare
+        isBreak -> 1f - elapsedShare
+        else -> 0f
+    }
+    val smoothFill by animateFloatAsState(
+        targetValue = targetFill.coerceIn(0f, 1f),
+        animationSpec = tween(durationMillis = 210, easing = LinearEasing),
+        label = "solidTahiniPhaseProgress",
+    )
     val restartTitle = if (isBreak) "Restart break" else "Restart session"
     val currentRemainingLabel = when (view.phase?.kind) {
         PhaseKind.POSE -> "Current session remaining"
@@ -106,6 +131,17 @@ fun SessionTimerScreen(
             }
         }
         ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+            Box(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large)) {
+                if (isWork || isBreak) {
+                    Box(modifier = Modifier.matchParentSize()) {
+                        Box(
+                            modifier = Modifier.align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .fillMaxHeight(smoothFill.coerceIn(0f, 1f))
+                                .background(tahini.copy(alpha = 0.23f)),
+                        )
+                    }
+                }
             Column(
                 modifier = Modifier.fillMaxWidth().padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -127,18 +163,24 @@ fun SessionTimerScreen(
                     }
                 }
                 Text(formatTime(view.phaseRemainingSeconds),
-                    style = MaterialTheme.typography.displayLarge)
+                    style = MaterialTheme.typography.displayLarge.copy(
+                        fontFeatureSettings = "tnum"
+                    ))
                 Text(currentRemainingLabel)
                 view.phase?.let { phase ->
                     val done = phase.durationSeconds - view.phaseRemainingSeconds
                     LinearProgressIndicator(
                         progress = {
-                            done.toFloat() / phase.durationSeconds.coerceAtLeast(1)
+                            if (isWork || isBreak) smoothFill
+                            else done.toFloat() / phase.durationSeconds.coerceAtLeast(1)
                         },
                         modifier = Modifier.fillMaxWidth(),
+                        color = if (isWork || isBreak) tahini
+                            else MaterialTheme.colorScheme.primary,
                     )
                 }
                 Text("Next: " + phaseLabel(view.nextPhase))
+            }
             }
         }
         if (view.recoveredSeconds != 0) {
