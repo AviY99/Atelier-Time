@@ -162,7 +162,13 @@ class MonotonicSessionTimerTest {
             poseSeconds = 10 * minute, shortBreakSeconds = 5 * minute,
             specialBreakCount = 0, cycleStart = CycleStart.BREAK_FIRST,
         )
-        val session = engine.approve(engine.generate(rules))
+        // 60m total yields a shortened 8m final regular session, which
+        // requires an explicit ending choice before approval.
+        val unresolved = engine.generate(rules)
+        assertTrue(unresolved.needsFinalPoseChoice)
+        val approvedCandidate = engine.generate(rules, FinalPoseChoice.remainder())
+        assertTrue(approvedCandidate.canApprove)
+        val session = engine.approve(approvedCandidate)
         var now = 0L
         val timer = MonotonicSessionTimer(session) { now }
         timer.start()
