@@ -360,6 +360,13 @@ fun AtelierAboutPanel() {
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,
+                    autoSize = TextAutoSize.StepBased(
+                        minFontSize = 10.sp,
+                        maxFontSize = 14.sp,
+                        stepSize = 0.5.sp,
+                    ),
+                    maxLines = 1,
+                    softWrap = false,
                 )
                 HorizontalDivider()
                 Text(
