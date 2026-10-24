@@ -9,6 +9,8 @@ data class OpeningDraft(
     val minutes: String = "1",
     // Null is reserved for untouched legacy presets; all new groups set a value.
     val breakAfterMinutes: String? = null,
+    // Preserve the exact immutable approved group identifier on Edit.
+    val originalGroupId: String? = null,
 )
 data class EditorInput(
     val name: String,
@@ -49,7 +51,7 @@ data class EditorInput(
             summarySeconds = seconds(summaryMinutes, "summary minutes"),
             openingGroups = opening.map {
                 OpeningPoseGroup(
-                    "opening_" + it.id,
+                    it.originalGroupId ?: ("opening_" + it.id),
                     read(it.count, "opening pose count"),
                     seconds(it.minutes, "opening pose minutes"),
                     it.breakAfterMinutes?.let { input ->
