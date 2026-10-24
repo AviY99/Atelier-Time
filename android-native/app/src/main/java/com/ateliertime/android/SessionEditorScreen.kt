@@ -288,9 +288,15 @@ fun SessionEditorScreen() {
     // Keep the tab bar BELOW Android status icons/notch and content ABOVE
     // gesture navigation in edge-to-edge mode. All tabs share these insets.
     AtelierDesignTheme(designPalette) {
-    Column(modifier = Modifier.fillMaxSize()
-        .background(MaterialTheme.colorScheme.background)
-        .safeDrawingPadding()) {
+    // A plain Column does NOT set Material3 LocalContentColor; text outside
+    // Cards inherited the Android default (black) even on Night. Surface
+    // supplies the correct onBackground color for all root sections.
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onBackground,
+    ) {
+    Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
         // Non-scrolling 5-way navigation. LTR is deliberate, including on
         // Hebrew/RTL devices: Editor | Timer | Sound | Design | About.
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
@@ -796,6 +802,7 @@ fun SessionEditorScreen() {
                 TextButton(colors = atelierTextColors(), onClick = { helpSection = null }) { Text("Close") }
             },
         )
+    }
     }
     }
 }
