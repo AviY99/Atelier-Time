@@ -27,8 +27,8 @@ fun SessionTimerScreen(
     timerError: String?,
     onStart: () -> Unit,
     onPauseResume: () -> Unit,
-    onStopAndRestart: () -> Unit,
-    onStopAndNext: () -> Unit,
+    onRestartSession: () -> Unit,
+    onNextPhase: () -> Unit,
 ) {
     var confirmation by remember { mutableStateOf<String?>(null) }
     // Contextual help keeps the Timer compact on a phone. Nothing is hidden
@@ -89,9 +89,13 @@ fun SessionTimerScreen(
         )
         Text("Elapsed: " + formatTime(view.elapsedSeconds) +
             " / " + formatTime(view.totalSeconds))
-        if (view.recoveredSeconds > 0) {
-            Text("Time recovered from final two poses: " +
-                formatTime(view.recoveredSeconds), color = MaterialTheme.colorScheme.primary)
+        if (view.recoveredSeconds != 0) {
+            Text(
+                (if (view.recoveredSeconds > 0) "Time deducted from final two poses: "
+                else "Time added to final two poses: ") +
+                    formatTime(kotlin.math.abs(view.recoveredSeconds)),
+                color = MaterialTheme.colorScheme.primary,
+            )
             timer.finalTwoPoseDurations()?.let { pair ->
                 Text("Adjusted final two poses: " +
                     formatTime(pair.first) + " + " + formatTime(pair.second))
@@ -119,7 +123,7 @@ fun SessionTimerScreen(
             }
         }
         HorizontalDivider()
-        Text("Stop session", style = MaterialTheme.typography.titleMedium)
+        Text("Session controls", style = MaterialTheme.typography.titleMedium)
         Row(modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -128,7 +132,7 @@ fun SessionTimerScreen(
                     view.status == TimerStatus.PAUSED,
                 modifier = Modifier.weight(1f),
                 onClick = { confirmation = "restart" },
-            ) { Text("Stop and restart session") }
+            ) { Text("Restart session") }
             TextButton(onClick = { helpFor = "restart" }) { Text("Help") }
         }
         Row(modifier = Modifier.fillMaxWidth(),
@@ -138,8 +142,8 @@ fun SessionTimerScreen(
                 enabled = view.status == TimerStatus.RUNNING ||
                     view.status == TimerStatus.PAUSED,
                 modifier = Modifier.weight(1f),
-                onClick = { confirmation = "next" },
-            ) { Text("Stop and go to next saved session", maxLines = 2) }
+                onClick = onNextPhase,
+            ) { Text("Next") }
             TextButton(onClick = { helpFor = "next" }) { Text("Help") }
         }
     }
@@ -149,21 +153,19 @@ fun SessionTimerScreen(
         AlertDialog(
             onDismissRequest = { confirmation = null },
             title = {
-                Text(if (choice == "restart") "Stop and restart?" else "Stop and select next session?")
+                Text("Restart this session?")
             },
             text = {
-                Text(if (choice == "restart")
-                    "This begins again at the first pose. To preserve the original finish " +
-                        "clock time, only the last two poses will be shortened. " +
-                        "If that is impossible, your running session remains unchanged."
-                else
-                    "The current timer ends and the next saved preset opens ready to start. " +
-                        "Saved session data will not be changed.")
+                Text("Restart at the beginning of the same session. To keep the " +
+                    "original finish time, the final two regular poses are shortened " +
+                    "according to the approved ending choice. If that is impossible, " +
+                    "the running timer remains unchanged. The session-finish melody " +
+                    "plays only if the restart succeeds.")
             },
             confirmButton = {
                 TextButton(onClick = {
                     confirmation = null
-                    if (choice == "restart") onStopAndRestart() else onStopAndNext()
+                    onRestartSession()
                 }) { Text("Confirm") }
             },
             dismissButton = {
@@ -175,8 +177,8 @@ fun SessionTimerScreen(
     if (selectedHelp != null) {
         val title = when (selectedHelp) {
             "pause" -> "Pause / Resume"
-            "restart" -> "Stop and restart session"
-            else -> "Stop and go to next saved session"
+            "restart" -> "Restart session"
+            else -> "Next phase"
         }
         val explanation = when (selectedHelp) {
             "pause" ->
@@ -184,20 +186,23 @@ fun SessionTimerScreen(
                     "Time spent paused is compensated, where feasible, by shortening " +
                     "only the final two regular poses according to your chosen ending."
             "restart" ->
-                "Discard progress in the current run and begin this SAME session " +
-                    "from Pose 1. The originally planned clock finish remains fixed: " +
-                    "the time already spent is deducted from the final two regular " +
-                    "poses (if both can remain at least one minute). Your saved " +
-                    "session is not changed. If the deduction cannot fit, the timer " +
-                    "stays as it was and shows a warning."
+                "Restart the SAME session from its first pose and play the " +
+                    "session-finish melody C. Keep the original clock finish time " +
+                    "by deducting time already used from the two final regular " +
+                    "poses, according to the approved ending choice. Both must " +
+                    "remain at least one minute. If the change is impossible, " +
+                    "the running timer stays unchanged without playing a cue."
             else ->
-                "Next means the NEXT DIFFERENT session you previously approved " +
-                    "and saved in Editor → Saved session presets. For example, " +
-                    "if only Draw1425 is saved, there is no other session to load. " +
-                    "Save another approved preset first. With two or more presets, " +
-                    "this stops the current run, loads the next preset in saved " +
-                    "order (wrapping at the end), and waits for you to press Start. " +
-                    "Neither saved schedule is changed or shortened."
+                "Next immediately finishes the current phase and starts the " +
+                    "very next phase of THIS session, whether it is a pose, " +
+                    "regular break, special break, or summary. It plays the " +
+                    "appropriate cue: A when leaving a pose, B when leaving a " +
+                    "break, and C when finishing the session. Skipped time is " +
+                    "added to the final two regular poses, or reduced if a pause " +
+                    "previously used more time. Their original ending choice is " +
+                    "preserved and the approved saved preset never changes. " +
+                    "If the final pair has already started or cannot be adjusted " +
+                    "safely, Next shows an explanation instead of changing the clock."
         }
         AlertDialog(
             onDismissRequest = { helpFor = null },
