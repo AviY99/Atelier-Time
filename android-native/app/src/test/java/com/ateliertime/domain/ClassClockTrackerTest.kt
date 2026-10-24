@@ -92,9 +92,9 @@ class ClassClockTrackerTest {
         assertEquals("Class summary", running.currentPhaseLabel)
         val done = tracker.observe(view(phase = null, elapsed = 180,
             status = TimerStatus.FINISHED, remaining = 0), start + 150_000L)
-        assertEquals(start + 150_000L, done.classEndEpochMs)
+        assertEquals(start + 180_000L, done.classEndEpochMs)
         assertNull(done.currentPhaseLabel)
-        assertEquals(start + 150_000L, tracker.observe(
+        assertEquals(start + 180_000L, tracker.observe(
             view(phase = null, elapsed = 180, status = TimerStatus.FINISHED,
                 remaining = 0), start + 170_000L).classEndEpochMs)
     }
@@ -213,7 +213,7 @@ class ClassClockTrackerTest {
         assertEquals(start + 180_000L, repeated.classEndEpochMs)
     }
 
-    @Test fun nextWithoutCompensationRebasesActualEndClockButKeepsClassStart() {
+    @Test fun nextWithoutCompensationNeverChangesOriginalClassEndClock() {
         val tracker = ClassClockTracker()
         val start = 1_700_000_000_000L
         tracker.newClass(view(), start)
@@ -224,7 +224,7 @@ class ClassClockTrackerTest {
             start + 50_000L,
         )
         assertEquals(start, next.classStartEpochMs)
-        assertEquals(start + 50_000L + 120_000L, next.classEndEpochMs)
+        assertEquals(start + 180_000L, next.classEndEpochMs)
         assertEquals(start + 50_000L, next.currentPhaseStartEpochMs)
         assertEquals(start + 110_000L, next.currentPhaseEndEpochMs)
     }
@@ -238,6 +238,58 @@ class ClassClockTrackerTest {
             start + 60_500L,
         )
         assertEquals(start + 180_000L, next.classEndEpochMs)
+    }
+
+    @Test fun realElapsedContinuesDuringPauseAndDoesNotJumpOnNext() {
+        val tracker = ClassClockTracker()
+        val start = 1_000_000L
+        tracker.newClass(view(), start)
+        val paused = tracker.observe(
+            view(elapsed = 15, remaining = 45, status = TimerStatus.PAUSED),
+            start + 15_000L,
+        )
+        assertEquals(15, paused.classElapsedSeconds)
+        assertEquals(165, paused.classRemainingSeconds)
+        // The Session countdown stays paused while real Class elapsed continues.
+        val stillPaused = tracker.observe(
+            view(elapsed = 15, remaining = 45, status = TimerStatus.PAUSED),
+            start + 45_000L,
+        )
+        assertEquals(45, stillPaused.classElapsedSeconds)
+        assertEquals(135, stillPaused.classRemainingSeconds)
+        val skipped = tracker.afterNext(
+            view(phase = two, elapsed = 60, remaining = 60),
+            start + 50_000L,
+        )
+        assertEquals(50, skipped.classElapsedSeconds)
+        assertEquals(130, skipped.classRemainingSeconds)
+        assertEquals(start + 180_000L, skipped.classEndEpochMs)
+        assertEquals(start + 50_000L, skipped.currentPhaseStartEpochMs)
+    }
+
+    @Test fun millisecondPreciseRemainingPreventsEndClockOscillation() {
+        val tracker = ClassClockTracker()
+        val start = 1_000_000L
+        tracker.newClass(view(), start)
+        // Updates between second boundaries refer to the SAME real End.
+        val a = tracker.observe(
+            view(elapsed = 0, remaining = 60)
+                .copy(phaseRemainingMillis = 59_775L),
+            start + 225L,
+        )
+        val b = tracker.observe(
+            view(elapsed = 0, remaining = 60)
+                .copy(phaseRemainingMillis = 59_075L),
+            start + 925L,
+        )
+        val d = tracker.observe(
+            view(elapsed = 1, remaining = 59)
+                .copy(phaseRemainingMillis = 58_825L),
+            start + 1_175L,
+        )
+        assertEquals(start + 60_000L, a.currentPhaseEndEpochMs)
+        assertEquals(a.currentPhaseEndEpochMs, b.currentPhaseEndEpochMs)
+        assertEquals(b.currentPhaseEndEpochMs, d.currentPhaseEndEpochMs)
     }
 
     @Test fun phaseLabelsDifferentiateKindsOfBreak() {
