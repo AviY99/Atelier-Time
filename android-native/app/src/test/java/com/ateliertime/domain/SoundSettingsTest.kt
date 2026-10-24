@@ -130,4 +130,59 @@ class SoundSettingsTest {
             .soundFor(TimerCue.BREAK_FINISHED))
     }
 
+
+    @Test fun sharedModeCanDisableSourceUsedOnlyByHiddenSeparateChoices() {
+        val file = CueSound(source = SoundSource.FILE, uri = "content://audio/abc")
+        val settings = SoundSettings()
+            .setSourceEnabled(SoundSource.FILE, true)
+            .choose(TimerCue.BREAK_FINISHED, file)
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+        assertEquals(SoundSource.APP, settings.soundFor(TimerCue.POSE_FINISHED).source)
+        val disabled = settings.setSourceEnabled(SoundSource.FILE, false)
+        assertEquals(setOf(SoundSource.APP), disabled.enabledSources)
+        assertTrue(disabled.activeSourcesEnabled())
+        assertEquals(file, disabled.breakEnd)
+        // Returning to Separate restores B and re-enables its required library.
+        val restored = disabled.setAssignmentMode(SoundAssignmentMode.SEPARATE)
+        assertTrue(SoundSource.FILE in restored.enabledSources)
+        assertEquals(file, restored.soundFor(TimerCue.BREAK_FINISHED))
+    }
+
+    @Test fun separateModeCanDisableSourceUsedOnlyByHiddenSharedChoice() {
+        val system = CueSound(source = SoundSource.SYSTEM,
+            uri = "content://settings/system/notification_sound")
+        val settings = SoundSettings()
+            .setSourceEnabled(SoundSource.SYSTEM, true)
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .chooseForVisibleMode(TimerCue.POSE_FINISHED, system)
+            .setAssignmentMode(SoundAssignmentMode.SEPARATE)
+        val disabled = settings.setSourceEnabled(SoundSource.SYSTEM, false)
+        assertEquals(setOf(SoundSource.APP), disabled.enabledSources)
+        assertEquals(system, disabled.sharedSound)
+        assertTrue(disabled.activeSourcesEnabled())
+        val resumed = disabled.setAssignmentMode(SoundAssignmentMode.SHARED)
+        assertTrue(SoundSource.SYSTEM in resumed.enabledSources)
+        assertEquals(system, resumed.soundFor(TimerCue.SESSION_FINISHED))
+    }
+
+    @Test fun activeModeOnlySourceAndLastEnabledSourceStillCannotBeDisabled() {
+        val file = CueSound(source = SoundSource.FILE, uri = "content://audio/abc")
+        val sharedFile = SoundSettings().setSourceEnabled(SoundSource.FILE, true)
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .chooseForVisibleMode(TimerCue.SESSION_FINISHED, file)
+        assertThrows(IllegalArgumentException::class.java) {
+            sharedFile.setSourceEnabled(SoundSource.FILE, false)
+        }
+        val appOnly = sharedFile.setSourceEnabled(SoundSource.APP, false)
+        assertEquals(setOf(SoundSource.FILE), appOnly.enabledSources)
+        assertThrows(IllegalArgumentException::class.java) {
+            appOnly.setSourceEnabled(SoundSource.FILE, false)
+        }
+        // Unset sharedSound inherits A and must still protect A's source.
+        val inherited = SoundSettings().setAssignmentMode(SoundAssignmentMode.SHARED)
+        assertThrows(IllegalArgumentException::class.java) {
+            inherited.setSourceEnabled(SoundSource.APP, false)
+        }
+    }
+
 }
