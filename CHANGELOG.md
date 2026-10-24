@@ -1,5 +1,11 @@
 # Changelog — Atelier Time
 
+## 2026-10-24 — D-098 36s Gradle build pass / debug APK copied; installation and UI QA pending
+
+**D-098 PHONE BUILD VERIFIED (2026-10-24; user terminal screenshot):** From the existing `android-native` Code on the Go worktree, the combined Gradle command reached `:app:testDebugUnitTest`, `:app:packageDebug`, and `:app:assembleDebug`, ending **`BUILD SUCCESSFUL in 36s`**, **42 actionable tasks: 7 executed, 35 up-to-date**. The same terminal output verifies `ls -lh /storage/emulated/0/Download/Atelier-Time-D098.apk` returned a **12M APK**, dated **Oct 24 19:22**. This verifies successful JVM-test task + debug APK assembly and copying into Downloads, **NOT installation or user visual acceptance** of the new compact Editor timeline. The screenshot does not expose individual JUnit counts or the local Git SHA. **Next and only current D-098 gate:** open the already-copied APK in Downloads, update-install **without uninstalling or clearing saved Classes**, and visually inspect **Editor → Complete class timeline**: `bodyMedium` smaller activity/time rows, 2dp between rows, readable without overlap/clipping. Prior D-097 APK was user-confirmed installed and working. No repeat Gradle build needed. Preserve the previously approved app behavior, Draft PR #3 and frozen `stable/android-d086`; no paid GitHub Actions.
+
+---
+
 ## 2026-10-24 — D-097 accepted on phone; D-098 compact Editor timeline source committed
 
 - **D-097 accepted:** In the new conversation following its confirmed 45-second Gradle PASS and APK assembly, the user explicitly reports **"הכל עובד כנדרש"** for the updated installed D-097. This closes focused phone acceptance of Auto Design Day-left / Night-right full-palette preview and adjacent Timer time/length labels. Does NOT verify connected instrumentation or locked-screen/background reliability.
