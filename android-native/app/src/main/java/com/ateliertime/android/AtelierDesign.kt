@@ -8,7 +8,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -234,22 +237,39 @@ fun AtelierAboutPanel() {
                 modifier = Modifier.fillMaxWidth().padding(14.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                // Clear descending type hierarchy: version > name/credit >
-                // copyright and description.
-                Text("Version $version", style = MaterialTheme.typography.headlineMedium)
+                // Single English LTR identity line, even when the device is
+                // configured for Hebrew RTL. The name shrinks if necessary;
+                // version and copyright never disappear off-screen.
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            "Atlier Time",
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.titleLarge,
+                            autoSize = TextAutoSize.StepBased(
+                                minFontSize = 11.sp,
+                                maxFontSize = 18.sp,
+                                stepSize = 0.5.sp,
+                            ),
+                            maxLines = 1,
+                            softWrap = false,
+                        )
+                        Text("Version $version",
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1, softWrap = false)
+                        Text("© 2026",
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1, softWrap = false)
+                    }
+                }
                 Text(
-                    "Atlier Time · Developed by Avi Yosfan with Open AI",
-                    modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.titleMedium,
-                    autoSize = TextAutoSize.StepBased(
-                        minFontSize = 10.sp,
-                        maxFontSize = 14.sp,
-                        stepSize = 0.5.sp,
-                    ),
-                    maxLines = 1,
-                    softWrap = false,
+                    "Developed by Avi Yosfan with assistance from Open AI",
+                    style = MaterialTheme.typography.bodyMedium,
                 )
-                Text("© 2026", style = MaterialTheme.typography.bodySmall)
                 HorizontalDivider()
                 Text(
                     "Atlier Time is a live studio timer that reflects the progress " +
