@@ -1,5 +1,13 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v3.4)
 
+## MOST RECENT USER CLARIFICATION — 2026-10-24 D-078: NEXT = NEXT PHASE (SOURCE DONE; QA PENDING)
+
+The user clarified final Timer actions: **Pause** unchanged (Resume toggle), **Restart session** unchanged behavior but short label, and **Next** advances to the NEXT pose or break **inside this same approved session**, not next saved preset. **Both Restart and Next play the appropriate existing selected melody** on successful action: Restart C (ending current run), Next A after pose, B after break, C if ending final summary. Skipped time is compensated as **added time to the two final regular poses**, but preceding lost paused time can result in net reduction. Preserve original finish clock where feasible, user-approved Remainder/Even/Custom finishing distribution, fixed intervening break and reserved summary; never change saved approved presets. Reject impossible reductions/changes when final pair already started with clear error and no cue.
+
+**Source committed and GitHub read-back verified** on `android-native-kotlin-compose`: signed `FinalPairCompensation.adjust`, `MonotonicSessionTimer.nextPhase()` returning `TimerTick` with cue, new handler in root session UI, Timer controls renamed and Help text corrected, now displays both added/deducted ending time. Six new phase skipping JVM test methods, three signed final pair tests, fixed pre-existing 10-note assertion to current 20-note upbeat melody. **69 JVM unit-test @Test methods + 9 Android instrumentation in source**. **NO phone rebuild, unit task PASS or updated APK acceptance from this new change yet**; older build screenshots apply to prior revision. Next: CoGo checkout git fast-forward, Bash Gradle 9.6.1 `:app:testDebugUnitTest :app:assembleDebug` with native AAPT2 override; update-install preserving offline presets; test Next pose→break/pose with cues and Restart C/compensation, Pause toggle and End time. PR #3 draft/unmerged; no Actions expense.
+
+---
+
 ## LATEST — 2026-10-24 D-077 LIVE TAB FEEDBACK + FIXES WRITTEN, NOT YET REBUILT
 
 User's three new on-phone screenshots confirm three-tab UI running, real `Draw1425` timer with Now/End clock, visible 02:07 recovered time from final pair (16:26+16:27, EVEN_SPLIT), and no-next-saved-session error with only one stored preset. User asks: tab row lower (it overlaps Android top system icons); put Timer Stop explanations in dedicated Help buttons instead of long text; explain what next session means; make melodies **happier and more rhythmic**.
