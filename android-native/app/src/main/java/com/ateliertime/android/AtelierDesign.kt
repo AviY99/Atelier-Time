@@ -345,6 +345,7 @@ fun DesignSettingsPanel(
     settings: DesignPreferences,
     currentPalette: DesignPalette,
     currentClockMillis: Long,
+    onPreviewHourChange: (Int?) -> Unit,
     onChange: (DesignPreferences) -> Unit,
 ) {
     // Dragging edits a *draft* time. Commit when the thumb is released:
@@ -398,7 +399,7 @@ fun DesignSettingsPanel(
                 ) {
                     Text("Night begins at %02d:00".format(draftNightStart),
                         style = MaterialTheme.typography.titleLarge)
-                    Text("Choose the Night start hour. Day begins at 06:00. The choice is applied when you release the slider.",
+                    Text("Slide left for Day and right for Night. The chosen start hour applies when released; Day returns at 06:00.",
                         style = MaterialTheme.typography.bodySmall)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -422,6 +423,7 @@ fun DesignSettingsPanel(
                                     DesignClock.MIN_NIGHT_HOUR,
                                     DesignClock.MAX_NIGHT_HOUR,
                                 )
+                                onPreviewHourChange(draftNightStart)
                             },
                             onValueChangeFinished = {
                                 if (draftNightStart != settings.nightStartsAtHour) {
@@ -429,6 +431,7 @@ fun DesignSettingsPanel(
                                         nightStartsAtHour = draftNightStart,
                                     ))
                                 }
+                                onPreviewHourChange(null)
                             },
                             valueRange = DesignClock.MIN_NIGHT_HOUR.toFloat()..
                                 DesignClock.MAX_NIGHT_HOUR.toFloat(),
@@ -444,9 +447,11 @@ fun DesignSettingsPanel(
                         Text("Day · 12:00", style = MaterialTheme.typography.bodySmall)
                         Text("Night · 23:00", style = MaterialTheme.typography.bodySmall)
                     }
-                    Text("Currently showing at $deviceClock: " +
+                    Text("Currently showing: " +
                         (if (currentPalette == DesignPalette.DAY) "Day" else "Night"),
-                        style = MaterialTheme.typography.bodyMedium)
+                        style = MaterialTheme.typography.titleMedium)
+                    Text("Auto follows the clock outside Design. Local time: $deviceClock.",
+                        style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
