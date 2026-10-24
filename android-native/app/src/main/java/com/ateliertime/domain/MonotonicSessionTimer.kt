@@ -258,10 +258,12 @@ class MonotonicSessionTimer(
      * If previously paused, paused wall time is deducted first; the net can
      * be positive (shrink), zero or negative (extend).
      *
-     * Once either final regular pose is in progress, changing both poses
-     * would overwrite work already seen by the user; safely refuse instead.
-     * The final summary can be ended early by Next: C sounds immediately.
-     * All validations happen BEFORE touching any live runtime field.
+     * In the final work pair, adjust ONLY the last not-yet-started work Session,
+     * preserving observed earlier work; Next on the final work Session or
+     * terminal summary completes the Class and returns to its saved-class home.
+     * If preserving the finish target is impossible, Next still advances
+     * without changing any approved or already-observed phase. The UI updates
+     * the expected Class finish accordingly. One cue per successful action.
      */
     fun nextPhase(): TimerTick {
         check(status == TimerStatus.RUNNING || status == TimerStatus.PAUSED) {
@@ -273,8 +275,15 @@ class MonotonicSessionTimer(
         val currentIndex = activePhases.indexOfFirst { it.id == current.id }
         check(currentIndex >= 0) { "Active phase no longer exists." }
         val nextIndex = currentIndex + 1
-        // End-of-summary has no next phase. Complete immediately with C.
-        if (nextIndex >= activePhases.size) {
+        val finalPair = session.phases.indices.filter {
+            session.phases[it].kind == PhaseKind.POSE &&
+                session.phases[it].poseSource == PoseSource.REGULAR
+        }.takeLast(2)
+        // The final work Session is the last actionable work phase. A manual
+        // Next there is an explicit end of Class, even with an optional summary.
+        // Next from the terminal summary has the same Exit-like result.
+        if (nextIndex >= activePhases.size ||
+            (finalPair.isNotEmpty() && currentIndex == finalPair.last())) {
             status = TimerStatus.FINISHED
             runningFromMs = null
             suspendedFromMs = null
@@ -290,28 +299,36 @@ class MonotonicSessionTimer(
         val pausedSeconds = (pausedMs + 999L) / 1000L
         val skippedSeconds = previous.phaseRemainingSeconds.toLong()
         val corrected = lostSeconds.toLong() + pausedSeconds - skippedSeconds
-        require(corrected in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
-            "Too much time was gained or lost to adjust the final poses."
+        // Keep Next usable even when a very long pause exceeds the remaining
+        // compensation capacity. Prefer original Class finish when feasible.
+        // Never modify a final Session the user has already entered.
+        val revision = if (corrected in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
+            try {
+                val adjusted = if (finalPair.size == 2 &&
+                    currentIndex >= finalPair.first()) {
+                    FinalPairCompensation.adjustLastOnly(
+                        session, activePhases, corrected.toInt(),
+                    )
+                } else {
+                    FinalPairCompensation.adjust(session, corrected.toInt())
+                }
+                check(adjusted.phases[nextIndex].startSeconds ==
+                    activePhases[nextIndex].startSeconds) {
+                    "A previously reached phase cannot move."
+                }
+                adjusted
+            } catch (_: IllegalArgumentException) {
+                null // Advance without compensation; Class finish will update.
+            } catch (_: IllegalStateException) {
+                null
+            }
+        } else null
+        val target = revision?.phases?.get(nextIndex) ?: activePhases[nextIndex]
+        if (revision != null) {
+            activePhases = revision.phases
+            activeTotalMs = revision.totalSeconds.toLong() * 1000L
+            lostSeconds = revision.recoveredSeconds
         }
-        val revision = FinalPairCompensation.adjust(session, corrected.toInt())
-        val finalFirstIndex = session.phases.indices.filter {
-            session.phases[it].kind == PhaseKind.POSE &&
-                session.phases[it].poseSource == PoseSource.REGULAR
-        }.takeLast(2).first()
-        check(currentIndex < finalFirstIndex || corrected == lostSeconds.toLong()) {
-            "The final poses have already started. Skipping now cannot adjust " +
-                "both without rewriting elapsed posing. Approve a revised end time."
-        }
-        // The start of the next phase is identical before/after a final-pair
-        // adjustment until the first final pose itself starts.
-        val target = revision.phases[nextIndex]
-        check(target.startSeconds == activePhases[nextIndex].startSeconds) {
-            "The next phase would move in time; refusing an unsafe skip."
-        }
-
-        activePhases = revision.phases
-        activeTotalMs = revision.totalSeconds.toLong() * 1000L
-        lostSeconds = revision.recoveredSeconds
         elapsedBeforeRunMs = target.startSeconds.toLong() * 1000L
         runningFromMs = now
         suspendedFromMs = null
