@@ -35,16 +35,23 @@ class MonotonicSessionTimerTest {
         timer.start()
         now = 50_000L
         timer.pause()
-        now = 3_650_000L
+        now = 350_000L
         assertEquals(50, timer.update().view.elapsedSeconds)
-        timer.resume()
+        val resumed = timer.resume()
+        assertEquals(300, resumed.recoveredSeconds)
+        assertEquals(180 * minute - 300, resumed.totalSeconds)
         now += 12_000L
         assertEquals(62, timer.update().view.elapsedSeconds)
         timer.stop()
-        assertEquals(0, timer.view().elapsedSeconds)
+        assertEquals(62, timer.view().elapsedSeconds)
         assertEquals(TimerStatus.STOPPED, timer.view().status)
-        timer.start()
-        assertEquals(0, timer.update().view.elapsedSeconds)
+        now += 120_000L
+        val continued = timer.start()
+        assertEquals(62, continued.elapsedSeconds)
+        assertEquals(420, continued.recoveredSeconds)
+        val newSession = timer.restartFromBeginning()
+        assertEquals(0, newSession.elapsedSeconds)
+        assertEquals(180 * minute, newSession.totalSeconds)
     }
 
     @Test fun emitsDifferentSingleCuesOnPoseAndBreakEdges() {
@@ -100,6 +107,34 @@ class MonotonicSessionTimerTest {
         assertNull(timer.update().cue)
         now = 30L * minute * 1000L + 1_000L
         assertEquals(TimerCue.BREAK_FINISHED, timer.update().cue)
+    }
+
+    @Test fun interruptionCannotSilentlyRewriteFinalPairAlreadyInProgress() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        timer.start()
+        now = 140L * minute * 1000L
+        timer.update()
+        timer.pause()
+        now += minute * 1000L
+        try {
+            timer.resume()
+            fail("Must refuse to change an already-started final pose.")
+        } catch (_: IllegalStateException) { }
+        assertEquals(TimerStatus.PAUSED, timer.view().status)
+    }
+
+    @Test fun interruptionBeyondFinalPairCapacityRequiresNewApprovedPlan() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        timer.start()
+        timer.pause()
+        now = 29L * minute * 1000L
+        try {
+            timer.resume()
+            fail("Need at least one minute for each of two final poses.")
+        } catch (_: IllegalArgumentException) { }
+        assertEquals(TimerStatus.PAUSED, timer.view().status)
     }
 
     @Test fun defaultMelodiesAreDistinctAndFiveSecondsLong() {
