@@ -14,6 +14,9 @@ data class ClassClockTimes(
     val currentPhaseEndEpochMs: Long? = null,
     val currentPhaseLabel: String? = null,
     val paused: Boolean = false,
+    /** Physical Class time; Next skips phase time but never jumps this clock. */
+    val classElapsedSeconds: Int? = null,
+    val classRemainingSeconds: Int? = null,
 )
 
 /**
@@ -29,7 +32,6 @@ class ClassClockTracker {
     private var classDeadline: Long? = null
     private var phaseId: String? = null
     private var phaseStarted: Long? = null
-    private var wasFinished = false
 
     fun newClass(view: TimerView, nowEpochMs: Long): ClassClockTimes {
         require(view.status == TimerStatus.RUNNING && view.elapsedSeconds == 0) {
@@ -39,7 +41,6 @@ class ClassClockTracker {
         classDeadline = nowEpochMs + view.totalSeconds.toLong() * 1_000L
         phaseId = null
         phaseStarted = null
-        wasFinished = false
         return observe(view, nowEpochMs)
     }
 
@@ -56,22 +57,9 @@ class ClassClockTracker {
         return observe(view, nowEpochMs)
     }
 
-    /**
-     * After a user-requested Next, keep the original finish target if the
-     * final-pair reflow recovered the skipped time. If it was impossible to
-     * compensate safely, show the real newly projected finish instead of a
-     * stale deadline. The original Class start and saved schedule stay intact.
-     */
-    fun afterNext(view: TimerView, nowEpochMs: Long): ClassClockTimes {
-        if (view.status == TimerStatus.RUNNING) {
-            val projected = nowEpochMs + view.totalRemainingSeconds.toLong() * 1_000L
-            if (classDeadline == null ||
-                kotlin.math.abs(projected - classDeadline!!) > 2_000L) {
-                classDeadline = projected
-            }
-        }
-        return observe(view, nowEpochMs)
-    }
+    /** Next skips phase time, NEVER changes the Class's real finish clock. */
+    fun afterNext(view: TimerView, nowEpochMs: Long): ClassClockTimes =
+        observe(view, nowEpochMs)
 
     /** Restart just the active Session OR typed Break, keeping Class clocks. */
     fun restartCurrentSegment(view: TimerView, nowEpochMs: Long): ClassClockTimes {
@@ -96,17 +84,27 @@ class ClassClockTracker {
         if (view.status == TimerStatus.READY && classStarted == null) {
             return ClassClockTimes()
         }
+        // These values come from actual wall-clock time, not the virtual
+        // schedule cursor which Next moves and Pause freezes.
+        val elapsedReal = classStarted?.let { start ->
+            val seconds = (nowEpochMs - start).coerceAtLeast(0L) / 1_000L
+            val classLength = classDeadline?.let { finish ->
+                ((finish - start).coerceAtLeast(0L) / 1_000L)
+            } ?: Int.MAX_VALUE.toLong()
+            seconds.coerceAtMost(classLength).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+        }
+        val remainingReal = classDeadline?.let { finish ->
+            ((finish - nowEpochMs).coerceAtLeast(0L) + 999L)
+                .div(1_000L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+        }
         if (view.status == TimerStatus.FINISHED) {
-            if (!wasFinished) {
-                // Early completion of summary via Next is a real earlier finish.
-                classDeadline = nowEpochMs
-                wasFinished = true
-            }
             phaseId = null
             phaseStarted = null
             return ClassClockTimes(
                 classStartEpochMs = classStarted,
                 classEndEpochMs = classDeadline,
+                classElapsedSeconds = elapsedReal,
+                classRemainingSeconds = remainingReal,
             )
         }
         val phase = view.phase
@@ -123,9 +121,12 @@ class ClassClockTracker {
             classEndEpochMs = classDeadline,
             currentPhaseStartEpochMs = if (phase == null) null else phaseStarted,
             currentPhaseEndEpochMs = if (phase == null || halted) null
-                else nowEpochMs + view.phaseRemainingSeconds.toLong() * 1_000L,
+                else nowEpochMs + (view.phaseRemainingMillis ?:
+                    view.phaseRemainingSeconds.toLong() * 1_000L),
             currentPhaseLabel = phase?.let(::clockPhaseLabel),
             paused = halted,
+            classElapsedSeconds = elapsedReal,
+            classRemainingSeconds = remainingReal,
         )
     }
 }
