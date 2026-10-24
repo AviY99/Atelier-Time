@@ -78,11 +78,21 @@ class MelodyAudioPlayer {
                     .setBufferSizeInBytes(samples.size * 2)
                     .build()
                 track = output
-                check(output.state == AudioTrack.STATE_INITIALIZED) {
-                    "Android audio output is not initialized."
+                // MODE_STATIC intentionally starts at STATE_NO_STATIC_DATA (2):
+                // that is successful initialization, not an error. After the
+                // PCM clip is written, Android transitions to STATE_INITIALIZED.
+                // Checking for STATE_INITIALIZED *before* write() made every
+                // melody fail on the user's real Android phone.
+                check(output.state != AudioTrack.STATE_UNINITIALIZED) {
+                    "Android could not create an audio track (state 0)."
                 }
                 val wrote = output.write(samples, 0, samples.size, AudioTrack.WRITE_BLOCKING)
-                check(wrote == samples.size) { "Could not write the complete melody." }
+                check(wrote == samples.size) {
+                    "Could not load five-second melody PCM: wrote $wrote of ${samples.size} samples."
+                }
+                check(output.state == AudioTrack.STATE_INITIALIZED) {
+                    "Audio track did not initialize after PCM write (state ${output.state})."
+                }
                 output.play()
                 delay(MELODY_MS + 150L)
             } catch (failure: Exception) {
