@@ -10,25 +10,23 @@ import androidx.compose.ui.unit.dp
 import com.ateliertime.domain.*
 
 /**
- * Offline preset actions. Only an approved timeline can be saved. Every read
- * validates the saved signature with the current scheduling engine.
- * Activate selects a stored approved plan but does not start a timer yet.
+ * The Timer's HOME (no class running): manage only SAVED approved classes.
+ * Editing is deliberately in Editor, not inside the running clock.
+ * All storage operations use the existing signed, offline PresetCatalog.
  */
 @Composable
 fun PresetLibrarySection(
     catalog: PresetCatalog,
-    approved: ApprovedSession?,
-    selectedId: String?,
-    suggestedName: String,
-    onSelected: (StoredPreset, ApprovedSession) -> Unit,
-    onSaved: (StoredPreset) -> Unit,
+    refreshKey: Int,
+    onEdit: (StoredPreset, ApprovedSession) -> Unit,
+    onRun: (StoredPreset, ApprovedSession) -> Unit,
     onDeleted: (String) -> Unit,
 ) {
     var collection by remember(catalog) { mutableStateOf(PresetCollection()) }
     var error by remember { mutableStateOf<String?>(null) }
-    var renameId by remember { mutableStateOf<String?>(null) }
+    var renameTarget by remember { mutableStateOf<StoredPreset?>(null) }
     var renameText by remember { mutableStateOf("") }
-    var pendingDelete by remember { mutableStateOf<String?>(null) }
+    var pendingDelete by remember { mutableStateOf<StoredPreset?>(null) }
     var showHelp by remember { mutableStateOf(false) }
 
     fun refresh() {
@@ -36,103 +34,59 @@ fun PresetLibrarySection(
             collection = catalog.state()
             error = null
         } catch (failure: Exception) {
-            error = failure.message ?: "Cannot read saved classes."
+            error = failure.message ?: "Could not read saved classes."
         }
     }
-    fun action(block: () -> Unit): Boolean {
-        return try {
-            block()
-            refresh()
-            true
-        } catch (failure: Exception) {
-            error = failure.message ?: "Saved class operation failed."
-            false
-        }
+    fun action(block: () -> Unit): Boolean = try {
+        block()
+        refresh()
+        true
+    } catch (failure: Exception) {
+        error = failure.message ?: "Saved class operation failed."
+        false
     }
 
-    LaunchedEffect(catalog) { refresh() }
-
-    HorizontalDivider()
-    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-        Text("Saved class presets", style = MaterialTheme.typography.titleLarge,
+    LaunchedEffect(catalog, refreshKey) { refresh() }
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text("Saved classes", style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.weight(1f))
         TextButton(onClick = { showHelp = true }) { Text("Help") }
     }
-    Text("Only an approved class timeline can be saved. Presets are stored offline.")
-    if (error != null) {
-        Text(
-            error ?: "",
-            color = MaterialTheme.colorScheme.error,
-        )
+    Text("Run starts the chosen class timer. Edit opens its approved plan " +
+        "in Editor, where Save can replace it after confirmation.")
+    error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    if (collection.entries.isEmpty()) {
+        Text("No saved classes. Create a class in Editor and select Save class.")
     }
-    Row(
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Button(
-            enabled = approved != null && selectedId == null,
-            onClick = {
-                val session = approved ?: return@Button
-                action {
-                    val saved = catalog.save(session, suggestedName)
-                    onSaved(saved)
-                }
-            },
-        ) { Text("Save approved class") }
-        OutlinedButton(
-            enabled = approved != null && selectedId != null,
-            onClick = {
-                val session = approved ?: return@OutlinedButton
-                action {
-                    val saved = catalog.save(session, suggestedName, selectedId)
-                    onSaved(saved)
-                }
-            },
-        ) { Text("Overwrite saved preset") }
-        OutlinedButton(
-            enabled = approved != null,
-            onClick = {
-                val session = approved ?: return@OutlinedButton
-                action {
-                    val saved = catalog.save(session, suggestedName)
-                    onSaved(saved)
-                }
-            },
-        ) { Text("Save as new preset") }
-    }
-    if (collection.entries.isEmpty()) Text("No saved classes yet.")
     collection.entries.forEach { preset ->
         ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.fillMaxWidth().padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(preset.title, style = MaterialTheme.typography.titleMedium)
-                if (collection.activeId == preset.id) {
-                    Text("Selected class (load to open its timer)")
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    TextButton(onClick = {
-                        action { onSelected(preset, catalog.open(preset.id)) }
-                    }) { Text("Load & edit") }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
+                    Button(onClick = {
+                        action { onRun(preset, catalog.activate(preset.id)) }
+                    }) { Text("Run") }
+                    OutlinedButton(onClick = {
+                        action { onEdit(preset, catalog.open(preset.id)) }
+                    }) { Text("Edit") }
                     TextButton(onClick = {
                         action {
-                            val selected = catalog.activate(preset.id)
-                            onSelected(preset, selected)
-                        }
-                    }) { Text("Select preset") }
-                    TextButton(onClick = {
-                        action {
-                            catalog.duplicate(preset.id, preset.title + " copy")
+                            val base = preset.title + " copy"
+                            val used = collection.entries.map { it.title.lowercase() }.toSet()
+                            val name = if (base.lowercase() !in used) base else
+                                generateSequence(2) { it + 1 }
+                                    .map { "$base $it" }
+                                    .first { it.lowercase() !in used }
+                            catalog.duplicate(preset.id, name)
                         }
                     }) { Text("Duplicate") }
                     TextButton(onClick = {
-                        renameId = preset.id
+                        renameTarget = preset
                         renameText = preset.title
                     }) { Text("Rename") }
-                    TextButton(onClick = { pendingDelete = preset.id }) {
-                        Text("Delete")
-                    }
+                    TextButton(onClick = { pendingDelete = preset }) { Text("Delete") }
                 }
             }
         }
@@ -140,62 +94,53 @@ fun PresetLibrarySection(
     if (showHelp) {
         AlertDialog(
             onDismissRequest = { showHelp = false },
-            title = { Text("Saved class presets") },
-            text = {
-                Text( "Save an explicitly approved class timeline on this phone. " +
-                     "Load & edit restores that exact approved class into the editor. " +
-                     "Select preset marks the class for timer use but does not start a clock; " +
-                    "open the timer separately when ready. Duplicating or renaming " +
-                    "preserves the approved timeline.")
-            },
+            title = { Text("Managing saved classes") },
+            text = { Text("Run starts the class in Timer. Edit opens its plan in " +
+                "Editor and requires Save before changes are stored. Duplicate " +
+                "makes a separate saved copy. Rename changes only the class name; " +
+                "Delete permanently removes the selected class after confirmation.") },
             confirmButton = {
                 TextButton(onClick = { showHelp = false }) { Text("Close") }
             },
         )
     }
-    val renameTarget = renameId
-    if (renameTarget != null) {
+    renameTarget?.let { target ->
         AlertDialog(
-            onDismissRequest = { renameId = null },
-            title = { Text("Rename saved class") },
+            onDismissRequest = { renameTarget = null },
+            title = { Text("Rename class") },
             text = {
-                OutlinedTextField(
-                    value = renameText,
+                OutlinedTextField(value = renameText,
                     onValueChange = { renameText = it },
-                    label = { Text("New name") },
-                    singleLine = true,
-                )
+                    label = { Text("Class name") }, singleLine = true)
             },
             confirmButton = {
                 TextButton(onClick = {
                     if (action {
-                        val renamed = catalog.rename(renameTarget, renameText)
-                        if (selectedId == renameTarget) {
-                            onSelected(renamed, catalog.open(renameTarget))
-                        }
-                    }) {
-                        renameId = null
-                    }
-                }) { Text("Rename") }
+                        require(renameText.isNotBlank()) { "Enter a class name." }
+                        require(collection.entries.none {
+                            it.id != target.id &&
+                                it.title.equals(renameText.trim(), ignoreCase = true)
+                        }) { "Another saved class already uses that name." }
+                        catalog.rename(target.id, renameText)
+                    }) renameTarget = null
+                }) { Text("Save name") }
             },
             dismissButton = {
-                TextButton(onClick = { renameId = null }) { Text("Cancel") }
+                TextButton(onClick = { renameTarget = null }) { Text("Cancel") }
             },
         )
     }
-    val deleteTarget = pendingDelete
-    if (deleteTarget != null) {
+    pendingDelete?.let { target ->
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("Delete saved class?") },
-            text = { Text("This removes the stored preset from the phone.") },
+            title = { Text("Delete ${target.title}?") },
+            text = { Text("The saved class will be removed from this phone.") },
             confirmButton = {
                 TextButton(onClick = {
-                    action {
-                        catalog.delete(deleteTarget)
-                        onDeleted(deleteTarget)
-                    }
-                    pendingDelete = null
+                    if (action {
+                        catalog.delete(target.id)
+                        onDeleted(target.id)
+                    }) pendingDelete = null
                 }) { Text("Delete") }
             },
             dismissButton = {
