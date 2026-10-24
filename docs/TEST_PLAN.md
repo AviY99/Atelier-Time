@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **REAL PHONE GRADLE PASS, 2026-10-24 13:03:** Screenshot shows native branch fast-forward `c1bf428..bab39b3`, then `:app:testDebugUnitTest :app:assembleDebug` with native ARM64 AAPT2 override; log grep returned **`67:BUILD SUCCESSFUL in 52s`**. This confirms Gradle task success and debug APK build, superseding the preceding Kotlin compile failure. Numeric number of test cases was not displayed; **do not claim 89 individual test results on screenshot alone**. APK copy/install and all runtime acceptance of D-080/D-081 still **PENDING**. Next: copy APK to Download; update-install preserving data; verify Timer saved library Run/Edit, Editor Save and overwrite confirmation, current work-Session Restart (not Class), cues and Class clocks, compact progress and friendly ending mode label.
+
+
 > **PHONE COMPILE FAILURE, 2026-10-24 12:53 (D-080/D-081):** Photo displays `:app:compileDebugKotlin FAILED`, generic Kotlin compilation error, **`BUILD FAILED in 22s`**, 31 tasks (1 executed, 30 up-to-date). Missing concrete `e:` compiler lines in photo. Static GitHub source inspection found `SessionEditorScreen.kt` uses `horizontalScroll` without its import; import added in commit `bab39b3603b1693d4bc9260c4152344effe93676`, source readback verified. **Not yet phone-retested; cannot claim sole root cause**, JVM test/assemble did NOT pass in this invocation. Repeat local compile/test/assemble; if another failure, capture actual Kotlin diagnostic lines from Gradle log using `grep -nE '(^e:|^error:|Unresolved reference|Type mismatch|BUILD (FAILED|SUCCESSFUL))'`. Do not uninstall/clear previous app data.
 
 
