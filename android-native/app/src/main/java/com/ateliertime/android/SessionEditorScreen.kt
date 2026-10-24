@@ -504,10 +504,10 @@ fun SessionEditorScreen() {
             }) { Text("Help") }
         }
         if (parseError != null) {
-            Text(parseError ?: "", color = MaterialTheme.colorScheme.error)
+            Text(parseError ?: "", color = atelierErrorTextColor())
         } else if (candidate != null) {
             candidate.issues.filter { it.severity == IssueSeverity.ERROR }.forEach {
-                Text(it.message, color = MaterialTheme.colorScheme.error)
+                Text(it.message, color = atelierErrorTextColor())
             }
             if (candidate.finalPoseIsShort && !candidate.hasBlockingIssues) {
                 Text("Final regular session: choose an ending", style = MaterialTheme.typography.titleMedium)
@@ -593,7 +593,7 @@ fun SessionEditorScreen() {
                     candidate.issues.filter { it.severity == IssueSeverity.WARNING }.forEach {
                         Text(
                             "Rest recommendation: " + it.message,
-                            color = MaterialTheme.colorScheme.error,
+                            color = atelierErrorTextColor(),
                         )
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -630,7 +630,7 @@ fun SessionEditorScreen() {
                 }
                 TimelinePhaseChart(candidate.phases)
                 saveError?.let {
-                    Text(it, color = MaterialTheme.colorScheme.error)
+                    Text(it, color = atelierErrorTextColor())
                 }
                 Button(colors = atelierFilledColors(), 
                     onClick = { requestFinalSave() },
@@ -668,7 +668,7 @@ fun SessionEditorScreen() {
                     },
                 )
                 if (melodyError != null) {
-                    Text(melodyError ?: "", color = MaterialTheme.colorScheme.error)
+                    Text(melodyError ?: "", color = atelierErrorTextColor())
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Automatic timer alerts", modifier = Modifier.weight(1f))
