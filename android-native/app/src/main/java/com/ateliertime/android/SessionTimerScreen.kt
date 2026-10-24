@@ -223,13 +223,13 @@ fun SessionTimerScreen(
                                 maxLines = 1)
                         }
                     }
-                    OutlinedButton(colors = atelierFilledColors(), colors = atelierOutlinedColors(), 
+                    OutlinedButton(colors = atelierOutlinedColors(), 
                         enabled = underway && canRestartSegment,
                         onClick = { confirmation = "restart" },
                         modifier = Modifier.weight(1.45f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     ) { Text(restartTitle, style = MaterialTheme.typography.labelSmall) }
-                    OutlinedButton(colors = atelierFilledColors(), colors = atelierOutlinedColors(), 
+                    OutlinedButton(colors = atelierOutlinedColors(), 
                         enabled = underway,
                         onClick = onNextPhase,
                         modifier = Modifier.weight(0.8f),
@@ -248,19 +248,19 @@ fun SessionTimerScreen(
                 }
                 Row(modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly) {
-                    TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { helpFor = "pause" },
+                    TextButton(colors = atelierTextColors(), onClick = { helpFor = "pause" },
                         contentPadding = PaddingValues(horizontal = 4.dp)) {
                         Text("Pause help", style = MaterialTheme.typography.labelSmall)
                     }
-                    TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { helpFor = "restart" },
+                    TextButton(colors = atelierTextColors(), onClick = { helpFor = "restart" },
                         contentPadding = PaddingValues(horizontal = 4.dp)) {
                         Text("Restart help", style = MaterialTheme.typography.labelSmall)
                     }
-                    TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { helpFor = "next" },
+                    TextButton(colors = atelierTextColors(), onClick = { helpFor = "next" },
                         contentPadding = PaddingValues(horizontal = 2.dp)) {
                         Text("Next help", style = MaterialTheme.typography.labelSmall)
                     }
-                    TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { helpFor = "exit" },
+                    TextButton(colors = atelierTextColors(), onClick = { helpFor = "exit" },
                         contentPadding = PaddingValues(horizontal = 2.dp)) {
                         Text("Exit help", style = MaterialTheme.typography.labelSmall)
                     }
@@ -292,13 +292,13 @@ fun SessionTimerScreen(
                         " plays only after a successful restart.")
             },
             confirmButton = {
-                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = {
+                TextButton(colors = atelierTextColors(), onClick = {
                     confirmation = null
                     if (choice == "exit") onExit() else onRestartSession()
                 }) { Text("Confirm") }
             },
             dismissButton = {
-                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { confirmation = null }) { Text("Cancel") }
+                TextButton(colors = atelierTextColors(), onClick = { confirmation = null }) { Text("Cancel") }
             },
         )
     }
@@ -348,7 +348,7 @@ fun SessionTimerScreen(
             title = { Text(title) },
             text = { Text(explanation) },
             confirmButton = {
-                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { helpFor = null }) { Text("Close") }
+                TextButton(colors = atelierTextColors(), onClick = { helpFor = null }) { Text("Close") }
             },
         )
     }
