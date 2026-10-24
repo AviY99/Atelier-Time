@@ -166,6 +166,53 @@ class ClassClockTrackerTest {
             restarted.currentPhaseEndEpochMs)
     }
 
+    @Test fun restartingRegularBreakResetsOnlyBreakClocksAndKeepsClassClocks() {
+        val engine = ScheduleEngine()
+        val rules = SessionRules(
+            id = "clock-break-restart", name = "Class", totalSeconds = 180 * 60,
+            summarySeconds = 15 * 60, poseSeconds = 25 * 60,
+            specialBreakCount = 1,
+        )
+        val plan = engine.approve(engine.generate(rules, FinalPoseChoice.remainder()))
+        val start = 1_700_000_000_000L
+        var ticks = 0L
+        val timer = MonotonicSessionTimer(plan) { ticks }
+        val tracker = ClassClockTracker()
+        tracker.newClass(timer.start(), start)
+        ticks = 26L * 60_000L
+        val running = timer.update().view
+        val before = tracker.observe(running, start + ticks)
+        assertEquals("Break · regular", before.currentPhaseLabel)
+        assertEquals(start + 25L * 60_000L, before.currentPhaseStartEpochMs)
+        val repeated = timer.restartCurrentSegmentKeepingEndTime()
+        val afterward = tracker.restartCurrentSegment(repeated, start + ticks)
+        assertEquals("Break · regular", afterward.currentPhaseLabel)
+        assertEquals(start + ticks, afterward.currentPhaseStartEpochMs)
+        assertEquals(start + 31L * 60_000L, afterward.currentPhaseEndEpochMs)
+        assertEquals(start, afterward.classStartEpochMs)
+        assertEquals(start + 180L * 60_000L, afterward.classEndEpochMs)
+    }
+
+    @Test fun restartingPausedSpecialBreakRestoresRunningClock() {
+        val tracker = ClassClockTracker()
+        val special = two.copy(kind = PhaseKind.SPECIAL_BREAK)
+        val start = 8_000_000L
+        val initial = tracker.newClass(view(), start)
+        assertEquals(start, initial.classStartEpochMs)
+        val paused = tracker.observe(
+            view(phase = special, elapsed = 66,
+                status = TimerStatus.PAUSED, remaining = 54), start + 66_000L,
+        )
+        assertEquals("Break · special", paused.currentPhaseLabel)
+        assertNull(paused.currentPhaseEndEpochMs)
+        val repeated = tracker.restartCurrentSegment(
+            view(phase = special, elapsed = 60, remaining = 60), start + 80_000L,
+        )
+        assertEquals(start + 80_000L, repeated.currentPhaseStartEpochMs)
+        assertEquals(start + 140_000L, repeated.currentPhaseEndEpochMs)
+        assertEquals(start + 180_000L, repeated.classEndEpochMs)
+    }
+
     @Test fun phaseLabelsDifferentiateKindsOfBreak() {
         assertEquals("Break · opening group", clockPhaseLabel(
             two.copy(openingGroupId = "g")))
