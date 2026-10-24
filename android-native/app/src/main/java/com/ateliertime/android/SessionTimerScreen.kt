@@ -40,6 +40,10 @@ fun SessionTimerScreen(
         time.format(Date(it))
     } ?: "—"
     val segmentLabel = classClockTimes.currentPhaseLabel ?: "Current segment"
+    val isBreak = view.phase?.kind == PhaseKind.SHORT_BREAK ||
+        view.phase?.kind == PhaseKind.SPECIAL_BREAK
+    val canRestartSegment = view.phase?.kind == PhaseKind.POSE || isBreak
+    val restartTitle = if (isBreak) "Restart break" else "Restart session"
     val currentRemainingLabel = when (view.phase?.kind) {
         PhaseKind.POSE -> "Current session remaining"
         PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK ->
@@ -71,17 +75,10 @@ fun SessionTimerScreen(
             Column(horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text("Clock  " + showTime(wallClockMillis),
-                    style = MaterialTheme.typography.labelSmall)
+                    style = MaterialTheme.typography.headlineSmall)
                 Text("Class start  " + showTime(classClockTimes.classStartEpochMs),
                     style = MaterialTheme.typography.labelSmall)
                 Text("Class end  " + showTime(classClockTimes.classEndEpochMs),
-                    style = MaterialTheme.typography.labelSmall)
-                Text("$segmentLabel start  " +
-                    showTime(classClockTimes.currentPhaseStartEpochMs),
-                    style = MaterialTheme.typography.labelSmall)
-                Text("$segmentLabel end  " +
-                    (if (classClockTimes.paused) "— (paused)"
-                        else showTime(classClockTimes.currentPhaseEndEpochMs)),
                     style = MaterialTheme.typography.labelSmall)
                 Spacer(modifier = Modifier.height(6.dp))
                 Text("Class remaining  " + formatTime(view.totalRemainingSeconds),
@@ -103,7 +100,23 @@ fun SessionTimerScreen(
                 modifier = Modifier.fillMaxWidth().padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text(phaseLabel(view.phase), style = MaterialTheme.typography.titleLarge)
+                Row(modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.Top) {
+                    Text(phaseLabel(view.phase),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(1f))
+                    Column(horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Text("$segmentLabel start  " +
+                            showTime(classClockTimes.currentPhaseStartEpochMs),
+                            style = MaterialTheme.typography.labelSmall)
+                        Text("$segmentLabel end  " +
+                            (if (classClockTimes.paused) "— (paused)"
+                            else showTime(classClockTimes.currentPhaseEndEpochMs)),
+                            style = MaterialTheme.typography.labelSmall)
+                    }
+                }
                 Text(formatTime(view.phaseRemainingSeconds),
                     style = MaterialTheme.typography.displayLarge)
                 Text(currentRemainingLabel)
@@ -165,11 +178,11 @@ fun SessionTimerScreen(
                         }
                     }
                     OutlinedButton(
-                        enabled = underway && view.phase?.kind == PhaseKind.POSE,
+                        enabled = underway && canRestartSegment,
                         onClick = { confirmation = "restart" },
                         modifier = Modifier.weight(1.3f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
-                    ) { Text("Restart session", style = MaterialTheme.typography.labelSmall) }
+                    ) { Text(restartTitle, style = MaterialTheme.typography.labelSmall) }
                     OutlinedButton(
                         enabled = underway,
                         onClick = onNextPhase,
@@ -206,19 +219,21 @@ fun SessionTimerScreen(
             onDismissRequest = { confirmation = null },
             title = {
                 Text(if (choice == "exit") "End class and return?"
-                    else "Restart current session?")
+                    else "Restart current " + (if (isBreak) "break?" else "session?"))
             },
             text = {
                 Text(if (choice == "exit")
                     "End the current run and return to your saved classes in Timer. " +
                         "The saved approved plan is not changed."
                 else
-                    "Restart only the current work session from its beginning. " +
-                        "Previous sessions and breaks stay completed; the Class start " +
-                        "and expected end remain unchanged. Time spent repeating " +
-                        "this session is compensated by the final two regular " +
-                        "sessions, if feasible. The session-end melody A plays only " +
-                        "after a successful restart. Restart is unavailable during breaks.")
+                    "Repeat the current " + (if (isBreak) "break" else "session") +
+                        " from its beginning. Previously completed phases and Class " +
+                        "start/end are unchanged. Time spent repeating this phase is " +
+                        "deducted from the two final regular sessions when feasible; " +
+                        "if the first has already finished, only the unfinished last " +
+                        "session can be shortened. The appropriate " +
+                        (if (isBreak) "break-end melody B" else "session-end melody A") +
+                        " plays only after a successful restart.")
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -235,7 +250,7 @@ fun SessionTimerScreen(
     if (selectedHelp != null) {
         val title = when (selectedHelp) {
             "pause" -> "Pause / Resume"
-            "restart" -> "Restart session"
+            "restart" -> restartTitle
             else -> "Next phase"
         }
         val explanation = when (selectedHelp) {
@@ -244,15 +259,17 @@ fun SessionTimerScreen(
                     "Time spent paused is compensated, where feasible, by shortening " +
                     "only the final two regular sessions according to your chosen ending."
             "restart" ->
-                "Restart only the CURRENT work session, not the entire Class. " +
-                    "Earlier sessions and breaks remain completed. The current session's " +
-                    "start clock resets to now. The original Class start/end times " +
-                    "remain unchanged. Repeat time is deducted from the two final " +
-                    "regular sessions (or net added time is redistributed) according " +
-                    "to your approved ending choice; both must remain at least one " +
-                    "minute. Session-end melody A plays on success. Restart is disabled " +
-                    "during breaks or the summary, and is rejected if the final " +
-                    "pair cannot be adjusted without rewriting a completed session."
+                "Restart only the currently active " +
+                    (if (isBreak) "Break" else "Session") +
+                    ", not the entire Class. Its start clock resets to now, while " +
+                    "the Class start and expected finish remain unchanged. The repeat " +
+                    "time is balanced against the final two regular Sessions according " +
+                    "to the approved ending choice. If the first final Session is already " +
+                    "completed, only the second can change. Both retain at least one " +
+                    "minute. On success the " +
+                    (if (isBreak) "break-end melody B" else "session-end melody A") +
+                    " plays. Restart is unavailable in Class summary and rejected " +
+                    "without sound if a safe adjustment is impossible."
             else ->
                 "Next immediately finishes the current session or break and starts the " +
                     "very next phase of THIS class, whether it is a session, " +
