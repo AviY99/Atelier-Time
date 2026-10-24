@@ -2,6 +2,7 @@ package com.ateliertime.android
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -304,6 +305,8 @@ fun SessionEditorScreen() {
                         MainTab.ABOUT -> "About"
                     }
                     Tab(
+                        selectedContentColor = if (atelierNightActive()) Color.White else MaterialTheme.colorScheme.primary,
+                        unselectedContentColor = if (atelierNightActive()) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                         selected = activeTab == tab,
                         onClick = { activeTab = tab },
                         text = {
@@ -334,10 +337,10 @@ fun SessionEditorScreen() {
         Text("Class editor · Android", style = MaterialTheme.typography.titleMedium)
         Text("Changes update the preview. Save approves and stores this class.")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { applyA() }) { Text("Example A") }
-            OutlinedButton(onClick = { applyB() }) { Text("Example B") }
+            OutlinedButton(colors = atelierFilledColors(), colors = atelierOutlinedColors(), onClick = { applyA() }) { Text("Example A") }
+            OutlinedButton(colors = atelierFilledColors(), colors = atelierOutlinedColors(), onClick = { applyB() }) { Text("Example B") }
         }
-        OutlinedTextField(
+        OutlinedTextField(colors = atelierInputColors(), 
             value = name, onValueChange = { name = it; invalidate() },
             label = { Text("Class title") }, modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -349,7 +352,7 @@ fun SessionEditorScreen() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Opening session groups", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
-            TextButton(onClick = {
+            TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = {
                 helpSection = "Opening session groups" to
                     "Each group is an ordered set of equal-duration opening sessions. " +
                     "Every group has a configurable break after it. Zero minutes is allowed " +
@@ -361,7 +364,7 @@ fun SessionEditorScreen() {
         opening.toList().forEachIndexed { index, group ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Opening session group " + (index + 1), modifier = Modifier.weight(1f))
-                TextButton(onClick = {
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = {
                     helpSection = "Opening session group " + (index + 1) to
                         "Number of sessions means how many consecutive work sessions this group contains. " +
                         "Each session duration sets the time of one work session in minutes. " +
@@ -395,24 +398,24 @@ fun SessionEditorScreen() {
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = {
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = {
                     if (index > 0) {
                         opening[index] = opening[index - 1].also { opening[index - 1] = group }
                         invalidate()
                     }
                 }, enabled = index > 0) { Text("Up") }
-                TextButton(onClick = {
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = {
                     if (index < opening.lastIndex) {
                         opening[index] = opening[index + 1].also { opening[index + 1] = group }
                         invalidate()
                     }
                 }, enabled = index < opening.lastIndex) { Text("Down") }
-                TextButton(onClick = { opening.removeAt(index); invalidate() }) {
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { opening.removeAt(index); invalidate() }) {
                     Text("Remove")
                 }
             }
         }
-        OutlinedButton(onClick = {
+        OutlinedButton(colors = atelierFilledColors(), colors = atelierOutlinedColors(), onClick = {
             opening.add(OpeningDraft(nextOpeningId++, breakAfterMinutes = normal)); invalidate()
         }) { Text("Add opening session group") }
 
@@ -420,7 +423,7 @@ fun SessionEditorScreen() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Regular sessions", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
-            TextButton(onClick = {
+            TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = {
                 helpSection = "Regular sessions" to
                     "One repeating work session lasts the configured number of minutes. " +
                     "It is separate from regular and special break settings."
@@ -433,7 +436,7 @@ fun SessionEditorScreen() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Regular breaks", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
-            TextButton(onClick = {
+            TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = {
                 helpSection = "Regular breaks" to
                     "Regular breaks repeat between work sessions. Set their normal duration " +
                     "here, independently of special-break duration and placement. " +
@@ -444,12 +447,12 @@ fun SessionEditorScreen() {
             { normal = it; invalidate() }, Modifier.fillMaxWidth())
         Text("Standard repeating order", style = MaterialTheme.typography.titleSmall)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(
+            FilterChip(colors = atelierChipColors(), 
                 selected = cycle == CycleStart.POSE_FIRST,
                 onClick = { cycle = CycleStart.POSE_FIRST; invalidate() },
                 label = { Text("Session first") },
             )
-            FilterChip(
+            FilterChip(colors = atelierChipColors(), 
                 selected = cycle == CycleStart.BREAK_FIRST,
                 onClick = { cycle = CycleStart.BREAK_FIRST; invalidate() },
                 label = { Text("Break first") },
@@ -460,7 +463,7 @@ fun SessionEditorScreen() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Special breaks", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
-            TextButton(onClick = {
+            TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = {
                 helpSection = "Special breaks" to
                     "Special breaks REPLACE selected numbered regular breaks; they are " +
                     "not extra breaks. Choose their own duration, count and automatic " +
@@ -480,7 +483,7 @@ fun SessionEditorScreen() {
                 onCheckedChange = { automatic = it; invalidate() })
         }
         if (!automatic && count.toIntOrNull() != 0) {
-            OutlinedTextField(
+            OutlinedTextField(colors = atelierInputColors(), 
                 value = manualOrdinals,
                 onValueChange = { manualOrdinals = it; invalidate() },
                 label = { Text("Regular-break numbers, e.g. 2,4") },
@@ -492,7 +495,7 @@ fun SessionEditorScreen() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Complete class timeline", style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f))
-            TextButton(onClick = {
+            TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = {
                 helpSection = "Complete class timeline" to
                     "All timestamps are elapsed time from class start, not wall-clock time. " +
                     "The total class includes the end-of-class summary. A rest advisory " +
@@ -517,7 +520,7 @@ fun SessionEditorScreen() {
                 // The longest option deliberately occupies two text lines on phones.
                 Row(modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    FilterChip(
+                    FilterChip(colors = atelierChipColors(), 
                         modifier = Modifier.weight(1.5f),
                         selected = ending?.mode == FinalPoseMode.REMAINDER,
                         onClick = {
@@ -529,7 +532,7 @@ fun SessionEditorScreen() {
                                 maxLines = 2, textAlign = TextAlign.Center)
                         },
                     )
-                    FilterChip(
+                    FilterChip(colors = atelierChipColors(), 
                         modifier = Modifier.weight(0.8f),
                         selected = ending?.mode == FinalPoseMode.EVEN_SPLIT,
                         enabled = candidate.canSplitFinalTwo,
@@ -539,7 +542,7 @@ fun SessionEditorScreen() {
                         },
                         label = { Text("Even") },
                     )
-                    FilterChip(
+                    FilterChip(colors = atelierChipColors(), 
                         modifier = Modifier.weight(1.1f),
                         selected = ending?.mode == FinalPoseMode.CUSTOM_SPLIT,
                         enabled = candidate.canSplitFinalTwo,
@@ -629,7 +632,7 @@ fun SessionEditorScreen() {
                 saveError?.let {
                     Text(it, color = MaterialTheme.colorScheme.error)
                 }
-                Button(
+                Button(colors = atelierFilledColors(), 
                     onClick = { requestFinalSave() },
                     enabled = candidate.canApprove &&
                         (!candidate.needsSafetyAcknowledgement || acceptedWarning),
@@ -771,12 +774,12 @@ fun SessionEditorScreen() {
                 "Saving now will overwrite that class and its approved timeline. " +
                 "This cannot be undone. Continue?") },
             confirmButton = {
-                TextButton(onClick = { finalSave(target.id) }) {
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { finalSave(target.id) }) {
                     Text("Overwrite class")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { overwriteTarget = null }) {
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { overwriteTarget = null }) {
                     Text("Cancel")
                 }
             },
@@ -790,7 +793,7 @@ fun SessionEditorScreen() {
             title = { Text(openHelp.first) },
             text = { Text(openHelp.second) },
             confirmButton = {
-                TextButton(onClick = { helpSection = null }) { Text("Close") }
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { helpSection = null }) { Text("Close") }
             },
         )
     }
@@ -804,7 +807,7 @@ private fun MinuteInput(
     onChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    OutlinedTextField(
+    OutlinedTextField(colors = atelierInputColors(), 
         value = value, onValueChange = onChange,
         label = { Text(label) }, modifier = modifier,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
