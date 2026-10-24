@@ -47,6 +47,7 @@ fun SessionEditorScreen() {
     var designPreferences by remember(designStore) {
         mutableStateOf(designStore.load())
     }
+    var autoPreviewHour by remember { mutableStateOf<Int?>(null) }
     val melodyPreferences = remember(context) { MelodyPreferences(context) }
     var melodySelections by remember(melodyPreferences) {
         mutableStateOf(melodyPreferences.load())
@@ -88,7 +89,14 @@ fun SessionEditorScreen() {
         Calendar.getInstance().apply { timeInMillis = wallClockMillis }
             .get(Calendar.HOUR_OF_DAY)
     }
-    val designPalette = DesignClock.resolve(designPreferences, hourOfDay)
+    val realClockPalette = DesignClock.resolve(designPreferences, hourOfDay)
+    // The slider must preview Day on the LEFT and Night on the RIGHT,
+    // regardless of the real clock. Everywhere outside Design the app still
+    // follows the user's saved automatic hour, including overnight.
+    val designPalette = if (activeTab == MainTab.DESIGN &&
+        designPreferences.mode == com.ateliertime.domain.DesignMode.AUTO) {
+        DesignClock.sliderPreview(autoPreviewHour ?: designPreferences.nightStartsAtHour)
+    } else realClockPalette
     val classClockTracker = remember(liveTimer) { ClassClockTracker() }
     var classClockTimes by remember(liveTimer) { mutableStateOf(ClassClockTimes()) }
     var timerError by remember(liveTimer) { mutableStateOf<String?>(null) }
@@ -329,9 +337,11 @@ fun SessionEditorScreen() {
                 settings = designPreferences,
                 currentPalette = designPalette,
                 currentClockMillis = wallClockMillis,
+                onPreviewHourChange = { autoPreviewHour = it },
                 onChange = { updated ->
                     designPreferences = updated
                     designStore.save(updated)
+                    autoPreviewHour = null
                 },
             )
             MainTab.ABOUT -> AtelierAboutPanel()
