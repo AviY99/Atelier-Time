@@ -1,5 +1,13 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v3.4)
 
+## NEWEST USER REQUEST IMPLEMENTED IN SOURCE, NOT PHONE-BUILT — 2026-10-24
+
+After confirming the fixed melodies audibly work, user requested THREE persistent main **Editor/Sounds/Timer** tabs, removal of timer's Test and Editor buttons, live melody editing from Sounds while running, **Pause→Resume**, explicit stop actions **Stop and restart session** (restart at first phase preserving original finish deadline by recovering elapsed time from two final regular poses) and **Stop and go to next saved session** (select the next approved saved preset in library order, wrap, ready for explicit Start), small `Now` device clock and `End` session finish time at right of Timer, plus a proportional **chronological timeline chart** beneath Editor's textual schedule list. Native branch code **already committed/read back**: root-owned persistent tabs/timer/sound loop in `SessionEditorScreen`; refactored `SessionTimerScreen` with clock and actions; pure `MonotonicSessionTimer.restartKeepingEndTime` and 2 JVM edge tests; Compose Canvas `TimelinePhaseChart`. See D-075/D-076 in [DECISIONS](DECISIONS.md).
+
+**STATUS:** previous real-phone Gradle unit tests/APK success and user-confirmed melody success apply to PRIOR APK. The current tabs/controls/timeline-chart code has **NOT** been compiled, tested or installed on phone. JVM test source count **57**, Android instrumentation **9**. Next run phone Git fast-forward + Gradle `:app:testDebugUnitTest :app:assembleDebug` with CoGo ARM64 native AAPT2 override; fix actual failures, update-install without deleting previously saved sessions, verify tab continuity, live tone changes, clock, two explicit stops, graph. K04 lock/background behavior still not guaranteed; no paid Actions or PR merge.
+
+---
+
 ## LATEST USER DEVICE RESULT — 2026-10-24: FIVE-SECOND A/B/C MELODY PREVIEWS WORK (USER-REPORTED)
 
 After `AudioTrack.MODE_STATIC` state-order correction, successful phone Gradle build and instructions to update-install and test three `Play 5s` buttons, user answered **"הכל עובד"**. Treat this as **manual melody-preview functional PASS per user's confirmation**, not confirmation of automatic runtime cue scheduling or any audio recording evidence. **NEXT:** execute the genuine app's short 3-minute `POSE_FIRST` session: total 3m, end summary 0, no opening groups, pose 1m, regular break 1m, special break count 0; expect automatic A when pose ends at 01:00, B when break ends at 02:00, C at overall 03:00. Then test interruption reflow for REMAINDER/EVEN/CUSTOM approved finishing pose pair in a longer session. Do not mark K04 complete for lock/background audio; native foreground service absent. Draft PR #3 still open, GitHub Actions remain unused.
