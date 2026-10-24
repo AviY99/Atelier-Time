@@ -761,7 +761,7 @@ fun SessionEditorScreen() {
                                 "Select Android sound")
                             putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI,
                                 if (selected.source == SoundSource.SYSTEM)
-                                    selected.uri?.let(Uri::parse)
+                                    selected.uri?.let { Uri.parse(it) }
                                 else RingtoneManager.getDefaultUri(
                                     RingtoneManager.TYPE_NOTIFICATION))
                         }
