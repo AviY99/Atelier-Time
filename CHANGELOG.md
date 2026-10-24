@@ -1,5 +1,12 @@
 # Changelog — Atelier Time
 
+## 2026-10-24 — D-083 compact Timer controls and non-blocking Next (new-source QA pending)
+
+- User confirmed D-082 updated Android app working on phone (“הכל עובד”); prior CoGo Gradle `BUILD SUCCESSFUL in 12s` with 42/42 UP-TO-DATE tasks.
+- New Android branch source: replace long Exit label with distinct-color **Exit** in same four-button row as Pause/Restart/Next, with separate Exit help and confirmation. Display real wall-clock values in HH:mm without seconds; enlarge phase/Class start and end time values approximately 1.5×.
+- Next can advance through the final pair without rewriting already-observed work, falls back to advancing and adjusting projected end when compensation cannot fit, and finishes/returns to saved Classes with melody C on the final regular work Session or summary. Other Next A/B cues, saved plans and user settings preserved.
+- Added 5 net JVM test definitions (total **102 written**, 9 Android instrumentation methods). D-083 **not yet compiled, unit-tested, installed or manually QA-verified on phone**. PR #3 remains open Draft; no paid GitHub Actions.
+
 ## 2026-10-23 — K03 offline preset management in Android native source / HANDOFF v3.3
 
 - User authorized the next stage; continued real Android Kotlin/Compose/Gradle code on `android-native-kotlin-compose` draft PR #3.
