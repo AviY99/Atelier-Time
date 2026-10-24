@@ -59,8 +59,26 @@ data class SoundSettings(
         }
     }
 
-    fun setAssignmentMode(mode: SoundAssignmentMode): SoundSettings =
-        copy(assignmentMode = mode)
+    /**
+     * Inactive sound selections remain stored. When switching modes, enable
+     * any library required by that mode's saved choices automatically.
+     */
+    fun setAssignmentMode(mode: SoundAssignmentMode): SoundSettings {
+        if (mode == assignmentMode) return this
+        val next = copy(assignmentMode = mode)
+        return next.copy(enabledSources = enabledSources +
+            next.activeSounds().map { it.source })
+    }
+
+    /** Only the sounds currently in use by the picker and timer matter. */
+    fun activeSounds(): List<CueSound> = when (assignmentMode) {
+        SoundAssignmentMode.SHARED -> listOf(sharedSound ?: poseEnd)
+        SoundAssignmentMode.SEPARATE -> listOf(poseEnd, breakEnd, classEnd)
+    }
+
+    fun activeSourcesEnabled(): Boolean =
+        enabledSources.isNotEmpty() &&
+            activeSounds().all { it.isPlayable && it.source in enabledSources }
 
     // Selecting in SHARED mode updates one sound only; the separate choices
     // remain untouched and are restored on switching back.
@@ -115,9 +133,8 @@ data class SoundSettings(
     fun setSourceEnabled(source: SoundSource, enabled: Boolean): SoundSettings {
         val next = if (enabled) enabledSources + source else enabledSources - source
         require(next.isNotEmpty()) { "Keep at least one sound source enabled." }
-        require((listOf(poseEnd, breakEnd, classEnd) +
-            listOfNotNull(sharedSound)).all { it.source in next }) {
-            "Change the selected sounds before disabling this source."
+        require(activeSounds().all { it.source in next }) {
+            "Change the selected sound in the current mode before disabling this source."
         }
         return copy(enabledSources = next)
     }
