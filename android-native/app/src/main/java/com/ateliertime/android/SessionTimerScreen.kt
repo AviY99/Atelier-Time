@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -181,7 +182,8 @@ fun SessionTimerScreen(
                 (if (view.recoveredSeconds > 0) "Time deducted from final two sessions: "
                 else "Time added to final two sessions: ") +
                     formatTime(kotlin.math.abs(view.recoveredSeconds)),
-                color = MaterialTheme.colorScheme.primary,
+                color = if (atelierNightActive()) Color.White
+                    else MaterialTheme.colorScheme.primary,
             )
             timer.finalTwoPoseDurations()?.let { pair ->
                 Text("Adjusted final two sessions: " +
@@ -210,24 +212,24 @@ fun SessionTimerScreen(
                         view.status == TimerStatus.PAUSED
                     if (view.status == TimerStatus.READY ||
                         view.status == TimerStatus.FINISHED) {
-                        Button(onClick = onStart, modifier = Modifier.weight(1f),
+                        Button(colors = atelierFilledColors(), onClick = onStart, modifier = Modifier.weight(1f),
                             contentPadding = PaddingValues(horizontal = 5.dp, vertical = 6.dp)) {
                             Text("Start", maxLines = 1)
                         }
                     } else {
-                        Button(onClick = onPauseResume, modifier = Modifier.weight(1f),
+                        Button(colors = atelierFilledColors(), onClick = onPauseResume, modifier = Modifier.weight(1f),
                             contentPadding = PaddingValues(horizontal = 5.dp, vertical = 6.dp)) {
                             Text(if (view.status == TimerStatus.RUNNING) "Pause" else "Resume",
                                 maxLines = 1)
                         }
                     }
-                    OutlinedButton(
+                    OutlinedButton(colors = atelierFilledColors(), colors = atelierOutlinedColors(), 
                         enabled = underway && canRestartSegment,
                         onClick = { confirmation = "restart" },
                         modifier = Modifier.weight(1.45f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     ) { Text(restartTitle, style = MaterialTheme.typography.labelSmall) }
-                    OutlinedButton(
+                    OutlinedButton(colors = atelierFilledColors(), colors = atelierOutlinedColors(), 
                         enabled = underway,
                         onClick = onNextPhase,
                         modifier = Modifier.weight(0.8f),
@@ -239,25 +241,26 @@ fun SessionTimerScreen(
                         contentPadding = PaddingValues(horizontal = 3.dp, vertical = 6.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                            contentColor = if (atelierNightActive()) Color.White
+                                else MaterialTheme.colorScheme.onErrorContainer,
                         ),
                     ) { Text("Exit", maxLines = 1, style = MaterialTheme.typography.labelSmall) }
                 }
                 Row(modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly) {
-                    TextButton(onClick = { helpFor = "pause" },
+                    TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { helpFor = "pause" },
                         contentPadding = PaddingValues(horizontal = 4.dp)) {
                         Text("Pause help", style = MaterialTheme.typography.labelSmall)
                     }
-                    TextButton(onClick = { helpFor = "restart" },
+                    TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { helpFor = "restart" },
                         contentPadding = PaddingValues(horizontal = 4.dp)) {
                         Text("Restart help", style = MaterialTheme.typography.labelSmall)
                     }
-                    TextButton(onClick = { helpFor = "next" },
+                    TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { helpFor = "next" },
                         contentPadding = PaddingValues(horizontal = 2.dp)) {
                         Text("Next help", style = MaterialTheme.typography.labelSmall)
                     }
-                    TextButton(onClick = { helpFor = "exit" },
+                    TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { helpFor = "exit" },
                         contentPadding = PaddingValues(horizontal = 2.dp)) {
                         Text("Exit help", style = MaterialTheme.typography.labelSmall)
                     }
@@ -289,13 +292,13 @@ fun SessionTimerScreen(
                         " plays only after a successful restart.")
             },
             confirmButton = {
-                TextButton(onClick = {
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = {
                     confirmation = null
                     if (choice == "exit") onExit() else onRestartSession()
                 }) { Text("Confirm") }
             },
             dismissButton = {
-                TextButton(onClick = { confirmation = null }) { Text("Cancel") }
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { confirmation = null }) { Text("Cancel") }
             },
         )
     }
@@ -345,7 +348,7 @@ fun SessionTimerScreen(
             title = { Text(title) },
             text = { Text(explanation) },
             confirmButton = {
-                TextButton(onClick = { helpFor = null }) { Text("Close") }
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { helpFor = null }) { Text("Close") }
             },
         )
     }
