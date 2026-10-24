@@ -1,5 +1,11 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v3.4)
 
+## CHAT CLOSED — NEW BINDING HANDOFF FOR NEXT CONVERSATION (2026-10-24)
+
+**Read [NEXT_CHAT_HANDOFF_2026_10_24.md](NEXT_CHAT_HANDOFF_2026_10_24.md) FIRST.** This is the new authoritative, dedicated next-chat document, committed and verified on `main`. The user explicitly ended this conversation. **Do not continue coding or ask for phone work in this closed chat.** The prior installed APK is **user-confirmed working** after screenshot-verified 13:03 Gradle success; subsequent D-082 start/end clocks in timer card, 2× Clock and Restart Break are **already implemented in GitHub source**, but **not yet built/tested/installed on phone**. Read new handoff for next-chat task ordering and distinctions. Older sections below remain historical. Native branch observed head at handoff: `b51620d64e87db129dcf44c153fb7bc986fcacf6`; PR #3 remains open Draft, not merged. No paid Actions.
+
+---
+
 ## ACTIVE HANDOFF — 2026-10-24 D-082 — last phone release confirmed working; NEW changes in source only
 
 **Authoritative status, superseding historical "install pending" blocks below:** At 13:03, the native phone Gradle `:app:testDebugUnitTest :app:assembleDebug` logged **BUILD SUCCESSFUL in 52s**. The user subsequently **explicitly confirmed the APK had already been installed and was working correctly**. DO NOT request reinstallation or repeat those completed gates. This acceptance belongs to the installed D-080/D-081 revision, **not** to subsequent D-082 changes. The historical [NEXT_CHAT_HANDOFF_2026_10_23.md](NEXT_CHAT_HANDOFF_2026_10_23.md) and K03/K04-pending notes reflect their original dates and are no longer present-time facts.
