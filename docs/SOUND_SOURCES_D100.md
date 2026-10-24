@@ -1,6 +1,6 @@
 # Atelier Time — D-100 expanded sound sources and duration controls (2026-10-24)
 
-**STATUS: Android source implemented on `android-native-kotlin-compose`, GitHub readback/static structure checked; NO phone Gradle build, install, audible runtime test, or user approval yet.** This is a new functional increment AFTER user-accepted design-frozen Android Stable 2 / D-098. Do NOT move or rewrite `stable/android-d098` or `stable/android-d086`.
+**CURRENT STATUS (2026-10-24): D-100 user-phone Gradle build/test task PASS and debug APK assembly PASS** (screenshot shows `BUILD SUCCESSFUL in 41s`, 42 tasks: 8 executed, 34 up-to-date, including `:app:testDebugUnitTest` and `:app:assembleDebug`). **The D-100 APK has NOT yet been confirmed copied to Downloads, update-installed, audibly tested, or user-approved.** The screenshot does not show the local HEAD SHA or individual JUnit method results. No rebuild is needed before the next gate. This is a new functional increment AFTER user-accepted design-frozen Android Stable 2 / D-098. Do NOT move or rewrite `stable/android-d098` or `stable/android-d086`.
 
 ## Approved user requirement
 
@@ -31,7 +31,7 @@ Categories are **multi-select**. Every enabled category appears as choices under
 
 | ID | Requirement and evidence needed |
 |---|---|
-| S01 | Phone Gradle 9.6.1 `:app:testDebugUnitTest :app:assembleDebug` with existing ARM64 AAPT2 override succeeds for the newly pulled code; note commit SHA, console and JUnit report counts |
+| S01 | **PASS (screenshot-confirmed, 2026-10-24):** Gradle test task, debug APK packaging and assembly succeeded in 41s; 42 actionable tasks (8 executed / 34 up-to-date). Exact local HEAD SHA and JUnit XML counts not shown, so they are not independently verified. |
 | S02 | Update-install Android debug APK without uninstall/data clearing; all previously saved Classes still visible |
 | S03 | Clean/default settings show only Atelier Time sounds, matching existing A/B/C selections and 5/5/5s durations |
 | S04 | Enable System; native ringtone chooser opens, returns an audible system sound and assigns it to cue A without changing B/C |
@@ -57,6 +57,13 @@ set -o pipefail &&
 bash "$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle" :app:testDebugUnitTest :app:assembleDebug --no-daemon --console=plain "-Pandroid.aapt2FromMavenOverride=$ANDROID_HOME/build-tools/36.0.0/aapt2" 2>&1 | tee "$HOME/atelier-d100-build.log"
 ```
 
-**Only on SUCCESS**, copy `app/build/outputs/apk/debug/app-debug.apk` to Downloads as `Atelier-Time-D100.apk`, update-install without uninstall/clearing data, then run the focused sound-source/duration QA. Do not present this document or source changes as an already tested new APK.
+**S01 already passed — do NOT repeat Gradle.** From the already-open `android-native` directory copy the existing successful APK to Downloads using:
+
+```bash
+cp app/build/outputs/apk/debug/app-debug.apk /storage/emulated/0/Download/Atelier-Time-D100.apk &&
+ls -lh /storage/emulated/0/Download/Atelier-Time-D100.apk
+```
+
+Then open the copied APK from Downloads and **update-install without uninstalling or clearing saved Classes**; run focused sound-source/duration QA S02–S15. The screenshot shown by the user only establishes the build PASS, not these pending steps. Do not present this document or source changes as an already tested new APK.
 
 **References:** Official Android RingtoneManager ACTION_RINGTONE_PICKER and Android OpenDocument/MediaPlayer APIs. The other platforms will need native adapters, not a claim of free cross-OS audio catalogs.
