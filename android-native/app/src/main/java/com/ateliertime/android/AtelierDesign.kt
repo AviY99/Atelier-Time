@@ -274,6 +274,20 @@ fun DesignSettingsPanel(
                     style = MaterialTheme.typography.titleLarge,
                 )
                 Slider(
+                    // The chosen time is when NIGHT starts. The part RIGHT
+                    // of the thumb must be Night blue; the left is Day.
+                    // Material3 normally colors the LEFT segment as active,
+                    // which previously made the visual meaning reversed.
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = if (currentPalette == DesignPalette.DAY)
+                            Color(0xFFD8CFBF) else Color(0xFF8498B0),
+                        inactiveTrackColor = if (currentPalette == DesignPalette.DAY)
+                            Color(0xFF41648B) else Color(0xFF99BCE0),
+                        activeTickColor = if (currentPalette == DesignPalette.DAY)
+                            Color(0xFF4B4C4A) else Color.White,
+                        inactiveTickColor = Color(0xFF223853),
+                    ),
                     value = settings.nightStartsAtHour.toFloat(),
                     onValueChange = {
                         onChange(settings.copy(
@@ -289,8 +303,8 @@ fun DesignSettingsPanel(
                 )
                 Row(modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("12:00", style = MaterialTheme.typography.bodySmall)
-                    Text("23:00", style = MaterialTheme.typography.bodySmall)
+                    Text("Day · 12:00", style = MaterialTheme.typography.bodySmall)
+                    Text("Night · 23:00", style = MaterialTheme.typography.bodySmall)
                 }
                 Text(
                     "Currently showing: " + (if (currentPalette == DesignPalette.DAY) "Day" else "Night"),
