@@ -48,7 +48,7 @@ fun PresetLibrarySection(
     Row(modifier = Modifier.fillMaxWidth()) {
         Text("Saved classes", style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.weight(1f))
-        TextButton(onClick = { showHelp = true }) { Text("Help") }
+        TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { showHelp = true }) { Text("Help") }
     }
     Text("Run starts the chosen class timer. Edit opens its approved plan " +
         "in Editor, where Save can replace it after confirmation.")
@@ -67,11 +67,11 @@ fun PresetLibrarySection(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Button(
+                    Button(colors = atelierFilledColors(), 
                         onClick = { action { onRun(preset, catalog.activate(preset.id)) } },
                         modifier = Modifier.weight(1f),
                     ) { Text("Run", maxLines = 1) }
-                    OutlinedButton(
+                    OutlinedButton(colors = atelierFilledColors(), colors = atelierOutlinedColors(), 
                         onClick = { action { onEdit(preset, catalog.open(preset.id)) } },
                         modifier = Modifier.weight(1f),
                     ) { Text("Edit", maxLines = 1) }
@@ -80,7 +80,7 @@ fun PresetLibrarySection(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    FilledTonalButton(
+                    FilledTonalButton(colors = atelierFilledColors(), colors = atelierTonalColors(), 
                         onClick = {
                             action {
                                 val base = preset.title + " copy"
@@ -95,7 +95,7 @@ fun PresetLibrarySection(
                         modifier = Modifier.weight(1.3f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     ) { Text("Duplicate", maxLines = 1, style = MaterialTheme.typography.labelMedium) }
-                    OutlinedButton(
+                    OutlinedButton(colors = atelierFilledColors(), colors = atelierOutlinedColors(), 
                         onClick = {
                             renameTarget = preset
                             renameText = preset.title
@@ -108,7 +108,8 @@ fun PresetLibrarySection(
                         modifier = Modifier.weight(0.9f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                         colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error,
+                            contentColor = if (atelierNightActive()) androidx.compose.ui.graphics.Color.White
+                                else MaterialTheme.colorScheme.error,
                         ),
                     ) { Text("Delete", maxLines = 1, style = MaterialTheme.typography.labelMedium) }
                 }
@@ -124,7 +125,7 @@ fun PresetLibrarySection(
                 "makes a separate saved copy. Rename changes only the class name; " +
                 "Delete permanently removes the selected class after confirmation.") },
             confirmButton = {
-                TextButton(onClick = { showHelp = false }) { Text("Close") }
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { showHelp = false }) { Text("Close") }
             },
         )
     }
@@ -133,12 +134,12 @@ fun PresetLibrarySection(
             onDismissRequest = { renameTarget = null },
             title = { Text("Rename class") },
             text = {
-                OutlinedTextField(value = renameText,
+                OutlinedTextField(colors = atelierInputColors(), value = renameText,
                     onValueChange = { renameText = it },
                     label = { Text("Class name") }, singleLine = true)
             },
             confirmButton = {
-                TextButton(onClick = {
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = {
                     if (action {
                         require(renameText.isNotBlank()) { "Enter a class name." }
                         require(collection.entries.none {
@@ -150,7 +151,7 @@ fun PresetLibrarySection(
                 }) { Text("Save name") }
             },
             dismissButton = {
-                TextButton(onClick = { renameTarget = null }) { Text("Cancel") }
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { renameTarget = null }) { Text("Cancel") }
             },
         )
     }
@@ -160,7 +161,7 @@ fun PresetLibrarySection(
             title = { Text("Delete ${target.title}?") },
             text = { Text("The saved class will be removed from this phone.") },
             confirmButton = {
-                TextButton(onClick = {
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = {
                     if (action {
                         catalog.delete(target.id)
                         onDeleted(target.id)
@@ -168,7 +169,7 @@ fun PresetLibrarySection(
                 }) { Text("Delete") }
             },
             dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) { Text("Cancel") }
+                TextButton(colors = atelierFilledColors(), colors = atelierTextColors(), onClick = { pendingDelete = null }) { Text("Cancel") }
             },
         )
     }
