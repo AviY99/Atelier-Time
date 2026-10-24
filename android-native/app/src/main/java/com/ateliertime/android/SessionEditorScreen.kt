@@ -57,7 +57,6 @@ fun SessionEditorScreen() {
     var acceptedWarning by remember { mutableStateOf(false) }
     var approved by remember { mutableStateOf<ApprovedSession?>(null) }
     var playingSession by remember { mutableStateOf<ApprovedSession?>(null) }
-    var playingPresetId by remember { mutableStateOf<String?>(null) }
     var activeTab by remember { mutableStateOf(MainTab.EDITOR) }
     var soundEnabled by remember { mutableStateOf(true) }
     val liveTimer = remember(playingSession) {
@@ -164,29 +163,24 @@ fun SessionEditorScreen() {
         }
     }
 
-    fun goToNextSavedSession() {
+    /** Play only an actually committed timer transition, never a failed action. */
+    fun runTimedCue(action: () -> TimerTick) {
         try {
-            val entries = catalog.state().entries
-            val currentIndex = entries.indexOfFirst { it.id == playingPresetId }
-            val next = if (currentIndex >= 0 && entries.size > 1) {
-                entries[(currentIndex + 1) % entries.size]
-            } else if (currentIndex < 0) {
-                entries.firstOrNull()
-            } else null
-            if (next == null) {
-                timerError =
-                    "Only one saved session is available (or none). " +
-                        "To use Next, save a second approved preset in Editor. " +
-                        "Your current timer is still running."
-            } else {
-                val restored = catalog.activate(next.id)
-                loadPreset(next, restored)
-                playingSession = restored
-                playingPresetId = next.id
-                activeTab = MainTab.TIMER
+            val event = action()
+            timerView = event.view
+            timerError = null
+            if (event.view.status == TimerStatus.FINISHED) {
+                deadlineMillis = System.currentTimeMillis()
             }
-        } catch (error: Exception) {
-            timerError = error.message ?: "Cannot load the next saved session."
+            if (soundEnabled && event.cue != null) {
+                melodyPlayer.play(melodySelections.forCue(event.cue)) {
+                    error -> melodyError = error
+                }
+            }
+        } catch (error: IllegalArgumentException) {
+            timerError = error.message ?: "The final poses cannot absorb this time change."
+        } catch (error: IllegalStateException) {
+            timerError = error.message ?: "This phase cannot be skipped safely."
         }
     }
 
@@ -490,7 +484,6 @@ fun SessionEditorScreen() {
                     Text("Exact timeline approved. Save this session, or start the timer.")
                     Button(onClick = {
                         playingSession = approved
-                        playingPresetId = selectedPresetId
                         activeTab = MainTab.TIMER
                     }) { Text("Open session timer") }
                 }
@@ -585,10 +578,15 @@ fun SessionEditorScreen() {
                                 else timer.pause()
                             }
                         },
-                        onStopAndRestart = {
-                            timerAction { timer.restartKeepingEndTime() }
+                        onRestartSession = {
+                            runTimedCue {
+                                TimerTick(timer.restartKeepingEndTime(),
+                                    TimerCue.SESSION_FINISHED)
+                            }
                         },
-                        onStopAndNext = { goToNextSavedSession() },
+                        onNextPhase = {
+                            runTimedCue { timer.nextPhase() }
+                        },
                     )
                 }
             }
