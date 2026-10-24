@@ -511,6 +511,22 @@ class MonotonicSessionTimerTest {
         assertNull(timer.update().cue)
     }
 
+    @Test fun fixedClassDeadlineCompletesOnceEvenIfVirtualTimerWasPaused() {
+        var now = 0L
+        val saved = approved()
+        val timer = MonotonicSessionTimer(saved) { now }
+        timer.start()
+        now = 2_500L
+        timer.pause()
+        now = saved.rules.totalSeconds.toLong() * 1_000L
+        val finished = timer.finishAtDeadline()
+        assertEquals(TimerStatus.FINISHED, finished.view.status)
+        assertEquals(TimerCue.SESSION_FINISHED, finished.cue)
+        assertNull(timer.finishAtDeadline().cue)
+        assertNull(timer.update().cue)
+        assertEquals(saved.rules.totalSeconds, saved.phases.last().endSeconds)
+    }
+
     @Test fun skipsStaleTransitionsButFinishesOnce() {
         var now = 0L
         val timer = MonotonicSessionTimer(approved()) { now }
