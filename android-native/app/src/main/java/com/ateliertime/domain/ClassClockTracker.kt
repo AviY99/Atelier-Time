@@ -56,6 +56,16 @@ class ClassClockTracker {
         return observe(view, nowEpochMs)
     }
 
+    /** Reset ONLY current Session clock; retain actual Class start and end. */
+    fun restartCurrentSession(view: TimerView, nowEpochMs: Long): ClassClockTimes {
+        require(view.status == TimerStatus.RUNNING && view.phase?.kind == PhaseKind.POSE) {
+            "A work session must be running after its restart."
+        }
+        phaseId = null
+        phaseStarted = null
+        return observe(view, nowEpochMs)
+    }
+
     fun observe(view: TimerView, nowEpochMs: Long): ClassClockTimes {
         if (view.status == TimerStatus.READY && classStarted == null) {
             return ClassClockTimes()
