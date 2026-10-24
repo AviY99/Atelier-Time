@@ -54,6 +54,16 @@ class DesignClockTest {
         assertEquals(1f, DesignMotion.fillFraction(PhaseKind.SHORT_BREAK, 100L, 150L))
     }
 
+    @Test fun horizontalRemainingBarStartsFullAndEmptiesAsTimePasses() {
+        assertEquals(1f, DesignMotion.remainingFraction(60_000L, 60_000L))
+        assertEquals(0.75f, DesignMotion.remainingFraction(60_000L, 45_000L))
+        assertEquals(0.5f, DesignMotion.remainingFraction(60_000L, 30_000L))
+        assertEquals(0f, DesignMotion.remainingFraction(60_000L, 0L))
+        assertEquals(1f, DesignMotion.remainingFraction(60_000L, 90_000L))
+        assertEquals(0f, DesignMotion.remainingFraction(60_000L, -1L))
+        assertEquals(0f, DesignMotion.remainingFraction(0L, 15_000L))
+    }
+
     @Test fun corruptedHourClampsToValidRange() {
         val before = DesignPreferences(DesignMode.AUTO, 5)
         val after = DesignPreferences(DesignMode.AUTO, 27)
