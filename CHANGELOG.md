@@ -1,5 +1,11 @@
 # Changelog — Atelier Time
 
+## 2026-10-24 — D-091 About identity row; Night Blue proposal unimplemented
+
+**D-091 · 2026-10-24 STATUS / SOURCE ONLY:** User asks About's first line to contain Atlier Time, numeric actual installed `Version`, and `© 2026` together, LTR and visible on narrow phone. Implemented in `AtelierDesign.kt` on Android development branch (commit `aa454a1e47d2cbbaaf73fde50c9c58c510cc0f52`, readback verified): weighted auto-size app name, fixed single-line Version and copyright, credit separately below (bodyMedium) and truthful live atelier timer English summary lower (bodySmall). No D-091 on-phone Gradle/build/install/screenshot acceptance yet. User requests *even softer, visibly more blue-toned* dark Night surfaces than older unapproved D-089/090 proposals: **Night Blue proposed only**, background `#304D70`, card `#3B5A7A`, secondary/variant surface `#4A6A8A`, **not changed in source until approved**. ALL existing button/tab/selected/accent/text/outline/tahini colors untouched; Day unchanged. See [D-091 design note](D091_ABOUT_HEADER_AND_NIGHT_BLUE_BACKGROUND_PROPOSAL.md). Existing D-088 is phone-accepted and stable D-086 source is frozen; D-089/D-090/D-091 code is still awaiting phone QA, PR #3 Draft/unmerged, no paid Actions.
+
+---
+
 ## 2026-10-24 — D-090 corrected About description & typography (device QA pending)
 
 - Explicitly positions Atelier Time as a LIVE atelier class timer rather than a planning tool, with larger numeric Version, a single auto-fitted English name/credit line and smaller copyright/description. Android code changed in `AtelierDesign.kt`; source commit `cd9514bc9`. No new build/device acceptance observed.
