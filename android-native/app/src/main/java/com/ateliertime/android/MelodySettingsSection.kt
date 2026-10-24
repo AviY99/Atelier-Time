@@ -26,13 +26,13 @@ fun MelodySettingsSection(
     }
     Text("Upbeat five-second tunes with clear rhythms. Choose one melody for " +
         "each timer event; your choices are saved on this phone.")
-    MelodyPicker("A · End of each pose", selections.poseEnd, { selected ->
+    MelodyPicker("A · End of each session", selections.poseEnd, { selected ->
         onSelectionsChange(selections.copy(poseEnd = selected))
     }, onPreview)
     MelodyPicker("B · End of each break", selections.breakEnd, { selected ->
         onSelectionsChange(selections.copy(breakEnd = selected))
     }, onPreview)
-    MelodyPicker("C · End of entire session", selections.sessionEnd, { selected ->
+    MelodyPicker("C · End of class", selections.sessionEnd, { selected ->
         onSelectionsChange(selections.copy(sessionEnd = selected))
     }, onPreview)
     if (showHelp) AlertDialog(
@@ -41,7 +41,7 @@ fun MelodySettingsSection(
         text = { Text("Each timer event plays its selected five-second melody, using quick " +
             "notes, rhythmic rests and an accented beat. Preview uses the same " +
             "audio as the timer; volume follows Android media volume. " +
-            "Change tunes here while the session runs; your approved timeline is unchanged.") },
+            "Change tunes here while the class runs; the approved timeline is unchanged.") },
         confirmButton = {
             TextButton(onClick = { showHelp = false }) { Text("Close") }
         },
