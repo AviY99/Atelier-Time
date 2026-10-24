@@ -59,15 +59,8 @@ fun SessionTimerScreen(
     val durationMs = view.phase?.durationSeconds?.toLong()?.times(1_000L) ?: 0L
     val msLeft = view.phaseRemainingMillis ?:
         view.phaseRemainingSeconds.toLong() * 1_000L
-    val elapsedShare = if (durationMs > 0) {
-        (1f - msLeft.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f)
-    } else 0f
-    // Session fills; Break drains. Single shared tahini color, no gradients.
-    val targetFill = when {
-        isWork -> elapsedShare
-        isBreak -> 1f - elapsedShare
-        else -> 0f
-    }
+    // Single source for presentation progress; never modify real timer math.
+    val targetFill = DesignMotion.fillFraction(view.phase?.kind, durationMs, msLeft)
     val smoothFill by animateFloatAsState(
         targetValue = targetFill.coerceIn(0f, 1f),
         animationSpec = tween(durationMillis = 210, easing = LinearEasing),
