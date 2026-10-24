@@ -176,6 +176,105 @@ class MonotonicSessionTimerTest {
         assertEquals(before, timer.view())
     }
 
+    @Test fun restartRegularBreakKeepsEarlierWorkAndClassFinish() {
+        var now = 0L
+        val original = approved()
+        val timer = MonotonicSessionTimer(original) { now }
+        timer.start()
+        now = 26L * minute * 1000L
+        val previous = timer.update().view
+        assertEquals(PhaseKind.SHORT_BREAK, previous.phase?.kind)
+        val restarted = timer.restartCurrentSegmentKeepingEndTime()
+        assertEquals(previous.phase?.id, restarted.phase?.id)
+        assertEquals(25 * minute, restarted.elapsedSeconds)
+        assertEquals(5 * minute, restarted.phaseRemainingSeconds)
+        assertEquals(1 * minute, restarted.recoveredSeconds)
+        assertEquals(179 * minute, restarted.totalSeconds)
+        assertEquals(180 * minute, now.toInt() / 1000 +
+            restarted.totalRemainingSeconds)
+        assertEquals(original.phases.first().endSeconds, 25 * minute)
+        assertNull(timer.update().cue)
+    }
+
+    @Test fun restartPausedBreakCountsBothElapsedAndPausedTime() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        timer.start()
+        now = 26L * minute * 1000L
+        timer.pause()
+        now = 28L * minute * 1000L
+        val restarted = timer.restartCurrentSegmentKeepingEndTime()
+        assertEquals(TimerStatus.RUNNING, restarted.status)
+        assertEquals(PhaseKind.SHORT_BREAK, restarted.phase?.kind)
+        assertEquals(25 * minute, restarted.elapsedSeconds)
+        assertEquals(3 * minute, restarted.recoveredSeconds)
+        assertEquals(177 * minute, restarted.totalSeconds)
+        assertEquals(180 * minute, now.toInt() / 1000 +
+            restarted.totalRemainingSeconds)
+    }
+
+    @Test fun restartSpecialBreakDoesNotChangeBreakKindOrApprovedPlan() {
+        var now = 0L
+        val plan = approved()
+        val special = plan.phases.first { it.kind == PhaseKind.SPECIAL_BREAK }
+        val timer = MonotonicSessionTimer(plan) { now }
+        timer.start()
+        now = (special.startSeconds.toLong() + 30L) * 1000L
+        val restarted = timer.restartCurrentSegmentKeepingEndTime()
+        assertEquals(special.id, restarted.phase?.id)
+        assertEquals(PhaseKind.SPECIAL_BREAK, restarted.phase?.kind)
+        assertEquals(special.startSeconds, restarted.elapsedSeconds)
+        assertEquals(special.durationSeconds, restarted.phaseRemainingSeconds)
+        assertEquals(30, restarted.recoveredSeconds)
+        assertEquals(plan.rules.totalSeconds,
+            (now / 1000L + restarted.totalRemainingSeconds).toInt())
+        assertEquals(special, plan.phases.first { it.id == special.id })
+    }
+
+    @Test fun restartingInterFinalBreakLocksCompletedFirstFinalSession() {
+        var now = 0L
+        val plan = approved()
+        val pair = plan.phases.filter {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.takeLast(2)
+        val rest = plan.phases.first { it.startSeconds == pair.first().endSeconds }
+        assertTrue(rest.kind == PhaseKind.SHORT_BREAK ||
+            rest.kind == PhaseKind.SPECIAL_BREAK)
+        val timer = MonotonicSessionTimer(plan) { now }
+        timer.start()
+        now = (rest.startSeconds.toLong() + minute) * 1000L
+        val restarted = timer.restartCurrentSegmentKeepingEndTime()
+        assertEquals(rest.id, restarted.phase?.id)
+        assertEquals(rest.startSeconds, restarted.elapsedSeconds)
+        assertEquals(pair.first().durationSeconds, timer.finalTwoPoseDurations()?.first)
+        assertEquals(pair.last().durationSeconds - minute,
+            timer.finalTwoPoseDurations()?.second)
+        assertEquals(180 * minute,
+            now.toInt() / 1000 + restarted.totalRemainingSeconds)
+    }
+
+    @Test fun impossibleLateBreakRestartIsAtomicWithoutChangingProgress() {
+        var now = 0L
+        val plan = approved()
+        val pair = plan.phases.filter {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.takeLast(2)
+        val rest = plan.phases.first { it.startSeconds == pair.first().endSeconds }
+        val timer = MonotonicSessionTimer(plan) { now }
+        timer.start()
+        val consumed = pair.last().durationSeconds - 30
+        assertTrue(consumed in 1 until rest.durationSeconds)
+        now = (rest.startSeconds.toLong() + consumed) * 1000L
+        val before = timer.view()
+        try {
+            timer.restartCurrentSegmentKeepingEndTime()
+            fail("The last Session must retain its one-minute minimum.")
+        } catch (_: IllegalArgumentException) { }
+        assertEquals(before, timer.view())
+        assertEquals(pair.first().durationSeconds to pair.last().durationSeconds,
+            timer.finalTwoPoseDurations())
+    }
+
     @Test fun nextFromPoseStartsBreakAndExtendsFinalPairWithoutChangingFinishClock() {
         var now = 0L
         val original = approved()
