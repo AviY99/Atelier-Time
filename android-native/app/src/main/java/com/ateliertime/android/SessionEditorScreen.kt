@@ -81,6 +81,8 @@ fun SessionEditorScreen() {
         ending = null
         acceptedWarning = false
         approved = null
+        saveError = null
+        overwriteTarget = null
     }
     // Swap the Editor button examples only. Historical domain fixtures A/B and
     // already-approved saved class signatures must NEVER change.
