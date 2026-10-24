@@ -328,6 +328,7 @@ fun SessionEditorScreen() {
             MainTab.DESIGN -> DesignSettingsPanel(
                 settings = designPreferences,
                 currentPalette = designPalette,
+                currentClockMillis = wallClockMillis,
                 onChange = { updated ->
                     designPreferences = updated
                     designStore.save(updated)
