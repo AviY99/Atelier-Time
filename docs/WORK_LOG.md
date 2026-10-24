@@ -1,5 +1,13 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-24 — Native audio initialization fix: follow-up phone Gradle build PASSED, audible acceptance pending
+
+**Screenshot evidence (user, 10:28 local Android Code on the Go terminal):** Kotlin/Android Gradle output includes `:app:compileDebugUnitTestKotlin`, `:app:testDebugUnitTest`, `:app:packageDebug`, `:app:assembleDebug` and **`BUILD SUCCESSFUL in 28s`**; **42 actionable tasks, 8 executed, 34 up-to-date**. This was provided in response to the previous instruction to pull the fixed `MODE_STATIC` audio-init code, run JVM tests and build the Android APK. Screenshot does **not** show `git rev-parse HEAD`, the exact JUnit XML count, copy completion, install success, or audio output; avoid claiming any unobserved item.
+
+**Status:** **on-phone Gradle test and APK build PASS**, but `MODE_STATIC` audio error fix is **NOT YET SOUND-TESTED IN UPDATED INSTALLED APP**. User must update-install the APK **without removing app data**, then try `Play 5s` A/B/C and note distinct melody audible vs red error; after that verify automatic cue boundaries. Android instrumented audio lifecycle test remains unexecuted. No paid Actions or merge of draft PR #3.
+
+---
+
 ## 2026-10-24 — Real-phone K04 audio preview failure: precise MODE_STATIC initialization bug fixed in source, pending retest
 
 **Evidence:** User screenshot of updated installed Atelier Time editor (10:23 local) shows three independently selectable five-second melodies (A "Rising steps", B "Calm descent", C "Celebration") but, after pressing a preview, a visible red error: **`Android audio output is not initialized.`**. User explicitly says no sound at the selection step, so full runtime audio assessment was stopped. **K04 audio acceptance FAIL / unresolved until next device APK test.** Selection UI and installed APK are real; sound did NOT work.
