@@ -174,7 +174,10 @@ fun SessionEditorScreen() {
                 entries.firstOrNull()
             } else null
             if (next == null) {
-                timerError = "No next saved session is available. Save another approved session first."
+                timerError =
+                    "Only one saved session is available (or none). " +
+                        "To use Next, save a second approved preset in Editor. " +
+                        "Your current timer is still running."
             } else {
                 val restored = catalog.activate(next.id)
                 loadPreset(next, restored)
