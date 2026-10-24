@@ -36,7 +36,7 @@ fun PresetLibrarySection(
             collection = catalog.state()
             error = null
         } catch (failure: Exception) {
-            error = failure.message ?: "Cannot read local sessions."
+            error = failure.message ?: "Cannot read saved classes."
         }
     }
     fun action(block: () -> Unit): Boolean {
@@ -45,7 +45,7 @@ fun PresetLibrarySection(
             refresh()
             true
         } catch (failure: Exception) {
-            error = failure.message ?: "Local session operation failed."
+            error = failure.message ?: "Saved class operation failed."
             false
         }
     }
@@ -100,7 +100,7 @@ fun PresetLibrarySection(
             },
         ) { Text("Save as new preset") }
     }
-    if (collection.entries.isEmpty()) Text("No saved sessions yet.")
+    if (collection.entries.isEmpty()) Text("No saved classes yet.")
     collection.entries.forEach { preset ->
         ElevatedCard(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(12.dp)) {
@@ -157,7 +157,7 @@ fun PresetLibrarySection(
     if (renameTarget != null) {
         AlertDialog(
             onDismissRequest = { renameId = null },
-            title = { Text("Rename saved session") },
+            title = { Text("Rename saved class") },
             text = {
                 OutlinedTextField(
                     value = renameText,
@@ -187,7 +187,7 @@ fun PresetLibrarySection(
     if (deleteTarget != null) {
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("Delete saved session?") },
+            title = { Text("Delete saved class?") },
             text = { Text("This removes the stored preset from the phone.") },
             confirmButton = {
                 TextButton(onClick = {
