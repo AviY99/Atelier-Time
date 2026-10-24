@@ -1,5 +1,11 @@
 # Changelog — Atelier Time
 
+## 2026-10-24 — D-106 real D-build About version and no redundant foreground sound tests
+
+User superseded prior `About Version 3` policy: show the **actual D-development iteration**, currently `Version D-104`, and use matching D-number in future APKs. Only Android DEVELOPMENT files were changed: Gradle `versionName = "D-104"` (`versionCode = 2` unchanged), and Compose About now displays the full installed `PackageManager.versionName` rather than extracting digits. **No new build/install** following this source change; the already assembled `Atelier-Time-D104.apk` remains the earlier Version 3 build. User also confirms normal sound cues and timing/phase transitions had been previously tested and work; **do not repeat the same foreground 3-minute A/B/C acceptance test**. Locked/background/Doze cue reliability, offline persistence and connected Android instrumentation are still separate OPEN QA gates. Stable 3 checkpoint and icon/logo pre-store approval remain unchanged.
+
+---
+
 ## 2026-10-24 — D-104 34s phone JVM test/build PASS, APK copied; install/QA pending
 
 Screenshot from phone Code on the Go shows **BUILD SUCCESSFUL in 34s** for `:app:testDebugUnitTest :app:assembleDebug`, 42 Gradle tasks (9 executed, 33 up-to-date). A ~12M `Atelier-Time-D104.apk` was copied to `/storage/emulated/0/Download/` at 21:25 on Oct 24. This is evidence of JVM Gradle test task and debug APK assembly PASS, **not** Android connected instrumentation, per-test JUnit count, actual update-install, installed About Version 3, saved-data retention or live 3-minute A/B/C audio QA. No rebuild needed: next install existing APK as an update without uninstall or clearing saved Classes; check About `Version 3`, data and A 01:00 / B 02:00 / C 03:00. D-103 Stable 3 and icon/logo pre-store requirement unchanged.
