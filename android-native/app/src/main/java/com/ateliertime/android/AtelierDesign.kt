@@ -151,6 +151,73 @@ fun AtelierDesignTheme(palette: DesignPalette, content: @Composable () -> Unit) 
     )
 }
 
+/**
+ * Compose components do not all inherit onSurface text: Material3 defaults
+ * give text/outlined buttons and active labels the primary accent color.
+ * Route their Night content through white while keeping Day's defaults.
+ */
+@Composable
+fun atelierNightActive(): Boolean =
+    MaterialTheme.colorScheme.background == Color(0xFF304D70)
+
+@Composable
+fun atelierFilledColors(): ButtonColors {
+    val colors = MaterialTheme.colorScheme
+    return if (atelierNightActive()) ButtonDefaults.buttonColors(
+        containerColor = colors.primary,
+        contentColor = Color.White,
+        disabledContainerColor = colors.surfaceVariant,
+        disabledContentColor = Color.White.copy(alpha = 0.65f),
+    ) else ButtonDefaults.buttonColors()
+}
+
+@Composable
+fun atelierOutlinedColors(): ButtonColors =
+    if (atelierNightActive()) ButtonDefaults.outlinedButtonColors(
+        contentColor = Color.White,
+        disabledContentColor = Color.White.copy(alpha = 0.65f),
+    ) else ButtonDefaults.outlinedButtonColors()
+
+@Composable
+fun atelierTextColors(): ButtonColors =
+    if (atelierNightActive()) ButtonDefaults.textButtonColors(
+        contentColor = Color.White,
+        disabledContentColor = Color.White.copy(alpha = 0.65f),
+    ) else ButtonDefaults.textButtonColors()
+
+@Composable
+fun atelierTonalColors(): ButtonColors {
+    val colors = MaterialTheme.colorScheme
+    return if (atelierNightActive()) ButtonDefaults.filledTonalButtonColors(
+        containerColor = colors.secondaryContainer,
+        contentColor = Color.White,
+        disabledContentColor = Color.White.copy(alpha = 0.65f),
+    ) else ButtonDefaults.filledTonalButtonColors()
+}
+
+@Composable
+fun atelierChipColors(): SelectableChipColors {
+    val colors = MaterialTheme.colorScheme
+    return if (atelierNightActive()) FilterChipDefaults.filterChipColors(
+        labelColor = Color.White,
+        selectedLabelColor = Color.White,
+        selectedContainerColor = colors.secondaryContainer,
+        iconColor = Color.White,
+        selectedLeadingIconColor = Color.White,
+        selectedTrailingIconColor = Color.White,
+    ) else FilterChipDefaults.filterChipColors()
+}
+
+@Composable
+fun atelierInputColors(): TextFieldColors =
+    if (atelierNightActive()) OutlinedTextFieldDefaults.colors(
+        focusedTextColor = Color.White,
+        unfocusedTextColor = Color.White,
+        focusedLabelColor = Color.White,
+        unfocusedLabelColor = Color.White,
+        disabledLabelColor = Color.White.copy(alpha = 0.6f),
+    ) else OutlinedTextFieldDefaults.colors()
+
 /** Single solid tahini tone for both the progress bar and phase background. */
 fun tahiniFill(palette: DesignPalette): Color = if (palette == DesignPalette.DAY) {
     Color(0xFFC5A576)
