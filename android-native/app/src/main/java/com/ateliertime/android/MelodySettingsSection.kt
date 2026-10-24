@@ -24,7 +24,8 @@ fun MelodySettingsSection(
             style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
         TextButton(onClick = { showHelp = true }) { Text("Help") }
     }
-    Text("Choose a different melody for each timer event. Settings are saved on this phone.")
+    Text("Upbeat five-second tunes with clear rhythms. Choose one melody for " +
+        "each timer event; your choices are saved on this phone.")
     MelodyPicker("A · End of each pose", selections.poseEnd, { selected ->
         onSelectionsChange(selections.copy(poseEnd = selected))
     }, onPreview)
@@ -37,9 +38,10 @@ fun MelodySettingsSection(
     if (showHelp) AlertDialog(
         onDismissRequest = { showHelp = false },
         title = { Text("Sound settings") },
-        text = { Text("Each event plays your chosen five-second melody. " +
-            "Preview plays the same audio as the timer. Volume follows media volume. " +
-            "Selections apply to every session without editing its approved timeline.") },
+        text = { Text("Each timer event plays its selected five-second melody, using quick " +
+            "notes, rhythmic rests and an accented beat. Preview uses the same " +
+            "audio as the timer; volume follows Android media volume. " +
+            "Change tunes here while the session runs; your approved timeline is unchanged.") },
         confirmButton = {
             TextButton(onClick = { showHelp = false }) { Text("Close") }
         },
