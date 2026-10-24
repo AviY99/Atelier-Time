@@ -2,6 +2,9 @@ package com.ateliertime.android
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
@@ -14,6 +17,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,6 +29,8 @@ import com.ateliertime.domain.DesignMode
 import com.ateliertime.domain.DesignPalette
 import com.ateliertime.domain.DesignPreferences
 import kotlin.math.roundToInt
+import kotlin.math.cos
+import kotlin.math.sin
 
 /** Preferences live separately from the signed Class catalog. */
 class DesignSettingsStore(context: Context) {
@@ -230,6 +237,102 @@ fun tahiniFill(palette: DesignPalette): Color = if (palette == DesignPalette.DAY
     Color(0xFFD5BD94)
 }
 
+/**
+ * Illustrations mirror the exact approved Day and Night palette surfaces:
+ * warm sun for Day, moon and stars for Night. No animation or extra assets.
+ */
+@Composable
+private fun PaletteSymbol(
+    palette: DesignPalette,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier = modifier) {
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val radius = size.minDimension * 0.21f
+        if (palette == DesignPalette.DAY) {
+            val gold = Color(0xFFB86B53)
+            drawCircle(color = Color(0xFFE3B87B), radius = radius, center = center)
+            repeat(8) { ray ->
+                val angle = ray * kotlin.math.PI * 2.0 / 8.0
+                val dirX = cos(angle).toFloat()
+                val dirY = sin(angle).toFloat()
+                drawLine(
+                    color = gold,
+                    start = Offset(center.x + dirX * radius * 1.35f,
+                        center.y + dirY * radius * 1.35f),
+                    end = Offset(center.x + dirX * radius * 1.8f,
+                        center.y + dirY * radius * 1.8f),
+                    strokeWidth = size.minDimension * 0.045f,
+                    cap = StrokeCap.Round,
+                )
+            }
+        } else {
+            // Cresent cutout uses the palette's actual card surface.
+            drawCircle(color = Color(0xFFD5BD94),
+                center = Offset(center.x - radius * 0.16f, center.y),
+                radius = radius * 1.16f)
+            drawCircle(color = Color(0xFF3B5A7A),
+                center = Offset(center.x + radius * 0.59f, center.y - radius * 0.38f),
+                radius = radius * 1.06f)
+            drawCircle(color = Color(0xFFF5F8FF), radius = radius * 0.12f,
+                center = Offset(center.x + radius * 1.34f, center.y + radius * 0.47f))
+            drawCircle(color = Color(0xFFC5B1FF), radius = radius * 0.09f,
+                center = Offset(center.x - radius * 1.38f, center.y - radius * 1.12f))
+        }
+    }
+}
+
+@Composable
+private fun PaletteChoiceCard(
+    palette: DesignPalette,
+    chosen: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val day = palette == DesignPalette.DAY
+    val surface = if (day) Color(0xFFFFFEF9) else Color(0xFF3B5A7A)
+    val text = if (day) Color(0xFF29312D) else Color.White
+    val borderColor = if (chosen) {
+        if (day) Color(0xFFB86B53) else Color(0xFFD5BD94)
+    } else if (day) Color(0xFFDCD4C8) else Color(0xFF607B9C)
+    Card(
+        modifier = modifier.clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = surface),
+        border = BorderStroke(if (chosen) 2.dp else 1.dp, borderColor),
+        shape = RoundedCornerShape(20.dp),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            PaletteSymbol(palette, Modifier.size(72.dp))
+            Text(if (day) "Day" else "Night",
+                color = text, style = MaterialTheme.typography.titleMedium)
+            Text(if (day) "Studio Linen" else "Night Blue",
+                color = text.copy(alpha = 0.87f),
+                style = MaterialTheme.typography.bodySmall)
+            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                listOf(
+                    if (day) Color(0xFFF7F4ED) else Color(0xFF304D70),
+                    surface,
+                    if (day) Color(0xFFB86B53) else Color(0xFF4F729C),
+                    if (day) Color(0xFFC5A576) else Color(0xFFD5BD94),
+                ).forEach { shade ->
+                    Box(
+                        modifier = Modifier.size(15.dp)
+                            .background(shade, RoundedCornerShape(5.dp))
+                            ,
+                    )
+                }
+            }
+            Text(if (chosen) "Selected" else "Select",
+                color = text,
+                style = MaterialTheme.typography.labelSmall)
+        }
+    }
+}
+
 @Composable
 fun DesignSettingsPanel(
     settings: DesignPreferences,
@@ -239,84 +342,97 @@ fun DesignSettingsPanel(
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(15.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Text("Design settings", style = MaterialTheme.typography.headlineSmall)
-        Text("Choose the look of Atelier Time. Your saved Classes and sound choices stay unchanged.")
+        Text("Choose a palette or let the time of day switch automatically.",
+            style = MaterialTheme.typography.bodyMedium)
+
+        // Explicit visual selections — no slider or clock control in the
+        // Day and Night choices.
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            listOf(
-                DesignMode.DAY to "Day",
-                DesignMode.NIGHT to "Night",
-                DesignMode.AUTO to "Auto",
-            ).forEach { (mode, title) ->
-                FilterChip(
-                    colors = atelierChipColors(),
-                    selected = settings.mode == mode,
-                    onClick = { onChange(settings.copy(mode = mode)) },
-                    label = { Text(title) },
-                    modifier = Modifier.weight(1f),
-                )
-            }
+            PaletteChoiceCard(
+                palette = DesignPalette.DAY,
+                chosen = settings.mode == DesignMode.DAY,
+                onClick = { onChange(settings.copy(mode = DesignMode.DAY)) },
+                modifier = Modifier.weight(1f),
+            )
+            PaletteChoiceCard(
+                palette = DesignPalette.NIGHT,
+                chosen = settings.mode == DesignMode.NIGHT,
+                onClick = { onChange(settings.copy(mode = DesignMode.NIGHT)) },
+                modifier = Modifier.weight(1f),
+            )
         }
-        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(9.dp),
-            ) {
-                Text("Automatic Day / Night", style = MaterialTheme.typography.titleMedium)
-                Text("Day starts at 06:00. Set when Night begins.",
-                    style = MaterialTheme.typography.bodyMedium)
-                Text(
-                    "Night starts at %02d:00".format(settings.nightStartsAtHour),
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                Slider(
-                    // The chosen time is when NIGHT starts. The part RIGHT
-                    // of the thumb must be Night blue; the left is Day.
-                    // Material3 normally colors the LEFT segment as active,
-                    // which previously made the visual meaning reversed.
-                    colors = SliderDefaults.colors(
-                        thumbColor = MaterialTheme.colorScheme.primary,
-                        activeTrackColor = if (currentPalette == DesignPalette.DAY)
-                            Color(0xFFD8CFBF) else Color(0xFF8498B0),
-                        inactiveTrackColor = if (currentPalette == DesignPalette.DAY)
-                            Color(0xFF41648B) else Color(0xFF99BCE0),
-                        activeTickColor = if (currentPalette == DesignPalette.DAY)
-                            Color(0xFF4B4C4A) else Color.White,
-                        inactiveTickColor = Color(0xFF223853),
-                    ),
-                    value = settings.nightStartsAtHour.toFloat(),
-                    onValueChange = {
-                        onChange(settings.copy(
-                            nightStartsAtHour = it.roundToInt().coerceIn(
-                                DesignClock.MIN_NIGHT_HOUR, DesignClock.MAX_NIGHT_HOUR,
+        FilterChip(
+            modifier = Modifier.fillMaxWidth(),
+            colors = atelierChipColors(),
+            selected = settings.mode == DesignMode.AUTO,
+            onClick = { onChange(settings.copy(mode = DesignMode.AUTO)) },
+            label = { Text("Auto · Switch Day / Night by time") },
+        )
+        if (settings.mode == DesignMode.AUTO) {
+            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text("Night begins at %02d:00".format(settings.nightStartsAtHour),
+                        style = MaterialTheme.typography.titleLarge)
+                    Text("Move the marker to set the Night start time. Day begins at 06:00.",
+                        style = MaterialTheme.typography.bodySmall)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        PaletteSymbol(DesignPalette.DAY, Modifier.size(35.dp))
+                        Slider(
+                            modifier = Modifier.weight(1f),
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.primary,
+                                activeTrackColor = if (currentPalette == DesignPalette.DAY)
+                                    Color(0xFFC5A576) else Color(0xFFD8CFBF),
+                                inactiveTrackColor = Color(0xFF4F729C),
+                                activeTickColor = Color(0xFF29312D),
+                                inactiveTickColor = Color.White,
                             ),
-                        ))
-                    },
-                    valueRange = DesignClock.MIN_NIGHT_HOUR.toFloat()..
-                        DesignClock.MAX_NIGHT_HOUR.toFloat(),
-                    steps = DesignClock.MAX_NIGHT_HOUR - DesignClock.MIN_NIGHT_HOUR - 1,
-                    enabled = settings.mode == DesignMode.AUTO,
-                )
-                Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Day · 12:00", style = MaterialTheme.typography.bodySmall)
-                    Text("Night · 23:00", style = MaterialTheme.typography.bodySmall)
+                            value = settings.nightStartsAtHour.toFloat(),
+                            onValueChange = {
+                                onChange(settings.copy(
+                                    nightStartsAtHour = it.roundToInt().coerceIn(
+                                        DesignClock.MIN_NIGHT_HOUR,
+                                        DesignClock.MAX_NIGHT_HOUR,
+                                    ),
+                                ))
+                            },
+                            valueRange = DesignClock.MIN_NIGHT_HOUR.toFloat()..
+                                DesignClock.MAX_NIGHT_HOUR.toFloat(),
+                            steps = DesignClock.MAX_NIGHT_HOUR -
+                                DesignClock.MIN_NIGHT_HOUR - 1,
+                        )
+                        PaletteSymbol(DesignPalette.NIGHT, Modifier.size(35.dp))
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text("Day · 12:00", style = MaterialTheme.typography.bodySmall)
+                        Text("Night · 23:00", style = MaterialTheme.typography.bodySmall)
+                    }
+                    Text("Currently showing: " +
+                        (if (currentPalette == DesignPalette.DAY) "Day" else "Night"),
+                        style = MaterialTheme.typography.bodyMedium)
                 }
-                Text(
-                    "Currently showing: " + (if (currentPalette == DesignPalette.DAY) "Day" else "Night"),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
             }
         }
         Text(
-            "During a Session the timer background fills; during a Break it empties. " +
-                "Both use a solid tahini-colored fill and matching bar. " +
-                "Timer digits remain static: no flashing or font animation.",
-            style = MaterialTheme.typography.bodyMedium,
+            "Session background fills; Break background drains. The tahini " +
+                "progress bars show elapsed time. Timer digits remain still.",
+            style = MaterialTheme.typography.bodySmall,
         )
     }
 }
