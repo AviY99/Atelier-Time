@@ -1,5 +1,7 @@
 # Atelier Time — binding handoff for the next ChatGPT conversation
 
+> **HISTORICAL DOCUMENT — SUPERSEDED BY D-097 HANDOFF, 2026-10-24:** Do NOT resume from D-082 or request its outdated build/QA. Use [NEXT_CHAT_HANDOFF_2026_10_24_D097.md](NEXT_CHAT_HANDOFF_2026_10_24_D097.md) as the current starting point. D-096 is user-accepted on phone, D-097 Gradle build/JVM task PASS in 45s but APK update-install and UX acceptance are open. Project canonical documents on main have newer records.
+
 **Date:** 2026-10-24 (Asia/Jerusalem)  
 **Status:** END OF CURRENT CHAT / NO FURTHER WORK REQUESTED IN THIS CHAT  
 **Authority:** This file is the newest starting point. Read it FIRST, then [HANDOFF.md](HANDOFF.md), [DECISIONS.md](DECISIONS.md) (especially D-080 through D-082), [TEST_PLAN.md](TEST_PLAN.md), [WORK_LOG.md](WORK_LOG.md), and the existing requirements/scheduling/audio reference documents linked there. The older [NEXT_CHAT_HANDOFF_2026_10_23.md](NEXT_CHAT_HANDOFF_2026_10_23.md) is historical and does not describe the present Android implementation.
