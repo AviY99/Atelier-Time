@@ -3,14 +3,17 @@ package com.ateliertime.android
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ateliertime.domain.*
 import kotlin.math.roundToInt
 
 /**
- * One global list of enabled sound sources; independent A/B/C choices.
- * Each enabled source appears in every event's selection menu.
+ * Compact Sound tab: library checkboxes in one row, two explicit sound modes.
+ * SHARED shows only one picker and one 5/10s duration; separate mode alone
+ * exposes the original independent A/B/C pickers and lengths.
  */
 @Composable
 fun MelodySettingsSection(
@@ -23,69 +26,150 @@ fun MelodySettingsSection(
 ) {
     var showHelp by remember { mutableStateOf(false) }
     HorizontalDivider()
-    Row {
-        Text("Sound choices", style = MaterialTheme.typography.titleLarge,
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("Sound choices", style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f))
         TextButton(colors = atelierTextColors(), onClick = { showHelp = true }) {
             Text("Help")
         }
     }
-    Text("Choose one or more available sound libraries. Atelier Time melodies " +
-        "are enabled by default. Every enabled library appears under A, B and C.")
-    SoundSource.entries.forEach { source ->
-        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-            Checkbox(
-                checked = source in settings.enabledSources,
-                onCheckedChange = { enabled ->
-                    runCatching { settings.setSourceEnabled(source, enabled) }
-                        .onSuccess(onSettingsChange)
-                        .onFailure { onError(it.message ?: "Cannot disable this sound source.") }
-                },
-            )
-            Text(source.title)
+
+    // One compact horizontal checkbox strip rather than three tall rows.
+    Text("Available libraries", style = MaterialTheme.typography.titleSmall)
+    Row(modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        SoundSource.entries.forEach { source ->
+            Column(modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                Checkbox(
+                    checked = source in settings.enabledSources,
+                    modifier = Modifier.size(36.dp),
+                    onCheckedChange = { enabled ->
+                        runCatching { settings.setSourceEnabled(source, enabled) }
+                            .onSuccess(onSettingsChange)
+                            .onFailure {
+                                onError(it.message ?: "Cannot disable this sound source.")
+                            }
+                    },
+                )
+                Text(
+                    when (source) {
+                        SoundSource.APP -> "Atelier Time"
+                        SoundSource.SYSTEM -> "OS sounds"
+                        SoundSource.FILE -> "Audio files"
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
     }
-    SoundPicker("A · End of each session", TimerCue.POSE_FINISHED, settings,
-        onSettingsChange, onChooseSystemSound, onChooseAudioFile, onPreview)
-    DurationChips("A · Session sound length", TimerCue.POSE_FINISHED,
-        settings, onSettingsChange)
-    SoundPicker("B · End of each break", TimerCue.BREAK_FINISHED, settings,
-        onSettingsChange, onChooseSystemSound, onChooseAudioFile, onPreview)
-    DurationChips("B · Break sound length", TimerCue.BREAK_FINISHED,
-        settings, onSettingsChange)
-    SoundPicker("C · End of class", TimerCue.SESSION_FINISHED, settings,
-        onSettingsChange, onChooseSystemSound, onChooseAudioFile, onPreview)
-    var sliderSeconds by remember(settings.classEndSeconds) {
-        mutableFloatStateOf(settings.classEndSeconds.toFloat())
+
+    // Both choices are visible side-by-side; changes never overwrite
+    // saved separate settings or the shared sound/duration.
+    Row(modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        listOf(
+            SoundAssignmentMode.SHARED to "Same sound for all",
+            SoundAssignmentMode.SEPARATE to "Separate A/B/C",
+        ).forEach { (mode, title) ->
+            FilterChip(
+                colors = atelierChipColors(),
+                modifier = Modifier.weight(1f),
+                selected = settings.assignmentMode == mode,
+                onClick = { onSettingsChange(settings.setAssignmentMode(mode)) },
+                label = {
+                    Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                },
+            )
+        }
     }
-    Text("C · Class end sound length: ${sliderSeconds.roundToInt()} seconds",
-        style = MaterialTheme.typography.titleSmall)
-    Slider(
-        value = sliderSeconds,
-        onValueChange = { sliderSeconds = it.roundToInt().coerceIn(5, 60).toFloat() },
-        onValueChangeFinished = {
-            onSettingsChange(settings.setDuration(
-                TimerCue.SESSION_FINISHED, sliderSeconds.roundToInt()))
-        },
-        valueRange = 5f..60f,
-        steps = 54, // All integer-second positions, including both endpoints.
-    )
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text("5 seconds", style = MaterialTheme.typography.bodySmall)
-        Text("60 seconds", style = MaterialTheme.typography.bodySmall)
+
+    if (settings.assignmentMode == SoundAssignmentMode.SHARED) {
+        SoundPicker(
+            cue = TimerCue.POSE_FINISHED, settings = settings,
+            onSettingsChange = onSettingsChange,
+            onChooseSystemSound = onChooseSystemSound,
+            onChooseAudioFile = onChooseAudioFile,
+            onPreview = onPreview,
+        )
+        Row(modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("All alerts · Length", style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.weight(1f))
+            listOf(5, 10).forEach { seconds ->
+                FilterChip(
+                    colors = atelierChipColors(),
+                    selected = settings.sharedSeconds == seconds,
+                    onClick = { onSettingsChange(settings.setSharedDuration(seconds)) },
+                    label = { Text("${seconds}s") },
+                )
+            }
+        }
+    } else {
+        CompactCue(
+            title = "A · End of session", cue = TimerCue.POSE_FINISHED,
+            settings = settings, onSettingsChange = onSettingsChange,
+            onChooseSystemSound = onChooseSystemSound,
+            onChooseAudioFile = onChooseAudioFile, onPreview = onPreview,
+        )
+        CompactCue(
+            title = "B · End of break", cue = TimerCue.BREAK_FINISHED,
+            settings = settings, onSettingsChange = onSettingsChange,
+            onChooseSystemSound = onChooseSystemSound,
+            onChooseAudioFile = onChooseAudioFile, onPreview = onPreview,
+        )
+        Row(modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically) {
+            Text("C · End of class", style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.weight(1f))
+            Text("${settings.classEndSeconds}s",
+                style = MaterialTheme.typography.titleSmall)
+        }
+        SoundPicker(
+            cue = TimerCue.SESSION_FINISHED, settings = settings,
+            onSettingsChange = onSettingsChange,
+            onChooseSystemSound = onChooseSystemSound,
+            onChooseAudioFile = onChooseAudioFile, onPreview = onPreview,
+        )
+        var sliderSeconds by remember(settings.classEndSeconds) {
+            mutableFloatStateOf(settings.classEndSeconds.toFloat())
+        }
+        Row(modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically) {
+            Text("5s", style = MaterialTheme.typography.labelSmall)
+            Slider(
+                value = sliderSeconds,
+                onValueChange = {
+                    sliderSeconds = it.roundToInt().coerceIn(5, 60).toFloat()
+                },
+                onValueChangeFinished = {
+                    onSettingsChange(settings.setDuration(
+                        TimerCue.SESSION_FINISHED, sliderSeconds.roundToInt()))
+                },
+                valueRange = 5f..60f,
+                steps = 54,
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+            )
+            Text("60s", style = MaterialTheme.typography.labelSmall)
+        }
     }
+
     if (showHelp) AlertDialog(
         onDismissRequest = { showHelp = false },
         title = { Text("Sound settings") },
-        text = { Text("Enable one or several libraries: Atelier Time, Android " +
-            "system sounds and audio files. Select one sound separately for " +
-            "each timer cue. Choosing System opens Android's sound picker; " +
-            "choosing File opens the document picker. Saved files remain on " +
-            "your device and must remain accessible. All enabled categories " +
-            "appear in each dropdown. A and B play for 5 or 10 seconds; " +
-            "Class end C plays for 5–60 seconds. Short sounds repeat to fill " +
-            "the chosen time. Preview uses exactly the same sound and duration " +
-            "as the timer. These settings never change approved Class schedules.") },
+        text = {
+            Text("Enable one or more libraries. Use 'Same sound for all' " +
+                "for a single A/B/C sound with one 5 or 10-second length. " +
+                "Choose 'Separate A/B/C' for independent sounds, A/B lengths " +
+                "of 5 or 10 seconds and a Class-end C length of 5–60 seconds. " +
+                "You can switch modes without losing previous choices. " +
+                "System and file choices use Android pickers; files must " +
+                "remain accessible. Short sounds repeat for the selected time. " +
+                "Changing sound preferences never changes approved Classes.")
+        },
         confirmButton = {
             TextButton(colors = atelierTextColors(), onClick = { showHelp = false }) {
                 Text("Close")
@@ -95,8 +179,35 @@ fun MelodySettingsSection(
 }
 
 @Composable
+private fun CompactCue(
+    title: String,
+    cue: TimerCue,
+    settings: SoundSettings,
+    onSettingsChange: (SoundSettings) -> Unit,
+    onChooseSystemSound: (TimerCue) -> Unit,
+    onChooseAudioFile: (TimerCue) -> Unit,
+    onPreview: (TimerCue) -> Unit,
+) {
+    Row(modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(title, style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.weight(1f), maxLines = 1)
+        listOf(5, 10).forEach { seconds ->
+            FilterChip(
+                colors = atelierChipColors(),
+                selected = settings.secondsFor(cue) == seconds,
+                onClick = { onSettingsChange(settings.setDuration(cue, seconds)) },
+                label = { Text("${seconds}s") },
+            )
+        }
+    }
+    SoundPicker(cue, settings, onSettingsChange,
+        onChooseSystemSound, onChooseAudioFile, onPreview)
+}
+
+@Composable
 private fun SoundPicker(
-    label: String,
     cue: TimerCue,
     settings: SoundSettings,
     onSettingsChange: (SoundSettings) -> Unit,
@@ -106,12 +217,14 @@ private fun SoundPicker(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val choice = settings.soundFor(cue)
-    Text(label, style = MaterialTheme.typography.titleMedium)
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         Box(modifier = Modifier.weight(1f)) {
             OutlinedButton(colors = atelierOutlinedColors(), onClick = { expanded = true },
                 modifier = Modifier.fillMaxWidth()) {
-                Text("${choice.source.title} · ${choice.title}", maxLines = 1)
+                Text("${choice.source.title} · ${choice.title}",
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 if (SoundSource.APP in settings.enabledSources) {
@@ -119,7 +232,7 @@ private fun SoundPicker(
                         DropdownMenuItem(
                             text = { Text("Atelier Time · ${melody.title}") },
                             onClick = {
-                                onSettingsChange(settings.choose(cue,
+                                onSettingsChange(settings.chooseForVisibleMode(cue,
                                     CueSound(source = SoundSource.APP, melody = melody)))
                                 expanded = false
                             },
@@ -135,7 +248,7 @@ private fun SoundPicker(
                         DropdownMenuItem(
                             text = { Text("System · ${saved.title}") },
                             onClick = {
-                                onSettingsChange(settings.choose(cue, saved))
+                                onSettingsChange(settings.chooseForVisibleMode(cue, saved))
                                 expanded = false
                             },
                         )
@@ -150,7 +263,7 @@ private fun SoundPicker(
                         DropdownMenuItem(
                             text = { Text("File · ${saved.title}") },
                             onClick = {
-                                onSettingsChange(settings.choose(cue, saved))
+                                onSettingsChange(settings.chooseForVisibleMode(cue, saved))
                                 expanded = false
                             },
                         )
@@ -159,32 +272,12 @@ private fun SoundPicker(
             }
         }
         OutlinedButton(colors = atelierOutlinedColors(), onClick = { onPreview(cue) }) {
-            Text("Play ${settings.secondsFor(cue)}s")
+            Text("Play ${settings.secondsFor(cue)}s", maxLines = 1)
         }
     }
 }
 
 private fun SoundSettings.savedChoices(source: SoundSource): List<CueSound> =
-    listOf(poseEnd, breakEnd, classEnd)
+    (listOf(poseEnd, breakEnd, classEnd) + listOfNotNull(sharedSound))
         .filter { it.source == source && it.isPlayable }
         .distinctBy { it.uri }
-
-@Composable
-private fun DurationChips(
-    label: String,
-    cue: TimerCue,
-    settings: SoundSettings,
-    onSettingsChange: (SoundSettings) -> Unit,
-) {
-    Text(label, style = MaterialTheme.typography.titleSmall)
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        listOf(5, 10).forEach { seconds ->
-            FilterChip(
-                colors = atelierChipColors(),
-                selected = settings.secondsFor(cue) == seconds,
-                onClick = { onSettingsChange(settings.setDuration(cue, seconds)) },
-                label = { Text("${seconds}s") },
-            )
-        }
-    }
-}
