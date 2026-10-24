@@ -352,37 +352,33 @@ fun SessionEditorScreen() {
             opening.add(OpeningDraft(nextOpeningId++, breakAfterMinutes = normal)); invalidate()
         }) { Text("Add opening session group") }
 
+        HorizontalDivider()
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Regular sessions and breaks", style = MaterialTheme.typography.titleMedium,
+            Text("Regular sessions", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
             TextButton(onClick = {
-                helpSection = "Regular sessions and breaks" to
-                    "These durations are used after the opening session groups. A special break " +
-                    "replaces an existing regular break, and does not add a new break. " +
-                    "All configured regular and special break durations must be positive."
+                helpSection = "Regular sessions" to
+                    "One repeating work session lasts the configured number of minutes. " +
+                    "It is separate from regular and special break settings."
             }) { Text("Help") }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MinuteInput("Regular session (min)", pose, { pose = it; invalidate() }, Modifier.weight(1f))
-            MinuteInput("Break · regular (min)", normal,
-                { normal = it; invalidate() }, Modifier.weight(1f))
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MinuteInput("Break · special (min)", special,
-                { special = it; invalidate() }, Modifier.weight(1f))
-            MinuteInput("Number of special breaks", count,
-                { count = it; invalidate() }, Modifier.weight(1f))
-        }
+        MinuteInput("Regular session duration (min)", pose,
+            { pose = it; invalidate() }, Modifier.fillMaxWidth())
+
+        HorizontalDivider()
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Repeating session/break cycle", style = MaterialTheme.typography.titleMedium,
+            Text("Regular breaks", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
             TextButton(onClick = {
-                helpSection = "Repeating session/break cycle" to
-                    "Choose whether the regular repeating pattern begins with a session " +
-                    "or with a break. Automatic placement selects special-break slots " +
-                    "deterministically; manual placement uses break numbers."
+                helpSection = "Regular breaks" to
+                    "Regular breaks repeat between work sessions. Set their normal duration " +
+                    "here, independently of special-break duration and placement. " +
+                    "An opening-group break is configured next to its opening group."
             }) { Text("Help") }
         }
+        MinuteInput("Regular break duration (min)", normal,
+            { normal = it; invalidate() }, Modifier.fillMaxWidth())
+        Text("Standard repeating order", style = MaterialTheme.typography.titleSmall)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilterChip(
                 selected = cycle == CycleStart.POSE_FIRST,
@@ -395,16 +391,35 @@ fun SessionEditorScreen() {
                 label = { Text("Break first") },
             )
         }
+
+        HorizontalDivider()
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Special breaks", style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f))
+            TextButton(onClick = {
+                helpSection = "Special breaks" to
+                    "Special breaks REPLACE selected numbered regular breaks; they are " +
+                    "not extra breaks. Choose their own duration, count and automatic " +
+                    "or manual placement. Manual positions refer only to numbered " +
+                    "regular-break slots, not opening-group rests."
+            }) { Text("Help") }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MinuteInput("Special break duration (min)", special,
+                { special = it; invalidate() }, Modifier.weight(1f))
+            MinuteInput("Number of special breaks", count,
+                { count = it; invalidate() }, Modifier.weight(1f))
+        }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Automatic special-break placement", modifier = Modifier.weight(1f))
             Switch(checked = automatic,
                 onCheckedChange = { automatic = it; invalidate() })
         }
-        if (!automatic) {
+        if (!automatic && count.toIntOrNull() != 0) {
             OutlinedTextField(
                 value = manualOrdinals,
                 onValueChange = { manualOrdinals = it; invalidate() },
-                label = { Text("Break ordinals, e.g. 2,4") },
+                label = { Text("Regular-break numbers, e.g. 2,4") },
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -533,46 +548,23 @@ fun SessionEditorScreen() {
                     )
                 }
                 TimelinePhaseChart(candidate.phases)
+                saveError?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error)
+                }
                 Button(
-                    onClick = {
-                        approved = engine.approve(
-                            candidate, acknowledgeWarnings = acceptedWarning
-                        )
-                    },
+                    onClick = { requestFinalSave() },
                     enabled = candidate.canApprove &&
                         (!candidate.needsSafetyAcknowledgement || acceptedWarning),
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Approve exact timeline")
+                    Text("Save class")
                 }
-                if (approved != null) {
-                    Text("Exact timeline approved. Save this class, or start the timer.")
-                    Button(onClick = {
-                        playingSession = approved
-                        activeTab = MainTab.TIMER
-                    }) { Text("Open class timer") }
-                }
+                Text("Save approves the exact timeline and stores the class offline. " +
+                    "If another saved class already has this name, you must " +
+                    "confirm before replacing it.",
+                    style = MaterialTheme.typography.bodySmall)
             }
         }
-        PresetLibrarySection(
-            catalog = catalog,
-            approved = approved,
-            selectedId = selectedPresetId,
-            suggestedName = name,
-            onSelected = { record, session -> loadPreset(record, session) },
-            onSaved = { record -> selectedPresetId = record.id },
-            onDeleted = { id ->
-                if (selectedPresetId == id) {
-                    selectedPresetId = null
-                    approved = null
-                    acceptedWarning = false
-                }
-            },
-        )
-        Text(
-            "Saved classes work offline. Selecting a class uses its approved plan; " +
-                "open the timer after loading an approved class.",
-            style = MaterialTheme.typography.bodySmall,
-        )
     }
             MainTab.SOUNDS -> Column(
                 modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
@@ -610,14 +602,34 @@ fun SessionEditorScreen() {
                 val timer = liveTimer
                 val view = timerView
                 if (session == null || timer == null || view == null) {
-                    Column(modifier = Modifier.fillMaxSize().padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text("No active class", style = MaterialTheme.typography.titleLarge)
-                        Text("Approve a class in Editor, or load a saved class. " +
-                            "Then tap Open class timer.")
-                        Button(onClick = { activeTab = MainTab.EDITOR }) {
-                            Text("Choose a class")
-                        }
+                    Column(
+                        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text("Timer · saved classes",
+                            style = MaterialTheme.typography.headlineSmall)
+                        PresetLibrarySection(
+                            catalog = catalog,
+                            refreshKey = libraryRevision,
+                            onEdit = { record, restored ->
+                                loadPreset(record, restored)
+                                activeTab = MainTab.EDITOR
+                            },
+                            onRun = { record, restored ->
+                                selectedPresetId = record.id
+                                playingSession = restored
+                                launchRunRequested = true
+                                activeTab = MainTab.TIMER
+                            },
+                            onDeleted = { id ->
+                                if (selectedPresetId == id) {
+                                    selectedPresetId = null
+                                    approved = null
+                                }
+                                libraryRevision += 1
+                            },
+                        )
                     }
                 } else {
                     SessionTimerScreen(
@@ -654,10 +666,35 @@ fun SessionEditorScreen() {
                         onNextPhase = {
                             runTimedCue { timer.nextPhase() }
                         },
+                        onExit = {
+                            playingSession = null
+                            launchRunRequested = false
+                            activeTab = MainTab.TIMER
+                        },
                     )
                 }
             }
         }
+    }
+
+    overwriteTarget?.let { target ->
+        AlertDialog(
+            onDismissRequest = { overwriteTarget = null },
+            title = { Text("Replace saved class?") },
+            text = { Text("A saved class named '${target.title}' already exists. " +
+                "Saving now will overwrite that class and its approved timeline. " +
+                "This cannot be undone. Continue?") },
+            confirmButton = {
+                TextButton(onClick = { finalSave(target.id) }) {
+                    Text("Overwrite class")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { overwriteTarget = null }) {
+                    Text("Cancel")
+                }
+            },
+        )
     }
 
     val openHelp = helpSection
