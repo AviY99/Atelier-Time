@@ -29,6 +29,15 @@ fun SessionEditorScreen() {
             UUID.randomUUID().toString()
         }
     }
+    val melodyPreferences = remember(context) { MelodyPreferences(context) }
+    var melodySelections by remember(melodyPreferences) {
+        mutableStateOf(melodyPreferences.load())
+    }
+    val melodyPlayer = remember { MelodyAudioPlayer() }
+    var melodyError by remember { mutableStateOf<String?>(null) }
+    DisposableEffect(melodyPlayer) {
+        onDispose { melodyPlayer.close() }
+    }
     var selectedPresetId by remember { mutableStateOf<String?>(null) }
     var name by remember { mutableStateOf("Atelier session") }
     var total by remember { mutableStateOf("180") }
@@ -115,6 +124,7 @@ fun SessionEditorScreen() {
     if (liveSession != null) {
         SessionTimerScreen(
             session = liveSession,
+            melodySelections = melodySelections,
             onBackToEditor = { playingSession = null },
         )
         return
@@ -131,6 +141,24 @@ fun SessionEditorScreen() {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { applyA() }) { Text("Example A") }
             OutlinedButton(onClick = { applyB() }) { Text("Example B") }
+        }
+        MelodySettingsSection(
+            selections = melodySelections,
+            onSelectionsChange = { updated ->
+                try {
+                    melodyPreferences.save(updated)
+                    melodySelections = updated
+                    melodyError = null
+                } catch (error: Exception) {
+                    melodyError = error.message ?: "Unable to save sound settings."
+                }
+            },
+            onPreview = { melody ->
+                melodyPlayer.play(melody) { message -> melodyError = message }
+            },
+        )
+        if (melodyError != null) {
+            Text(melodyError ?: "", color = MaterialTheme.colorScheme.error)
         }
         OutlinedTextField(
             value = name, onValueChange = { name = it; invalidate() },
