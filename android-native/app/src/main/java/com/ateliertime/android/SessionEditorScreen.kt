@@ -56,6 +56,10 @@ fun SessionEditorScreen() {
     var ending by remember { mutableStateOf<FinalPoseChoice?>(null) }
     var acceptedWarning by remember { mutableStateOf(false) }
     var approved by remember { mutableStateOf<ApprovedSession?>(null) }
+    var saveError by remember { mutableStateOf<String?>(null) }
+    var overwriteTarget by remember { mutableStateOf<StoredPreset?>(null) }
+    var libraryRevision by remember { mutableIntStateOf(0) }
+    var launchRunRequested by remember { mutableStateOf(false) }
     var playingSession by remember { mutableStateOf<ApprovedSession?>(null) }
     var activeTab by remember { mutableStateOf(MainTab.EDITOR) }
     var soundEnabled by remember { mutableStateOf(true) }
@@ -78,16 +82,16 @@ fun SessionEditorScreen() {
         acceptedWarning = false
         approved = null
     }
+    // Swap the Editor button examples only. Historical domain fixtures A/B and
+    // already-approved saved class signatures must NEVER change.
     fun applyA() {
         selectedPresetId = null
         name = "Example A"
         total = "180"; summary = "15"; pose = "25"
         normal = "5"; special = "15"; count = "1"
-        cycle = CycleStart.BREAK_FIRST
+        cycle = CycleStart.POSE_FIRST
         automatic = true
         opening.clear()
-        opening.add(OpeningDraft(nextOpeningId++, "4", "1", "0"))
-        opening.add(OpeningDraft(nextOpeningId++, "4", "4", "5"))
         invalidate()
     }
     fun applyB() {
@@ -95,9 +99,11 @@ fun SessionEditorScreen() {
         name = "Example B"
         total = "180"; summary = "15"; pose = "25"
         normal = "5"; special = "15"; count = "1"
-        cycle = CycleStart.POSE_FIRST
+        cycle = CycleStart.BREAK_FIRST
         automatic = true
         opening.clear()
+        opening.add(OpeningDraft(nextOpeningId++, "4", "1", "0"))
+        opening.add(OpeningDraft(nextOpeningId++, "4", "4", "5"))
         invalidate()
     }
 
@@ -136,6 +142,19 @@ fun SessionEditorScreen() {
         null
     }
 
+    // Run from the Timer library starts the actual class without another
+    // intermediate approval or 'Start' button.
+    LaunchedEffect(liveTimer, launchRunRequested) {
+        val clock = liveTimer
+        if (clock != null && launchRunRequested) {
+            val view = clock.start()
+            timerView = view
+            classClockTimes = classClockTracker.newClass(view, System.currentTimeMillis())
+            timerError = null
+            launchRunRequested = false
+        }
+    }
+
     LaunchedEffect(liveTimer, melodySelections, soundEnabled) {
         while (true) {
             val nowEpochMs = System.currentTimeMillis()
@@ -149,6 +168,11 @@ fun SessionEditorScreen() {
                     melodyPlayer.play(melodySelections.forCue(tick.cue)) {
                         message -> melodyError = message
                     }
+                }
+                if (tick.view.status == TimerStatus.FINISHED) {
+                    // Return to Timer's saved-class HOME once the class ends.
+                    playingSession = null
+                    activeTab = MainTab.TIMER
                 }
             }
             delay(200)
@@ -185,10 +209,42 @@ fun SessionEditorScreen() {
                     error -> melodyError = error
                 }
             }
+            if (event.view.status == TimerStatus.FINISHED) {
+                playingSession = null
+                activeTab = MainTab.TIMER
+            }
         } catch (error: IllegalArgumentException) {
             timerError = error.message ?: "The final sessions cannot absorb this time change."
         } catch (error: IllegalStateException) {
             timerError = error.message ?: "This phase cannot be skipped safely."
+        }
+    }
+
+    fun finalSave(overwriteId: String?) {
+        val current = candidate ?: return
+        try {
+            val exact = engine.approve(current, acknowledgeWarnings = acceptedWarning)
+            val record = catalog.save(exact, name, overwriteId = overwriteId)
+            selectedPresetId = record.id
+            approved = catalog.open(record.id)
+            overwriteTarget = null
+            saveError = null
+            libraryRevision += 1
+            // The Timer tab is the home for saved classes, not an auto-run screen.
+            activeTab = MainTab.TIMER
+        } catch (failure: Exception) {
+            saveError = failure.message ?: "The class could not be saved."
+        }
+    }
+
+    fun requestFinalSave() {
+        try {
+            val id = ClassSaveTarget.existingId(catalog.state().entries, name)
+            val existing = catalog.state().entries.firstOrNull { it.id == id }
+            if (existing == null) finalSave(null)
+            else overwriteTarget = existing
+        } catch (failure: Exception) {
+            saveError = failure.message ?: "Cannot read saved classes."
         }
     }
 
