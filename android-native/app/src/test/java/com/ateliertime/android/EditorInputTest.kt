@@ -59,6 +59,29 @@ class EditorInputTest {
         assertEquals(listOf(60, 240), rules.openingGroups.map { it.poseSeconds })
     }
 
+    @Test fun editingSavedClassPreservesOriginalGroupIdentifiers() {
+        val rules = defaults().copy(
+            opening = listOf(
+                OpeningDraft(31, "4", "1", "0", originalGroupId = "drawing-opening-a"),
+                OpeningDraft(32, "4", "4", "5", originalGroupId = "drawing-opening-b"),
+            ),
+            cycleStart = CycleStart.BREAK_FIRST,
+        ).toRules()
+        assertEquals(
+            listOf("drawing-opening-a", "drawing-opening-b"),
+            rules.openingGroups.map { it.id },
+        )
+        val updated = defaults().copy(
+            opening = listOf(
+                OpeningDraft(31, "3", "1", "0", originalGroupId = "drawing-opening-a"),
+                OpeningDraft(32, "4", "4", "5", originalGroupId = "drawing-opening-b"),
+            ),
+            cycleStart = CycleStart.BREAK_FIRST,
+        ).toRules()
+        assertEquals(rules.openingGroups.map { it.id },
+            updated.openingGroups.map { it.id })
+    }
+
     @Test fun manualOrdinalsOnlyApplyWhenRequested() {
         val r = defaults().copy(
             automaticPlacement = false,
