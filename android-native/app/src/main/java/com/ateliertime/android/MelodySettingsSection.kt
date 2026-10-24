@@ -55,11 +55,11 @@ fun MelodySettingsSection(
         settings, onSettingsChange)
     SoundPicker("C · End of class", TimerCue.SESSION_FINISHED, settings,
         onSettingsChange, onChooseSystemSound, onChooseAudioFile, onPreview)
-    Text("C · Class end sound length: ${settings.classEndSeconds} seconds",
-        style = MaterialTheme.typography.titleSmall)
     var sliderSeconds by remember(settings.classEndSeconds) {
         mutableFloatStateOf(settings.classEndSeconds.toFloat())
     }
+    Text("C · Class end sound length: ${sliderSeconds.roundToInt()} seconds",
+        style = MaterialTheme.typography.titleSmall)
     Slider(
         value = sliderSeconds,
         onValueChange = { sliderSeconds = it.roundToInt().coerceIn(5, 60).toFloat() },
