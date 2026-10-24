@@ -1,5 +1,13 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-24 12:14 — D-079 phone Gradle rerun PASSED after focused test fixture repair
+
+**Screenshot-verified from user's actual Code on the Go Android terminal (12:14 local):** The combined local native-Android Gradle run reports `> Task :app:assembleDebug`, `> Task :app:compileDebugUnitTestKotlin`, `> Task :app:testDebugUnitTest`, and **`BUILD SUCCESSFUL in 23s`**. 42 actionable tasks: **4 executed, 38 up-to-date**. This follows the previous 12:09 result of 78 tests/one failed and the explicit-ending-choice fixture correction committed as `332279384cd195b74b68d6b08881bbb74adba21d`. The Kotlin Gradle test task and debug APK assembly are now verified PASS. The screenshot does **not** show a per-case JUnit XML total, exact checkout SHA, successful APK copy, update-install, or live UI timings; do not invent those.
+
+**Next phone validation:** update-install `/storage/emulated/0/Download/Atelier-Time-update.apk` if the chained copy step completed; otherwise run `cp app/build/outputs/apk/debug/app-debug.apk /storage/emulated/0/Download/Atelier-Time-update.apk` from the `android-native` directory. **Do not uninstall or clear stored presets.** Test Timer's five live clock entries (Clock, Class start/end, current Session/Break start/end) during normal timing and Next, Pause/Resume, Restart class; inspect Class/Session/Break label consistency and cue playback. Android instrumentation tests and lock/background sound are still unverified. PR #3 stays draft; no paid Actions.
+
+---
+
 ## 2026-10-24 — D-079 PHONE UNIT GATE FAILED 1/78; root cause in test fixture fixed (unverified until rerun)
 
 **Actual phone screenshot (Code on the Go, 12:09 local):** Gradle `:app:testDebugUnitTest` **FAILED** after **78 tests completed, 1 failed**, `BUILD FAILED in 42s`, 39 actionable tasks (8 executed, 31 up-to-date). Exact failing case `MonotonicSessionTimerTest > nextSupportsConsecutiveOpeningPosesAndLaterOpeningBreak`, `IllegalStateException` at **`MonotonicSessionTimerTest.kt:165`**. The screenshot does not show the complete exception message or XML trace, but line 165 in the checked-out test source invokes `engine.approve(engine.generate(rules))`. The one-hour test fixture (2×1 minute opening sessions, a shared 5m break, repeating 10m session/5m break) ends in a shortened 8m final regular session. `ScheduleEngine.generate(rules)` appropriately sets `needsFinalPoseChoice`, and `approve` requires an explicit ending choice. **The failing code never reaches `nextPhase`; no live Next defect was proven.** The 77 other tests completed without a reported failure. Because the combined command used `&&`, debug APK build/copy is **NOT CONFIRMED for the failed run**.
