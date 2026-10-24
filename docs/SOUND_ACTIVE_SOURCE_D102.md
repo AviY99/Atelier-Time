@@ -1,6 +1,8 @@
 # D-102 — Disable only sound libraries unused by the active Sound mode
 
-**Date:** 2026-10-24. **Status:** source fix committed on `android-native-kotlin-compose`; GitHub readback/static checks only. **No D-102 Gradle compile, APK install, or phone user acceptance yet.**
+> **D-102 PHONE BUILD PASS / INSTALL & FOCUSED UX QA PENDING (2026-10-24):** User-supplied Code on the Go screenshot confirms `:app:assembleDebug` and `:app:testDebugUnitTest`, **BUILD SUCCESSFUL in 29s**, 42 actionable tasks (8 executed, 34 up-to-date). The same screenshot verifies the resulting **12M** `Atelier-Time-D102.apk` already copied to `/storage/emulated/0/Download/` (Oct 24 20:39). Exact local commit SHA and individual test results/JUnit XML are not shown. **No D-102 update-install or actual active-source checkbox behavior has yet been confirmed.** Do not repeat the build or copy. Next: update-install existing APK without uninstall or clearing stored Classes, then in Same sound for all select an Atelier Time sound and disable Audio files when it is only used in hidden Separate A/B/C (should succeed without error); switch to Separate (needed source auto-enables and prior chosen sound returns); ensure active sound's source still cannot be unchecked. Stable 2 rollback unchanged.
+
+**Date:** 2026-10-24. **Status:** D-102 passed on-phone Gradle unit-test task and APK build, and APK was copied to Downloads; update-install and user QA are still pending.
 
 ## Evidence and user report
 
