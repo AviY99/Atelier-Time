@@ -99,6 +99,42 @@ class ClassClockTrackerTest {
                 remaining = 0), start + 170_000L).classEndEpochMs)
     }
 
+    @Test fun realTimerNextAndRestartUsePhysicalTimeNotSkippedVirtualOffsets() {
+        val engine = ScheduleEngine()
+        val rules = SessionRules(
+            id = "clock", name = "Class", totalSeconds = 180 * 60,
+            summarySeconds = 15 * 60, poseSeconds = 25 * 60,
+            specialBreakCount = 1,
+        )
+        val approved = engine.approve(
+            engine.generate(rules, FinalPoseChoice.remainder())
+        )
+        var monotonicMs = 0L
+        val actualStart = 1_700_000_000_000L
+        val timer = MonotonicSessionTimer(approved) { monotonicMs }
+        val tracker = ClassClockTracker()
+        tracker.newClass(timer.start(), actualStart)
+
+        monotonicMs = 10L * 60_000L
+        val jumped = timer.nextPhase().view
+        val jumpedClock = tracker.observe(jumped, actualStart + monotonicMs)
+        assertEquals("Break · regular", jumpedClock.currentPhaseLabel)
+        assertEquals(actualStart + 10L * 60_000L,
+            jumpedClock.currentPhaseStartEpochMs)
+        assertEquals(actualStart + 15L * 60_000L,
+            jumpedClock.currentPhaseEndEpochMs)
+        assertEquals(actualStart + 180L * 60_000L,
+            jumpedClock.classEndEpochMs)
+
+        monotonicMs = 12L * 60_000L
+        val restarted = timer.restartKeepingEndTime()
+        val restartedClock = tracker.restartClass(restarted, actualStart + monotonicMs)
+        assertEquals(actualStart + monotonicMs, restartedClock.classStartEpochMs)
+        assertEquals(actualStart + 180L * 60_000L,
+            restartedClock.classEndEpochMs)
+        assertEquals("Session 1", restartedClock.currentPhaseLabel)
+    }
+
     @Test fun phaseLabelsDifferentiateKindsOfBreak() {
         assertEquals("Break · opening group", clockPhaseLabel(
             two.copy(openingGroupId = "g")))
