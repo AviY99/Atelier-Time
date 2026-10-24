@@ -1,5 +1,11 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-24 — D-082 SOURCE SYNC + GRADLE GATE SUCCESS; NEW PHONE INSTALL / UX QA PENDING
+
+User screenshot: existing Code on the Go checkout fast-forwarded Android branch `bab39b3..b51620d` (`android-native-kotlin-compose`, 8 files updated). The combined initial command attempted `cd android-native` while the terminal was *already* inside that directory, so `cd` failed and Gradle did not execute on that attempt. User then ran the Gradle-only command from `.../Atelier-Time/android-native` and supplied the terminal result **`BUILD SUCCESSFUL in 12s`** for `:app:testDebugUnitTest :app:assembleDebug`, **42 actionable tasks: 42 UP-TO-DATE**. This is a successful Gradle up-to-date gate; not evidence of 97 test cases freshly run, nor installation or UI/automatic audio verification for D-082. No source fixes were warranted by the terminal output. Next: update-install existing debug APK preserving on-phone saved classes; inspect moved phase clocks and 2x Clock, current Break restart with B cue, Session restart A, Class clock stability, last-only final-break compensation/rejection. Retain prior user-accepted working APK status for D-080/D-081, separate instrumentation/background audio QA and open Draft PR #3. No paid Actions or merge.
+
+---
+
 ## 2026-10-24 — CLOSURE CHECKPOINT: NEW NEXT-CHAT HANDOFF PUBLISHED, NO NEW CODE EXECUTION
 
 At user's explicit request **"השיחה הגיעה לסיומה הכן הנדאוף לשיחה חדשה , דיחה זאת אחכ סגורה"**, created and GitHub-readback-verified the authoritative [NEXT_CHAT_HANDOFF_2026_10_24.md](NEXT_CHAT_HANDOFF_2026_10_24.md). Verified `android-native-kotlin-compose` head `b51620d64e87db129dcf44c153fb7bc986fcacf6` and PR #3 **open Draft/unmerged** at handoff. Reviewed current `HANDOFF`, `WORK_LOG`, `TEST_PLAN`, `DECISIONS` and historical Oct 23 handoff. The earlier native APK build+phone install is already **user-confirmed WORKING**, but newly committed D-082 card/clock/Restart Break source remains **UNBUILT and UNTESTED on the phone**. The new handoff separates these clearly and specifies the next-chat gates. **No additional feature edits, Gradle calls, installations, paid CI, or merge** were performed during this closure.
