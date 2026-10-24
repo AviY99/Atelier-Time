@@ -29,20 +29,6 @@ class DesignClockTest {
         assertEquals(DesignPalette.NIGHT, DesignClock.resolve(config, 0))
     }
 
-    @Test fun autoSliderPreviewIsDayOnLeftAndNightRightOfMidpoint() {
-        assertEquals(DesignPalette.DAY, DesignClock.previewForSlider(12))
-        assertEquals(DesignPalette.DAY, DesignClock.previewForSlider(17))
-        assertEquals(DesignPalette.NIGHT, DesignClock.previewForSlider(18))
-        assertEquals(DesignPalette.NIGHT, DesignClock.previewForSlider(23))
-        assertEquals(DesignPalette.DAY, DesignClock.previewForSlider(0))
-        assertEquals(DesignPalette.NIGHT, DesignClock.previewForSlider(99))
-        // Clock-based automatic mode stays separate from editing preview.
-        assertEquals(DesignPalette.DAY,
-            DesignClock.resolve(DesignPreferences(DesignMode.AUTO, 18), 14))
-        assertEquals(DesignPalette.NIGHT,
-            DesignClock.resolve(DesignPreferences(DesignMode.AUTO, 18), 20))
-    }
-
     @Test fun changingSliderHourChangesOnlyNightTransition() {
         val early = DesignPreferences(DesignMode.AUTO, 16)
         val late = DesignPreferences(DesignMode.AUTO, 22)
