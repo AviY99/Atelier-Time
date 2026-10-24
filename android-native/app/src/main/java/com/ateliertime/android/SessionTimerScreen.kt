@@ -29,6 +29,7 @@ fun SessionTimerScreen(
     onPauseResume: () -> Unit,
     onRestartSession: () -> Unit,
     onNextPhase: () -> Unit,
+    onExit: () -> Unit,
 ) {
     var confirmation by remember { mutableStateOf<String?>(null) }
     // Contextual help keeps the Timer compact on a phone. Nothing is hidden
@@ -39,18 +40,36 @@ fun SessionTimerScreen(
         time.format(Date(it))
     } ?: "—"
     val segmentLabel = classClockTimes.currentPhaseLabel ?: "Current segment"
+    val currentRemainingLabel = when (view.phase?.kind) {
+        PhaseKind.POSE -> "Current session remaining"
+        PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK ->
+            phaseLabel(view.phase) + " remaining"
+        PhaseKind.SUMMARY -> "Class summary remaining"
+        null -> "No current session / break"
+    }
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(modifier = Modifier.weight(1f)) {
                 Text("Class timer", style = MaterialTheme.typography.titleLarge)
-                Text(session.rules.name, style = MaterialTheme.typography.titleSmall)
+                Text(session.rules.name, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    when (view.status) {
+                        TimerStatus.RUNNING -> "Running"
+                        TimerStatus.PAUSED -> "Paused"
+                        TimerStatus.READY -> "Ready"
+                        TimerStatus.FINISHED -> "Finished"
+                        TimerStatus.STOPPED -> "Stopped"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
-            Column(horizontalAlignment = Alignment.End) {
+            Column(horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text("Clock  " + showTime(wallClockMillis),
                     style = MaterialTheme.typography.labelSmall)
                 Text("Class start  " + showTime(classClockTimes.classStartEpochMs),
@@ -64,17 +83,21 @@ fun SessionTimerScreen(
                     (if (classClockTimes.paused) "— (paused)"
                         else showTime(classClockTimes.currentPhaseEndEpochMs)),
                     style = MaterialTheme.typography.labelSmall)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text("Class remaining  " + formatTime(view.totalRemainingSeconds),
+                    style = MaterialTheme.typography.labelSmall)
+                LinearProgressIndicator(
+                    progress = {
+                        view.elapsedSeconds.toFloat() /
+                            view.totalSeconds.coerceAtLeast(1)
+                    },
+                    modifier = Modifier.width(178.dp).height(4.dp),
+                )
+                Text("Class elapsed  " + formatTime(view.elapsedSeconds) +
+                    " / " + formatTime(view.totalSeconds),
+                    style = MaterialTheme.typography.labelSmall)
             }
         }
-        Text(
-            when (view.status) {
-                TimerStatus.READY -> "Ready to begin the approved class"
-                TimerStatus.RUNNING -> "Running"
-                TimerStatus.PAUSED -> "Paused — segment end time pending Resume"
-                TimerStatus.FINISHED -> "Class finished"
-                TimerStatus.STOPPED -> "Stopped"
-            },
-        )
         ElevatedCard(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(20.dp),
@@ -83,7 +106,7 @@ fun SessionTimerScreen(
                 Text(phaseLabel(view.phase), style = MaterialTheme.typography.titleLarge)
                 Text(formatTime(view.phaseRemainingSeconds),
                     style = MaterialTheme.typography.displayLarge)
-                Text("Current session / break remaining")
+                Text(currentRemainingLabel)
                 view.phase?.let { phase ->
                     val done = phase.durationSeconds - view.phaseRemainingSeconds
                     LinearProgressIndicator(
@@ -96,13 +119,6 @@ fun SessionTimerScreen(
                 Text("Next: " + phaseLabel(view.nextPhase))
             }
         }
-        Text("Class remaining: " + formatTime(view.totalRemainingSeconds))
-        LinearProgressIndicator(
-            progress = { view.elapsedSeconds.toFloat() / view.totalSeconds.coerceAtLeast(1) },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Text("Class elapsed: " + formatTime(view.elapsedSeconds) +
-            " / " + formatTime(view.totalSeconds))
         if (view.recoveredSeconds != 0) {
             Text(
                 (if (view.recoveredSeconds > 0) "Time deducted from final two sessions: "
@@ -119,46 +135,63 @@ fun SessionTimerScreen(
         }
         timerError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
-        when (view.status) {
-            TimerStatus.READY, TimerStatus.FINISHED -> {
-                Button(onClick = onStart) {
-                    Text(if (view.status == TimerStatus.FINISHED) "Start new class"
-                    else "Start class")
-                }
-            }
-            TimerStatus.RUNNING, TimerStatus.PAUSED, TimerStatus.STOPPED -> {
-                Row(verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = onPauseResume) {
-                        Text(if (view.status == TimerStatus.RUNNING) "Pause" else "Resume")
+        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text("Class controls", style = MaterialTheme.typography.titleSmall)
+                Row(modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    val underway = view.status == TimerStatus.RUNNING ||
+                        view.status == TimerStatus.PAUSED
+                    if (view.status == TimerStatus.READY ||
+                        view.status == TimerStatus.FINISHED) {
+                        Button(onClick = onStart, modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(horizontal = 5.dp, vertical = 6.dp)) {
+                            Text("Start", maxLines = 1)
+                        }
+                    } else {
+                        Button(onClick = onPauseResume, modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(horizontal = 5.dp, vertical = 6.dp)) {
+                            Text(if (view.status == TimerStatus.RUNNING) "Pause" else "Resume",
+                                maxLines = 1)
+                        }
                     }
-                    TextButton(onClick = { helpFor = "pause" }) { Text("Help") }
+                    OutlinedButton(
+                        enabled = underway,
+                        onClick = { confirmation = "restart" },
+                        modifier = Modifier.weight(1.3f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                    ) { Text("Restart class", style = MaterialTheme.typography.labelSmall) }
+                    OutlinedButton(
+                        enabled = underway,
+                        onClick = onNextPhase,
+                        modifier = Modifier.weight(0.85f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                    ) { Text("Next", maxLines = 1) }
                 }
+                Row(modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly) {
+                    TextButton(onClick = { helpFor = "pause" },
+                        contentPadding = PaddingValues(horizontal = 4.dp)) {
+                        Text("Pause help", style = MaterialTheme.typography.labelSmall)
+                    }
+                    TextButton(onClick = { helpFor = "restart" },
+                        contentPadding = PaddingValues(horizontal = 4.dp)) {
+                        Text("Restart help", style = MaterialTheme.typography.labelSmall)
+                    }
+                    TextButton(onClick = { helpFor = "next" },
+                        contentPadding = PaddingValues(horizontal = 4.dp)) {
+                        Text("Next help", style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+                TextButton(onClick = { confirmation = "exit" },
+                    modifier = Modifier.align(Alignment.End),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                ) { Text("End & return to saved classes") }
             }
-        }
-        HorizontalDivider()
-        Text("Class controls", style = MaterialTheme.typography.titleMedium)
-        Row(modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(
-                enabled = view.status == TimerStatus.RUNNING ||
-                    view.status == TimerStatus.PAUSED,
-                modifier = Modifier.weight(1f),
-                onClick = { confirmation = "restart" },
-            ) { Text("Restart class") }
-            TextButton(onClick = { helpFor = "restart" }) { Text("Help") }
-        }
-        Row(modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(
-                enabled = view.status == TimerStatus.RUNNING ||
-                    view.status == TimerStatus.PAUSED,
-                modifier = Modifier.weight(1f),
-                onClick = onNextPhase,
-            ) { Text("Next") }
-            TextButton(onClick = { helpFor = "next" }) { Text("Help") }
         }
     }
 
@@ -167,19 +200,24 @@ fun SessionTimerScreen(
         AlertDialog(
             onDismissRequest = { confirmation = null },
             title = {
-                Text("Restart this class?")
+                Text(if (choice == "exit") "End class and return?"
+                    else "Restart this class?")
             },
             text = {
-                Text("Restart at the beginning of the same class. To keep the " +
-                    "original finish time, the final two regular sessions are shortened " +
-                    "according to the approved ending choice. If that is impossible, " +
-                    "the running timer remains unchanged. The class-finish melody " +
-                    "plays only if the restart succeeds.")
+                Text(if (choice == "exit")
+                    "End the current run and return to your saved classes in Timer. " +
+                        "The saved approved plan is not changed."
+                else
+                    "Restart at the beginning of the same class. To keep the " +
+                        "original finish time, the final two regular sessions are shortened " +
+                        "according to the approved ending choice. If that is impossible, " +
+                        "the running timer remains unchanged. The class-finish melody " +
+                        "plays only if restart succeeds.")
             },
             confirmButton = {
                 TextButton(onClick = {
                     confirmation = null
-                    onRestartSession()
+                    if (choice == "exit") onExit() else onRestartSession()
                 }) { Text("Confirm") }
             },
             dismissButton = {
