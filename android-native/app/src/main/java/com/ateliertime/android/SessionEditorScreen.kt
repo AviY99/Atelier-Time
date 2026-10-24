@@ -22,6 +22,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import android.os.SystemClock
+import android.app.Activity
+import android.content.Intent
+import android.media.RingtoneManager
+import android.net.Uri
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import java.util.Calendar
 import com.ateliertime.domain.DesignClock
 import com.ateliertime.domain.*
@@ -49,13 +56,76 @@ fun SessionEditorScreen() {
     }
     var autoPreviewHour by remember { mutableStateOf<Int?>(null) }
     val melodyPreferences = remember(context) { MelodyPreferences(context) }
-    var melodySelections by remember(melodyPreferences) {
-        mutableStateOf(melodyPreferences.load())
+    var soundSettings by remember(melodyPreferences) {
+        mutableStateOf(melodyPreferences.loadSettings())
     }
-    val melodyPlayer = remember { MelodyAudioPlayer() }
+    val melodyPlayer = remember(context) { MelodyAudioPlayer(context) }
     var melodyError by remember { mutableStateOf<String?>(null) }
     DisposableEffect(melodyPlayer) {
         onDispose { melodyPlayer.close() }
+    }
+    fun saveSoundSettings(updated: SoundSettings) {
+        try {
+            melodyPreferences.saveSettings(updated)
+            soundSettings = updated
+            melodyError = null
+        } catch (failure: Exception) {
+            melodyError = failure.message ?: "Unable to save sound settings."
+        }
+    }
+
+    // The system chooser and the document provider own their respective lists:
+    // no storage scan, no filesystem path access, no broad media permission.
+    var pickingCue by remember { mutableStateOf<TimerCue?>(null) }
+    val androidSoundPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val cue = pickingCue
+        pickingCue = null
+        if (result.resultCode == Activity.RESULT_OK && cue != null) {
+            @Suppress("DEPRECATION")
+            val uri: Uri? = result.data?.getParcelableExtra(
+                RingtoneManager.EXTRA_RINGTONE_PICKED_URI
+            )
+            if (uri == null) {
+                melodyError = "Choose an audible system sound."
+            } else {
+                val title = runCatching {
+                    RingtoneManager.getRingtone(context, uri)?.getTitle(context)
+                }.getOrNull() ?: "Android system sound"
+                saveSoundSettings(soundSettings.choose(cue, CueSound(
+                    source = SoundSource.SYSTEM,
+                    melody = soundSettings.soundFor(cue).melody,
+                    uri = uri.toString(), displayName = title,
+                )))
+            }
+        }
+    }
+    val documentPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        val cue = pickingCue
+        pickingCue = null
+        if (uri != null && cue != null) {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+                val title = context.contentResolver.query(
+                    uri, arrayOf(OpenableColumns.DISPLAY_NAME),
+                    null, null, null,
+                )?.use { cursor ->
+                    if (cursor.moveToFirst()) cursor.getString(0) else null
+                } ?: uri.lastPathSegment ?: "Audio file"
+                saveSoundSettings(soundSettings.choose(cue, CueSound(
+                    source = SoundSource.FILE,
+                    melody = soundSettings.soundFor(cue).melody,
+                    uri = uri.toString(), displayName = title,
+                )))
+            } catch (failure: Exception) {
+                melodyError = failure.message ?: "Cannot retain access to this audio file."
+            }
+        }
     }
     var selectedPresetId by remember { mutableStateOf<String?>(null) }
     var name by remember { mutableStateOf("Atelier class") }
@@ -185,7 +255,7 @@ fun SessionEditorScreen() {
         }
     }
 
-    LaunchedEffect(liveTimer, melodySelections, soundEnabled) {
+    LaunchedEffect(liveTimer, soundSettings, soundEnabled) {
         while (true) {
             val nowEpochMs = System.currentTimeMillis()
             wallClockMillis = nowEpochMs
@@ -204,8 +274,9 @@ fun SessionEditorScreen() {
                 timerView = tick.view
                 classClockTimes = classClockTracker.observe(tick.view, nowEpochMs)
                 if (soundEnabled && tick.cue != null) {
-                    melodyPlayer.play(melodySelections.forCue(tick.cue)) {
-                        message -> melodyError = message
+                    melodyPlayer.play(soundSettings.soundFor(tick.cue),
+                        soundSettings.secondsFor(tick.cue)) { message ->
+                        melodyError = message
                     }
                 }
                 if (tick.view.status == TimerStatus.FINISHED) {
@@ -250,8 +321,9 @@ fun SessionEditorScreen() {
             }
             timerError = null
             if (soundEnabled && event.cue != null) {
-                melodyPlayer.play(melodySelections.forCue(event.cue)) {
-                    error -> melodyError = error
+                melodyPlayer.play(soundSettings.soundFor(event.cue),
+                    soundSettings.secondsFor(event.cue)) { error ->
+                    melodyError = error
                 }
             }
             if (event.view.status == TimerStatus.FINISHED) {
@@ -675,19 +747,45 @@ fun SessionEditorScreen() {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 MelodySettingsSection(
-                    selections = melodySelections,
-                    onSelectionsChange = { updated ->
-                        try {
-                            melodyPreferences.save(updated)
-                            melodySelections = updated
-                            melodyError = null
-                        } catch (error: Exception) {
-                            melodyError = error.message ?: "Unable to save sound settings."
+                    settings = soundSettings,
+                    onSettingsChange = { updated -> saveSoundSettings(updated) },
+                    onChooseSystemSound = { cue ->
+                        pickingCue = cue
+                        val selected = soundSettings.soundFor(cue)
+                        val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+                            putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE,
+                                RingtoneManager.TYPE_ALL)
+                            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+                            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+                            putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE,
+                                "Select Android sound")
+                            putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI,
+                                if (selected.source == SoundSource.SYSTEM)
+                                    selected.uri?.let(Uri::parse)
+                                else RingtoneManager.getDefaultUri(
+                                    RingtoneManager.TYPE_NOTIFICATION))
+                        }
+                        runCatching { androidSoundPicker.launch(intent) }
+                            .onFailure {
+                                pickingCue = null
+                                melodyError = it.message ?: "Android sound picker unavailable."
+                            }
+                    },
+                    onChooseAudioFile = { cue ->
+                        pickingCue = cue
+                        runCatching { documentPicker.launch(arrayOf("audio/*")) }
+                            .onFailure {
+                                pickingCue = null
+                                melodyError = it.message ?: "Audio file picker unavailable."
+                            }
+                    },
+                    onPreview = { cue ->
+                        melodyPlayer.play(soundSettings.soundFor(cue),
+                            soundSettings.secondsFor(cue)) { message ->
+                            melodyError = message
                         }
                     },
-                    onPreview = { melody ->
-                        melodyPlayer.play(melody) { message -> melodyError = message }
-                    },
+                    onError = { message -> melodyError = message },
                 )
                 if (melodyError != null) {
                     Text(melodyError ?: "", color = atelierErrorTextColor())
@@ -697,8 +795,8 @@ fun SessionEditorScreen() {
                     Switch(checked = soundEnabled,
                         onCheckedChange = { soundEnabled = it })
                 }
-                Text("You can change melodies while a timer is running. The clock " +
-                    "continues in the Timer tab and the new choices apply at the next cue.")
+                Text("Sounds and playback lengths can change while a class runs. " +
+                    "The Timer clock and approved Class schedule remain unchanged.")
             }
             MainTab.TIMER -> {
                 val session = playingSession
