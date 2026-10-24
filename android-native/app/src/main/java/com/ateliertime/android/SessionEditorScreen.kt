@@ -629,21 +629,26 @@ fun SessionEditorScreen() {
                                 it.kind == PhaseKind.SPECIAL_BREAK
                         }.sumOf { it.durationSeconds } / 60 + " min",
                 )
-                candidate.phases.forEach { phase ->
-                    val label = when (phase.kind) {
-                        PhaseKind.POSE -> "Session " + phase.poseNumber
-                        PhaseKind.SHORT_BREAK ->
-                            if (phase.openingGroupId != null)
-                                "Break · opening group"
-                            else "Break · regular #" + phase.breakOrdinal
-                        PhaseKind.SPECIAL_BREAK -> "Break · special #" + phase.breakOrdinal
-                        PhaseKind.SUMMARY -> "End-of-class summary"
+                // Keep the chronological text timeline compact without changing
+                // its timestamps, phase labels, order, or the chart below it.
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    candidate.phases.forEach { phase ->
+                        val label = when (phase.kind) {
+                            PhaseKind.POSE -> "Session " + phase.poseNumber
+                            PhaseKind.SHORT_BREAK ->
+                                if (phase.openingGroupId != null)
+                                    "Break · opening group"
+                                else "Break · regular #" + phase.breakOrdinal
+                            PhaseKind.SPECIAL_BREAK -> "Break · special #" + phase.breakOrdinal
+                            PhaseKind.SUMMARY -> "End-of-class summary"
+                        }
+                        Text(
+                            formatOffset(phase.startSeconds) + "–" +
+                                formatOffset(phase.endSeconds) + "  " + label +
+                                "  (" + phase.durationSeconds / 60 + " min)",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
                     }
-                    Text(
-                        formatOffset(phase.startSeconds) + "–" +
-                            formatOffset(phase.endSeconds) + "  " + label +
-                            "  (" + phase.durationSeconds / 60 + " min)",
-                    )
                 }
                 TimelinePhaseChart(candidate.phases)
                 saveError?.let {
