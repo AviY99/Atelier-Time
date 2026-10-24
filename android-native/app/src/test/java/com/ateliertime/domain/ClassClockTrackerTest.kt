@@ -213,6 +213,33 @@ class ClassClockTrackerTest {
         assertEquals(start + 180_000L, repeated.classEndEpochMs)
     }
 
+    @Test fun nextWithoutCompensationRebasesActualEndClockButKeepsClassStart() {
+        val tracker = ClassClockTracker()
+        val start = 1_700_000_000_000L
+        tracker.newClass(view(), start)
+        // A forced Next during an unabsorbable pause advances the virtual
+        // phase but leaves the remaining phase lengths unchanged.
+        val next = tracker.afterNext(
+            view(phase = two, elapsed = 60, remaining = 60),
+            start + 50_000L,
+        )
+        assertEquals(start, next.classStartEpochMs)
+        assertEquals(start + 50_000L + 120_000L, next.classEndEpochMs)
+        assertEquals(start + 50_000L, next.currentPhaseStartEpochMs)
+        assertEquals(start + 110_000L, next.currentPhaseEndEpochMs)
+    }
+
+    @Test fun compensatedNextPreservesOriginalEndClockWhenWithinTickTolerance() {
+        val tracker = ClassClockTracker()
+        val start = 1_700_000_000_000L
+        tracker.newClass(view(), start)
+        val next = tracker.afterNext(
+            view(phase = two, elapsed = 60, remaining = 60),
+            start + 60_500L,
+        )
+        assertEquals(start + 180_000L, next.classEndEpochMs)
+    }
+
     @Test fun phaseLabelsDifferentiateKindsOfBreak() {
         assertEquals("Break · opening group", clockPhaseLabel(
             two.copy(openingGroupId = "g")))
