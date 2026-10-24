@@ -6,6 +6,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.ateliertime.domain.*
 import kotlin.math.roundToInt
@@ -44,7 +46,8 @@ fun MelodySettingsSection(
                 verticalArrangement = Arrangement.spacedBy(0.dp)) {
                 Checkbox(
                     checked = source in settings.enabledSources,
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier.size(36.dp)
+                        .semantics { contentDescription = source.title },
                     onCheckedChange = { enabled ->
                         runCatching { settings.setSourceEnabled(source, enabled) }
                             .onSuccess(onSettingsChange)
