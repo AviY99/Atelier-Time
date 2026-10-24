@@ -98,8 +98,11 @@ class MelodyPreferences(
                 !isClass && (value == 5 || value == 10)) value else fallback
         }
         return SoundSettings(
-            enabledSources = (enabled + a.source + b.source + c.source +
-                listOfNotNull(shared?.source))
+            // A dormant mode may retain sounds from a disabled library.
+            // Restore only libraries required by the CURRENT mode on load.
+            enabledSources = (enabled + (if (mode == SoundAssignmentMode.SHARED)
+                listOf((shared ?: a).source)
+            else listOf(a.source, b.source, c.source)))
                 .ifEmpty { defaults.enabledSources },
             poseEnd = a, breakEnd = b, classEnd = c,
             assignmentMode = mode, sharedSound = shared,
@@ -111,11 +114,14 @@ class MelodyPreferences(
     }
 
     fun saveSettings(settings: SoundSettings) {
-        require(settings.enabledSources.isNotEmpty() &&
-            (listOf(settings.poseEnd, settings.breakEnd, settings.classEnd) +
-                listOfNotNull(settings.sharedSound)).all {
-                it.isPlayable && it.source in settings.enabledSources
-            }) { "Select a sound from an enabled source for each timer event." }
+        require(settings.activeSourcesEnabled()) {
+            "Select a sound from an enabled source in the current mode."
+        }
+        // Keep dormant selections intact even if their libraries are disabled.
+        require((listOf(settings.poseEnd, settings.breakEnd, settings.classEnd) +
+            listOfNotNull(settings.sharedSound)).all { it.isPlayable }) {
+            "A saved sound selection is missing its audio file."
+        }
         require(settings.sharedSeconds in setOf(5, 10) &&
             settings.poseEndSeconds in setOf(5, 10) &&
             settings.breakEndSeconds in setOf(5, 10) &&
