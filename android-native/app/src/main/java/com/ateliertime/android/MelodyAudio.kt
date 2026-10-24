@@ -11,6 +11,7 @@ import com.ateliertime.domain.MelodyPattern
 import com.ateliertime.domain.MelodySelections
 import com.ateliertime.domain.SoundSettings
 import com.ateliertime.domain.SoundSource
+import com.ateliertime.domain.SoundAssignmentMode
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -74,6 +75,18 @@ class MelodyPreferences(
         val a = choice("poseEnd", legacy.poseEnd)
         val b = choice("breakEnd", legacy.breakEnd)
         val c = choice("sessionEnd", legacy.sessionEnd)
+        // No mode key on D-100 installs: do not silently make their
+        // three previously chosen sounds identical during an upgrade.
+        val mode = runCatching {
+            SoundAssignmentMode.valueOf(prefs.getString(
+                "soundAssignmentMode", SoundAssignmentMode.SEPARATE.name)!!)
+        }.getOrDefault(SoundAssignmentMode.SEPARATE)
+        val sharedMelody = runCatching {
+            MelodyPattern.valueOf(prefs.getString("sharedMelody", null) ?: a.melody.name)
+        }.getOrDefault(a.melody)
+        val shared = if (prefs.contains("sharedSource")) {
+            choice("shared", sharedMelody)
+        } else null
         val names = runCatching { prefs.getString("enabledSources", null) }.getOrNull()
         val enabled = if (names == null) setOf(SoundSource.APP) else
             names.split(",").mapNotNull { name ->
@@ -85,9 +98,11 @@ class MelodyPreferences(
                 !isClass && (value == 5 || value == 10)) value else fallback
         }
         return SoundSettings(
-            enabledSources = (enabled + a.source + b.source + c.source)
+            enabledSources = (enabled + a.source + b.source + c.source +
+                listOfNotNull(shared?.source))
                 .ifEmpty { defaults.enabledSources },
             poseEnd = a, breakEnd = b, classEnd = c,
+            assignmentMode = mode, sharedSound = shared,
             poseEndSeconds = seconds("poseEndSeconds", 5, false),
             breakEndSeconds = seconds("breakEndSeconds", 5, false),
             classEndSeconds = seconds("classEndSeconds", 5, true),
@@ -96,7 +111,8 @@ class MelodyPreferences(
 
     fun saveSettings(settings: SoundSettings) {
         require(settings.enabledSources.isNotEmpty() &&
-            listOf(settings.poseEnd, settings.breakEnd, settings.classEnd).all {
+            (listOf(settings.poseEnd, settings.breakEnd, settings.classEnd) +
+                listOfNotNull(settings.sharedSound)).all {
                 it.isPlayable && it.source in settings.enabledSources
             }) { "Select a sound from an enabled source for each timer event." }
         require(settings.poseEndSeconds in setOf(5, 10) &&
@@ -109,6 +125,7 @@ class MelodyPreferences(
             .putString("sessionEnd", settings.classEnd.melody.name)
             .putString("enabledSources", SoundSource.entries
                 .filter { it in settings.enabledSources }.joinToString(",") { it.name })
+            .putString("soundAssignmentMode", settings.assignmentMode.name)
             .putInt("poseEndSeconds", settings.poseEndSeconds)
             .putInt("breakEndSeconds", settings.breakEndSeconds)
             .putInt("classEndSeconds", settings.classEndSeconds)
@@ -120,6 +137,13 @@ class MelodyPreferences(
         write("poseEnd", settings.poseEnd)
         write("breakEnd", settings.breakEnd)
         write("sessionEnd", settings.classEnd)
+        if (settings.sharedSound == null) {
+            edit.remove("sharedSource").remove("sharedUri").remove("sharedTitle")
+                .remove("sharedMelody")
+        } else {
+            write("shared", settings.sharedSound)
+            edit.putString("sharedMelody", settings.sharedSound.melody.name)
+        }
         check(edit.commit()) { "Sound preferences could not be saved." }
     }
 }
