@@ -118,8 +118,10 @@ class MonotonicSessionTimer(
         val interruptionMs = (now - (suspendedFromMs ?: now)).coerceAtLeast(0L)
         val addedSeconds = ((interruptionMs + 999L) / 1000L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
         val nextLost = lostSeconds.toLong() + addedSeconds
-        check(nextLost <= Int.MAX_VALUE) { "Interruption is too long to resume." }
-        if (nextLost > 0L) {
+        check(nextLost in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
+            "Interruption is too long to resume."
+        }
+        if (nextLost != lostSeconds.toLong()) {
             val revised = FinalPairCompensation.adjust(session, nextLost.toInt())
             val firstAdjusted = revised.phases.indexOfFirst {
                 it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR &&
