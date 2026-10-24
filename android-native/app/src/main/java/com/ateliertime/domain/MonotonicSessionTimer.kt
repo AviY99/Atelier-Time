@@ -92,41 +92,38 @@ class MonotonicSessionTimer(
     }
 
     /**
-     * Restart only the CURRENT work Session, never the whole Class.
+     * Repeats only the currently active work Session OR Break.
      *
-     * Previously completed sessions/breaks stay completed. The active Session
-     * restarts at its own phase start, and the time already spent on it (plus
-     * any current pause) is deducted from the final TWO regular sessions,
-     * using the originally approved Remainder/Even/Custom ending choice.
-     * If preceding Next actions gained time, this net correction may also
-     * EXTEND the final pair. The Class start and original finish deadline
-     * stay unchanged. Neither approved schedule nor stored preset is edited.
+     * The Class stays in progress and previously completed phases stay done.
+     * Seconds already spent on this phase plus paused wall time are recovered
+     * from the last two regular work Sessions, without changing the approved
+     * stored plan. Existing Next credits are included in the signed correction.
      *
-     * A break/summary has no current Session to restart. Once the LAST final
-     * regular session has started, its first partner is already completed;
-     * rebalancing both would rewrite past work, so reject atomically.
-     * Restarting the FIRST final regular Session remains valid because it is
-     * explicitly reset and no earlier completed phase is altered.
+     * Before the final pair starts, honor the user's chosen split with both
+     * future Sessions. While restarting the break BETWEEN the final pair,
+     * the already-completed first Session is frozen and only the unfinished
+     * last Session can be shortened. Reject any impossible change before
+     * mutating the running timer. Summary and last final Session cannot restart.
      */
-    fun restartCurrentSessionKeepingEndTime(): TimerView {
+    fun restartCurrentSegmentKeepingEndTime(): TimerView {
         check(status == TimerStatus.RUNNING || status == TimerStatus.PAUSED) {
-            "Start the class before restarting a session."
+            "Start the class before restarting a Session or Break."
         }
-        val current = view().phase
-            ?: error("There is no active session to restart.")
-        check(current.kind == PhaseKind.POSE) {
-            "Restart session works during a Session, not a Break or class summary. " +
-                "Use Next to finish the current break."
+        val current = view().phase ?: error("There is no active phase to restart.")
+        check(current.kind == PhaseKind.POSE ||
+            current.kind == PhaseKind.SHORT_BREAK ||
+            current.kind == PhaseKind.SPECIAL_BREAK) {
+            "The class summary cannot be restarted as a Session or Break."
         }
         val index = activePhases.indexOfFirst { it.id == current.id }
-        check(index >= 0) { "Current session is missing from the timeline." }
+        check(index >= 0) { "Current phase is missing from the class timeline." }
         val regularIndices = session.phases.indices.filter {
             session.phases[it].kind == PhaseKind.POSE &&
                 session.phases[it].poseSource == PoseSource.REGULAR
         }.takeLast(2)
         check(regularIndices.size == 2 && index < regularIndices.last()) {
-            "The last regular Session has already started. Cannot rebalance " +
-                "two final sessions without rewriting a completed one."
+            "The final regular Session has already started. Cannot rewrite " +
+                "a previously completed final Session."
         }
         val now = nowMillis()
         val elapsedWithinMs = (elapsedMs() -
@@ -137,15 +134,20 @@ class MonotonicSessionTimer(
         val addedSeconds = (elapsedWithinMs + pausedMs + 999L) / 1_000L
         val correction = lostSeconds.toLong() + addedSeconds
         require(correction in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
-            "Restart delay is too large for the class timeline."
+            "The time change is too large to adjust the final two Sessions."
         }
-        val revised = FinalPairCompensation.adjust(session, correction.toInt())
+        val revised = if (index == regularIndices[0] + 1) {
+            FinalPairCompensation.adjustLastOnly(
+                session, activePhases, correction.toInt(),
+            )
+        } else {
+            FinalPairCompensation.adjust(session, correction.toInt())
+        }
         val target = revised.phases[index]
-        check(target.id == current.id &&
-            target.startSeconds == current.startSeconds) {
-            "The current session start would change. No restart was performed."
+        check(target.id == current.id && target.startSeconds == current.startSeconds) {
+            "The current phase start would change. No restart was performed."
         }
-        // All failure checks completed. Commit the transition atomically.
+        // Atomic commit: every feasibility check has passed.
         activePhases = revised.phases
         activeTotalMs = revised.totalSeconds.toLong() * 1_000L
         lostSeconds = revised.recoveredSeconds
@@ -155,6 +157,15 @@ class MonotonicSessionTimer(
         lastPhaseIndex = index
         status = TimerStatus.RUNNING
         return view()
+    }
+
+    /** Backwards-compatible work-Session API; never use this to restart a Break. */
+    fun restartCurrentSessionKeepingEndTime(): TimerView {
+        val phase = view().phase
+        check(phase?.kind == PhaseKind.POSE) {
+            "This method restarts work Sessions only."
+        }
+        return restartCurrentSegmentKeepingEndTime()
     }
 
     fun pause(): TimerView {
