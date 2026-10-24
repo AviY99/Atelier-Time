@@ -57,6 +57,7 @@ fun SessionEditorScreen() {
     var acceptedWarning by remember { mutableStateOf(false) }
     var approved by remember { mutableStateOf<ApprovedSession?>(null) }
     var playingSession by remember { mutableStateOf<ApprovedSession?>(null) }
+    var playingPresetId by remember { mutableStateOf<String?>(null) }
     var activeTab by remember { mutableStateOf(MainTab.EDITOR) }
     var soundEnabled by remember { mutableStateOf(true) }
     val liveTimer = remember(playingSession) {
@@ -166,7 +167,7 @@ fun SessionEditorScreen() {
     fun goToNextSavedSession() {
         try {
             val entries = catalog.state().entries
-            val currentIndex = entries.indexOfFirst { it.id == selectedPresetId }
+            val currentIndex = entries.indexOfFirst { it.id == playingPresetId }
             val next = if (currentIndex >= 0 && entries.size > 1) {
                 entries[(currentIndex + 1) % entries.size]
             } else if (currentIndex < 0) {
@@ -178,6 +179,7 @@ fun SessionEditorScreen() {
                 val restored = catalog.activate(next.id)
                 loadPreset(next, restored)
                 playingSession = restored
+                playingPresetId = next.id
                 activeTab = MainTab.TIMER
             }
         } catch (error: Exception) {
@@ -483,6 +485,7 @@ fun SessionEditorScreen() {
                     Text("Exact timeline approved. Save this session, or start the timer.")
                     Button(onClick = {
                         playingSession = approved
+                        playingPresetId = selectedPresetId
                         activeTab = MainTab.TIMER
                     }) { Text("Open session timer") }
                 }
