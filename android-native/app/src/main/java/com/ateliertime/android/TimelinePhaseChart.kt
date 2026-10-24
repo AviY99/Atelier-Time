@@ -33,9 +33,9 @@ fun TimelinePhaseChart(phases: List<SchedulePhase>) {
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Session timeline at a glance",
+            Text("Class timeline at a glance",
                 style = MaterialTheme.typography.titleMedium)
-            Text("Left to right: the complete session, proportional to actual duration.",
+            Text("Left to right: the complete class, proportional to actual duration.",
                 style = MaterialTheme.typography.bodySmall)
             Canvas(modifier = Modifier.fillMaxWidth().height(44.dp)) {
                 val full = size.width
@@ -64,10 +64,10 @@ fun TimelinePhaseChart(phases: List<SchedulePhase>) {
                     style = MaterialTheme.typography.labelSmall)
             }
             Text("Time by activity", style = MaterialTheme.typography.titleSmall)
-            ChartLegend("Poses", poseTotal, PhaseKind.POSE)
-            ChartLegend("Regular breaks", normalTotal, PhaseKind.SHORT_BREAK)
-            ChartLegend("Special breaks", specialTotal, PhaseKind.SPECIAL_BREAK)
-            ChartLegend("End summary", summaryTotal, PhaseKind.SUMMARY)
+            ChartLegend("Sessions", poseTotal, PhaseKind.POSE)
+            ChartLegend("Break · regular", normalTotal, PhaseKind.SHORT_BREAK)
+            ChartLegend("Break · special", specialTotal, PhaseKind.SPECIAL_BREAK)
+            ChartLegend("Class summary", summaryTotal, PhaseKind.SUMMARY)
         }
     }
 }
