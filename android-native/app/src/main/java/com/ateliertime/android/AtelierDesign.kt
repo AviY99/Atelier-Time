@@ -197,7 +197,7 @@ fun DesignSettingsPanel(
                     Text("23:00", style = MaterialTheme.typography.bodySmall)
                 }
                 Text(
-                    "Currently showing: " + if (currentPalette == DesignPalette.DAY) "Day" else "Night",
+                    "Currently showing: " + (if (currentPalette == DesignPalette.DAY) "Day" else "Night"),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
