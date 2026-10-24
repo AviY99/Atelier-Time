@@ -86,6 +86,96 @@ class MonotonicSessionTimerTest {
         assertEquals(180 * minute, timer.view().totalSeconds)
     }
 
+    @Test fun restartCurrentSessionKeepsEarlierPhasesAndOriginalClassDeadline() {
+        var now = 0L
+        val session = approved()
+        val timer = MonotonicSessionTimer(session) { now }
+        timer.start()
+        now = 40L * minute * 1000L // Session 2 started at virtual 30m.
+        val before = timer.update().view
+        assertEquals(2, before.phase?.poseNumber)
+        val restart = timer.restartCurrentSessionKeepingEndTime()
+        assertEquals(TimerStatus.RUNNING, restart.status)
+        assertEquals(before.phase?.id, restart.phase?.id)
+        assertEquals(30 * minute, restart.elapsedSeconds)
+        assertEquals(25 * minute, restart.phaseRemainingSeconds)
+        assertEquals(10 * minute, restart.recoveredSeconds)
+        assertEquals(170 * minute, restart.totalSeconds)
+        assertEquals(session.phases[1].startSeconds, 25 * minute)
+        assertEquals(180 * minute, now.toInt() / 1000 +
+            restart.totalRemainingSeconds)
+        assertNull(timer.update().cue) // Restart cue emitted by UI only.
+    }
+
+    @Test fun pausedRestartCurrentSessionAlsoRecoversPausedWallTime() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        timer.start()
+        now = 31L * minute * 1000L
+        timer.pause()
+        now = 33L * minute * 1000L
+        val restart = timer.restartCurrentSessionKeepingEndTime()
+        assertEquals(TimerStatus.RUNNING, restart.status)
+        assertEquals(2, restart.phase?.poseNumber)
+        assertEquals(30 * minute, restart.elapsedSeconds)
+        assertEquals(3 * minute, restart.recoveredSeconds)
+        assertEquals(177 * minute, restart.totalSeconds)
+        assertEquals(180 * minute, now.toInt() / 1000 +
+            restart.totalRemainingSeconds)
+    }
+
+    @Test fun afterNextGainedTimeRestartStillUsesSignedCompensation() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        timer.start()
+        now = 10L * minute * 1000L
+        assertEquals(PhaseKind.SHORT_BREAK, timer.nextPhase().view.phase?.kind)
+        now = 18L * minute * 1000L // Five-minute break + 3 minutes into Session 2.
+        val restart = timer.restartCurrentSessionKeepingEndTime()
+        assertEquals(2, restart.phase?.poseNumber)
+        assertEquals(30 * minute, restart.elapsedSeconds)
+        assertEquals(-12 * minute, restart.recoveredSeconds)
+        assertEquals(192 * minute, restart.totalSeconds)
+        assertEquals(180 * minute, now.toInt() / 1000 +
+            restart.totalRemainingSeconds)
+    }
+
+    @Test fun restartRejectsBreakAndPreservesRunningClockAtomically() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        timer.start()
+        now = 26L * minute * 1000L
+        val before = timer.view()
+        assertEquals(PhaseKind.SHORT_BREAK, before.phase?.kind)
+        try {
+            timer.restartCurrentSessionKeepingEndTime()
+            fail("Restart session cannot restart a break.")
+        } catch (_: IllegalStateException) { }
+        assertEquals(before, timer.view())
+    }
+
+    @Test fun firstFinalSessionMayRestartButLastFinalSessionCannotRewritePast() {
+        var now = 0L
+        val session = approved()
+        val pair = session.phases.filter {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.takeLast(2)
+        val timer = MonotonicSessionTimer(session) { now }
+        timer.start()
+        now = (pair.first().startSeconds + minute).toLong() * 1000L
+        val restarting = timer.restartCurrentSessionKeepingEndTime()
+        assertEquals(pair.first().id, restarting.phase?.id)
+        assertEquals(pair.first().startSeconds, restarting.elapsedSeconds)
+        now = (pair.last().startSeconds + minute + 30).toLong() * 1000L
+        val before = timer.view()
+        assertEquals(pair.last().id, before.phase?.id)
+        try {
+            timer.restartCurrentSessionKeepingEndTime()
+            fail("Last final session cannot change completed partner.")
+        } catch (_: IllegalStateException) { }
+        assertEquals(before, timer.view())
+    }
+
     @Test fun nextFromPoseStartsBreakAndExtendsFinalPairWithoutChangingFinishClock() {
         var now = 0L
         val original = approved()
