@@ -20,9 +20,12 @@ import kotlin.math.sin
  * Phone-private configuration. Does not touch the independently versioned
  * approved-session store or modify saved schedules on app updates.
  */
-class MelodyPreferences(context: Context) {
+class MelodyPreferences(
+    context: Context,
+    storageName: String = "atelier_time_melody_preferences",
+) {
     private val prefs = context.applicationContext.getSharedPreferences(
-        "atelier_time_melody_preferences", Context.MODE_PRIVATE
+        storageName, Context.MODE_PRIVATE
     )
     fun load(): MelodySelections {
         fun get(key: String, fallback: MelodyPattern): MelodyPattern =
