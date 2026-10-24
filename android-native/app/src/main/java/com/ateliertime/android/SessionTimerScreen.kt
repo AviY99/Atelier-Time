@@ -456,9 +456,9 @@ private fun WallClockRow(
                 fontFamily = FontFamily.Monospace
             ) else MaterialTheme.typography.bodyLarge)
                 .let { if (compact) it.copy(lineHeight = 20.sp) else it },
-            // Keep Start and End seconds in a constant aligned numeric field.
-            // The old 120dp width needlessly separated their labels.
-            modifier = if (stabilizeTime) Modifier.width(100.dp) else Modifier,
+            // Monospaced digits keep a ticking clock stable without forcing
+            // a wide empty field before shorter values such as "05:00".
+            // Every label stays directly beside its value (4dp gap).
             textAlign = TextAlign.End,
             maxLines = 1,
             softWrap = false,
