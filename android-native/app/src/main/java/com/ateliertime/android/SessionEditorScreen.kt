@@ -43,7 +43,7 @@ fun SessionEditorScreen() {
         onDispose { melodyPlayer.close() }
     }
     var selectedPresetId by remember { mutableStateOf<String?>(null) }
-    var name by remember { mutableStateOf("Atelier session") }
+    var name by remember { mutableStateOf("Atelier class") }
     var total by remember { mutableStateOf("180") }
     var summary by remember { mutableStateOf("15") }
     var pose by remember { mutableStateOf("25") }
@@ -162,9 +162,9 @@ fun SessionEditorScreen() {
             classClockTimes = classClockTracker.observe(updated, System.currentTimeMillis())
             timerError = null
         } catch (error: IllegalArgumentException) {
-            timerError = error.message ?: "Cannot fit the interruption into the final two poses."
+            timerError = error.message ?: "Cannot fit the interruption into the final two sessions."
         } catch (error: IllegalStateException) {
-            timerError = error.message ?: "Cannot change a pose that has already started."
+            timerError = error.message ?: "Cannot change a session that has already started."
         }
     }
 
@@ -186,7 +186,7 @@ fun SessionEditorScreen() {
                 }
             }
         } catch (error: IllegalArgumentException) {
-            timerError = error.message ?: "The final poses cannot absorb this time change."
+            timerError = error.message ?: "The final sessions cannot absorb this time change."
         } catch (error: IllegalStateException) {
             timerError = error.message ?: "This phase cannot be skipped safely."
         }
@@ -211,7 +211,7 @@ fun SessionEditorScreen() {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("Atelier Time", style = MaterialTheme.typography.headlineMedium)
-        Text("Session editor · Android", style = MaterialTheme.typography.titleMedium)
+        Text("Class editor · Android", style = MaterialTheme.typography.titleMedium)
         Text("Every edit regenerates the schedule and cancels previous approval.")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { applyA() }) { Text("Example A") }
@@ -219,19 +219,19 @@ fun SessionEditorScreen() {
         }
         OutlinedTextField(
             value = name, onValueChange = { name = it; invalidate() },
-            label = { Text("Session title") }, modifier = Modifier.fillMaxWidth(),
+            label = { Text("Class title") }, modifier = Modifier.fillMaxWidth(),
             singleLine = true,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MinuteInput("Total session duration (min)", total, { total = it; invalidate() }, Modifier.weight(1f))
-            MinuteInput("End-of-session summary (min)", summary, { summary = it; invalidate() }, Modifier.weight(1f))
+            MinuteInput("Total class duration (min)", total, { total = it; invalidate() }, Modifier.weight(1f))
+            MinuteInput("End-of-class summary (min)", summary, { summary = it; invalidate() }, Modifier.weight(1f))
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Opening pose groups", style = MaterialTheme.typography.titleMedium,
+            Text("Opening session groups", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
             TextButton(onClick = {
-                helpSection = "Opening pose groups" to
-                    "Each group is an ordered set of equal-duration opening poses. " +
+                helpSection = "Opening session groups" to
+                    ""Each group is an ordered set of equal-duration opening sessions. " +
                     "Every group has a configurable break after it. Zero minutes is allowed " +
                     "between groups; the last group requires at least one minute. " +
                     "A break-first regular cycle can share its initial break with the " +
@@ -240,21 +240,21 @@ fun SessionEditorScreen() {
         }
         opening.toList().forEachIndexed { index, group ->
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Opening group " + (index + 1), modifier = Modifier.weight(1f))
+                Text("Opening session group " + (index + 1), modifier = Modifier.weight(1f))
                 TextButton(onClick = {
-                    helpSection = "Opening group " + (index + 1) to
-                        "Number of poses means how many consecutive poses this group contains. " +
-                        "Each pose duration sets the time of one pose in minutes. " +
+                    helpSection = "Opening session group " + (index + 1) to
+                        ""Number of sessions means how many consecutive work sessions this group contains. " +
+                        ""Each session duration sets the time of one work session in minutes. " +
                         "Set Break after group to 0 for no break between opening groups. " +
                         "The last group requires at least 1 minute of rest. If it equals " +
                         "the initial regular break, only one break occurs."
                 }) { Text("Help") }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                MinuteInput("Number of poses", group.count, {
+                MinuteInput("Number of sessions", group.count, {
                     opening[index] = group.copy(count = it); invalidate()
                 }, Modifier.weight(1f))
-                MinuteInput("Each pose duration (min)", group.minutes, {
+                MinuteInput("Each session duration (min)", group.minutes, {
                     opening[index] = group.copy(minutes = it); invalidate()
                 }, Modifier.weight(1f))
             }
@@ -294,35 +294,35 @@ fun SessionEditorScreen() {
         }
         OutlinedButton(onClick = {
             opening.add(OpeningDraft(nextOpeningId++, breakAfterMinutes = normal)); invalidate()
-        }) { Text("Add opening group") }
+        }) { Text("Add opening session group") }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Regular poses and breaks", style = MaterialTheme.typography.titleMedium,
+            Text("Regular sessions and breaks", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
             TextButton(onClick = {
-                helpSection = "Regular poses and breaks" to
-                    "These durations are used after the opening groups. A special break " +
+                helpSection = "Regular sessions and breaks" to
+                    ""These durations are used after the opening session groups. A special break " +
                     "replaces an existing regular break, and does not add a new break. " +
                     "All configured regular and special break durations must be positive."
             }) { Text("Help") }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MinuteInput("Regular pose (min)", pose, { pose = it; invalidate() }, Modifier.weight(1f))
-            MinuteInput("Regular break (min)", normal,
+            MinuteInput("Regular session (min)", pose, { pose = it; invalidate() }, Modifier.weight(1f))
+            MinuteInput("Break · regular (min)", normal,
                 { normal = it; invalidate() }, Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MinuteInput("Special break (min)", special,
+            MinuteInput("Break · special (min)", special,
                 { special = it; invalidate() }, Modifier.weight(1f))
             MinuteInput("Number of special breaks", count,
                 { count = it; invalidate() }, Modifier.weight(1f))
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Repeating pose/break cycle", style = MaterialTheme.typography.titleMedium,
+            Text("Repeating session/break cycle", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
             TextButton(onClick = {
-                helpSection = "Repeating pose/break cycle" to
-                    "Choose whether the regular repeating pattern begins with a pose " +
+                helpSection = "Repeating session/break cycle" to
+                    ""Choose whether the regular repeating pattern begins with a session " +
                     "or with a break. Automatic placement selects special-break slots " +
                     "deterministically; manual placement uses break numbers."
             }) { Text("Help") }
@@ -331,7 +331,7 @@ fun SessionEditorScreen() {
             FilterChip(
                 selected = cycle == CycleStart.POSE_FIRST,
                 onClick = { cycle = CycleStart.POSE_FIRST; invalidate() },
-                label = { Text("Pose first") },
+                label = { Text("Session first") },
             )
             FilterChip(
                 selected = cycle == CycleStart.BREAK_FIRST,
@@ -355,12 +355,12 @@ fun SessionEditorScreen() {
 
         HorizontalDivider()
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Complete session timeline", style = MaterialTheme.typography.titleLarge,
+            Text("Complete class timeline", style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f))
             TextButton(onClick = {
-                helpSection = "Complete session timeline" to
-                    "All timestamps are elapsed time from session start, not wall-clock time. " +
-                    "The total session includes the end-of-session summary. A rest advisory " +
+                helpSection = "Complete class timeline" to
+                    ""All timestamps are elapsed time from class start, not wall-clock time. " +
+                    ""The total class includes the end-of-class summary. A rest advisory " +
                     "after more than 25 minutes of cumulative posing without a qualifying " +
                     "5-minute break requires separate acknowledgment and final approval."
             }) { Text("Help") }
@@ -372,7 +372,7 @@ fun SessionEditorScreen() {
                 Text(it.message, color = MaterialTheme.colorScheme.error)
             }
             if (candidate.finalPoseIsShort && !candidate.hasBlockingIssues) {
-                Text("Final regular pose: choose an ending", style = MaterialTheme.typography.titleMedium)
+                Text("Final regular session: choose an ending", style = MaterialTheme.typography.titleMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(
                         selected = ending?.mode == FinalPoseMode.REMAINDER,
@@ -417,7 +417,7 @@ fun SessionEditorScreen() {
                     if (available > 2) {
                         val first = ((ending?.firstPoseSeconds ?: 60) / 60)
                             .coerceIn(1, available - 1)
-                        Text("First pose: " + first + " min; last: " +
+                        Text("First session: " + first + " min; last: " +
                             (available - first) + " min")
                         Slider(
                             value = first.toFloat(),
@@ -452,7 +452,7 @@ fun SessionEditorScreen() {
                     }
                 }
                 Text(
-                    "Poses: " + candidate.phases.filter {
+                    ""Sessions: " + candidate.phases.filter {
                         it.kind == PhaseKind.POSE
                     }.sumOf { it.durationSeconds } / 60 +
                         " min · Rest: " + candidate.phases.filter {
@@ -462,13 +462,13 @@ fun SessionEditorScreen() {
                 )
                 candidate.phases.forEach { phase ->
                     val label = when (phase.kind) {
-                        PhaseKind.POSE -> "Pose " + phase.poseNumber
+                        PhaseKind.POSE -> "Session " + phase.poseNumber
                         PhaseKind.SHORT_BREAK ->
                             if (phase.openingGroupId != null)
-                                "Opening-group break"
-                            else "Regular break #" + phase.breakOrdinal
-                        PhaseKind.SPECIAL_BREAK -> "Special break #" + phase.breakOrdinal
-                        PhaseKind.SUMMARY -> "End-of-session summary"
+                                "Break · opening group"
+                            else "Break · regular #" + phase.breakOrdinal
+                        PhaseKind.SPECIAL_BREAK -> "Break · special #" + phase.breakOrdinal
+                        PhaseKind.SUMMARY -> "End-of-class summary"
                     }
                     Text(
                         formatOffset(phase.startSeconds) + "–" +
@@ -489,11 +489,11 @@ fun SessionEditorScreen() {
                     Text("Approve exact timeline")
                 }
                 if (approved != null) {
-                    Text("Exact timeline approved. Save this session, or start the timer.")
+                    Text("Exact timeline approved. Save this class, or start the timer.")
                     Button(onClick = {
                         playingSession = approved
                         activeTab = MainTab.TIMER
-                    }) { Text("Open session timer") }
+                    }) { Text("Open class timer") }
                 }
             }
         }
@@ -513,8 +513,8 @@ fun SessionEditorScreen() {
             },
         )
         Text(
-            "Saved sessions work offline. Activation selects an approved plan; " +
-                "open the timer after loading an approved session.",
+            ""Saved classes work offline. Selecting a class uses its approved plan; " +
+                "open the timer after loading an approved class.",
             style = MaterialTheme.typography.bodySmall,
         )
     }
@@ -556,11 +556,11 @@ fun SessionEditorScreen() {
                 if (session == null || timer == null || view == null) {
                     Column(modifier = Modifier.fillMaxSize().padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text("No active session", style = MaterialTheme.typography.titleLarge)
-                        Text("Approve a session in Editor, or load a saved preset. " +
-                            "Then tap Open session timer.")
+                        Text("No active class", style = MaterialTheme.typography.titleLarge)
+                        Text(""Approve a class in Editor, or load a saved class. " +
+                            "Then tap Open class timer.")
                         Button(onClick = { activeTab = MainTab.EDITOR }) {
-                            Text("Choose a session")
+                            Text("Choose a class")
                         }
                     }
                 } else {
