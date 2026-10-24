@@ -1,5 +1,11 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-24 — D-104 34s phone JVM test/build PASS, APK copied; install/QA pending
+
+Screenshot from phone Code on the Go shows **BUILD SUCCESSFUL in 34s** for `:app:testDebugUnitTest :app:assembleDebug`, 42 Gradle tasks (9 executed, 33 up-to-date). A ~12M `Atelier-Time-D104.apk` was copied to `/storage/emulated/0/Download/` at 21:25 on Oct 24. This is evidence of JVM Gradle test task and debug APK assembly PASS, **not** Android connected instrumentation, per-test JUnit count, actual update-install, installed About Version 3, saved-data retention or live 3-minute A/B/C audio QA. No rebuild needed: next install existing APK as an update without uninstall or clearing saved Classes; check About `Version 3`, data and A 01:00 / B 02:00 / C 03:00. D-103 Stable 3 and icon/logo pre-store requirement unchanged.
+
+---
+
 ## 2026-10-24 — D-104 Timer reliability tests & next About Version 3; D-105 pre-store icon stage
 
 After user accepted Android Stable 3, inserted mandatory pre-store **logo + launcher/store icon** design, approval and installed icon validation gate, before any Google Play submission. AndroidManifest currently has no launcher icon. Four new pure Kotlin/JVM tests added in `TimerReliabilityGateTest.kt`: accelerated 200ms 3-minute A/B/C boundaries, 3-hour monotonic deadline, delayed UI cue suppression, and one-time paused deadline C. These have **NOT been executed** in current conversation; existing Timer code/sounds/UI unchanged. As explicitly promised, NEXT development APK uses `versionName = "3"` and `versionCode = 2` via `android-native/app/build.gradle.kts`, so installed About will read Version 3 after next update. APK not yet built/installed, no user acceptance claimed. Frozen Stable 3 `stable/android-d102` untouched; PR #3 Draft/unmerged. Next phone run Gradle JVM tests+assemble with CoGo override, capture XML/test PASS and update-install preserving Classes. Specifications: [Timer QA](TIMER_RELIABILITY_D104.md), [logo gate](ICON_LOGO_PRESTORE_GATE.md).
