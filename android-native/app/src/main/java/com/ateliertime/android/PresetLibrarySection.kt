@@ -1,7 +1,5 @@
 package com.ateliertime.android
 
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -63,30 +61,56 @@ fun PresetLibrarySection(
             Column(modifier = Modifier.fillMaxWidth().padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(preset.title, style = MaterialTheme.typography.titleMedium)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
-                    Button(onClick = {
-                        action { onRun(preset, catalog.activate(preset.id)) }
-                    }) { Text("Run") }
-                    OutlinedButton(onClick = {
-                        action { onEdit(preset, catalog.open(preset.id)) }
-                    }) { Text("Edit") }
-                    TextButton(onClick = {
-                        action {
-                            val base = preset.title + " copy"
-                            val used = collection.entries.map { it.title.lowercase() }.toSet()
-                            val name = if (base.lowercase() !in used) base else
-                                generateSequence(2) { it + 1 }
-                                    .map { "$base $it" }
-                                    .first { it.lowercase() !in used }
-                            catalog.duplicate(preset.id, name)
-                        }
-                    }) { Text("Duplicate") }
-                    TextButton(onClick = {
-                        renameTarget = preset
-                        renameText = preset.title
-                    }) { Text("Rename") }
-                    TextButton(onClick = { pendingDelete = preset }) { Text("Delete") }
+                // The selected Class's commands stay visible on its own card
+                // without horizontal scrolling or off-screen management actions.
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Button(
+                        onClick = { action { onRun(preset, catalog.activate(preset.id)) } },
+                        modifier = Modifier.weight(1f),
+                    ) { Text("Run", maxLines = 1) }
+                    OutlinedButton(
+                        onClick = { action { onEdit(preset, catalog.open(preset.id)) } },
+                        modifier = Modifier.weight(1f),
+                    ) { Text("Edit", maxLines = 1) }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    FilledTonalButton(
+                        onClick = {
+                            action {
+                                val base = preset.title + " copy"
+                                val used = collection.entries.map { it.title.lowercase() }.toSet()
+                                val name = if (base.lowercase() !in used) base else
+                                    generateSequence(2) { it + 1 }
+                                        .map { "$base $it" }
+                                        .first { it.lowercase() !in used }
+                                catalog.duplicate(preset.id, name)
+                            }
+                        },
+                        modifier = Modifier.weight(1.3f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                    ) { Text("Duplicate", maxLines = 1, style = MaterialTheme.typography.labelMedium) }
+                    OutlinedButton(
+                        onClick = {
+                            renameTarget = preset
+                            renameText = preset.title
+                        },
+                        modifier = Modifier.weight(1.1f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                    ) { Text("Rename", maxLines = 1, style = MaterialTheme.typography.labelMedium) }
+                    TextButton(
+                        onClick = { pendingDelete = preset },
+                        modifier = Modifier.weight(0.9f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error,
+                        ),
+                    ) { Text("Delete", maxLines = 1, style = MaterialTheme.typography.labelMedium) }
                 }
             }
         }
