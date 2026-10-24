@@ -61,7 +61,7 @@ class MelodyAudioPlayer {
             var track: AudioTrack? = null
             try {
                 val samples = render(melody)
-                track = AudioTrack.Builder()
+                val output = AudioTrack.Builder()
                     .setAudioAttributes(AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_MEDIA)
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -74,12 +74,13 @@ class MelodyAudioPlayer {
                     .setTransferMode(AudioTrack.MODE_STATIC)
                     .setBufferSizeInBytes(samples.size * 2)
                     .build()
-                check(track.state == AudioTrack.STATE_INITIALIZED) {
+                track = output
+                check(output.state == AudioTrack.STATE_INITIALIZED) {
                     "Android audio output is not initialized."
                 }
-                val wrote = track.write(samples, 0, samples.size, AudioTrack.WRITE_BLOCKING)
+                val wrote = output.write(samples, 0, samples.size, AudioTrack.WRITE_BLOCKING)
                 check(wrote == samples.size) { "Could not write the complete melody." }
-                track.play()
+                output.play()
                 delay(MELODY_MS + 150L)
             } catch (failure: Exception) {
                 if (failure !is kotlinx.coroutines.CancellationException) {
