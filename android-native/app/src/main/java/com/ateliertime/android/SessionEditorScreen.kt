@@ -165,7 +165,16 @@ fun SessionEditorScreen() {
             wallClockMillis = nowEpochMs
             val clock = liveTimer
             if (clock != null) {
-                val tick = clock.update()
+                // Physical Class deadline is immutable. If a long Pause or
+                // uncompensated Next leaves virtual phases, finish exactly
+                // when the originally approved wall-time deadline is reached.
+                val before = clock.view()
+                val deadline = classClockTimes.classEndEpochMs
+                val deadlineReached = deadline != null && nowEpochMs >= deadline &&
+                    (before.status == TimerStatus.RUNNING ||
+                        before.status == TimerStatus.PAUSED)
+                val tick = if (deadlineReached) clock.finishAtDeadline()
+                    else clock.update()
                 timerView = tick.view
                 classClockTimes = classClockTracker.observe(tick.view, nowEpochMs)
                 if (soundEnabled && tick.cue != null) {
