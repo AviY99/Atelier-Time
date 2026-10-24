@@ -18,8 +18,8 @@ import com.ateliertime.domain.*
 import kotlinx.coroutines.delay
 
 /**
- * Real Stage 2 Android editor/chronological schedule preview.
- * Offline approved presets now persist. Selecting a preset does NOT yet run a timer.
+ * Offline Editor is the final-authoring and Save interface.
+ * Timer owns the saved-class library, Run and real-time countdown.
  * Style is a neutral Material 3 baseline, NOT final branding.
  */
 private enum class MainTab { EDITOR, SOUNDS, TIMER }
@@ -268,7 +268,7 @@ fun SessionEditorScreen() {
     ) {
         Text("Atelier Time", style = MaterialTheme.typography.headlineMedium)
         Text("Class editor · Android", style = MaterialTheme.typography.titleMedium)
-        Text("Every edit regenerates the schedule and cancels previous approval.")
+        Text("Changes update the preview. Save approves and stores this class.")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { applyA() }) { Text("Example A") }
             OutlinedButton(onClick = { applyB() }) { Text("Example B") }
@@ -432,8 +432,8 @@ fun SessionEditorScreen() {
                 helpSection = "Complete class timeline" to
                     "All timestamps are elapsed time from class start, not wall-clock time. " +
                     "The total class includes the end-of-class summary. A rest advisory " +
-                    "after more than 25 minutes of cumulative posing without a qualifying " +
-                    "5-minute break requires separate acknowledgment and final approval."
+                    "after more than 25 minutes of cumulative sessions without a qualifying " +
+                    "5-minute break requires acknowledgment before Save."
             }) { Text("Help") }
         }
         if (parseError != null) {
