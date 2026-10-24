@@ -31,6 +31,17 @@ fun SessionTimerScreen(
     var confirmStop by remember { mutableStateOf(false) }
     val audio = remember { MelodyAudioPlayer() }
     var audioError by remember { mutableStateOf<String?>(null) }
+    var timerError by remember { mutableStateOf<String?>(null) }
+    fun runTimerAction(action: () -> TimerView) {
+        try {
+            snapshot = action()
+            timerError = null
+        } catch (e: IllegalStateException) {
+            timerError = e.message ?: "This interruption cannot fit within the final two poses."
+        } catch (e: IllegalArgumentException) {
+            timerError = e.message ?: "Invalid timing adjustment."
+        }
+    }
     DisposableEffect(audio) {
         onDispose { audio.close() }
     }
@@ -100,22 +111,37 @@ fun SessionTimerScreen(
         )
         Text("Elapsed: " + durationLabel(view.elapsedSeconds) +
             " / " + durationLabel(view.totalSeconds))
+        if (view.recoveredSeconds > 0) {
+            Text("Interruption recovered from the final two poses: " +
+                durationLabel(view.recoveredSeconds),
+                color = MaterialTheme.colorScheme.primary)
+            Text("The approved ending choice determines their revised durations. " +
+                "Original saved session settings are unchanged.")
+        }
+        if (timerError != null) {
+            Text(timerError ?: "", color = MaterialTheme.colorScheme.error)
+        }
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             when (view.status) {
-                TimerStatus.READY, TimerStatus.STOPPED, TimerStatus.FINISHED -> {
-                    Button(onClick = { snapshot = timer.start() }) {
-                        Text(if (view.status == TimerStatus.FINISHED) "Restart" else "Start")
+                TimerStatus.READY, TimerStatus.FINISHED -> {
+                    Button(onClick = { runTimerAction { timer.start() } }) {
+                        Text(if (view.status == TimerStatus.FINISHED) "New session" else "Start")
+                    }
+                }
+                TimerStatus.STOPPED -> {
+                    Button(onClick = { runTimerAction { timer.start() } }) {
+                        Text("Continue session")
                     }
                 }
                 TimerStatus.RUNNING -> {
-                    Button(onClick = { snapshot = timer.pause() }) { Text("Pause") }
+                    Button(onClick = { runTimerAction { timer.pause() } }) { Text("Pause") }
                 }
                 TimerStatus.PAUSED -> {
-                    Button(onClick = { snapshot = timer.resume() }) { Text("Resume") }
+                    Button(onClick = { runTimerAction { timer.resume() } }) { Text("Resume") }
                 }
             }
             OutlinedButton(
@@ -127,6 +153,11 @@ fun SessionTimerScreen(
                 timer.stop()
                 onBackToEditor()
             }) { Text("Editor") }
+        }
+        if (view.status == TimerStatus.STOPPED || view.status == TimerStatus.PAUSED) {
+            TextButton(onClick = {
+                runTimerAction { timer.restartFromBeginning() }
+            }) { Text("Start new full session (new end time)") }
         }
 
         HorizontalDivider()
@@ -156,10 +187,12 @@ fun SessionTimerScreen(
         AlertDialog(
             onDismissRequest = { confirmStop = false },
             title = { Text("Stop this session?") },
-            text = { Text("Stopping resets the live clock. Your saved plan is unchanged.") },
+            text = { Text("Stop keeps your elapsed progress. Continuing this session " +
+                "will shorten the last two poses to preserve the original end time " +
+                "using your previously approved ending choice. The saved preset is unchanged.") },
             confirmButton = {
                 TextButton(onClick = {
-                    snapshot = timer.stop()
+                    runTimerAction { timer.stop() }
                     confirmStop = false
                 }) { Text("Stop timer") }
             },
