@@ -1,5 +1,10 @@
 # Changelog — Atelier Time
 
+## 2026-10-24 — D-086 native Gradle gate passed, device UI gate open
+
+- User phone terminal screenshot confirms **BUILD SUCCESSFUL in 36s**, 42 tasks (7 executed, 35 up-to-date), with `:app:testDebugUnitTest` and `:app:assembleDebug` completed. Exact test count not shown.
+- Debug APK ready for update-install and visual check of two-line remainder choice plus Even and Custom, all inside the width of the phone. Existing D-085 installed app is user-accepted; no D-086 install/appearance acceptance yet. No CI or merge.
+
 ## 2026-10-24 — D-086 Editor ending-option chip fits phone width (device QA pending)
 
 - User confirmed prior D-085 Android release works. In Editor → Complete class timeline, fixed the long "Last gets remaining time" choice by breaking its label into two centered lines and giving the three FilterChip options proportionate widths (1.5:0.8:1.1) within a fixed full-width row instead of horizontal scrolling.
