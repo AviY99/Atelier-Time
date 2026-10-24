@@ -56,6 +56,36 @@ class MonotonicSessionTimerTest {
         assertEquals(180 * minute, newSession.totalSeconds)
     }
 
+    @Test fun stopAndRestartRetainsOriginalEndByShorteningFinalPair() {
+        var now = 10_000L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        timer.start()
+        now += 4L * minute * 1000L
+        timer.update()
+        val restart = timer.restartKeepingEndTime()
+        assertEquals(TimerStatus.RUNNING, restart.status)
+        assertEquals(0, restart.elapsedSeconds)
+        assertEquals(180 * minute - 4 * minute, restart.totalSeconds)
+        assertEquals(4 * minute, restart.recoveredSeconds)
+        assertEquals((25 * minute) to (1 * minute), timer.finalTwoPoseDurations())
+        now += (180L - 4L) * minute * 1000L
+        assertEquals(TimerCue.SESSION_FINISHED, timer.update().cue)
+    }
+
+    @Test fun failedStopAndRestartDoesNotCorruptRunningClock() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        timer.start()
+        now += 40L * minute * 1000L
+        try {
+            timer.restartKeepingEndTime()
+            fail("Too much time for two at-least-one-minute final poses")
+        } catch (_: IllegalArgumentException) { }
+        assertEquals(TimerStatus.RUNNING, timer.view().status)
+        assertEquals(40 * minute, timer.view().elapsedSeconds)
+        assertEquals(180 * minute, timer.view().totalSeconds)
+    }
+
     @Test fun emitsDifferentSingleCuesOnPoseAndBreakEdges() {
         var now = 0L
         val timer = MonotonicSessionTimer(approved()) { now }
