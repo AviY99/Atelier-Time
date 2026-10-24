@@ -29,6 +29,7 @@ class MonotonicSessionTimer(
     private val nowMillis: () -> Long,
 ) {
     private var status = TimerStatus.READY
+    private var originalStartMs: Long? = null
     private var elapsedBeforeRunMs = 0L
     private var runningFromMs: Long? = null
     private var suspendedFromMs: Long? = null
@@ -48,6 +49,7 @@ class MonotonicSessionTimer(
         activePhases = session.phases
         activeTotalMs = session.rules.totalSeconds.toLong() * 1000L
         runningFromMs = nowMillis()
+        originalStartMs = runningFromMs
         suspendedFromMs = null
         lastPhaseIndex = 0
         status = TimerStatus.RUNNING
@@ -60,6 +62,32 @@ class MonotonicSessionTimer(
         runningFromMs = null
         suspendedFromMs = null
         return start()
+    }
+
+    /**
+     * Stops the current run and begins the SAME session from its first phase.
+     * The original monotonic deadline remains fixed; all elapsed wall time
+     * since its first start is recovered ONLY from the final two regular poses.
+     * Reject impossible compression without altering the live timer.
+     */
+    fun restartKeepingEndTime(): TimerView {
+        val startAt = originalStartMs ?: return start()
+        val now = nowMillis()
+        val goneMs = (now - startAt).coerceAtLeast(0L)
+        val secondsToRecover = ((goneMs + 999L) / 1000L)
+        require(secondsToRecover <= Int.MAX_VALUE.toLong()) {
+            "Too much time has elapsed to restart this session."
+        }
+        val adjusted = FinalPairCompensation.adjust(session, secondsToRecover.toInt())
+        activePhases = adjusted.phases
+        activeTotalMs = adjusted.totalSeconds.toLong() * 1000L
+        lostSeconds = adjusted.recoveredSeconds
+        elapsedBeforeRunMs = 0L
+        runningFromMs = now
+        suspendedFromMs = null
+        lastPhaseIndex = 0
+        status = TimerStatus.RUNNING
+        return view()
     }
 
     fun pause(): TimerView {
