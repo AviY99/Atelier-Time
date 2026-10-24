@@ -63,11 +63,11 @@ fun SessionTimerScreen(
         view.phaseRemainingSeconds.toLong() * 1_000L
     // Single source for presentation progress; never modify real timer math.
     val targetFill = DesignMotion.fillFraction(view.phase?.kind, durationMs, msLeft)
-    val targetRemaining = DesignMotion.remainingFraction(durationMs, msLeft)
-    val smoothRemaining by animateFloatAsState(
-        targetValue = targetRemaining,
+    val targetElapsed = DesignMotion.elapsedFraction(durationMs, msLeft)
+    val smoothElapsed by animateFloatAsState(
+        targetValue = targetElapsed,
         animationSpec = tween(durationMillis = 210, easing = LinearEasing),
-        label = "phaseTimeRemainingFraction",
+        label = "phaseTimeElapsedFraction",
     )
     val smoothFill by animateFloatAsState(
         targetValue = targetFill.coerceIn(0f, 1f),
@@ -120,12 +120,11 @@ fun SessionTimerScreen(
                 Spacer(modifier = Modifier.height(6.dp))
                 Text("Class remaining  " + formatTime(classClockTimes.classRemainingSeconds ?: session.rules.totalSeconds),
                     style = MaterialTheme.typography.labelSmall)
-                SolidRemainingBar(
-                    remainingFraction = DesignMotion.remainingFraction(
-                        durationMillis = session.rules.totalSeconds.toLong() * 1_000L,
-                        remainingMillis = (classClockTimes.classRemainingSeconds
-                            ?: session.rules.totalSeconds).toLong() * 1_000L,
-                    ),
+                SolidProgressBar(
+                    progressFraction = (
+                        (classClockTimes.classElapsedSeconds ?: 0).toFloat() /
+                            session.rules.totalSeconds.coerceAtLeast(1).toFloat()
+                    ).coerceIn(0f, 1f),
                     fillColor = tahini,
                     modifier = Modifier.width(178.dp).height(4.dp),
                 )
@@ -179,12 +178,11 @@ fun SessionTimerScreen(
                     ))
                 Text(currentRemainingLabel)
                 view.phase?.let { phase ->
-                    // The bar encodes REMAINING time: starts full, drains to
-                    // zero for both Session and Break. Background remains
-                    // Session fill / Break drain independently of the bar.
-                    SolidRemainingBar(
-                        remainingFraction = if (isWork || isBreak) smoothRemaining
-                            else DesignMotion.remainingFraction(
+                    // Session AND Break bars show ELAPSED time, filling from
+                    // zero to full. Unlike the bar, the Break background drains.
+                    SolidProgressBar(
+                        progressFraction = if (isWork || isBreak) smoothElapsed
+                            else DesignMotion.elapsedFraction(
                                 phase.durationSeconds.toLong(),
                                 view.phaseRemainingSeconds.toLong(),
                             ),
@@ -374,10 +372,10 @@ fun SessionTimerScreen(
 
 }
 
-/** Full-width tahini bar without Material3's trailing stop-indicator dot. */
+/** Elapsed-time tahini bar without Material3's trailing stop-indicator dot. */
 @Composable
-private fun SolidRemainingBar(
-    remainingFraction: Float,
+private fun SolidProgressBar(
+    progressFraction: Float,
     fillColor: Color,
     modifier: Modifier = Modifier,
 ) {
@@ -387,7 +385,7 @@ private fun SolidRemainingBar(
     ) {
         Box(
             modifier = Modifier.fillMaxHeight()
-                .fillMaxWidth(remainingFraction.coerceIn(0f, 1f))
+                .fillMaxWidth(progressFraction.coerceIn(0f, 1f))
                 .background(fillColor),
         )
     }
