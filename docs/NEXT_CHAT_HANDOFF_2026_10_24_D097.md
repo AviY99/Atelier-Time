@@ -1,5 +1,7 @@
 # Atelier Time — NEW CHAT HANDOFF (D-097, 2026-10-24)
 
+> **LATEST SUPERSEDING CHECKPOINT / 2026-10-24:** D-098 is now installed and user-confirmed working (**"הכל עובד"**). User declared **Atelier Time Android Stable 2**, with all visual/design aspects CLOSED. Immutable rollback branch [`stable/android-d098`](https://github.com/AviY99/Atelier-Time/tree/stable/android-d098) at commit `6d5cbab6818cae288de8367849f8d3ea53f4739f`. **Do not repeat any D-097 or D-098 installation/build instructions below.** This document is historical. The authoritative current state is [ANDROID_STABLE_2_D098.md](ANDROID_STABLE_2_D098.md), [HANDOFF.md](HANDOFF.md), [DECISIONS.md](DECISIONS.md) and [TEST_PLAN.md](TEST_PLAN.md).
+
 > **POST-HANDOFF STATUS UPDATE (2026-10-24):** D-097 is NOW user-confirmed installed and working ("הכל עובד כנדרש"); its historical pending-APK instruction below has already been completed and MUST NOT be repeated. A subsequent D-098 Editor-only compact timeline text change is committed on Android branch `6d5cbab6818cae288de8367849f8d3ea53f4739f` but NOT phone built/installed/tested. The current status and next steps are in `HANDOFF.md`, `DECISIONS.md` and `TEST_PLAN.md`; this D-097 document remains an historical checkpoint.
 
 **STATUS: CURRENT CONVERSATION CLOSED AT USER REQUEST. READ THIS FILE FIRST IN THE NEXT CONVERSATION.**  
