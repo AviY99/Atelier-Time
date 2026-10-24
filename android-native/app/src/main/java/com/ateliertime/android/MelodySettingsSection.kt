@@ -121,11 +121,14 @@ fun MelodySettingsSection(
             onChooseSystemSound = onChooseSystemSound,
             onChooseAudioFile = onChooseAudioFile, onPreview = onPreview,
         )
+        var sliderSeconds by remember(settings.classEndSeconds) {
+            mutableFloatStateOf(settings.classEndSeconds.toFloat())
+        }
         Row(modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically) {
             Text("C · End of class", style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.weight(1f))
-            Text("${settings.classEndSeconds}s",
+            Text("${sliderSeconds.roundToInt()}s",
                 style = MaterialTheme.typography.titleSmall)
         }
         SoundPicker(
@@ -134,9 +137,6 @@ fun MelodySettingsSection(
             onChooseSystemSound = onChooseSystemSound,
             onChooseAudioFile = onChooseAudioFile, onPreview = onPreview,
         )
-        var sliderSeconds by remember(settings.classEndSeconds) {
-            mutableFloatStateOf(settings.classEndSeconds.toFloat())
-        }
         Row(modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically) {
             Text("5s", style = MaterialTheme.typography.labelSmall)
