@@ -248,6 +248,7 @@ fun DesignSettingsPanel(
                 DesignMode.AUTO to "Auto",
             ).forEach { (mode, title) ->
                 FilterChip(
+                    colors = atelierChipColors(),
                     selected = settings.mode == mode,
                     onClick = { onChange(settings.copy(mode = mode)) },
                     label = { Text(title) },
