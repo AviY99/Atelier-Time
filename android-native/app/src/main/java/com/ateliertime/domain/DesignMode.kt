@@ -42,4 +42,10 @@ object DesignMotion {
         val elapsedRatio = 1f - remaining.toFloat() / durationMillis.toFloat()
         return if (isBreak) 1f - elapsedRatio else elapsedRatio
     }
+    /** A progress bar represents time LEFT, not elapsed phase fill. */
+    fun remainingFraction(durationMillis: Long, remainingMillis: Long): Float =
+        if (durationMillis <= 0L) 0f
+        else remainingMillis.coerceIn(0L, durationMillis).toFloat() /
+            durationMillis.toFloat()
+
 }
