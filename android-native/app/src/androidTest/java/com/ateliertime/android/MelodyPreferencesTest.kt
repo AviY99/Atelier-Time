@@ -8,6 +8,7 @@ import com.ateliertime.domain.MelodySelections
 import com.ateliertime.domain.CueSound
 import com.ateliertime.domain.SoundSource
 import com.ateliertime.domain.TimerCue
+import com.ateliertime.domain.SoundAssignmentMode
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -70,4 +71,31 @@ class MelodyPreferencesTest {
         preferences.saveSettings(selected)
         assertEquals(selected, MelodyPreferences(context, isolatedName).loadSettings())
     }
+
+    @Test fun upgradingD100KeepsSeparateSoundsAndNewSharedSettingSurvivesReload() {
+        val prefs = MelodyPreferences(context, isolatedName)
+        val original = prefs.loadSettings()
+            .setDuration(TimerCue.SESSION_FINISHED, 37)
+            .choose(TimerCue.BREAK_FINISHED,
+                CueSound(melody = MelodyPattern.WARM_BELLS))
+        prefs.saveSettings(original)
+        val upgraded = MelodyPreferences(context, isolatedName).loadSettings()
+        assertEquals(SoundAssignmentMode.SEPARATE, upgraded.assignmentMode)
+        val shared = upgraded
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .setSharedDuration(10)
+            .chooseForVisibleMode(TimerCue.SESSION_FINISHED,
+                CueSound(melody = MelodyPattern.CELEBRATION))
+        prefs.saveSettings(shared)
+        val restored = MelodyPreferences(context, isolatedName).loadSettings()
+        assertEquals(shared, restored)
+        TimerCue.entries.forEach { cue ->
+            assertEquals(10, restored.secondsFor(cue))
+            assertEquals(MelodyPattern.CELEBRATION, restored.soundFor(cue).melody)
+        }
+        val separateAgain = restored.setAssignmentMode(SoundAssignmentMode.SEPARATE)
+        assertEquals(37, separateAgain.secondsFor(TimerCue.SESSION_FINISHED))
+        assertEquals(MelodyPattern.WARM_BELLS, separateAgain.breakEnd.melody)
+    }
+
 }
