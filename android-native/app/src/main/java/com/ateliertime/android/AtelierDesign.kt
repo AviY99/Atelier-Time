@@ -12,6 +12,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -32,6 +36,9 @@ import com.ateliertime.domain.DesignPreferences
 import kotlin.math.roundToInt
 import kotlin.math.cos
 import kotlin.math.sin
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /** Preferences live separately from the signed Class catalog. */
 class DesignSettingsStore(context: Context) {
@@ -337,8 +344,17 @@ private fun PaletteChoiceCard(
 fun DesignSettingsPanel(
     settings: DesignPreferences,
     currentPalette: DesignPalette,
+    currentClockMillis: Long,
     onChange: (DesignPreferences) -> Unit,
 ) {
+    // Dragging edits a *draft* time. Commit when the thumb is released:
+    // the whole app palette should not abruptly flip under a user's finger.
+    var draftNightStart by remember(settings.mode) {
+        mutableIntStateOf(settings.nightStartsAtHour)
+    }
+    val deviceClock = remember(currentClockMillis / 60_000L) {
+        SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(currentClockMillis))
+    }
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(16.dp),
@@ -380,9 +396,9 @@ fun DesignSettingsPanel(
                     modifier = Modifier.fillMaxWidth().padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text("Night begins at %02d:00".format(settings.nightStartsAtHour),
+                    Text("Night begins at %02d:00".format(draftNightStart),
                         style = MaterialTheme.typography.titleLarge)
-                    Text("Move the marker to set the Night start time. Day begins at 06:00.",
+                    Text("Choose the Night start hour. Day begins at 06:00. The choice is applied when you release the slider.",
                         style = MaterialTheme.typography.bodySmall)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -400,14 +416,19 @@ fun DesignSettingsPanel(
                                 activeTickColor = Color(0xFF29312D),
                                 inactiveTickColor = Color.White,
                             ),
-                            value = settings.nightStartsAtHour.toFloat(),
+                            value = draftNightStart.toFloat(),
                             onValueChange = {
-                                onChange(settings.copy(
-                                    nightStartsAtHour = it.roundToInt().coerceIn(
-                                        DesignClock.MIN_NIGHT_HOUR,
-                                        DesignClock.MAX_NIGHT_HOUR,
-                                    ),
-                                ))
+                                draftNightStart = it.roundToInt().coerceIn(
+                                    DesignClock.MIN_NIGHT_HOUR,
+                                    DesignClock.MAX_NIGHT_HOUR,
+                                )
+                            },
+                            onValueChangeFinished = {
+                                if (draftNightStart != settings.nightStartsAtHour) {
+                                    onChange(settings.copy(
+                                        nightStartsAtHour = draftNightStart,
+                                    ))
+                                }
                             },
                             valueRange = DesignClock.MIN_NIGHT_HOUR.toFloat()..
                                 DesignClock.MAX_NIGHT_HOUR.toFloat(),
@@ -423,7 +444,7 @@ fun DesignSettingsPanel(
                         Text("Day · 12:00", style = MaterialTheme.typography.bodySmall)
                         Text("Night · 23:00", style = MaterialTheme.typography.bodySmall)
                     }
-                    Text("Currently showing: " +
+                    Text("Currently showing at $deviceClock: " +
                         (if (currentPalette == DesignPalette.DAY) "Day" else "Night"),
                         style = MaterialTheme.typography.bodyMedium)
                 }
