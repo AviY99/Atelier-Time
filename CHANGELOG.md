@@ -1,5 +1,10 @@
 # Changelog — Atelier Time
 
+## 2026-10-24 — D-086 Editor ending-option chip fits phone width (device QA pending)
+
+- User confirmed prior D-085 Android release works. In Editor → Complete class timeline, fixed the long "Last gets remaining time" choice by breaking its label into two centered lines and giving the three FilterChip options proportionate widths (1.5:0.8:1.1) within a fixed full-width row instead of horizontal scrolling.
+- No change to selected ending option, scheduling, Save, test definitions, audio, signed storage or Timer operation. Code commit `d0a03d2` on draft Android branch; **new D-086 compilation/build/device layout acceptance still pending**.
+
 ## 2026-10-24 — D-085 live Class clock and Timer/list polish (new-source QA pending)
 
 - User reports D-084 working on phone. Changed Class elapsed to real physical elapsed (no appended Class total); elapsed continues while paused/after Next, Class target end remains unchanged; Class remaining and progress use actual wall time. At deadline a Class still running/paused ends with one C cue.
