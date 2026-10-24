@@ -160,11 +160,11 @@ fun SessionTimerScreen(
                         }
                     }
                     OutlinedButton(
-                        enabled = underway,
+                        enabled = underway && view.phase?.kind == PhaseKind.POSE,
                         onClick = { confirmation = "restart" },
                         modifier = Modifier.weight(1.3f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
-                    ) { Text("Restart class", style = MaterialTheme.typography.labelSmall) }
+                    ) { Text("Restart session", style = MaterialTheme.typography.labelSmall) }
                     OutlinedButton(
                         enabled = underway,
                         onClick = onNextPhase,
@@ -201,18 +201,19 @@ fun SessionTimerScreen(
             onDismissRequest = { confirmation = null },
             title = {
                 Text(if (choice == "exit") "End class and return?"
-                    else "Restart this class?")
+                    else "Restart current session?")
             },
             text = {
                 Text(if (choice == "exit")
                     "End the current run and return to your saved classes in Timer. " +
                         "The saved approved plan is not changed."
                 else
-                    "Restart at the beginning of the same class. To keep the " +
-                        "original finish time, the final two regular sessions are shortened " +
-                        "according to the approved ending choice. If that is impossible, " +
-                        "the running timer remains unchanged. The class-finish melody " +
-                        "plays only if restart succeeds.")
+                    "Restart only the current work session from its beginning. " +
+                        "Previous sessions and breaks stay completed; the Class start " +
+                        "and expected end remain unchanged. Time spent repeating " +
+                        "this session is compensated by the final two regular " +
+                        "sessions, if feasible. The session-end melody A plays only " +
+                        "after a successful restart. Restart is unavailable during breaks.")
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -229,7 +230,7 @@ fun SessionTimerScreen(
     if (selectedHelp != null) {
         val title = when (selectedHelp) {
             "pause" -> "Pause / Resume"
-            "restart" -> "Restart class"
+            "restart" -> "Restart session"
             else -> "Next phase"
         }
         val explanation = when (selectedHelp) {
@@ -238,12 +239,15 @@ fun SessionTimerScreen(
                     "Time spent paused is compensated, where feasible, by shortening " +
                     "only the final two regular sessions according to your chosen ending."
             "restart" ->
-                "Restart the SAME class from Session 1 and play the " +
-                    "class-finish melody C. Keep the original clock finish time " +
-                    "by deducting time already used from the two final regular " +
-                    "sessions, according to the approved ending choice. Both must " +
-                    "remain at least one minute. If the change is impossible, " +
-                    "the running timer stays unchanged without playing a cue."
+                "Restart only the CURRENT work session, not the entire Class. " +
+                    "Earlier sessions and breaks remain completed. The current session's " +
+                    "start clock resets to now. The original Class start/end times " +
+                    "remain unchanged. Repeat time is deducted from the two final " +
+                    "regular sessions (or net added time is redistributed) according " +
+                    "to your approved ending choice; both must remain at least one " +
+                    "minute. Session-end melody A plays on success. Restart is disabled " +
+                    "during breaks or the summary, and is rejected if the final " +
+                    "pair cannot be adjusted without rewriting a completed session."
             else ->
                 "Next immediately finishes the current session or break and starts the " +
                     "very next phase of THIS class, whether it is a session, " +
