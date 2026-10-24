@@ -54,11 +54,11 @@ fun PresetLibrarySection(
 
     HorizontalDivider()
     Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-        Text("Saved session presets", style = MaterialTheme.typography.titleLarge,
+        Text("Saved class presets", style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.weight(1f))
         TextButton(onClick = { showHelp = true }) { Text("Help") }
     }
-    Text("Only an approved session timeline can be saved. Presets are stored offline.")
+    Text("Only an approved class timeline can be saved. Presets are stored offline.")
     if (error != null) {
         Text(
             error ?: "",
@@ -78,7 +78,7 @@ fun PresetLibrarySection(
                     onSaved(saved)
                 }
             },
-        ) { Text("Save approved session") }
+        ) { Text("Save approved class") }
         OutlinedButton(
             enabled = approved != null && selectedId != null,
             onClick = {
@@ -106,7 +106,7 @@ fun PresetLibrarySection(
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(preset.title, style = MaterialTheme.typography.titleMedium)
                 if (collection.activeId == preset.id) {
-                    Text("Selected preset (load to open its timer)")
+                    Text("Selected class (load to open its timer)")
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
@@ -140,11 +140,11 @@ fun PresetLibrarySection(
     if (showHelp) {
         AlertDialog(
             onDismissRequest = { showHelp = false },
-            title = { Text("Saved session presets") },
+            title = { Text("Saved class presets") },
             text = {
-                Text("Save an explicitly approved timeline on this phone. " +
-                    "Load & edit restores that exact approved session into the editor. " +
-                    "Select preset marks it for timer use but does not start a clock; " +
+                Text( "Save an explicitly approved class timeline on this phone. " +
+                     "Load & edit restores that exact approved class into the editor. " +
+                     "Select preset marks the class for timer use but does not start a clock; " +
                     "open the timer separately when ready. Duplicating or renaming " +
                     "preserves the approved timeline.")
             },
