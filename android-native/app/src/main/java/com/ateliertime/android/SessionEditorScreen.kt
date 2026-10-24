@@ -93,7 +93,7 @@ fun SessionEditorScreen() {
                 val title = runCatching {
                     RingtoneManager.getRingtone(context, uri)?.getTitle(context)
                 }.getOrNull() ?: "Android system sound"
-                saveSoundSettings(soundSettings.choose(cue, CueSound(
+                saveSoundSettings(soundSettings.chooseForVisibleMode(cue, CueSound(
                     source = SoundSource.SYSTEM,
                     melody = soundSettings.soundFor(cue).melody,
                     uri = uri.toString(), displayName = title,
@@ -117,7 +117,7 @@ fun SessionEditorScreen() {
                 )?.use { cursor ->
                     if (cursor.moveToFirst()) cursor.getString(0) else null
                 } ?: uri.lastPathSegment ?: "Audio file"
-                saveSoundSettings(soundSettings.choose(cue, CueSound(
+                saveSoundSettings(soundSettings.chooseForVisibleMode(cue, CueSound(
                     source = SoundSource.FILE,
                     melody = soundSettings.soundFor(cue).melody,
                     uri = uri.toString(), displayName = title,
@@ -743,8 +743,8 @@ fun SessionEditorScreen() {
     }
             MainTab.SOUNDS -> Column(
                 modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 MelodySettingsSection(
                     settings = soundSettings,
