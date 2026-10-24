@@ -115,8 +115,15 @@ fun SessionTimerScreen(
             Text("Interruption recovered from the final two poses: " +
                 durationLabel(view.recoveredSeconds),
                 color = MaterialTheme.colorScheme.primary)
-            Text("The approved ending choice determines their revised durations. " +
-                "Original saved session settings are unchanged.")
+            val pair = timer.finalTwoPoseDurations()
+            if (pair != null) {
+                Text("Revised final poses: " + durationLabel(pair.first) + " + " +
+                    durationLabel(pair.second))
+            }
+            Text("Ending mode: " +
+                (session.selectedChoice?.mode?.name ?: "REMAINDER") +
+                ". Intervening rest and reserved end summary stay unchanged. " +
+                "The saved preset is not overwritten.")
         }
         if (timerError != null) {
             Text(timerError ?: "", color = MaterialTheme.colorScheme.error)
