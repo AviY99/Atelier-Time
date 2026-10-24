@@ -13,13 +13,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import android.os.SystemClock
 import com.ateliertime.domain.*
+import kotlinx.coroutines.delay
 
 /**
  * Real Stage 2 Android editor/chronological schedule preview.
  * Offline approved presets now persist. Selecting a preset does NOT yet run a timer.
  * Style is a neutral Material 3 baseline, NOT final branding.
  */
+private enum class MainTab { EDITOR, SOUNDS, TIMER }
+
 @Composable
 fun SessionEditorScreen() {
     val engine = remember { ScheduleEngine() }
@@ -53,6 +57,17 @@ fun SessionEditorScreen() {
     var acceptedWarning by remember { mutableStateOf(false) }
     var approved by remember { mutableStateOf<ApprovedSession?>(null) }
     var playingSession by remember { mutableStateOf<ApprovedSession?>(null) }
+    var activeTab by remember { mutableStateOf(MainTab.EDITOR) }
+    var soundEnabled by remember { mutableStateOf(true) }
+    val liveTimer = remember(playingSession) {
+        playingSession?.let { session ->
+            MonotonicSessionTimer(session) { SystemClock.elapsedRealtime() }
+        }
+    }
+    var timerView by remember(liveTimer) { mutableStateOf(liveTimer?.view()) }
+    var wallClockMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    var deadlineMillis by remember(liveTimer) { mutableStateOf<Long?>(null) }
+    var timerError by remember(liveTimer) { mutableStateOf<String?>(null) }
     var helpSection by remember { mutableStateOf<Pair<String, String>?>(null) }
     var nextOpeningId by remember { mutableIntStateOf(1) }
     val opening = remember { mutableStateListOf<OpeningDraft>() }
@@ -120,17 +135,68 @@ fun SessionEditorScreen() {
         null
     }
 
-    val liveSession = playingSession
-    if (liveSession != null) {
-        SessionTimerScreen(
-            session = liveSession,
-            melodySelections = melodySelections,
-            onBackToEditor = { playingSession = null },
-        )
-        return
+    LaunchedEffect(liveTimer, melodySelections, soundEnabled) {
+        while (true) {
+            wallClockMillis = System.currentTimeMillis()
+            val clock = liveTimer
+            if (clock != null) {
+                val tick = clock.update()
+                timerView = tick.view
+                if (soundEnabled && tick.cue != null) {
+                    melodyPlayer.play(melodySelections.forCue(tick.cue)) {
+                        message -> melodyError = message
+                    }
+                }
+            }
+            delay(200)
+        }
     }
 
-    Column(
+    fun timerAction(block: () -> TimerView) {
+        try {
+            timerView = block()
+            timerError = null
+        } catch (error: IllegalArgumentException) {
+            timerError = error.message ?: "Cannot fit the interruption into the final two poses."
+        } catch (error: IllegalStateException) {
+            timerError = error.message ?: "Cannot change a pose that has already started."
+        }
+    }
+
+    fun goToNextSavedSession() {
+        try {
+            val entries = catalog.state().entries
+            val currentIndex = entries.indexOfFirst { it.id == selectedPresetId }
+            val next = if (currentIndex >= 0 && entries.size > 1) {
+                entries[(currentIndex + 1) % entries.size]
+            } else if (currentIndex < 0) {
+                entries.firstOrNull()
+            } else null
+            if (next == null) {
+                timerError = "No next saved session is available. Save another approved session first."
+            } else {
+                val restored = catalog.activate(next.id)
+                loadPreset(next, restored)
+                playingSession = restored
+                activeTab = MainTab.TIMER
+            }
+        } catch (error: Exception) {
+            timerError = error.message ?: "Cannot load the next saved session."
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        TabRow(selectedTabIndex = activeTab.ordinal) {
+            MainTab.entries.forEach { tab ->
+                Tab(
+                    selected = activeTab == tab,
+                    onClick = { activeTab = tab },
+                    text = { Text(tab.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                )
+            }
+        }
+        when (activeTab) {
+            MainTab.EDITOR -> Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -141,24 +207,6 @@ fun SessionEditorScreen() {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { applyA() }) { Text("Example A") }
             OutlinedButton(onClick = { applyB() }) { Text("Example B") }
-        }
-        MelodySettingsSection(
-            selections = melodySelections,
-            onSelectionsChange = { updated ->
-                try {
-                    melodyPreferences.save(updated)
-                    melodySelections = updated
-                    melodyError = null
-                } catch (error: Exception) {
-                    melodyError = error.message ?: "Unable to save sound settings."
-                }
-            },
-            onPreview = { melody ->
-                melodyPlayer.play(melody) { message -> melodyError = message }
-            },
-        )
-        if (melodyError != null) {
-            Text(melodyError ?: "", color = MaterialTheme.colorScheme.error)
         }
         OutlinedTextField(
             value = name, onValueChange = { name = it; invalidate() },
@@ -419,6 +467,7 @@ fun SessionEditorScreen() {
                             "  (" + phase.durationSeconds / 60 + " min)",
                     )
                 }
+                TimelinePhaseChart(candidate.phases)
                 Button(
                     onClick = {
                         approved = engine.approve(
@@ -434,6 +483,7 @@ fun SessionEditorScreen() {
                     Text("Exact timeline approved. Save this session, or start the timer.")
                     Button(onClick = {
                         playingSession = approved
+                        activeTab = MainTab.TIMER
                     }) { Text("Open session timer") }
                 }
             }
@@ -458,6 +508,83 @@ fun SessionEditorScreen() {
                 "open the timer after loading an approved session.",
             style = MaterialTheme.typography.bodySmall,
         )
+    }
+            MainTab.SOUNDS -> Column(
+                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                MelodySettingsSection(
+                    selections = melodySelections,
+                    onSelectionsChange = { updated ->
+                        try {
+                            melodyPreferences.save(updated)
+                            melodySelections = updated
+                            melodyError = null
+                        } catch (error: Exception) {
+                            melodyError = error.message ?: "Unable to save sound settings."
+                        }
+                    },
+                    onPreview = { melody ->
+                        melodyPlayer.play(melody) { message -> melodyError = message }
+                    },
+                )
+                if (melodyError != null) {
+                    Text(melodyError ?: "", color = MaterialTheme.colorScheme.error)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Automatic timer alerts", modifier = Modifier.weight(1f))
+                    Switch(checked = soundEnabled,
+                        onCheckedChange = { soundEnabled = it })
+                }
+                Text("You can change melodies while a timer is running. The clock " +
+                    "continues in the Timer tab and the new choices apply at the next cue.")
+            }
+            MainTab.TIMER -> {
+                val session = playingSession
+                val timer = liveTimer
+                val view = timerView
+                if (session == null || timer == null || view == null) {
+                    Column(modifier = Modifier.fillMaxSize().padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text("No active session", style = MaterialTheme.typography.titleLarge)
+                        Text("Approve a session in Editor, or load a saved preset. " +
+                            "Then tap Open session timer.")
+                        Button(onClick = { activeTab = MainTab.EDITOR }) {
+                            Text("Choose a session")
+                        }
+                    }
+                } else {
+                    SessionTimerScreen(
+                        session = session,
+                        timer = timer,
+                        view = view,
+                        wallClockMillis = wallClockMillis,
+                        deadlineEpochMillis = deadlineMillis,
+                        timerError = timerError,
+                        onStart = {
+                            timerAction { timer.start() }
+                            if (timerView?.status == TimerStatus.RUNNING) {
+                                deadlineMillis = System.currentTimeMillis() +
+                                    timerView!!.totalRemainingSeconds * 1000L
+                            }
+                        },
+                        onPauseResume = {
+                            timerAction {
+                                if (timer.view().status == TimerStatus.PAUSED ||
+                                    timer.view().status == TimerStatus.STOPPED)
+                                    timer.resume()
+                                else timer.pause()
+                            }
+                        },
+                        onStopAndRestart = {
+                            timerAction { timer.restartKeepingEndTime() }
+                        },
+                        onStopAndNext = { goToNextSavedSession() },
+                    )
+                }
+            }
+        }
     }
 
     val openHelp = helpSection
