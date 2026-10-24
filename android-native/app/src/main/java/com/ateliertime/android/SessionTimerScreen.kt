@@ -31,6 +31,9 @@ fun SessionTimerScreen(
     onStopAndNext: () -> Unit,
 ) {
     var confirmation by remember { mutableStateOf<String?>(null) }
+    // Contextual help keeps the Timer compact on a phone. Nothing is hidden
+    // from screen-reader users because each action has its own Help control.
+    var helpFor by remember { mutableStateOf<String?>(null) }
     val time = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
@@ -101,39 +104,44 @@ fun SessionTimerScreen(
         when (view.status) {
             TimerStatus.READY, TimerStatus.FINISHED -> {
                 Button(onClick = onStart) {
-                    Text(if (view.status == TimerStatus.FINISHED) "Start new session" else "Start session")
+                    Text(if (view.status == TimerStatus.FINISHED) "Start new session"
+                    else "Start session")
                 }
             }
-            TimerStatus.RUNNING, TimerStatus.PAUSED -> {
-                Button(onClick = onPauseResume) {
-                    Text(if (view.status == TimerStatus.PAUSED) "Resume" else "Pause")
+            TimerStatus.RUNNING, TimerStatus.PAUSED, TimerStatus.STOPPED -> {
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = onPauseResume) {
+                        Text(if (view.status == TimerStatus.RUNNING) "Pause" else "Resume")
+                    }
+                    TextButton(onClick = { helpFor = "pause" }) { Text("Help") }
                 }
-            }
-            TimerStatus.STOPPED -> {
-                Button(onClick = onPauseResume) { Text("Resume") }
             }
         }
         HorizontalDivider()
         Text("Stop session", style = MaterialTheme.typography.titleMedium)
-        OutlinedButton(
-            enabled = view.status == TimerStatus.RUNNING || view.status == TimerStatus.PAUSED,
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { confirmation = "restart" },
-        ) { Text("Stop and restart session") }
-        OutlinedButton(
-            enabled = view.status == TimerStatus.RUNNING || view.status == TimerStatus.PAUSED,
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { confirmation = "next" },
-        ) { Text("Stop and go to next saved session") }
-        Text(
-            "Pause freezes the current pose; Resume shortens the final two poses " +
-                "as needed to keep the original finish time. Stop and restart begins " +
-                "at pose 1 while preserving the same finish deadline (if feasible). " +
-                "Next session loads the next stored preset without modifying either plan. " +
-                "Change melodies anytime in the Sounds tab; automatic cues remain active " +
-                "while you switch tabs.",
-            style = MaterialTheme.typography.bodySmall,
-        )
+        Row(modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                enabled = view.status == TimerStatus.RUNNING ||
+                    view.status == TimerStatus.PAUSED,
+                modifier = Modifier.weight(1f),
+                onClick = { confirmation = "restart" },
+            ) { Text("Stop and restart session") }
+            TextButton(onClick = { helpFor = "restart" }) { Text("Help") }
+        }
+        Row(modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                enabled = view.status == TimerStatus.RUNNING ||
+                    view.status == TimerStatus.PAUSED,
+                modifier = Modifier.weight(1f),
+                onClick = { confirmation = "next" },
+            ) { Text("Stop and go to next saved session", maxLines = 2) }
+            TextButton(onClick = { helpFor = "next" }) { Text("Help") }
+        }
     }
 
     val choice = confirmation
@@ -163,6 +171,44 @@ fun SessionTimerScreen(
             },
         )
     }
+    val selectedHelp = helpFor
+    if (selectedHelp != null) {
+        val title = when (selectedHelp) {
+            "pause" -> "Pause / Resume"
+            "restart" -> "Stop and restart session"
+            else -> "Stop and go to next saved session"
+        }
+        val explanation = when (selectedHelp) {
+            "pause" ->
+                "Pause holds the current pose. Resume continues from the same point. " +
+                    "Time spent paused is compensated, where feasible, by shortening " +
+                    "only the final two regular poses according to your chosen ending."
+            "restart" ->
+                "Discard progress in the current run and begin this SAME session " +
+                    "from Pose 1. The originally planned clock finish remains fixed: " +
+                    "the time already spent is deducted from the final two regular " +
+                    "poses (if both can remain at least one minute). Your saved " +
+                    "session is not changed. If the deduction cannot fit, the timer " +
+                    "stays as it was and shows a warning."
+            else ->
+                "Next means the NEXT DIFFERENT session you previously approved " +
+                    "and saved in Editor → Saved session presets. For example, " +
+                    "if only Draw1425 is saved, there is no other session to load. " +
+                    "Save another approved preset first. With two or more presets, " +
+                    "this stops the current run, loads the next preset in saved " +
+                    "order (wrapping at the end), and waits for you to press Start. " +
+                    "Neither saved schedule is changed or shortened."
+        }
+        AlertDialog(
+            onDismissRequest = { helpFor = null },
+            title = { Text(title) },
+            text = { Text(explanation) },
+            confirmButton = {
+                TextButton(onClick = { helpFor = null }) { Text("Close") }
+            },
+        )
+    }
+
 }
 
 private fun phaseLabel(phase: SchedulePhase?): String = when (phase?.kind) {
