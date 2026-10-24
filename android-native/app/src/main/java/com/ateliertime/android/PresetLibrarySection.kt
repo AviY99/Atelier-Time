@@ -52,7 +52,7 @@ fun PresetLibrarySection(
     }
     Text("Run starts the chosen class timer. Edit opens its approved plan " +
         "in Editor, where Save can replace it after confirmation.")
-    error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    error?.let { Text(it, color = atelierErrorTextColor()) }
     if (collection.entries.isEmpty()) {
         Text("No saved classes. Create a class in Editor and select Save class.")
     }
