@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **USER-REPORTED AUDIO PREVIEW PASS (2026-10-24):** Following APK update with the `MODE_STATIC` initialization fix, user replied **"הכל עובד"** to the test request for the three A/B/C `Play 5s` previews. Mark **manual melody previews device PASS (user-reported)**. **Do not infer automatic cue A/B/C at phase boundaries, actual timed 5.000s precision, background/locked-screen reliability, final pair interruption logic or Android instrumentation PASS.** Next: test approved 3m session (no openings, `POSE_FIRST`, 1m regular pose, 1m regular break, 0 special count, 0 summary); A at 01:00, B at 02:00, C at 03:00. Then separate approved final-pair compensation check.
+
+
 > **2026-10-24 10:28 PHONE REBUILD EVIDENCE:** Following the static `AudioTrack` initialization source fix, user screenshot shows `:app:testDebugUnitTest`, `:app:assembleDebug` and **`BUILD SUCCESSFUL in 28s`**; 42 tasks (8 executed, 34 up-to-date). This verifies the Gradle tasks, NOT audible playback, device install, individual JUnit XML count, or instrumentation execution. **Next K04 gate remains audible A/B/C `Play 5s` in updated APK**, then automatic timer cue checks. Do not mark audio PASS before observation.
 
 
