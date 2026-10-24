@@ -47,7 +47,7 @@ class MelodyPreferences(
 }
 
 /**
- * Each selected melody plays exactly ten half-second notes (five seconds),
+ * Each melody plays twenty rhythmic quarter-second slots (five seconds),
  * through PCM AudioTrack instead of indistinguishable short DTMF beeps.
  *
  * Playback is non-blocking; the clock can tick while the melody plays.
@@ -116,22 +116,28 @@ class MelodyAudioPlayer {
     companion object {
         private const val SAMPLE_RATE = 22_050
         private const val MELODY_MS = 5_000
-        private const val SLOT_MS = 500
+        private const val SLOT_MS = 250
 
         private fun render(pattern: MelodyPattern): ShortArray {
+            require(pattern.notesHz.size == MELODY_MS / SLOT_MS) {
+                "Expected exactly twenty rhythmic notes/rests for a five-second melody."
+            }
             val framesPerSlot = SAMPLE_RATE * SLOT_MS / 1000
             val result = ShortArray(SAMPLE_RATE * MELODY_MS / 1000)
             pattern.notesHz.forEachIndexed { slot, frequency ->
                 if (slot >= MELODY_MS / SLOT_MS || frequency <= 0) return@forEachIndexed
                 for (i in 0 until framesPerSlot) {
                     val sec = i.toDouble() / SAMPLE_RATE
-                    val envelope = minOf(1.0, i.toDouble() / (SAMPLE_RATE * .025)) *
+                    // Short articulation and an accented downbeat on every fourth
+                    // rhythmic slot: clearly livelier than the old 500ms tones.
+                    val envelope = minOf(1.0, i.toDouble() / (SAMPLE_RATE * .012)) *
                         minOf(1.0, (framesPerSlot - 1 - i).toDouble() /
-                            (SAMPLE_RATE * .08))
+                            (SAMPLE_RATE * .045))
+                    val accent = if (slot % 4 == 0) 1.0 else 0.76
                     val wave = 0.72 * sin(2 * PI * frequency * sec) +
                         0.28 * sin(2 * PI * frequency * 2 * sec)
                     result[slot * framesPerSlot + i] =
-                        (wave * envelope * 11_500.0).toInt().toShort()
+                        (wave * envelope * accent * 11_500.0).toInt().toShort()
                 }
             }
             return result
