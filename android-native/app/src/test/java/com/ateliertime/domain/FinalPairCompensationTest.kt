@@ -61,6 +61,34 @@ class FinalPairCompensationTest {
         assertEquals(m(175), cut.totalSeconds)
     }
 
+    @Test fun skipExtendsLastPoseUnderRemainderChoice() {
+        val original = session(FinalPoseChoice.remainder())
+        val lengthened = FinalPairCompensation.adjust(original, -m(6))
+        verify(original, lengthened)
+        assertEquals(m(25), lengthened.firstFinalPoseSeconds)
+        assertEquals(m(11), lengthened.lastFinalPoseSeconds)
+        assertEquals(m(186), lengthened.totalSeconds)
+    }
+
+    @Test fun skippedTimeSplitsEvenlyForEvenEnding() {
+        val original = session(FinalPoseChoice.even())
+        val lengthened = FinalPairCompensation.adjust(original, -m(6))
+        verify(original, lengthened)
+        assertEquals(m(18), lengthened.firstFinalPoseSeconds)
+        assertEquals(m(18), lengthened.lastFinalPoseSeconds)
+        assertEquals(m(15), lengthened.phases.last().durationSeconds)
+    }
+
+    @Test fun skippedTimeKeepsCustomEndingRatio() {
+        val original = session(FinalPoseChoice.custom(m(18)))
+        val extra = FinalPairCompensation.adjust(original, -m(5))
+        verify(original, extra)
+        val combined = extra.firstFinalPoseSeconds + extra.lastFinalPoseSeconds
+        assertEquals(m(35), combined)
+        assertEquals(21 * m(1), extra.firstFinalPoseSeconds)
+        assertEquals(14 * m(1), extra.lastFinalPoseSeconds)
+    }
+
     @Test fun zeroDelayDoesNotChangeApprovedPhaseBoundaries() {
         val original = session(FinalPoseChoice.custom(m(18)))
         val zero = FinalPairCompensation.adjust(original, 0)
