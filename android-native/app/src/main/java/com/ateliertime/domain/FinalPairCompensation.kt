@@ -5,9 +5,10 @@ import kotlin.math.roundToInt
 /**
  * Runtime-only end-time recovery. Never mutates a saved/approved preset.
  *
- * If paused or stopped before the two last regular poses, keep earlier phases
- * and the intervening rest intact; recover lost wall-clock seconds only from
- * those final poses. The reserved summary remains its original duration.
+ * Signed correction: positive seconds shrink the last two regular poses to
+ * recover lost wall time; negative seconds extend them to absorb time gained
+ * by skipping a phase. Earlier phases, intervening break and summary retain
+ * their exact approved lengths. The approved preset is NEVER mutated.
  *
  * The user's already chosen ending mode decides how remaining posing time is
  * distributed: REMAINDER uses the final pose first, EVEN splits approximately
@@ -23,7 +24,8 @@ data class CompensatedTimeline(
 
 object FinalPairCompensation {
     fun adjust(session: ApprovedSession, lostSeconds: Int): CompensatedTimeline {
-        require(lostSeconds >= 0) { "Interrupted time cannot be negative." }
+        // A negative correction means a phase was intentionally skipped.
+        // Preserve its saved approval; expand only the end pair at runtime.
         val originals = session.phases
         val pair = originals.indices.filter {
             originals[it].kind == PhaseKind.POSE &&
@@ -42,12 +44,13 @@ object FinalPairCompensation {
         val first = originals[firstIndex]
         val rest = originals[firstIndex + 1]
         val last = originals[lastIndex]
-        val combined = first.durationSeconds + last.durationSeconds
-        require(combined - lostSeconds >= 2 * SECONDS_PER_MINUTE) {
-            "Not enough remaining time to keep both final poses at least one minute. " +
-                "Please choose a new end time and approve a revised schedule."
+        val combined = first.durationSeconds.toLong() + last.durationSeconds
+        val availableLong = combined - lostSeconds.toLong()
+        require(availableLong in (2L * SECONDS_PER_MINUTE)..Int.MAX_VALUE.toLong()) {
+            "Final two poses cannot absorb this time change while keeping both " +
+                "at least one minute. Approve a revised end time instead."
         }
-        val available = combined - lostSeconds
+        val available = availableLong.toInt()
         val firstNew = when (session.selectedChoice?.mode ?: FinalPoseMode.REMAINDER) {
             FinalPoseMode.REMAINDER ->
                 minOf(first.durationSeconds, available - SECONDS_PER_MINUTE)
@@ -71,7 +74,8 @@ object FinalPairCompensation {
             revised[i] = originals[i].shifted(cursor, cursor + length)
             cursor += length
         }
-        check(cursor == session.rules.totalSeconds - lostSeconds)
+        check(cursor.toLong() ==
+            session.rules.totalSeconds.toLong() - lostSeconds.toLong())
         return CompensatedTimeline(
             revised, cursor, lostSeconds, firstNew, lastNew,
         )
