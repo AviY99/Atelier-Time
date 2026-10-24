@@ -13,6 +13,10 @@ import androidx.compose.ui.platform.LocalContext
 import java.util.UUID
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -27,7 +31,7 @@ import kotlinx.coroutines.delay
  * Timer owns the saved-class library, Run and real-time countdown.
  * Style is a neutral Material 3 baseline, NOT final branding.
  */
-private enum class MainTab { EDITOR, SOUNDS, TIMER, DESIGN, ABOUT }
+private enum class MainTab { EDITOR, TIMER, SOUNDS, DESIGN, ABOUT }
 
 @Composable
 fun SessionEditorScreen() {
@@ -286,13 +290,29 @@ fun SessionEditorScreen() {
     Column(modifier = Modifier.fillMaxSize()
         .background(MaterialTheme.colorScheme.background)
         .safeDrawingPadding()) {
-        ScrollableTabRow(selectedTabIndex = activeTab.ordinal, edgePadding = 4.dp) {
-            MainTab.entries.forEach { tab ->
-                Tab(
-                    selected = activeTab == tab,
-                    onClick = { activeTab = tab },
-                    text = { Text(tab.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                )
+        // Non-scrolling 5-way navigation. LTR is deliberate, including on
+        // Hebrew/RTL devices: Editor | Timer | Sound | Design | About.
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            TabRow(selectedTabIndex = activeTab.ordinal,
+                modifier = Modifier.fillMaxWidth()) {
+                MainTab.entries.forEach { tab ->
+                    val label = when (tab) {
+                        MainTab.EDITOR -> "Editor"
+                        MainTab.TIMER -> "Timer"
+                        MainTab.SOUNDS -> "Sound"
+                        MainTab.DESIGN -> "Design"
+                        MainTab.ABOUT -> "About"
+                    }
+                    Tab(
+                        selected = activeTab == tab,
+                        onClick = { activeTab = tab },
+                        text = {
+                            Text(label, fontSize = 11.sp,
+                                maxLines = 1, softWrap = false,
+                                overflow = TextOverflow.Clip)
+                        },
+                    )
+                }
             }
         }
         when (activeTab) {
