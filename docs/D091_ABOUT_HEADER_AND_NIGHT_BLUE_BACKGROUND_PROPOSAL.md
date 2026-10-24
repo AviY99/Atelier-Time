@@ -1,5 +1,7 @@
 # D-091 — About identity header and bluer, softer Night proposal
 
+> **SUPERSEDED BY APPROVED D-092 — 2026-10-24:** User explicitly approved the proposed Night Blue **background only** colors `#304D70` canvas, `#3B5A7A` cards, `#4A6A8A` secondary surfaces. These exact three roles have now been implemented in `AtelierDesign.kt` on the Android draft branch, source commit `151aeeb51c3d754f48e0bddeed49786402a1396c`. No button/accent/tahini, Day or timer algorithm changes. About credit is shortened to **"Developed by Avi Yosfan · with ChatGPT (OpenAI)"** after reviewing OpenAI's published human-credit/AI disclosure and brand guidance. Title and credit centered; English description justified with smaller type; existing top row still name / real numeric Version / © 2026. Previously incorrect raw-regex double escaping for version extraction fixed. **D-092 new source NOT yet Gradle compiled/JVM-tested/APK installed/device QA accepted.** This page's earlier "proposal not approved" statements are historical as of D-092; see [D-092](DECISIONS.md).
+
 Date: 2026-10-24. **D-091 ABOUT CHANGE COMMITTED AS SOURCE ONLY / ANDROID BUILD + PHONE UI QA PENDING. Night palette is a PROPOSAL, NOT CODED.**
 
 ## Approved About layout correction
