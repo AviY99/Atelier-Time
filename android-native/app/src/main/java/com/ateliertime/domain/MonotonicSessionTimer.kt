@@ -4,9 +4,9 @@ package com.ateliertime.domain
  * Platform-neutral runtime. Milliseconds come from an injected monotonic clock
  * (SystemClock.elapsedRealtime on Android), never wall-clock time or tick counts.
  *
- * Sound events are emitted exactly once for adjacent phase transitions observed
- * while running. Missed old transitions are NOT replayed after a long suspension.
- * Consecutive opening poses deliberately have no automatic cue pending D-016.
+ * Sound events are emitted once for each pose or rest phase transition while
+ * running. Short UI scheduling jitter is tolerated (up to 5 sec); old
+ * notifications are not replayed after a long OS suspension.
  */
 enum class TimerStatus { READY, RUNNING, PAUSED, FINISHED, STOPPED }
 enum class TimerCue { POSE_FINISHED, BREAK_FINISHED, SESSION_FINISHED }
@@ -98,11 +98,11 @@ class MonotonicSessionTimer(
         }
         val cue = if (oldIndex != null && newIndex == oldIndex + 1) {
             val justEnded = session.phases[oldIndex]
-            // Avoid playing stale sounds for several crossed phases after wakeup.
-            if (next.elapsedSeconds - justEnded.endSeconds > 1) null
+            // The UI can wake slightly late; don't drop an otherwise valid
+            // transition just because it missed the exact second boundary.
+            if (next.elapsedSeconds - justEnded.endSeconds > 5) null
             else when (justEnded.kind) {
-                PhaseKind.POSE ->
-                    if (next.phase?.kind != PhaseKind.POSE) TimerCue.POSE_FINISHED else null
+                PhaseKind.POSE -> TimerCue.POSE_FINISHED
                 PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK -> TimerCue.BREAK_FINISHED
                 PhaseKind.SUMMARY -> null
             }
