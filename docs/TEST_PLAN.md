@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **LATEST PHONE DEVICE ACCEPTANCE (USER-REPORTED, 2026-10-24):** After screenshot-confirmed 13:03 native `:app:testDebugUnitTest :app:assembleDebug` **`BUILD SUCCESSFUL in 52s`**, the user explicitly states that the subsequent APK copy/update-install is **already completed and the app is working**. **Close APK installation pending for the currently delivered native build. DO NOT prescribe another installation or repeat passing local Gradle build as the next step.** This is an overall user acceptance report, *not* individual verified results for each D-080/D-081 UI action, nor evidence that Android instrumentation (9 source cases), lock/background scheduling/audio and long-run reliability have passed. Preserve their independent unverified status. Continue forward from next actionable product/test milestone.
+
+
 > **REAL PHONE GRADLE PASS, 2026-10-24 13:03:** Screenshot shows native branch fast-forward `c1bf428..bab39b3`, then `:app:testDebugUnitTest :app:assembleDebug` with native ARM64 AAPT2 override; log grep returned **`67:BUILD SUCCESSFUL in 52s`**. This confirms Gradle task success and debug APK build, superseding the preceding Kotlin compile failure. Numeric number of test cases was not displayed; **do not claim 89 individual test results on screenshot alone**. APK copy/install and all runtime acceptance of D-080/D-081 still **PENDING**. Next: copy APK to Download; update-install preserving data; verify Timer saved library Run/Edit, Editor Save and overwrite confirmation, current work-Session Restart (not Class), cues and Class clocks, compact progress and friendly ending mode label.
 
 
