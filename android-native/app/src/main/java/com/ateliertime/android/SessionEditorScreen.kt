@@ -795,8 +795,8 @@ fun SessionEditorScreen() {
                     Switch(checked = soundEnabled,
                         onCheckedChange = { soundEnabled = it })
                 }
-                Text("Sounds and playback lengths can change while a class runs. " +
-                    "The Timer clock and approved Class schedule remain unchanged.")
+                Text("Sound changes take effect on the next cue; Class timing is unchanged.",
+                    style = MaterialTheme.typography.bodySmall)
             }
             MainTab.TIMER -> {
                 val session = playingSession
