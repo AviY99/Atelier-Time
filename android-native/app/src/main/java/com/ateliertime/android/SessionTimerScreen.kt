@@ -173,7 +173,7 @@ fun SessionTimerScreen(
                 Text("Restart at the beginning of the same class. To keep the " +
                     "original finish time, the final two regular sessions are shortened " +
                     "according to the approved ending choice. If that is impossible, " +
-                    "the running timer remains unchanged. The session-finish melody " +
+                    "the running timer remains unchanged. The class-finish melody " +
                     "plays only if the restart succeeds.")
             },
             confirmButton = {
@@ -201,9 +201,9 @@ fun SessionTimerScreen(
                     "only the final two regular sessions according to your chosen ending."
             "restart" ->
                 "Restart the SAME class from Session 1 and play the " +
-                    "session-finish melody C. Keep the original clock finish time " +
+                    "class-finish melody C. Keep the original clock finish time " +
                     "by deducting time already used from the two final regular " +
-                    "poses, according to the approved ending choice. Both must " +
+                    "sessions, according to the approved ending choice. Both must " +
                     "remain at least one minute. If the change is impossible, " +
                     "the running timer stays unchanged without playing a cue."
             else ->
@@ -211,7 +211,7 @@ fun SessionTimerScreen(
                     "very next phase of THIS class, whether it is a session, " +
                     "regular break, special break, or class summary. It plays the " +
                     "appropriate cue: A when leaving a session, B when leaving a " +
-                    "break, and C when finishing the session. Skipped time is " +
+                    "break, and C when finishing the class. Skipped time is " +
                     "added to the final two regular sessions, or reduced if a pause " +
                     "previously used more time. Their original ending choice is " +
                     "preserved and the approved saved preset never changes. " +
