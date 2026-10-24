@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **2026-10-24 10:28 PHONE REBUILD EVIDENCE:** Following the static `AudioTrack` initialization source fix, user screenshot shows `:app:testDebugUnitTest`, `:app:assembleDebug` and **`BUILD SUCCESSFUL in 28s`**; 42 tasks (8 executed, 34 up-to-date). This verifies the Gradle tasks, NOT audible playback, device install, individual JUnit XML count, or instrumentation execution. **Next K04 gate remains audible A/B/C `Play 5s` in updated APK**, then automatic timer cue checks. Do not mark audio PASS before observation.
+
+
 > **K04 LIVE AUDIO FAILURE + PRE-WRITE STATE FIX (2026-10-24):** Installed editor screenshot shows selectable five-second melodies but pressing preview produces red error `Android audio output is not initialized.`, with **no sound**. The old static `AudioTrack` initialization check was wrong: before `write()`, success is `STATE_NO_STATIC_DATA` (2), **not** `STATE_INITIALIZED` (1). Native-branch fix [f083106](https://github.com/AviY99/Atelier-Time/commit/f083106d6ce8c8d4ae414ff8dab6d320543aa71c) checks actual uninitialized state before PCM write and full initialized state after PCM write, with a new device regression [4714319](https://github.com/AviY99/Atelier-Time/commit/471431952b568b67bd58bf9a0cae714941438f01). **Source only / pending Gradle rebuild + phone retest:** old 34s Gradle PASS predates this fix; no cue/audio PASS claim. Current test sources **55 JVM + 9 instrumentation**; new Android test unexecuted. Check previews and automatic 3m A/B/C events, then pause/stop reflow and locked-screen support separately.
 
 
