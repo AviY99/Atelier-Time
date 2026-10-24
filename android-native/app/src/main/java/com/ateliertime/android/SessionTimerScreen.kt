@@ -7,6 +7,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ateliertime.domain.*
 import java.text.SimpleDateFormat
@@ -85,22 +87,21 @@ fun SessionTimerScreen(
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
-                    WallClockRow("Class start", showClassTime(classClockTimes.classStartEpochMs))
-                    WallClockRow("Class end", showClassTime(classClockTimes.classEndEpochMs))
-                    WallClockRow("Class length", formatClassLength(session.rules.totalSeconds))
+                    WallClockRow("Class start", showClassTime(classClockTimes.classStartEpochMs), enlargeLabel = true)
+                    WallClockRow("Class end", showClassTime(classClockTimes.classEndEpochMs), enlargeLabel = true)
+                    WallClockRow("Class length", formatClassLength(session.rules.totalSeconds), enlargeLabel = true)
                 }
                 Spacer(modifier = Modifier.height(6.dp))
-                Text("Class remaining  " + formatTime(view.totalRemainingSeconds),
+                Text("Class remaining  " + formatTime(classClockTimes.classRemainingSeconds ?: session.rules.totalSeconds),
                     style = MaterialTheme.typography.labelSmall)
                 LinearProgressIndicator(
                     progress = {
-                        view.elapsedSeconds.toFloat() /
-                            view.totalSeconds.coerceAtLeast(1)
+                        (classClockTimes.classElapsedSeconds ?: 0).toFloat() /
+                            session.rules.totalSeconds.coerceAtLeast(1)
                     },
                     modifier = Modifier.width(178.dp).height(4.dp),
                 )
-                Text("Class elapsed  " + formatTime(view.elapsedSeconds) +
-                    " / " + formatTime(view.totalSeconds),
+                Text("Class elapsed  " + formatTime(classClockTimes.classElapsedSeconds ?: 0),
                     style = MaterialTheme.typography.labelSmall)
             }
         }
@@ -118,9 +119,11 @@ fun SessionTimerScreen(
                     Column(horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         // Phase name remains in the card heading; keep clock values legible.
-                        WallClockRow("Start", showPhaseTime(classClockTimes.currentPhaseStartEpochMs))
+                        WallClockRow("Start", showPhaseTime(classClockTimes.currentPhaseStartEpochMs),
+                            stabilizeTime = true)
                         WallClockRow("End", if (classClockTimes.paused) "— (paused)"
-                            else showPhaseTime(classClockTimes.currentPhaseEndEpochMs))
+                            else showPhaseTime(classClockTimes.currentPhaseEndEpochMs),
+                            stabilizeTime = true)
                     }
                 }
                 Text(formatTime(view.phaseRemainingSeconds),
@@ -314,15 +317,33 @@ fun SessionTimerScreen(
 
 }
 
-/** Keep timestamp labels compact; show hour/minute values ~1.5x larger. */
+/** Fixed-sized phase digits prevent End seconds from making the card jump. */
 @Composable
-private fun WallClockRow(label: String, value: String) {
+private fun WallClockRow(
+    label: String,
+    value: String,
+    enlargeLabel: Boolean = false,
+    stabilizeTime: Boolean = false,
+) {
+    val small = MaterialTheme.typography.labelSmall
     Row(
+        modifier = Modifier.heightIn(min = 24.dp),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text("$label  ", style = MaterialTheme.typography.labelSmall)
-        Text(value, style = MaterialTheme.typography.bodyLarge)
+        Text("$label  ", style = if (enlargeLabel)
+            small.copy(fontSize = small.fontSize * 1.3f) else small,
+            maxLines = 1)
+        Text(
+            value,
+            style = if (stabilizeTime) MaterialTheme.typography.bodyLarge.copy(
+                fontFamily = FontFamily.Monospace
+            ) else MaterialTheme.typography.bodyLarge,
+            modifier = if (stabilizeTime) Modifier.width(120.dp) else Modifier,
+            textAlign = TextAlign.End,
+            maxLines = 1,
+            softWrap = false,
+        )
     }
 }
 
