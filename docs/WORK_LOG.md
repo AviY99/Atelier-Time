@@ -1,5 +1,13 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-24 — D-079 PHONE UNIT GATE FAILED 1/78; root cause in test fixture fixed (unverified until rerun)
+
+**Actual phone screenshot (Code on the Go, 12:09 local):** Gradle `:app:testDebugUnitTest` **FAILED** after **78 tests completed, 1 failed**, `BUILD FAILED in 42s`, 39 actionable tasks (8 executed, 31 up-to-date). Exact failing case `MonotonicSessionTimerTest > nextSupportsConsecutiveOpeningPosesAndLaterOpeningBreak`, `IllegalStateException` at **`MonotonicSessionTimerTest.kt:165`**. The screenshot does not show the complete exception message or XML trace, but line 165 in the checked-out test source invokes `engine.approve(engine.generate(rules))`. The one-hour test fixture (2×1 minute opening sessions, a shared 5m break, repeating 10m session/5m break) ends in a shortened 8m final regular session. `ScheduleEngine.generate(rules)` appropriately sets `needsFinalPoseChoice`, and `approve` requires an explicit ending choice. **The failing code never reaches `nextPhase`; no live Next defect was proven.** The 77 other tests completed without a reported failure. Because the combined command used `&&`, debug APK build/copy is **NOT CONFIRMED for the failed run**.
+
+**Actual fix committed/read-back verified, native branch [`332279384cd195b74b68d6b08881bbb74adba21d`](https://github.com/AviY99/Atelier-Time/commit/332279384cd195b74b68d6b08881bbb74adba21d):** only the test setup for `nextSupportsConsecutiveOpeningPosesAndLaterOpeningBreak` changed. Explicitly verify `unresolved.needsFinalPoseChoice == true`, regenerate with `FinalPoseChoice.remainder()`, verify `approvedCandidate.canApprove`, then approve and exercise both opening Next transitions and their A cues. **NO production schedule engine validation weakened, NO test disabled, no saved preset or UI changed.** New source **NOT RETESTED on phone**; rerun Kotlin gate then APK via the same known local Gradle/AAPT2 command before new installation or PASS claims. PR #3 remains draft, no paid Actions.
+
+---
+
 ## 2026-10-24 — D-079 Class / Session / Break terminology and five real-time clock fields (SOURCE ONLY)
 
 **New direct user requirement:** Change visible semantics: **Class** = whole lesson/time frame (historical `SessionRules` total); **Session** = each timed internal posing/work segment (historical `PhaseKind.POSE`); **Break** = generic rest with its type (`regular`, `special`, `opening group`). The reserved summary is **end-of-class summary**, not a Session. In upper-right Timer show five **live local-clock values**: **Clock**, **Class start**, **Class end**, **Current Session/Break start**, **Current Session/Break end**, with last two labeled according to actual current phase. Approved in [D-079](DECISIONS.md).
