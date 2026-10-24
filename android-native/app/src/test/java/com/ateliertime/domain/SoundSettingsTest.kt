@@ -76,4 +76,58 @@ class SoundSettingsTest {
         }
         assertEquals(file, mixed.soundFor(TimerCue.BREAK_FINISHED))
     }
+
+    @Test fun sharedSoundUsesOneFiveOrTenSecondLengthForAllThreeEvents() {
+        val original = SoundSettings()
+            .setDuration(TimerCue.POSE_FINISHED, 10)
+            .setDuration(TimerCue.BREAK_FINISHED, 5)
+            .setDuration(TimerCue.SESSION_FINISHED, 57)
+        assertEquals(SoundAssignmentMode.SEPARATE, original.assignmentMode)
+        val shared = original
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .setSharedDuration(10)
+        TimerCue.entries.forEach { cue ->
+            assertEquals(original.poseEnd, shared.soundFor(cue))
+            assertEquals(10, shared.secondsFor(cue))
+        }
+        val newSound = CueSound(melody = MelodyPattern.WARM_BELLS)
+        val updated = shared.chooseForVisibleMode(TimerCue.SESSION_FINISHED, newSound)
+        TimerCue.entries.forEach { cue ->
+            assertEquals(newSound, updated.soundFor(cue))
+            assertEquals(10, updated.secondsFor(cue))
+        }
+        val restored = updated.setAssignmentMode(SoundAssignmentMode.SEPARATE)
+        assertEquals(original.poseEnd, restored.poseEnd)
+        assertEquals(original.breakEnd, restored.breakEnd)
+        assertEquals(original.classEnd, restored.classEnd)
+        assertEquals(10, restored.secondsFor(TimerCue.POSE_FINISHED))
+        assertEquals(5, restored.secondsFor(TimerCue.BREAK_FINISHED))
+        assertEquals(57, restored.secondsFor(TimerCue.SESSION_FINISHED))
+        assertEquals(newSound, restored.sharedSound)
+    }
+
+    @Test fun sharedLengthIsRestrictedToFiveOrTenSecondsEvenForClassEnd() {
+        for (length in listOf(4, 6, 11, 30, 60)) {
+            assertThrows(IllegalArgumentException::class.java) {
+                SoundSettings().setSharedDuration(length)
+            }
+        }
+        assertEquals(5, SoundSettings().setSharedDuration(5).sharedSeconds)
+        assertEquals(10, SoundSettings().setSharedDuration(10).sharedSeconds)
+    }
+
+    @Test fun sharedAndSeparateModesPreserveExternalSourcesIndependently() {
+        val source = CueSound(
+            source = SoundSource.FILE, uri = "content://audio/42", displayName = "Bell")
+        val sound = SoundSettings().setSourceEnabled(SoundSource.FILE, true)
+            .choose(TimerCue.BREAK_FINISHED, source)
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .chooseForVisibleMode(TimerCue.POSE_FINISHED,
+                CueSound(melody = MelodyPattern.CELEBRATION))
+        assertEquals(MelodyPattern.CELEBRATION,
+            sound.soundFor(TimerCue.SESSION_FINISHED).melody)
+        assertEquals(source, sound.setAssignmentMode(SoundAssignmentMode.SEPARATE)
+            .soundFor(TimerCue.BREAK_FINISHED))
+    }
+
 }
