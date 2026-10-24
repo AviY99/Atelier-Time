@@ -35,10 +35,14 @@ fun SessionTimerScreen(
     // Contextual help keeps the Timer compact on a phone. Nothing is hidden
     // from screen-reader users because each action has its own Help control.
     var helpFor by remember { mutableStateOf<String?>(null) }
-    val time = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
-    fun showTime(value: Long?): String = value?.let {
-        time.format(Date(it))
-    } ?: "—"
+    // Class header clocks use minute precision; active Session/Break
+    // boundary clocks retain seconds for exact timing review.
+    val classTime = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
+    val phaseTime = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
+    fun showClassTime(value: Long?): String =
+        value?.let { classTime.format(Date(it)) } ?: "—"
+    fun showPhaseTime(value: Long?): String =
+        value?.let { phaseTime.format(Date(it)) } ?: "—"
     val isBreak = view.phase?.kind == PhaseKind.SHORT_BREAK ||
         view.phase?.kind == PhaseKind.SPECIAL_BREAK
     val canRestartSegment = view.phase?.kind == PhaseKind.POSE || isBreak
@@ -73,10 +77,18 @@ fun SessionTimerScreen(
             }
             Column(horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                Text("Clock  " + showTime(wallClockMillis),
+                Text("Clock  " + showClassTime(wallClockMillis),
                     style = MaterialTheme.typography.headlineSmall)
-                WallClockRow("Class start", showTime(classClockTimes.classStartEpochMs))
-                WallClockRow("Class end", showTime(classClockTimes.classEndEpochMs))
+                // Three matching lines directly under Clock, without
+                // extra vertical gaps between start, end and Class length.
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                ) {
+                    WallClockRow("Class start", showClassTime(classClockTimes.classStartEpochMs))
+                    WallClockRow("Class end", showClassTime(classClockTimes.classEndEpochMs))
+                    WallClockRow("Class length", formatClassLength(session.rules.totalSeconds))
+                }
                 Spacer(modifier = Modifier.height(6.dp))
                 Text("Class remaining  " + formatTime(view.totalRemainingSeconds),
                     style = MaterialTheme.typography.labelSmall)
@@ -106,9 +118,9 @@ fun SessionTimerScreen(
                     Column(horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         // Phase name remains in the card heading; keep clock values legible.
-                        WallClockRow("Start", showTime(classClockTimes.currentPhaseStartEpochMs))
+                        WallClockRow("Start", showPhaseTime(classClockTimes.currentPhaseStartEpochMs))
                         WallClockRow("End", if (classClockTimes.paused) "— (paused)"
-                            else showTime(classClockTimes.currentPhaseEndEpochMs))
+                            else showPhaseTime(classClockTimes.currentPhaseEndEpochMs))
                     }
                 }
                 Text(formatTime(view.phaseRemainingSeconds),
@@ -321,6 +333,12 @@ private fun phaseLabel(phase: SchedulePhase?): String = when (phase?.kind) {
     PhaseKind.SPECIAL_BREAK -> "Break · special"
     PhaseKind.SUMMARY -> "Class summary"
     null -> "No active phase"
+}
+
+/** Approved Class length, not the compensated live countdown (hours:minutes). */
+private fun formatClassLength(seconds: Int): String {
+    val safe = seconds.coerceAtLeast(0)
+    return "%02d:%02d".format(safe / 3600, (safe / 60) % 60)
 }
 
 private fun formatTime(seconds: Int): String {
