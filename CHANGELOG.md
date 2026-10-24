@@ -1,5 +1,12 @@
 # Changelog — Atelier Time
 
+## 2026-10-24 — D-085 live Class clock and Timer/list polish (new-source QA pending)
+
+- User reports D-084 working on phone. Changed Class elapsed to real physical elapsed (no appended Class total); elapsed continues while paused/after Next, Class target end remains unchanged; Class remaining and progress use actual wall time. At deadline a Class still running/paused ends with one C cue.
+- Increased only Class start/end/length label fonts 1.3×, numeric values unchanged. Stabilized Segment End with precise monotonic milliseconds and fixed-width monospaced seconds to prevent End card text bounce.
+- Organized each saved Class card into two visible rows: Run/Edit; Duplicate/Rename/Delete, with distinct button styles, no horizontal scrolling.
+- Added 4 JVM test source methods / updated earlier deadline expectations: **106 written JVM tests, 9 instrumented methods**. **D-085 new source not yet compiled, tested, APK-installed or device QA-accepted.** Retain saved data; PR #3 stays Draft; no paid CI.
+
 ## 2026-10-24 — D-084 segmented clock precision and tighter Class header (device QA pending)
 
 - User feedback: restore `HH:mm:ss` for active Session/Break Start/End while preserving `HH:mm` for Clock and Class start/end, and put **Class length** below Class end as the third equally styled compact line under Clock.
