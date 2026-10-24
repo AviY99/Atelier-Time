@@ -124,7 +124,8 @@ fun SessionEditorScreen() {
         rules.openingGroups.forEach {
             opening.add(OpeningDraft(nextOpeningId++,
                 it.count.toString(), (it.poseSeconds / 60).toString(),
-                it.breakAfterSeconds?.div(60)?.toString()))
+                it.breakAfterSeconds?.div(60)?.toString(),
+                originalGroupId = it.id))
         }
         ending = preset.ending
         acceptedWarning = preset.acknowledgedRestWarnings
