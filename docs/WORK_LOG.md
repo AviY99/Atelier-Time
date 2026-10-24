@@ -1,5 +1,13 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-24 13:03 — D-080/D-081 Android Kotlin unit-test and debug APK build PASS after import fix
+
+**User-provided real Android Code on the Go screenshot at 13:03 local time** shows `git pull --ff-only` fast-forwarding native branch from `c1bf428` to **`bab39b3`**, with `SessionEditorScreen.kt | 1 +`; then the user ran Bash Gradle 9.6.1 `:app:testDebugUnitTest :app:assembleDebug --no-daemon --console=plain` with the native phone AAPT2 override, logging all output to `$HOME/atelier-build.log`. Subsequent command `grep -nE '(^e:|^error:|BUILD FAILED|BUILD SUCCESSFUL|tests completed)' "$HOME/atelier-build.log" | tail -40` printed **`67:BUILD SUCCESSFUL in 52s`**. This **verifies Gradle test task and debug APK assembly completed** for the fast-forwarded working tree. Screenshot does not show numeric individual test count, copied APK in Downloads, update-install, or manual acceptance of D-080/D-081 behavior. The prior `compileDebugKotlin` failure is superseded by this PASS. **Do not treat 89 tests written as an independently observed run count.**
+
+**Remaining phone steps:** Since this latest shell command redirected Gradle output and did not execute `cp`, copy debug APK from `android-native/app/build/outputs/apk/debug/app-debug.apk` to `/storage/emulated/0/Download/Atelier-Time-update.apk`, verify success, update-install without uninstalling or clearing offline saved classes. Exercise Timer home saved classes, Run/Edit/Save overwrite, natural finish and End/return, current-only Restart session and its A cue, Next to next session/break, final-pair preservation, tab/sounds continuity and the new final-pair label. Android instrumentation and background/locked-screen sound remain unverified. PR #3 draft; no paid GitHub Actions.
+
+---
+
 ## 2026-10-24 12:53 — D-080/D-081 actual Android compilation FAILED; missing Editor horizontalScroll import fixed in source (retest pending)
 
 **Observed phone screenshot at 12:53 local:** `Execution failed for task ':app:compileDebugKotlin'`, `Compilation error. See log for more details`, **`BUILD FAILED in 22s`**, 31 actionable tasks (1 executed, 30 up-to-date). The screenshot shows **only the generic Gradle failure summary**, not the Kotlin `e:` compiler diagnostic(s), therefore no exact error/message was verified directly from phone output. Unit test gate and APK assembly were **NOT** completed in this run, no new APK PASS/install.
