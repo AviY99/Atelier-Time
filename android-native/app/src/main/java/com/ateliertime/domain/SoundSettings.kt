@@ -10,7 +10,7 @@ enum class SoundSource(val title: String) {
     FILE("Audio file"),
 }
 
-/** The shared option affects only sound identity, never the three cue durations. */
+/** Shared mode has one sound and one 5/10s duration; separate settings are retained. */
 enum class SoundAssignmentMode { SEPARATE, SHARED }
 
 /** A single sound used for one cue; source options are enabled independently. */
@@ -43,6 +43,7 @@ data class SoundSettings(
     // Null means the first shared choice inherits the current A sound.
     // Retained separately so switching modes never erases A/B/C selections.
     val sharedSound: CueSound? = null,
+    val sharedSeconds: Int = 5,
     val poseEndSeconds: Int = 5,
     val breakEndSeconds: Int = 5,
     val classEndSeconds: Int = 5,
@@ -73,10 +74,20 @@ data class SoundSettings(
         }
     }
 
-    fun secondsFor(cue: TimerCue): Int = when (cue) {
-        TimerCue.POSE_FINISHED -> poseEndSeconds
-        TimerCue.BREAK_FINISHED -> breakEndSeconds
-        TimerCue.SESSION_FINISHED -> classEndSeconds
+    fun secondsFor(cue: TimerCue): Int {
+        if (assignmentMode == SoundAssignmentMode.SHARED) return sharedSeconds
+        return when (cue) {
+            TimerCue.POSE_FINISHED -> poseEndSeconds
+            TimerCue.BREAK_FINISHED -> breakEndSeconds
+            TimerCue.SESSION_FINISHED -> classEndSeconds
+        }
+    }
+
+    fun setSharedDuration(seconds: Int): SoundSettings {
+        require(seconds == 5 || seconds == 10) {
+            "Shared sound length must be 5 or 10 seconds."
+        }
+        return copy(sharedSeconds = seconds)
     }
 
     fun choose(cue: TimerCue, choice: CueSound): SoundSettings {
