@@ -1,5 +1,15 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-24 12:53 — D-080/D-081 actual Android compilation FAILED; missing Editor horizontalScroll import fixed in source (retest pending)
+
+**Observed phone screenshot at 12:53 local:** `Execution failed for task ':app:compileDebugKotlin'`, `Compilation error. See log for more details`, **`BUILD FAILED in 22s`**, 31 actionable tasks (1 executed, 30 up-to-date). The screenshot shows **only the generic Gradle failure summary**, not the Kotlin `e:` compiler diagnostic(s), therefore no exact error/message was verified directly from phone output. Unit test gate and APK assembly were **NOT** completed in this run, no new APK PASS/install.
+
+**Actual source review and fix, native branch commit `bab39b3603b1693d4bc9260c4152344effe93676`:** `SessionEditorScreen.kt` uses `Modifier.horizontalScroll(rememberScrollState())` around the three final-session distribution chips, but imports only `rememberScrollState` and `verticalScroll`. Added missing `import androidx.compose.foundation.horizontalScroll` using GitHub API and verified exact source readback. This is a definite unresolved-extension compile risk, but **cannot honestly assert it was the ONLY failure** without the missing compiler diagnostic lines. No schedule/timer/storage logic changed. **RETEST PENDING**; do not mark compile or Kotlin test PASS.
+
+**Next CoGo action:** `git pull --ff-only` then local Gradle `:app:testDebugUnitTest :app:assembleDebug` with existing native ARM64 AAPT2 property and Bash Gradle 9.6.1, logging `--console=plain` to a file if there is another failure and extracting Kotlin compiler `e:`/`error:` lines rather than photographing the generic `* What went wrong` tail. Copy/update-install debug APK only after all gates succeed. No paid Actions; PR #3 stays draft; saved phone data untouched.
+
+---
+
 ## 2026-10-24 — D-081: Restart ONLY current Session; clarify final-pair Remainder label — code committed, QA pending
 
 **Direct user correction:** Restart is not a restart of the whole Class. The control must be named **Restart session**, must restart the **current work Session only**, not start Class at its first Session, and must not alter previously completed segments or the Class start time. In Editor's final-pair split options, opaque **Remainder** must have a clear explanatory label. All previous Class/Session/Break terminology, Timer home saved-class management and approved ending-mode logic remain unchanged.
