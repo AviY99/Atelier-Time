@@ -21,6 +21,8 @@ data class TimerView(
     val phaseRemainingSeconds: Int,
     val totalRemainingSeconds: Int,
     val recoveredSeconds: Int = 0,
+    /** Precise active phase time for stable wall-clock End (not rounded seconds). */
+    val phaseRemainingMillis: Long? = null,
 )
 
 data class TimerTick(val view: TimerView, val cue: TimerCue? = null)
@@ -222,7 +224,8 @@ class MonotonicSessionTimer(
     }
 
     fun view(): TimerView {
-        val elapsed = (elapsedMs() / 1000L).toInt()
+        val preciseElapsedMs = elapsedMs()
+        val elapsed = (preciseElapsedMs / 1000L).toInt()
         val index = phaseIndex(elapsed)
         val phase = index?.let { activePhases[it] }
         val totalSeconds = (activeTotalMs / 1000L).toInt()
@@ -235,6 +238,9 @@ class MonotonicSessionTimer(
             phaseRemainingSeconds = phase?.let { it.endSeconds - elapsed } ?: 0,
             totalRemainingSeconds = totalSeconds - elapsed,
             recoveredSeconds = lostSeconds,
+            phaseRemainingMillis = phase?.let {
+                (it.endSeconds.toLong() * 1_000L - preciseElapsedMs).coerceAtLeast(0L)
+            },
         )
     }
 
