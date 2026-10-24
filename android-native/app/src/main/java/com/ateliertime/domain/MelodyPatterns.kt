@@ -1,15 +1,41 @@
 package com.ateliertime.domain
 
-/** Built-in five-second melodies. Notes are semitone-independent frequencies in Hz;
- * a zero is a half-second rest. Kept Android-free for later platform reuse.
+/**
+ * Built-in five-second tunes: twenty 250ms rhythmic slots per melody.
+ * A value of 0 is an intentional silent slot creating a syncopated pulse.
+ * Enum identifiers MUST remain stable for existing on-phone sound preferences.
  */
 enum class MelodyPattern(val title: String, val notesHz: List<Int>) {
-    SOFT_CHIMES("Soft chimes", listOf(523, 659, 784, 1047, 784, 659, 523, 659, 784, 1047)),
-    RISING_STEPS("Rising steps", listOf(392, 440, 494, 523, 587, 659, 698, 784, 880, 988)),
-    WARM_BELLS("Warm bells", listOf(392, 523, 659, 523, 784, 659, 523, 392, 523, 659)),
-    BRIGHT_FANFARE("Bright fanfare", listOf(523, 523, 784, 659, 784, 1047, 784, 1047, 1175, 1047)),
-    CALM_DESCENT("Calm descent", listOf(880, 784, 698, 659, 587, 523, 494, 440, 392, 392)),
-    CELEBRATION("Celebration", listOf(523, 659, 784, 1047, 988, 1047, 1175, 1319, 1175, 1319)),
+    SOFT_CHIMES(
+        "Bouncy chimes",
+        listOf(523, 659, 784, 0, 784, 659, 1047, 0, 523, 659,
+            784, 1047, 988, 784, 659, 0, 784, 988, 1047, 1319),
+    ),
+    RISING_STEPS(
+        "Happy steps",
+        listOf(392, 494, 587, 784, 587, 784, 988, 0, 523, 659,
+            784, 1047, 784, 988, 1175, 0, 784, 988, 1175, 1319),
+    ),
+    WARM_BELLS(
+        "Sunny bells",
+        listOf(392, 523, 659, 0, 523, 659, 784, 0, 659, 784,
+            988, 784, 523, 659, 784, 0, 523, 659, 784, 1047),
+    ),
+    BRIGHT_FANFARE(
+        "Upbeat fanfare",
+        listOf(523, 523, 784, 0, 659, 784, 1047, 0, 784, 988,
+            1047, 1175, 1047, 784, 988, 0, 1047, 1175, 1319, 1319),
+    ),
+    CALM_DESCENT(
+        "Playful bounce",
+        listOf(880, 659, 784, 523, 880, 659, 1047, 0, 784, 587,
+            698, 523, 784, 659, 988, 0, 659, 784, 1047, 1175),
+    ),
+    CELEBRATION(
+        "Celebration beat",
+        listOf(523, 659, 784, 1047, 0, 1047, 1175, 1319, 1047, 784,
+            988, 1175, 0, 1175, 1319, 1568, 1319, 1175, 1319, 1568),
+    ),
 }
 
 /** Global on-device sound selections, independent of saved session scheduling rules. */
