@@ -27,16 +27,6 @@ object DesignClock {
             DesignPalette.DAY else DesignPalette.NIGHT
     }
 
-    /**
-     * Auto slider visual preview: left half = Day; right half = Night.
-     * This is independent of actual clock-based Auto scheduling.
-     */
-    fun previewForSlider(startHour: Int): DesignPalette {
-        val safeHour = startHour.coerceIn(MIN_NIGHT_HOUR, MAX_NIGHT_HOUR)
-        val midpoint = (MIN_NIGHT_HOUR + MAX_NIGHT_HOUR) / 2.0
-        return if (safeHour <= midpoint) DesignPalette.DAY else DesignPalette.NIGHT
-    }
-
     fun resolve(preferences: DesignPreferences, hourOfDay: Int): DesignPalette {
         val hour = hourOfDay.coerceIn(0, 23)
         return when (preferences.mode) {
