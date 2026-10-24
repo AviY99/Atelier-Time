@@ -197,7 +197,7 @@ fun SessionTimerScreen(
             Text("Ending choice: " + endingLabel +
                 ". The intervening break, class summary and saved preset remain unchanged.")
         }
-        timerError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        timerError?.let { Text(it, color = atelierErrorTextColor()) }
 
         ElevatedCard(modifier = Modifier.fillMaxWidth()) {
             Column(
