@@ -29,6 +29,22 @@ class MonotonicSessionTimerTest {
         assertEquals(PhaseKind.SHORT_BREAK, view.nextPhase?.kind)
     }
 
+    @Test fun phaseRemainingMillisMaintainsSubsecondPrecisionForStableEndClock() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        val start = timer.start()
+        val expected = 25L * minute * 1_000L
+        assertEquals(expected, start.phaseRemainingMillis)
+        now = 275L
+        val first = timer.view()
+        assertEquals(expected - 275L, first.phaseRemainingMillis)
+        assertEquals(25 * minute, first.phaseRemainingSeconds)
+        now = 1_125L
+        val second = timer.view()
+        assertEquals(expected - 1_125L, second.phaseRemainingMillis)
+        assertEquals(25 * minute - 1, second.phaseRemainingSeconds)
+    }
+
     @Test fun pausesAndResumesWithoutCountingPausedTime() {
         var now = 0L
         val timer = MonotonicSessionTimer(approved()) { now }
