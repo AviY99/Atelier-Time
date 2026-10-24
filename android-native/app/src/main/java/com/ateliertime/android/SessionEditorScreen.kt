@@ -1,6 +1,7 @@
 package com.ateliertime.android
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import android.os.SystemClock
 import java.util.Calendar
 import com.ateliertime.domain.DesignClock
-import com.ateliertime.domain.DesignPreferences
 import com.ateliertime.domain.*
 import kotlinx.coroutines.delay
 
@@ -79,7 +79,7 @@ fun SessionEditorScreen() {
     }
     var timerView by remember(liveTimer) { mutableStateOf(liveTimer?.view()) }
     var wallClockMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    val hourOfDay = remember(wallClockMillis) {
+    val hourOfDay = remember(wallClockMillis / 60_000L) {
         Calendar.getInstance().apply { timeInMillis = wallClockMillis }
             .get(Calendar.HOUR_OF_DAY)
     }
@@ -283,7 +283,9 @@ fun SessionEditorScreen() {
     // Keep the tab bar BELOW Android status icons/notch and content ABOVE
     // gesture navigation in edge-to-edge mode. All tabs share these insets.
     AtelierDesignTheme(designPalette) {
-    Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
+    Column(modifier = Modifier.fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)
+        .safeDrawingPadding()) {
         ScrollableTabRow(selectedTabIndex = activeTab.ordinal, edgePadding = 4.dp) {
             MainTab.entries.forEach { tab ->
                 Tab(
