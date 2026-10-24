@@ -6,7 +6,8 @@ import org.junit.Test
 class ClassSaveTargetTest {
     private fun preset(id: String, title: String): StoredPreset = StoredPreset(
         id = id, title = title,
-        rules = SessionRules(id = id, name = title, totalSeconds = 180 * 60),
+        rules = SessionRules(id = id, name = title,
+            totalSeconds = 180 * 60, poseSeconds = 25 * 60),
         ending = null, acknowledgedRestWarnings = false,
         timelineSignature = "fixture",
     )
