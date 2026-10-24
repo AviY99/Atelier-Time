@@ -443,19 +443,22 @@ private fun WallClockRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            "$label  ",
+            label,
             style = (if (enlargeLabel)
                 small.copy(fontSize = small.fontSize * 1.3f) else small)
                 .let { if (compact) it.copy(lineHeight = 18.sp) else it },
             maxLines = 1,
         )
+        Spacer(modifier = Modifier.width(4.dp))
         Text(
             value,
             style = (if (stabilizeTime) MaterialTheme.typography.bodyLarge.copy(
                 fontFamily = FontFamily.Monospace
             ) else MaterialTheme.typography.bodyLarge)
                 .let { if (compact) it.copy(lineHeight = 20.sp) else it },
-            modifier = if (stabilizeTime) Modifier.width(120.dp) else Modifier,
+            // Keep Start and End seconds in a constant aligned numeric field.
+            // The old 120dp width needlessly separated their labels.
+            modifier = if (stabilizeTime) Modifier.width(100.dp) else Modifier,
             textAlign = TextAlign.End,
             maxLines = 1,
             softWrap = false,
