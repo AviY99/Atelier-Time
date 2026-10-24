@@ -1,5 +1,11 @@
 # Changelog — Atelier Time
 
+## 2026-10-24 — D-100 phone build successful, installation and audio QA pending
+
+**D-100 actual phone build evidence (2026-10-24):** User screenshot shows `:app:testDebugUnitTest`, `:app:assembleDebug`, **BUILD SUCCESSFUL in 41s**, 42 Gradle tasks (**8 executed, 34 up-to-date**) in the existing `android-native` CoGo terminal. This upgrades prior D-100 'source only' status to **Android Gradle JVM-test TASK and debug APK assembly PASS**; screenshot does not identify local checkout SHA or actual per-test JUnit count. **NO D-100 APK update-install or runtime audio source/duration validation is yet reported.** Do not rerun Gradle. Next copy `app/build/outputs/apk/debug/app-debug.apk` to `/storage/emulated/0/Download/Atelier-Time-D100.apk`, update-install without uninstalling or clearing Classes, and check built-in/system/file sound sources and independent A/B 5/10s, C 5–60s audio selections. `stable/android-d098` remains frozen. [Detailed S01–S15 QA checklist](docs/SOUND_SOURCES_D100.md).
+
+---
+
 ## 2026-10-24 — D-100 extended sound sources & playback durations (source only)
 
 D-100 Android **source implemented; not built or accepted on phone**. User requested three simultaneously enable-able source categories in Sound: existing Atelier Time melodies (default), native platform sounds, and audio files. Each A/B/C dropdown offers currently enabled categories (one selected sound per event), with independent duration A=Session end 5/10s, B=Break end 5/10s, C=Class end slider 5–60s every second. Current native commits created pure domain `SoundSettings`, private preference migration keeping existing stored melodies, Android `RingtoneManager` picker, `OpenDocument` file picker with persisted URI read access, `MediaPlayer` external playback, duration-aware existing PCM `AudioTrack` clips, and unit/instrumentation test definitions. Source files were read back; simple brace/parenthesis balances clean, but **neither real Gradle compile nor JUnit executions nor phone APK/manual playback were performed for this iteration**. No claim of audio duration precision or OS lock/background reliability. **Stable 2 D-098 and its source snapshot were left unchanged; no redesign of other tabs, preset changes, signing or paid CI.** Next phone build/test/QA is documented in [SOUND_SOURCES_D100.md](SOUND_SOURCES_D100.md).
