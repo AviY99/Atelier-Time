@@ -37,6 +37,23 @@ class DesignClockTest {
         assertEquals(DesignPalette.NIGHT, DesignClock.resolve(late, 22))
     }
 
+    @Test fun workFillIncreasesAndBreakFillDecreases() {
+        assertEquals(0f, DesignMotion.fillFraction(PhaseKind.POSE, 100_000L, 100_000L))
+        assertEquals(0.5f, DesignMotion.fillFraction(PhaseKind.POSE, 100_000L, 50_000L))
+        assertEquals(1f, DesignMotion.fillFraction(PhaseKind.POSE, 100_000L, 0L))
+        assertEquals(1f, DesignMotion.fillFraction(PhaseKind.SHORT_BREAK, 100_000L, 100_000L))
+        assertEquals(0.5f, DesignMotion.fillFraction(PhaseKind.SHORT_BREAK, 100_000L, 50_000L))
+        assertEquals(0f, DesignMotion.fillFraction(PhaseKind.SPECIAL_BREAK, 100_000L, 0L))
+    }
+
+    @Test fun zeroDurationAndSummaryHaveNoFillAndFractionsClamp() {
+        assertEquals(0f, DesignMotion.fillFraction(PhaseKind.POSE, 0L, 0L))
+        assertEquals(0f, DesignMotion.fillFraction(PhaseKind.SUMMARY, 100L, 20L))
+        assertEquals(0f, DesignMotion.fillFraction(PhaseKind.POSE, 100L, 150L))
+        assertEquals(1f, DesignMotion.fillFraction(PhaseKind.POSE, 100L, -10L))
+        assertEquals(1f, DesignMotion.fillFraction(PhaseKind.SHORT_BREAK, 100L, 150L))
+    }
+
     @Test fun corruptedHourClampsToValidRange() {
         val before = DesignPreferences(DesignMode.AUTO, 5)
         val after = DesignPreferences(DesignMode.AUTO, 27)
