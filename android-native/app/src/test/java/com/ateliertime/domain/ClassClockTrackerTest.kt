@@ -135,6 +135,37 @@ class ClassClockTrackerTest {
         assertEquals("Session 1", restartedClock.currentPhaseLabel)
     }
 
+    @Test fun restartingCurrentSessionResetsOnlyItsClockNotClassBoundary() {
+        val engine = ScheduleEngine()
+        val rules = SessionRules(
+            id = "clock-restart", name = "Class", totalSeconds = 180 * 60,
+            summarySeconds = 15 * 60, poseSeconds = 25 * 60,
+            specialBreakCount = 1,
+        )
+        val plan = engine.approve(engine.generate(rules, FinalPoseChoice.remainder()))
+        val clockStart = 1_700_000_000_000L
+        var monotonic = 0L
+        val timer = MonotonicSessionTimer(plan) { monotonic }
+        val tracker = ClassClockTracker()
+        tracker.newClass(timer.start(), clockStart)
+
+        monotonic = 40L * 60_000L
+        val running = timer.update().view
+        val before = tracker.observe(running, clockStart + monotonic)
+        assertEquals("Session 2", before.currentPhaseLabel)
+        assertEquals(clockStart + 30L * 60_000L,
+            before.currentPhaseStartEpochMs)
+        val view = timer.restartCurrentSessionKeepingEndTime()
+        val restarted = tracker.restartCurrentSession(view, clockStart + monotonic)
+        assertEquals(clockStart, restarted.classStartEpochMs)
+        assertEquals(clockStart + 180L * 60_000L, restarted.classEndEpochMs)
+        assertEquals(clockStart + 40L * 60_000L,
+            restarted.currentPhaseStartEpochMs)
+        assertEquals("Session 2", restarted.currentPhaseLabel)
+        assertEquals(clockStart + 65L * 60_000L,
+            restarted.currentPhaseEndEpochMs)
+    }
+
     @Test fun phaseLabelsDifferentiateKindsOfBreak() {
         assertEquals("Break · opening group", clockPhaseLabel(
             two.copy(openingGroupId = "g")))
