@@ -140,6 +140,21 @@ class MonotonicSessionTimerTest {
         assertEquals(197 * minute, resumed.totalSeconds)
     }
 
+    @Test fun nextAfterLongPauseShrinksFinalPairWhenDowntimeExceedsSkippedPose() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        timer.start()
+        now = minute.toLong() * 1000L
+        timer.pause()
+        now = 30L * minute * 1000L
+        val skipped = timer.nextPhase()
+        assertEquals(TimerStatus.RUNNING, skipped.view.status)
+        assertEquals(TimerCue.POSE_FINISHED, skipped.cue)
+        assertEquals(5 * minute, skipped.view.recoveredSeconds)
+        assertEquals(175 * minute, skipped.view.totalSeconds)
+        assertEquals((24 * minute) to (1 * minute), timer.finalTwoPoseDurations())
+    }
+
     @Test fun nextSupportsConsecutiveOpeningPosesAndLaterOpeningBreak() {
         val rules = SessionRules(
             id = "steps", name = "Steps", totalSeconds = 60 * minute,
