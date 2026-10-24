@@ -4,8 +4,14 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import android.media.MediaPlayer
+import android.net.Uri
+import com.ateliertime.domain.CueSound
 import com.ateliertime.domain.MelodyPattern
 import com.ateliertime.domain.MelodySelections
+import com.ateliertime.domain.SoundSettings
+import com.ateliertime.domain.SoundSource
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -13,12 +19,13 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.PI
 import kotlin.math.sin
 
 /**
- * Phone-private configuration. Does not touch the independently versioned
- * approved-session store or modify saved schedules on app updates.
+ * Private sound preferences, completely separate from the saved Class store.
+ * Original melody enum IDs/keys are preserved for a non-destructive upgrade.
  */
 class MelodyPreferences(
     context: Context,
@@ -27,6 +34,7 @@ class MelodyPreferences(
     private val prefs = context.applicationContext.getSharedPreferences(
         storageName, Context.MODE_PRIVATE
     )
+
     fun load(): MelodySelections {
         fun get(key: String, fallback: MelodyPattern): MelodyPattern =
             runCatching { MelodyPattern.valueOf(prefs.getString(key, null) ?: fallback.name) }
@@ -34,9 +42,11 @@ class MelodyPreferences(
         return MelodySelections(
             get("poseEnd", MelodySelections().poseEnd),
             get("breakEnd", MelodySelections().breakEnd),
-            get("sessionEnd", MelodySelections().sessionEnd)
+            get("sessionEnd", MelodySelections().sessionEnd),
         )
     }
+
+    /** Keep the original API for existing preferences/device regression tests. */
     fun save(selection: MelodySelections) {
         check(prefs.edit()
             .putString("poseEnd", selection.poseEnd.name)
@@ -44,66 +54,156 @@ class MelodyPreferences(
             .putString("sessionEnd", selection.sessionEnd.name)
             .commit()) { "Sound selections could not be saved." }
     }
+
+    fun loadSettings(): SoundSettings {
+        val legacy = load()
+        val defaults = SoundSettings()
+        fun source(key: String): SoundSource =
+            runCatching {
+                SoundSource.valueOf(prefs.getString(key, SoundSource.APP.name)!!)
+            }.getOrDefault(SoundSource.APP)
+        fun string(key: String): String? =
+            runCatching { prefs.getString(key, null) }.getOrNull()?.takeIf { it.isNotBlank() }
+        fun choice(key: String, melody: MelodyPattern): CueSound {
+            val parsed = CueSound(
+                source = source("${key}Source"), melody = melody,
+                uri = string("${key}Uri"), displayName = string("${key}Title"),
+            )
+            return if (parsed.isPlayable) parsed else CueSound(melody = melody)
+        }
+        val a = choice("poseEnd", legacy.poseEnd)
+        val b = choice("breakEnd", legacy.breakEnd)
+        val c = choice("sessionEnd", legacy.sessionEnd)
+        val names = runCatching { prefs.getString("enabledSources", null) }.getOrNull()
+        val enabled = if (names == null) setOf(SoundSource.APP) else
+            names.split(",").mapNotNull { name ->
+                SoundSource.entries.firstOrNull { it.name == name }
+            }.toSet()
+        fun seconds(key: String, fallback: Int, isClass: Boolean): Int {
+            val value = runCatching { prefs.getInt(key, fallback) }.getOrDefault(fallback)
+            return if (isClass && value in 5..60 ||
+                !isClass && (value == 5 || value == 10)) value else fallback
+        }
+        return SoundSettings(
+            enabledSources = (enabled + a.source + b.source + c.source)
+                .ifEmpty { defaults.enabledSources },
+            poseEnd = a, breakEnd = b, classEnd = c,
+            poseEndSeconds = seconds("poseEndSeconds", 5, false),
+            breakEndSeconds = seconds("breakEndSeconds", 5, false),
+            classEndSeconds = seconds("classEndSeconds", 5, true),
+        )
+    }
+
+    fun saveSettings(settings: SoundSettings) {
+        require(settings.enabledSources.isNotEmpty() &&
+            listOf(settings.poseEnd, settings.breakEnd, settings.classEnd).all {
+                it.isPlayable && it.source in settings.enabledSources
+            }) { "Select a sound from an enabled source for each timer event." }
+        require(settings.poseEndSeconds in setOf(5, 10) &&
+            settings.breakEndSeconds in setOf(5, 10) &&
+            settings.classEndSeconds in 5..60) { "Invalid sound duration." }
+        val edit = prefs.edit()
+            // Save legacy keys so previously selected application melodies remain.
+            .putString("poseEnd", settings.poseEnd.melody.name)
+            .putString("breakEnd", settings.breakEnd.melody.name)
+            .putString("sessionEnd", settings.classEnd.melody.name)
+            .putString("enabledSources", SoundSource.entries
+                .filter { it in settings.enabledSources }.joinToString(",") { it.name })
+            .putInt("poseEndSeconds", settings.poseEndSeconds)
+            .putInt("breakEndSeconds", settings.breakEndSeconds)
+            .putInt("classEndSeconds", settings.classEndSeconds)
+        fun write(key: String, value: CueSound) {
+            edit.putString("${key}Source", value.source.name)
+                .putString("${key}Uri", value.uri)
+                .putString("${key}Title", value.displayName)
+        }
+        write("poseEnd", settings.poseEnd)
+        write("breakEnd", settings.breakEnd)
+        write("sessionEnd", settings.classEnd)
+        check(edit.commit()) { "Sound preferences could not be saved." }
+    }
 }
 
 /**
- * Each melody plays twenty rhythmic quarter-second slots (five seconds),
- * through PCM AudioTrack instead of indistinguishable short DTMF beeps.
+ * All choices play for the selected number of seconds. Built-in five-second
+ * rhythmic tunes repeat as needed; OS and user audio loop or stop at timeout.
+ * Preview and actual cue dispatch share this implementation.
  *
- * Playback is non-blocking; the clock can tick while the melody plays.
- * Requires foreground-service notification support for reliable lock-screen
- * and force-background playback, which remains separately unverified.
+ * As with the prior player, Android lock-screen/Doze foreground-service
+ * reliability is NOT claimed until separately implemented and device tested.
  */
-class MelodyAudioPlayer {
+class MelodyAudioPlayer(context: Context) {
+    private val appContext = context.applicationContext
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var active: Job? = null
 
-    fun play(melody: MelodyPattern, onError: (String) -> Unit = {}) {
+    fun play(choice: CueSound, durationSeconds: Int, onError: (String) -> Unit = {}) {
+        require(durationSeconds in 5..60)
         active?.cancel()
         active = scope.launch {
             var track: AudioTrack? = null
+            var media: MediaPlayer? = null
             try {
-                val samples = render(melody)
-                val output = AudioTrack.Builder()
-                    .setAudioAttributes(AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .build())
-                    .setAudioFormat(AudioFormat.Builder()
-                        .setSampleRate(SAMPLE_RATE)
-                        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                        .build())
-                    .setTransferMode(AudioTrack.MODE_STATIC)
-                    .setBufferSizeInBytes(samples.size * 2)
-                    .build()
-                track = output
-                // MODE_STATIC intentionally starts at STATE_NO_STATIC_DATA (2):
-                // that is successful initialization, not an error. After the
-                // PCM clip is written, Android transitions to STATE_INITIALIZED.
-                // Checking for STATE_INITIALIZED *before* write() made every
-                // melody fail on the user's real Android phone.
-                check(output.state != AudioTrack.STATE_UNINITIALIZED) {
-                    "Android could not create an audio track (state 0)."
+                when (choice.source) {
+                    SoundSource.APP -> {
+                        val clip = render(choice.melody)
+                        val repeats = durationSeconds / 5
+                        val remainder = durationSeconds % 5
+                        val sampleCount = SAMPLE_RATE * durationSeconds
+                        val samples = ShortArray(sampleCount) { index ->
+                            clip[index % clip.size]
+                        }
+                        // No change to the approved 5s PCM waveform.
+                        check(repeats >= 1 && remainder in 0..4)
+                        val output = AudioTrack.Builder()
+                            .setAudioAttributes(soundAttributes())
+                            .setAudioFormat(AudioFormat.Builder()
+                                .setSampleRate(SAMPLE_RATE)
+                                .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                                .build())
+                            .setTransferMode(AudioTrack.MODE_STATIC)
+                            .setBufferSizeInBytes(samples.size * 2)
+                            .build()
+                        track = output
+                        // Static AudioTrack initially has STATE_NO_STATIC_DATA (2).
+                        check(output.state != AudioTrack.STATE_UNINITIALIZED) {
+                            "Android could not create an audio track."
+                        }
+                        check(output.write(samples, 0, samples.size,
+                            AudioTrack.WRITE_BLOCKING) == samples.size) {
+                            "Could not load built-in melody PCM."
+                        }
+                        check(output.state == AudioTrack.STATE_INITIALIZED) {
+                            "Audio track did not initialize after PCM write."
+                        }
+                        output.play()
+                    }
+                    SoundSource.SYSTEM, SoundSource.FILE -> {
+                        val uri = choice.uri?.takeIf { it.isNotBlank() }
+                            ?: error("The selected sound is missing. Choose it again.")
+                        val player = MediaPlayer()
+                        media = player
+                        player.setAudioAttributes(soundAttributes())
+                        player.setDataSource(appContext, Uri.parse(uri))
+                        player.isLooping = true
+                        player.prepare()
+                        player.start()
+                    }
                 }
-                val wrote = output.write(samples, 0, samples.size, AudioTrack.WRITE_BLOCKING)
-                check(wrote == samples.size) {
-                    "Could not load five-second melody PCM: wrote $wrote of ${samples.size} samples."
-                }
-                check(output.state == AudioTrack.STATE_INITIALIZED) {
-                    "Audio track did not initialize after PCM write (state ${output.state})."
-                }
-                output.play()
-                delay(MELODY_MS + 150L)
+                delay(durationSeconds * 1_000L)
             } catch (failure: Exception) {
-                if (failure !is kotlinx.coroutines.CancellationException) {
-                    kotlinx.coroutines.withContext(Dispatchers.Main) {
-                        onError(failure.message ?: "Could not play melody.")
+                if (failure !is CancellationException) {
+                    withContext(Dispatchers.Main) {
+                        onError(failure.message ?:
+                            "Cannot play this sound. Choose an accessible audio file.")
                     }
                 }
             } finally {
                 runCatching { track?.stop() }
                 runCatching { track?.release() }
+                runCatching { media?.stop() }
+                runCatching { media?.release() }
             }
         }
     }
@@ -118,9 +218,14 @@ class MelodyAudioPlayer {
         private const val MELODY_MS = 5_000
         private const val SLOT_MS = 250
 
+        private fun soundAttributes(): AudioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
         private fun render(pattern: MelodyPattern): ShortArray {
             require(pattern.notesHz.size == MELODY_MS / SLOT_MS) {
-                "Expected exactly twenty rhythmic notes/rests for a five-second melody."
+                "Expected twenty rhythmic slots for the built-in five-second melody."
             }
             val framesPerSlot = SAMPLE_RATE * SLOT_MS / 1000
             val result = ShortArray(SAMPLE_RATE * MELODY_MS / 1000)
@@ -128,8 +233,6 @@ class MelodyAudioPlayer {
                 if (slot >= MELODY_MS / SLOT_MS || frequency <= 0) return@forEachIndexed
                 for (i in 0 until framesPerSlot) {
                     val sec = i.toDouble() / SAMPLE_RATE
-                    // Short articulation and an accented downbeat on every fourth
-                    // rhythmic slot: clearly livelier than the old 500ms tones.
                     val envelope = minOf(1.0, i.toDouble() / (SAMPLE_RATE * .012)) *
                         minOf(1.0, (framesPerSlot - 1 - i).toDouble() /
                             (SAMPLE_RATE * .045))
