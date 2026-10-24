@@ -101,7 +101,7 @@ class MonotonicSessionTimerTest {
         assertEquals(25 * minute, restart.phaseRemainingSeconds)
         assertEquals(10 * minute, restart.recoveredSeconds)
         assertEquals(170 * minute, restart.totalSeconds)
-        assertEquals(session.phases[1].startSeconds, 25 * minute)
+        assertEquals(session.phases[1].kind, PhaseKind.SHORT_BREAK)
         assertEquals(180 * minute, now.toInt() / 1000 +
             restart.totalRemainingSeconds)
         assertNull(timer.update().cue) // Restart cue emitted by UI only.
