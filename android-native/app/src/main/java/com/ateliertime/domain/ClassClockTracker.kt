@@ -56,6 +56,23 @@ class ClassClockTracker {
         return observe(view, nowEpochMs)
     }
 
+    /**
+     * After a user-requested Next, keep the original finish target if the
+     * final-pair reflow recovered the skipped time. If it was impossible to
+     * compensate safely, show the real newly projected finish instead of a
+     * stale deadline. The original Class start and saved schedule stay intact.
+     */
+    fun afterNext(view: TimerView, nowEpochMs: Long): ClassClockTimes {
+        if (view.status == TimerStatus.RUNNING) {
+            val projected = nowEpochMs + view.totalRemainingSeconds.toLong() * 1_000L
+            if (classDeadline == null ||
+                kotlin.math.abs(projected - classDeadline!!) > 2_000L) {
+                classDeadline = projected
+            }
+        }
+        return observe(view, nowEpochMs)
+    }
+
     /** Restart just the active Session OR typed Break, keeping Class clocks. */
     fun restartCurrentSegment(view: TimerView, nowEpochMs: Long): ClassClockTimes {
         require(view.status == TimerStatus.RUNNING &&
