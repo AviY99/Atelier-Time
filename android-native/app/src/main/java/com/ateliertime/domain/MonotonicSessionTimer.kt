@@ -54,6 +54,14 @@ class MonotonicSessionTimer(
         return view()
     }
 
+    /** Explicitly abandon old progress/deadline and begin a new full session. */
+    fun restartFromBeginning(): TimerView {
+        status = TimerStatus.READY
+        runningFromMs = null
+        suspendedFromMs = null
+        return start()
+    }
+
     fun pause(): TimerView {
         if (status == TimerStatus.RUNNING) {
             elapsedBeforeRunMs = elapsedMs()
