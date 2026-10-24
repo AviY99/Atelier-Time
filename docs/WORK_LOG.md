@@ -1,5 +1,13 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-24 — New 3-tab UI + explicit timer stop controls: on-phone Gradle test/build PASS
+
+**Direct Android phone screenshot (11:28 local time):** Code on the Go Gradle output includes `:app:compileDebugUnitTestKotlin`, `:app:testDebugUnitTest`, `:app:packageDebug`, `:app:assembleDebug`, followed by **`BUILD SUCCESSFUL in 34s`** with **42 actionable tasks (10 executed, 32 up-to-date)**. This was sent after the user was instructed to fast-forward the `android-native-kotlin-compose` branch and run the combined Kotlin test + APK assembly tasks for the new Editor/Sounds/Timer tabs, on-screen current/end clock, proportional editor timeline and differentiated Pause/Resume/Stop actions. Git revision is not displayed in the screenshot, so attribute the PASS to the **shown Gradle run**, not to an independently proven SHA. JUnit XML numeric 57-case count and Android instrumentation 9-case execution were not shown.
+
+**Verification boundary:** Gradle unit-test and APK build **PASS**, **new APK update-install and runtime behavior NOT YET VERIFIED**. Download copy command has no displayed evidence in screenshot. Need user to install existing `Atelier-Time-update.apk` **as an update without uninstalling/clearing presets** and inspect tabs, runtime continuity while switching to Sounds, 5s cue changes, current/expected end clocks, and Stop→Restart / Stop→Next distinct from Pause. Background/locked-screen continuity and all nine Android instrumentation tests remain pending. Draft PR #3 unmerged; no paid Actions.
+
+---
+
 ## 2026-10-24 — User-approved 3-tab UX, stop semantics, wall/end clock and proportional schedule chart (SOURCE COMMITTED, QA PENDING)
 
 **New direct user feedback:** After successful audible melody fix, user states **everything works**. User requests to remove redundant Test buttons and Editor navigation in Timer, create permanent **Editor / Sounds / Timer** tabs; ability to change melodies while current timer runs; `Pause` toggle to `Resume` but `Stop` must choose explicit **Stop and restart session** or **Stop and go to next session**, not behave like Pause; final-two-regular-poses interruption compensation remains according to approved Remainder/Even/Custom; current device local clock shown small at top right above current session's expected finish clock. Add a graphic under the complete phase list on Editor.
