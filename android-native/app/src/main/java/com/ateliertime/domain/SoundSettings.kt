@@ -10,6 +10,9 @@ enum class SoundSource(val title: String) {
     FILE("Audio file"),
 }
 
+/** The shared option affects only sound identity, never the three cue durations. */
+enum class SoundAssignmentMode { SEPARATE, SHARED }
+
 /** A single sound used for one cue; source options are enabled independently. */
 data class CueSound(
     val source: SoundSource = SoundSource.APP,
@@ -35,14 +38,39 @@ data class SoundSettings(
     val poseEnd: CueSound = CueSound(melody = MelodyPattern.SOFT_CHIMES),
     val breakEnd: CueSound = CueSound(melody = MelodyPattern.RISING_STEPS),
     val classEnd: CueSound = CueSound(melody = MelodyPattern.CELEBRATION),
+    // The migration-safe default preserves D-100's independent A/B/C choices.
+    val assignmentMode: SoundAssignmentMode = SoundAssignmentMode.SEPARATE,
+    // Null means the first shared choice inherits the current A sound.
+    // Retained separately so switching modes never erases A/B/C selections.
+    val sharedSound: CueSound? = null,
     val poseEndSeconds: Int = 5,
     val breakEndSeconds: Int = 5,
     val classEndSeconds: Int = 5,
 ) {
-    fun soundFor(cue: TimerCue): CueSound = when (cue) {
-        TimerCue.POSE_FINISHED -> poseEnd
-        TimerCue.BREAK_FINISHED -> breakEnd
-        TimerCue.SESSION_FINISHED -> classEnd
+    fun soundFor(cue: TimerCue): CueSound {
+        if (assignmentMode == SoundAssignmentMode.SHARED) {
+            return sharedSound ?: poseEnd
+        }
+        return when (cue) {
+            TimerCue.POSE_FINISHED -> poseEnd
+            TimerCue.BREAK_FINISHED -> breakEnd
+            TimerCue.SESSION_FINISHED -> classEnd
+        }
+    }
+
+    fun setAssignmentMode(mode: SoundAssignmentMode): SoundSettings =
+        copy(assignmentMode = mode)
+
+    // Selecting in SHARED mode updates one sound only; the separate choices
+    // remain untouched and are restored on switching back.
+    fun chooseForVisibleMode(cue: TimerCue, choice: CueSound): SoundSettings {
+        require(choice.source in enabledSources) { "Enable the sound source first." }
+        require(choice.isPlayable) { "Choose an available sound or audio file." }
+        return if (assignmentMode == SoundAssignmentMode.SHARED) {
+            copy(sharedSound = choice)
+        } else {
+            choose(cue, choice)
+        }
     }
 
     fun secondsFor(cue: TimerCue): Int = when (cue) {
@@ -76,7 +104,8 @@ data class SoundSettings(
     fun setSourceEnabled(source: SoundSource, enabled: Boolean): SoundSettings {
         val next = if (enabled) enabledSources + source else enabledSources - source
         require(next.isNotEmpty()) { "Keep at least one sound source enabled." }
-        require(listOf(poseEnd, breakEnd, classEnd).all { it.source in next }) {
+        require((listOf(poseEnd, breakEnd, classEnd) +
+            listOfNotNull(sharedSound)).all { it.source in next }) {
             "Change the selected sounds before disabling this source."
         }
         return copy(enabledSources = next)
