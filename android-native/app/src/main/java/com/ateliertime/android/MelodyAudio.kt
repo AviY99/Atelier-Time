@@ -103,6 +103,7 @@ class MelodyPreferences(
                 .ifEmpty { defaults.enabledSources },
             poseEnd = a, breakEnd = b, classEnd = c,
             assignmentMode = mode, sharedSound = shared,
+            sharedSeconds = seconds("sharedSeconds", 5, false),
             poseEndSeconds = seconds("poseEndSeconds", 5, false),
             breakEndSeconds = seconds("breakEndSeconds", 5, false),
             classEndSeconds = seconds("classEndSeconds", 5, true),
@@ -115,7 +116,8 @@ class MelodyPreferences(
                 listOfNotNull(settings.sharedSound)).all {
                 it.isPlayable && it.source in settings.enabledSources
             }) { "Select a sound from an enabled source for each timer event." }
-        require(settings.poseEndSeconds in setOf(5, 10) &&
+        require(settings.sharedSeconds in setOf(5, 10) &&
+            settings.poseEndSeconds in setOf(5, 10) &&
             settings.breakEndSeconds in setOf(5, 10) &&
             settings.classEndSeconds in 5..60) { "Invalid sound duration." }
         val edit = prefs.edit()
@@ -126,6 +128,7 @@ class MelodyPreferences(
             .putString("enabledSources", SoundSource.entries
                 .filter { it in settings.enabledSources }.joinToString(",") { it.name })
             .putString("soundAssignmentMode", settings.assignmentMode.name)
+            .putInt("sharedSeconds", settings.sharedSeconds)
             .putInt("poseEndSeconds", settings.poseEndSeconds)
             .putInt("breakEndSeconds", settings.breakEndSeconds)
             .putInt("classEndSeconds", settings.classEndSeconds)
