@@ -1,5 +1,15 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-24 — VERIFIED updated K04 + D-071 Android build and JVM Gradle test gate
+
+**Evidence (user screenshot, Code on the Go on actual Android phone, 09:41 local):** The combined Gradle execution that was requested after updating `android-native-kotlin-compose`, using the CoGo native ARM64 AAPT2 override, shows both `> Task :app:assembleDebug` and `> Task :app:testDebugUnitTest`, ending in **`BUILD SUCCESSFUL in 37s`**; **42 actionable tasks: 8 executed, 34 up-to-date**. Kotlin test-source compile (`:app:compileDebugUnitTestKotlin`) and APK packaging (`:app:packageDebug`) appear in the same log. This is on-device evidence that the current updated feature source including K04 first-cut timer, three tones, D-071 group-break editor/scheduler and help labels **compiled, passed Gradle's JVM-test task and assembled a debug APK**. The screenshot does not separately show JUnit XML totals (46 JVM methods written) or new APK file hash; do not invent those results.
+
+**Acceptance boundary:** Gradle tasks **PASS**. The **updated** APK has NOT YET been visibly installed/launched; UI group-break validation, real timer tick/pause/resume, three audible cues, preservation of old saved presets after upgrade, force-close/offline reload and locked/background reliability are **NOT VERIFIED**. Seven Android instrumentation methods are WRITTEN, **NOT RUN**. D-016 cue granularity still open; no paid GitHub Actions, PR #3 remains draft.
+
+**Next:** In the already-used Code on the Go checkout, open existing `android-native/app/build/outputs/apk/debug/app-debug.apk` with Android installer to update existing Atelier Time installation **without uninstalling or clearing app data**. Check new group-break fields, A's 0/5-minute behavior, an existing saved preset, "Open session timer", Start/Pause/Resume/Stop and "Test A/B/C" sounds; provide phone screenshots/observations. Avoid claiming K03 full persistence or K04 background audio before tests.
+
+---
+
 ## 2026-10-24 — User APPROVED D-071; opening-group rest source implemented (pending Android validation)
 
 **Approval:** After review of the explicit diagram and question, user answered **“כן”**. This approves break-after-every-opening-group semantics: configurable whole-minute rest `>=0` between earlier groups; **last group requires `>=1m` rest**; existing initial regular rest counts once when matching the configured last-group value (Example A 00:20–00:25), with **no duplicate break**. If last-group rest differs, it replaces that initial slot instead of adding adjacent rest; custom group rests have no normal-replacement ordinal. Existing 25m/5m warning still applies to all real breaks. Approval added to [DECISIONS D-071](DECISIONS.md).
