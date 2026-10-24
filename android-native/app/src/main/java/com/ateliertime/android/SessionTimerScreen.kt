@@ -113,9 +113,21 @@ fun SessionTimerScreen(
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
-                    WallClockRow("Class start", showClassTime(classClockTimes.classStartEpochMs), enlargeLabel = true)
-                    WallClockRow("Class end", showClassTime(classClockTimes.classEndEpochMs), enlargeLabel = true)
-                    WallClockRow("Class length", formatClassLength(session.rules.totalSeconds), enlargeLabel = true)
+                    WallClockRow(
+                        "Class start",
+                        showClassTime(classClockTimes.classStartEpochMs),
+                        enlargeLabel = true, compact = true,
+                    )
+                    WallClockRow(
+                        "Class end",
+                        showClassTime(classClockTimes.classEndEpochMs),
+                        enlargeLabel = true, compact = true,
+                    )
+                    WallClockRow(
+                        "Class length",
+                        formatClassLength(session.rules.totalSeconds),
+                        enlargeLabel = true, compact = true,
+                    )
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Text("Class remaining  " + formatTime(classClockTimes.classRemainingSeconds ?: session.rules.totalSeconds),
@@ -162,14 +174,37 @@ fun SessionTimerScreen(
                     Text(phaseLabel(view.phase),
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.weight(1f))
-                    Column(horizontalAlignment = Alignment.End,
-                        verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                        // Phase name remains in the card heading; keep clock values legible.
-                        WallClockRow("Start", showPhaseTime(classClockTimes.currentPhaseStartEpochMs),
-                            stabilizeTime = true)
-                        WallClockRow("End", if (classClockTimes.paused) "— (paused)"
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(0.dp),
+                    ) {
+                        // Keep the phase's Start/End/Length together as a
+                        // compact time-information block with aligned digits.
+                        WallClockRow(
+                            "Start",
+                            showPhaseTime(classClockTimes.currentPhaseStartEpochMs),
+                            stabilizeTime = true, compact = true,
+                        )
+                        WallClockRow(
+                            "End",
+                            if (classClockTimes.paused) "— (paused)"
                             else showPhaseTime(classClockTimes.currentPhaseEndEpochMs),
-                            stabilizeTime = true)
+                            stabilizeTime = true, compact = true,
+                        )
+                        view.phase?.let { active ->
+                            val lengthLabel = when (active.kind) {
+                                PhaseKind.POSE -> "Session length"
+                                PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK -> "Break length"
+                                else -> null
+                            }
+                            lengthLabel?.let { label ->
+                                WallClockRow(
+                                    label,
+                                    formatTime(active.durationSeconds),
+                                    stabilizeTime = true, compact = true,
+                                )
+                            }
+                        }
                     }
                 }
                 Text(formatTime(view.phaseRemainingSeconds),
@@ -398,21 +433,27 @@ private fun WallClockRow(
     value: String,
     enlargeLabel: Boolean = false,
     stabilizeTime: Boolean = false,
+    compact: Boolean = false,
 ) {
     val small = MaterialTheme.typography.labelSmall
     Row(
-        modifier = Modifier.heightIn(min = 24.dp),
+        modifier = Modifier.heightIn(min = if (compact) 20.dp else 24.dp),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text("$label  ", style = if (enlargeLabel)
-            small.copy(fontSize = small.fontSize * 1.3f) else small,
-            maxLines = 1)
+        Text(
+            "$label  ",
+            style = (if (enlargeLabel)
+                small.copy(fontSize = small.fontSize * 1.3f) else small)
+                .let { if (compact) it.copy(lineHeight = 18.sp) else it },
+            maxLines = 1,
+        )
         Text(
             value,
-            style = if (stabilizeTime) MaterialTheme.typography.bodyLarge.copy(
+            style = (if (stabilizeTime) MaterialTheme.typography.bodyLarge.copy(
                 fontFamily = FontFamily.Monospace
-            ) else MaterialTheme.typography.bodyLarge,
+            ) else MaterialTheme.typography.bodyLarge)
+                .let { if (compact) it.copy(lineHeight = 20.sp) else it },
             modifier = if (stabilizeTime) Modifier.width(120.dp) else Modifier,
             textAlign = TextAlign.End,
             maxLines = 1,
