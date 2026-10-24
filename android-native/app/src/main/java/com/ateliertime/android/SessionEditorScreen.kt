@@ -197,13 +197,19 @@ fun SessionEditorScreen() {
     }
 
     /** Play only an actually committed timer transition, never a failed action. */
-    fun runTimedCue(restartCurrentSegment: Boolean = false, action: () -> TimerTick) {
+    fun runTimedCue(
+        restartCurrentSegment: Boolean = false,
+        advancedByNext: Boolean = false,
+        action: () -> TimerTick,
+    ) {
         try {
             val event = action()
             timerView = event.view
             val nowEpochMs = System.currentTimeMillis()
             classClockTimes = if (restartCurrentSegment) {
                 classClockTracker.restartCurrentSegment(event.view, nowEpochMs)
+            } else if (advancedByNext) {
+                classClockTracker.afterNext(event.view, nowEpochMs)
             } else {
                 classClockTracker.observe(event.view, nowEpochMs)
             }
@@ -681,7 +687,7 @@ fun SessionEditorScreen() {
                             }
                         },
                         onNextPhase = {
-                            runTimedCue { timer.nextPhase() }
+                            runTimedCue(advancedByNext = true) { timer.nextPhase() }
                         },
                         onExit = {
                             playingSession = null
