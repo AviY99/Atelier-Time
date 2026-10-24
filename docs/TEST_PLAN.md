@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **LATEST 2026-10-24 PHONE GRADLE RESULT — PASS FOR UPDATED D-071 + FIRST K04 SOURCE:** Screenshot shows `:app:assembleDebug`, `:app:compileDebugUnitTestKotlin`, `:app:testDebugUnitTest`, **`BUILD SUCCESSFUL in 37s`**, 42 actionable tasks (8 executed, 34 up-to-date), using CoGo Android ARM64 native AAPT2 override as prescribed. **Debug APK assembly and JVM test Gradle gates PASS for the updated feature branch.** Exact 46 JUnit execution count is not shown independently in XML; 7 Android instrumentation tests NOT RUN. Installation of newly built APK, actual K04 timer/audio, D-071 group-break interaction, and persistence of saved sessions across update/restart/offline remain **NOT YET VERIFIED**. No claim of background/locked screen reliability.
+
+
 > **NEW D-071 GROUP BREAK ACCEPTED; TEST SOURCES PENDING (2026-10-24):** User confirmed positive break after last opening group, zero allowed earlier, and reuse of existing first regular break when the two overlap. Scheduler/editor/optional saved-JSON rule implemented on live Android branch with legacy saved-signature preservation. Added **6 JVM scheduler + 2 JVM editor + 1 JVM catalog + 1 Android instrumentation** new tests. **TOTAL WRITTEN: 46 JVM / 7 Android instrumentation; these added tests HAVE NOT RUN.** Prior verified Gradle `:app:testDebugUnitTest` success only covers old checkout (32 source methods). Run phone Gradle native AAPT2 override again before claiming rule works. Example A expected exact original timestamps, including 00:20–00:25 one break; group break validation and signed persisted settings included.
 
 
