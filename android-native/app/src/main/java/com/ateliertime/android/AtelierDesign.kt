@@ -3,6 +3,7 @@ package com.ateliertime.android
 import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
@@ -321,8 +322,7 @@ private fun PaletteChoiceCard(
                 ).forEach { shade ->
                     Box(
                         modifier = Modifier.size(15.dp)
-                            .background(shade, RoundedCornerShape(5.dp))
-                            ,
+                            .background(shade, RoundedCornerShape(5.dp)),
                     )
                 }
             }
