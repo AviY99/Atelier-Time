@@ -1,5 +1,7 @@
 # Atelier Time — NEW CHAT HANDOFF (D-097, 2026-10-24)
 
+> **POST-HANDOFF STATUS UPDATE (2026-10-24):** D-097 is NOW user-confirmed installed and working ("הכל עובד כנדרש"); its historical pending-APK instruction below has already been completed and MUST NOT be repeated. A subsequent D-098 Editor-only compact timeline text change is committed on Android branch `6d5cbab6818cae288de8367849f8d3ea53f4739f` but NOT phone built/installed/tested. The current status and next steps are in `HANDOFF.md`, `DECISIONS.md` and `TEST_PLAN.md`; this D-097 document remains an historical checkpoint.
+
 **STATUS: CURRENT CONVERSATION CLOSED AT USER REQUEST. READ THIS FILE FIRST IN THE NEXT CONVERSATION.**  
 **Authoritative project entry:** [HANDOFF.md](HANDOFF.md), [DECISIONS.md](DECISIONS.md) (D-097, D-096 and later corrections), [TEST_PLAN.md](TEST_PLAN.md), [WORK_LOG.md](WORK_LOG.md), [ROADMAP.md](ROADMAP.md) and [CHANGELOG](../CHANGELOG.md). The older [NEXT_CHAT_HANDOFF_2026_10_24.md](NEXT_CHAT_HANDOFF_2026_10_24.md) is **historical (D-082)** and must not override this D-097 handoff.
 
