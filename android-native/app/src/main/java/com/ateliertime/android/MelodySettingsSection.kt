@@ -22,7 +22,7 @@ fun MelodySettingsSection(
     Row {
         Text("Five-second sound melodies",
             style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
-        TextButton(onClick = { showHelp = true }) { Text("Help") }
+        TextButton(colors = atelierTextColors(), onClick = { showHelp = true }) { Text("Help") }
     }
     Text("Upbeat five-second tunes with clear rhythms. Choose one melody for " +
         "each timer event; your choices are saved on this phone.")
@@ -43,7 +43,7 @@ fun MelodySettingsSection(
             "audio as the timer; volume follows Android media volume. " +
             "Change tunes here while the class runs; the approved timeline is unchanged.") },
         confirmButton = {
-            TextButton(onClick = { showHelp = false }) { Text("Close") }
+            TextButton(colors = atelierTextColors(), onClick = { showHelp = false }) { Text("Close") }
         },
     )
 }
@@ -59,7 +59,7 @@ private fun MelodyPicker(
     Text(label, style = MaterialTheme.typography.titleMedium)
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Box(modifier = Modifier.weight(1f)) {
-            OutlinedButton(onClick = { expanded = true },
+            OutlinedButton(colors = atelierOutlinedColors(), onClick = { expanded = true },
                 modifier = Modifier.fillMaxWidth()) {
                 Text(choice.title, maxLines = 1)
             }
@@ -72,6 +72,6 @@ private fun MelodyPicker(
                 }
             }
         }
-        OutlinedButton(onClick = { onPreview(choice) }) { Text("Play 5s") }
+        OutlinedButton(colors = atelierOutlinedColors(), onClick = { onPreview(choice) }) { Text("Play 5s") }
     }
 }
