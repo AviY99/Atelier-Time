@@ -68,6 +68,24 @@ class DesignClockTest {
         assertEquals(0.75f, DesignMotion.fillFraction(PhaseKind.SHORT_BREAK, 60_000L, 45_000L))
     }
 
+    @Test fun autoSliderPreviewAlwaysMovesFromDayAtLeftToNightAtRight() {
+        assertEquals(DesignPalette.DAY, DesignClock.sliderPreview(12))
+        assertEquals(DesignPalette.DAY, DesignClock.sliderPreview(17))
+        assertEquals(DesignPalette.NIGHT, DesignClock.sliderPreview(18))
+        assertEquals(DesignPalette.NIGHT, DesignClock.sliderPreview(23))
+        assertEquals(DesignPalette.DAY, DesignClock.sliderPreview(-100))
+        assertEquals(DesignPalette.NIGHT, DesignClock.sliderPreview(100))
+    }
+
+    @Test fun autoPreviewDoesNotModifyRealHourBasedAutoMode() {
+        val options = DesignPreferences(DesignMode.AUTO, 19)
+        assertEquals(DesignPalette.NIGHT, DesignClock.sliderPreview(19))
+        assertEquals(DesignPalette.DAY, DesignClock.resolve(options, 17))
+        assertEquals(DesignPalette.NIGHT, DesignClock.resolve(options, 19))
+        assertEquals(DesignPalette.NIGHT, DesignClock.resolve(options, 4))
+        assertEquals(DesignPalette.DAY, DesignClock.resolve(options, 6))
+    }
+
     @Test fun corruptedHourClampsToValidRange() {
         val before = DesignPreferences(DesignMode.AUTO, 5)
         val after = DesignPreferences(DesignMode.AUTO, 27)
