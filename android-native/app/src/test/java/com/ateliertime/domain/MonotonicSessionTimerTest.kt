@@ -231,6 +231,24 @@ class MonotonicSessionTimerTest {
         assertEquals(special, plan.phases.first { it.id == special.id })
     }
 
+    @Test fun restartBreakAfterNextCreditsSkippedTimeAgainstRepeat() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(approved()) { now }
+        timer.start()
+        now = 10L * minute * 1000L
+        val jumped = timer.nextPhase().view
+        assertEquals(PhaseKind.SHORT_BREAK, jumped.phase?.kind)
+        assertEquals(-15 * minute, jumped.recoveredSeconds)
+        now = 11L * minute * 1000L
+        val restarted = timer.restartCurrentSegmentKeepingEndTime()
+        assertEquals(25 * minute, restarted.elapsedSeconds)
+        assertEquals(-14 * minute, restarted.recoveredSeconds)
+        assertEquals(194 * minute, restarted.totalSeconds)
+        assertEquals(180 * minute,
+            now.toInt() / 1000 + restarted.totalRemainingSeconds)
+        assertNull(timer.update().cue)
+    }
+
     @Test fun restartingInterFinalBreakLocksCompletedFirstFinalSession() {
         var now = 0L
         val plan = approved()
