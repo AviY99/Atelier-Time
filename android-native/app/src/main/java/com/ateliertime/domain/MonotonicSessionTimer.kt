@@ -130,6 +130,16 @@ class MonotonicSessionTimer(
         )
     }
 
+    /** Values shown in the timer after a pause/stop changes the selected ending. */
+    fun finalTwoPoseDurations(): Pair<Int, Int>? {
+        val final = activePhases.filter {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.takeLast(2)
+        return if (final.size == 2)
+            final[0].durationSeconds to final[1].durationSeconds
+        else null
+    }
+
     /** One alert per observed phase transition; no stale multi-phase replay. */
     fun update(): TimerTick {
         if (status != TimerStatus.RUNNING) return TimerTick(view())
