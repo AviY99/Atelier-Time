@@ -218,6 +218,11 @@ fun atelierInputColors(): TextFieldColors =
         disabledLabelColor = Color.White.copy(alpha = 0.6f),
     ) else OutlinedTextFieldDefaults.colors()
 
+/** Preserve error semantics in button containers; Night messages remain white. */
+@Composable
+fun atelierErrorTextColor(): Color =
+    if (atelierNightActive()) Color.White else MaterialTheme.colorScheme.error
+
 /** Single solid tahini tone for both the progress bar and phase background. */
 fun tahiniFill(palette: DesignPalette): Color = if (palette == DesignPalette.DAY) {
     Color(0xFFC5A576)
