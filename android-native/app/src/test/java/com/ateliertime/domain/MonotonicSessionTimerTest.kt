@@ -403,23 +403,84 @@ class MonotonicSessionTimerTest {
         assertNull(timer.update().cue)
     }
 
-    @Test fun nextCannotRewriteAlreadyStartedFinalPairAndLeavesTimerIntact() {
+    @Test fun nextFromFirstFinalSessionAdvancesWithoutRewritingObservedSession() {
         var now = 0L
         val session = approved()
-        val firstFinal = session.phases.filter {
+        val pair = session.phases.filter {
             it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
-        }.takeLast(2).first()
+        }.takeLast(2)
+        val first = pair.first()
+        val rest = session.phases.first { it.startSeconds == first.endSeconds }
         val timer = MonotonicSessionTimer(session) { now }
         timer.start()
-        now = (firstFinal.startSeconds + 5).toLong() * 1000L
-        timer.update()
-        try {
-            timer.nextPhase()
-            fail("Must preserve already started final pose, not silently rewrite it.")
-        } catch (_: IllegalStateException) { }
-        assertEquals(firstFinal.id, timer.view().phase?.id)
-        assertEquals(0, timer.view().recoveredSeconds)
-        assertEquals(TimerStatus.RUNNING, timer.view().status)
+        now = (first.startSeconds + 5).toLong() * 1000L
+        val next = timer.nextPhase()
+        assertEquals(TimerStatus.RUNNING, next.view.status)
+        assertEquals(rest.id, next.view.phase?.id)
+        assertEquals(TimerCue.POSE_FINISHED, next.cue)
+        assertEquals(first.durationSeconds, timer.finalTwoPoseDurations()?.first)
+        assertEquals(pair.last().durationSeconds + first.durationSeconds - 5,
+            timer.finalTwoPoseDurations()?.second)
+        assertEquals(session.rules.totalSeconds, now.toInt() / 1000 +
+            next.view.totalRemainingSeconds)
+        assertEquals(first, session.phases.first { it.id == first.id })
+        assertNull(timer.update().cue)
+    }
+
+    @Test fun nextFromFinalPairBreakKeepsFirstAndExtendsLastSession() {
+        var now = 0L
+        val session = approved()
+        val pair = session.phases.filter {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.takeLast(2)
+        val rest = session.phases.first { it.startSeconds == pair.first().endSeconds }
+        val timer = MonotonicSessionTimer(session) { now }
+        timer.start()
+        now = (rest.startSeconds + 10).toLong() * 1000L
+        val next = timer.nextPhase()
+        assertEquals(pair.last().id, next.view.phase?.id)
+        assertEquals(TimerCue.BREAK_FINISHED, next.cue)
+        assertEquals(pair.first().durationSeconds, timer.finalTwoPoseDurations()?.first)
+        assertEquals(pair.last().durationSeconds + rest.durationSeconds - 10,
+            timer.finalTwoPoseDurations()?.second)
+        assertEquals(session.rules.totalSeconds, now.toInt() / 1000 +
+            next.view.totalRemainingSeconds)
+    }
+
+    @Test fun nextOnLastWorkSessionFinishesClassAndEmitsCOnlyOnce() {
+        var now = 0L
+        val session = approved()
+        val finalWork = session.phases.last {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }
+        assertTrue(session.rules.summarySeconds > 0)
+        val timer = MonotonicSessionTimer(session) { now }
+        timer.start()
+        now = (finalWork.startSeconds + 5).toLong() * 1000L
+        val next = timer.nextPhase()
+        assertEquals(TimerStatus.FINISHED, next.view.status)
+        assertEquals(TimerCue.SESSION_FINISHED, next.cue)
+        assertNull(next.view.phase)
+        assertNull(timer.update().cue)
+        assertEquals(session.rules.totalSeconds, session.phases.last().endSeconds)
+    }
+
+    @Test fun nextAfterImpossiblePauseStillAdvancesWithoutMutatingSavedClass() {
+        var now = 0L
+        val session = approved()
+        val timer = MonotonicSessionTimer(session) { now }
+        timer.start()
+        now = 60_000L
+        timer.pause()
+        now = 61L * minute * 1000L
+        val next = timer.nextPhase()
+        assertEquals(TimerStatus.RUNNING, next.view.status)
+        assertEquals(PhaseKind.SHORT_BREAK, next.view.phase?.kind)
+        assertEquals(TimerCue.POSE_FINISHED, next.cue)
+        assertEquals(session.rules.totalSeconds, next.view.totalSeconds)
+        assertEquals(0, next.view.recoveredSeconds)
+        assertEquals(session.rules.totalSeconds, session.phases.last().endSeconds)
+        assertNull(timer.update().cue)
     }
 
     @Test fun emitsDifferentSingleCuesOnPoseAndBreakEdges() {
