@@ -1,5 +1,8 @@
 # Test and acceptance plan — Atelier Time
 
+> **D-081 — CURRENT SESSION RESTART CORRECTION (2026-10-24, SOURCE UNBUILT):** UI **Restart session** restarts only the running Session from that phase's beginning, not the Class, with earlier sessions/breaks and actual Class start unchanged; repeat time (plus pause time, net of prior Next skips) is deducted from or credited to **both final regular sessions**, retaining original Class end time, approved split and saved preset where feasible. On success play **A session-end cue**, not C class-end. Disable during Break/summary; reject impossible final-pair rewrites atomically. Clock Tracker resets only current Session start on successful restart. Editor last-pair Remainder chip renamed **Last gets remaining time**, with explanatory copy; serialized `FinalPoseMode.REMAINDER` unchanged. Five timer + one clock new JVM source tests, **89 JVM methods total**, 9 Android instrumentation source tests; **NO new Kotlin Gradle pass/APK/phone acceptance yet**, also D-080 still pending. Test restart during Session 2; pause→restart; Next→restart; Break guard; last-final safety; verify A cue and actual Class start/end remain fixed. 
+
+
 > **D-080 extra safety check (2026-10-24):** Loading a saved class for Edit now retains each opening group's *exact approved identifier* via optional `OpeningDraft.originalGroupId` and `EditorInput` mapping, instead of silently regenerating different group IDs. New JVM `EditorInputTest.editingSavedClassPreservesOriginalGroupIdentifiers` was written and checked into the branch, **NOT RUN**. Total now **83 known JVM test source methods**, Android instrumentation 9; new D-080 source still not compiled on phone.
 
 
