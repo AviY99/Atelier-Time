@@ -231,7 +231,7 @@ fun SessionEditorScreen() {
                 modifier = Modifier.weight(1f))
             TextButton(onClick = {
                 helpSection = "Opening session groups" to
-                    ""Each group is an ordered set of equal-duration opening sessions. " +
+                    "Each group is an ordered set of equal-duration opening sessions. " +
                     "Every group has a configurable break after it. Zero minutes is allowed " +
                     "between groups; the last group requires at least one minute. " +
                     "A break-first regular cycle can share its initial break with the " +
@@ -243,8 +243,8 @@ fun SessionEditorScreen() {
                 Text("Opening session group " + (index + 1), modifier = Modifier.weight(1f))
                 TextButton(onClick = {
                     helpSection = "Opening session group " + (index + 1) to
-                        ""Number of sessions means how many consecutive work sessions this group contains. " +
-                        ""Each session duration sets the time of one work session in minutes. " +
+                        "Number of sessions means how many consecutive work sessions this group contains. " +
+                        "Each session duration sets the time of one work session in minutes. " +
                         "Set Break after group to 0 for no break between opening groups. " +
                         "The last group requires at least 1 minute of rest. If it equals " +
                         "the initial regular break, only one break occurs."
@@ -301,7 +301,7 @@ fun SessionEditorScreen() {
                 modifier = Modifier.weight(1f))
             TextButton(onClick = {
                 helpSection = "Regular sessions and breaks" to
-                    ""These durations are used after the opening session groups. A special break " +
+                    "These durations are used after the opening session groups. A special break " +
                     "replaces an existing regular break, and does not add a new break. " +
                     "All configured regular and special break durations must be positive."
             }) { Text("Help") }
@@ -322,7 +322,7 @@ fun SessionEditorScreen() {
                 modifier = Modifier.weight(1f))
             TextButton(onClick = {
                 helpSection = "Repeating session/break cycle" to
-                    ""Choose whether the regular repeating pattern begins with a session " +
+                    "Choose whether the regular repeating pattern begins with a session " +
                     "or with a break. Automatic placement selects special-break slots " +
                     "deterministically; manual placement uses break numbers."
             }) { Text("Help") }
@@ -359,8 +359,8 @@ fun SessionEditorScreen() {
                 modifier = Modifier.weight(1f))
             TextButton(onClick = {
                 helpSection = "Complete class timeline" to
-                    ""All timestamps are elapsed time from class start, not wall-clock time. " +
-                    ""The total class includes the end-of-class summary. A rest advisory " +
+                    "All timestamps are elapsed time from class start, not wall-clock time. " +
+                    "The total class includes the end-of-class summary. A rest advisory " +
                     "after more than 25 minutes of cumulative posing without a qualifying " +
                     "5-minute break requires separate acknowledgment and final approval."
             }) { Text("Help") }
@@ -452,7 +452,7 @@ fun SessionEditorScreen() {
                     }
                 }
                 Text(
-                    ""Sessions: " + candidate.phases.filter {
+                    "Sessions: " + candidate.phases.filter {
                         it.kind == PhaseKind.POSE
                     }.sumOf { it.durationSeconds } / 60 +
                         " min · Rest: " + candidate.phases.filter {
@@ -513,7 +513,7 @@ fun SessionEditorScreen() {
             },
         )
         Text(
-            ""Saved classes work offline. Selecting a class uses its approved plan; " +
+            "Saved classes work offline. Selecting a class uses its approved plan; " +
                 "open the timer after loading an approved class.",
             style = MaterialTheme.typography.bodySmall,
         )
@@ -557,7 +557,7 @@ fun SessionEditorScreen() {
                     Column(modifier = Modifier.fillMaxSize().padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text("No active class", style = MaterialTheme.typography.titleLarge)
-                        Text(""Approve a class in Editor, or load a saved class. " +
+                        Text("Approve a class in Editor, or load a saved class. " +
                             "Then tap Open class timer.")
                         Button(onClick = { activeTab = MainTab.EDITOR }) {
                             Text("Choose a class")
