@@ -3,6 +3,7 @@ package com.ateliertime.android
 import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -214,35 +215,48 @@ fun DesignSettingsPanel(
 @Composable
 fun AtelierAboutPanel() {
     val context = androidx.compose.ui.platform.LocalContext.current
-    // Read actual installed APK metadata: never show an invented app version.
+    // Display actual installed version number, excluding its dev/suffix label.
     val version = androidx.compose.runtime.remember(context) {
         val installedVersion = runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0)
                 .versionName.orEmpty()
         }.getOrDefault("")
-        // Render just the numeric component, e.g. "0.1.0-dev" -> "0.1.0".
-        Regex("""\d+(?:\.\d+)*""").find(installedVersion)?.value ?: "—"
+        Regex("""\\d+(?:\\.\\d+)*""").find(installedVersion)?.value ?: "—"
     }
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-            .padding(20.dp),
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("About", style = MaterialTheme.typography.headlineSmall)
+        Text("About", style = MaterialTheme.typography.titleLarge)
         ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Atlier Time", style = MaterialTheme.typography.headlineMedium)
-                Text("Version $version", style = MaterialTheme.typography.titleMedium)
-                Text("© 2026", style = MaterialTheme.typography.bodyMedium)
-                Text("Developed by Avi Yosfan with assistance from Open AI",
-                    style = MaterialTheme.typography.titleMedium)
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                // Clear descending type hierarchy: version > name/credit >
+                // copyright and description.
+                Text("Version $version", style = MaterialTheme.typography.headlineMedium)
+                Text(
+                    "Atlier Time · Developed by Avi Yosfan with Open AI",
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.titleMedium,
+                    autoSize = TextAutoSize.StepBased(
+                        minFontSize = 10.sp,
+                        maxFontSize = 14.sp,
+                        stepSize = 0.5.sp,
+                    ),
+                    maxLines = 1,
+                    softWrap = false,
+                )
+                Text("© 2026", style = MaterialTheme.typography.bodySmall)
                 HorizontalDivider()
                 Text(
-                    "Atlier Time helps you plan art studio classes, organize " +
-                        "work sessions and breaks, save reusable class schedules, " +
-                        "and run a timer with sound alerts and live time tracking.",
-                    style = MaterialTheme.typography.bodyLarge,
+                    "Atlier Time is a live studio timer that reflects the progress " +
+                        "of an ongoing class—its work sessions, breaks and remaining " +
+                        "time—and makes day-to-day class management easier. " +
+                        "Timed sound cues help keep the class on track.",
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
         }
