@@ -2,6 +2,7 @@ package com.ateliertime.android
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -62,6 +63,12 @@ fun SessionTimerScreen(
         view.phaseRemainingSeconds.toLong() * 1_000L
     // Single source for presentation progress; never modify real timer math.
     val targetFill = DesignMotion.fillFraction(view.phase?.kind, durationMs, msLeft)
+    val targetRemaining = DesignMotion.remainingFraction(durationMs, msLeft)
+    val smoothRemaining by animateFloatAsState(
+        targetValue = targetRemaining,
+        animationSpec = tween(durationMillis = 210, easing = LinearEasing),
+        label = "phaseTimeRemainingFraction",
+    )
     val smoothFill by animateFloatAsState(
         targetValue = targetFill.coerceIn(0f, 1f),
         animationSpec = tween(durationMillis = 210, easing = LinearEasing),
@@ -113,18 +120,28 @@ fun SessionTimerScreen(
                 Spacer(modifier = Modifier.height(6.dp))
                 Text("Class remaining  " + formatTime(classClockTimes.classRemainingSeconds ?: session.rules.totalSeconds),
                     style = MaterialTheme.typography.labelSmall)
-                LinearProgressIndicator(
-                    progress = {
-                        (classClockTimes.classElapsedSeconds ?: 0).toFloat() /
-                            session.rules.totalSeconds.coerceAtLeast(1)
-                    },
+                SolidRemainingBar(
+                    remainingFraction = DesignMotion.remainingFraction(
+                        durationMillis = session.rules.totalSeconds.toLong() * 1_000L,
+                        remainingMillis = (classClockTimes.classRemainingSeconds
+                            ?: session.rules.totalSeconds).toLong() * 1_000L,
+                    ),
+                    fillColor = tahini,
                     modifier = Modifier.width(178.dp).height(4.dp),
                 )
                 Text("Class elapsed  " + formatTime(classClockTimes.classElapsedSeconds ?: 0),
                     style = MaterialTheme.typography.labelSmall)
             }
         }
-        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.elevatedCardColors(
+                // Increase contrast against the Night canvas only in the
+                // active Timer card. White small text remains > 5:1.
+                containerColor = if (designPalette == DesignPalette.NIGHT)
+                    Color(0xFF4D7194) else MaterialTheme.colorScheme.surfaceContainerLow,
+            ),
+        ) {
             Box(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large)) {
                 if (isWork || isBreak) {
                     Box(modifier = Modifier.matchParentSize()) {
@@ -162,15 +179,17 @@ fun SessionTimerScreen(
                     ))
                 Text(currentRemainingLabel)
                 view.phase?.let { phase ->
-                    val done = phase.durationSeconds - view.phaseRemainingSeconds
-                    LinearProgressIndicator(
-                        progress = {
-                            if (isWork || isBreak) smoothFill
-                            else done.toFloat() / phase.durationSeconds.coerceAtLeast(1)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        color = if (isWork || isBreak) tahini
-                            else MaterialTheme.colorScheme.primary,
+                    // The bar encodes REMAINING time: starts full, drains to
+                    // zero for both Session and Break. Background remains
+                    // Session fill / Break drain independently of the bar.
+                    SolidRemainingBar(
+                        remainingFraction = if (isWork || isBreak) smoothRemaining
+                            else DesignMotion.remainingFraction(
+                                phase.durationSeconds.toLong(),
+                                view.phaseRemainingSeconds.toLong(),
+                            ),
+                        fillColor = tahini,
+                        modifier = Modifier.fillMaxWidth().height(8.dp),
                     )
                 }
                 Text("Next: " + phaseLabel(view.nextPhase))
@@ -353,6 +372,25 @@ fun SessionTimerScreen(
         )
     }
 
+}
+
+/** Full-width tahini bar without Material3's trailing stop-indicator dot. */
+@Composable
+private fun SolidRemainingBar(
+    remainingFraction: Float,
+    fillColor: Color,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier.clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f)),
+    ) {
+        Box(
+            modifier = Modifier.fillMaxHeight()
+                .fillMaxWidth(remainingFraction.coerceIn(0f, 1f))
+                .background(fillColor),
+        )
+    }
 }
 
 /** Fixed-sized phase digits prevent End seconds from making the card jump. */
