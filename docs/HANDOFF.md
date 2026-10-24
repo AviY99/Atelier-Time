@@ -1,5 +1,11 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v3.4)
 
+## LATEST PHONE EVIDENCE (10:17 LOCAL, 2026-10-24): COMBINED GRADLE PASS, MELODY / FINAL PAIR STILL NEED RUNTIME QA
+
+User screenshot from CoGo native phone project shows `compileDebugUnitTestKotlin`, `:app:testDebugUnitTest`, `:app:packageDebug`, `:app:assembleDebug`, and **`BUILD SUCCESSFUL in 34s`** with 42 tasks (10 executed, 32 up-to-date). Screenshot does not include checkout SHA or XML test counts. Native branch now has committed source for six selectable **5-second melodic tunes**, distinct A/B/C chosen globally in the main editor, AudioTrack playback including automatic timer event handling, and `FinalPairCompensation` handling Pause/Resume or Stop/Continue by shortening approved last two regular poses while retaining selected ending policy and reserved summary; separate new-session start resets deadline. GitHub source contains **55 JVM tests and 8 device instrumentation tests**, but **no new device audio/clock acceptance results**. Previous user reported identical, only-on-preview timer tones; cannot mark this cured solely because Gradle passed. Next: update-install latest APK without uninstalling, inspect global melody selectors and six preview tunes, execute 3-minute real POSE_FIRST schedule with 1-minute poses and breaks, verify automatic A at 01:00, B at 02:00, C at 03:00. Then verify selected preferences persist across app relaunch and the two-pose interruption logic on a longer approved session. Phone background/lock alerts still need foreground-service implementation and real acceptance. PR #3 remains draft; do not enable paid Actions.
+
+---
+
 ## 2026-10-24 — NEWEST: DISTINCT 5-SECOND MELODIES, TIMER ALARM FIX & FINAL-PAIR DOWNTIME RECOVERY IN SOURCE ONLY
 
 User tested previously installed Android APK: **app works and saved session survives update**; sounds at three manual Test A/B/C buttons are perceived alike, automatic timer boundary alerts NOT heard. User requested distinctly melodic **5-second** alerts, chooser on main editor, and shortening the final two poses after interrupted session continuation/restart based on already selected final-pose mode.
