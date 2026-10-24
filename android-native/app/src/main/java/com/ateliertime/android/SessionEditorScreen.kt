@@ -187,7 +187,9 @@ fun SessionEditorScreen() {
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    // Keep the tab bar BELOW Android status icons/notch and content ABOVE
+    // gesture navigation in edge-to-edge mode. All tabs share these insets.
+    Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
         TabRow(selectedTabIndex = activeTab.ordinal) {
             MainTab.entries.forEach { tab ->
                 Tab(
