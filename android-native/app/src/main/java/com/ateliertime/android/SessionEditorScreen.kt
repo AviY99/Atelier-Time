@@ -13,6 +13,7 @@ import java.util.UUID
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import android.os.SystemClock
 import com.ateliertime.domain.*
@@ -468,17 +469,24 @@ fun SessionEditorScreen() {
                     "remaining time to the last. Even splits the time equally; " +
                     "Custom lets you choose the split.",
                     style = MaterialTheme.typography.bodySmall)
-                Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Keep all three ending choices visible without horizontal scrolling.
+                // The longest option deliberately occupies two text lines on phones.
+                Row(modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     FilterChip(
+                        modifier = Modifier.weight(1.6f),
                         selected = ending?.mode == FinalPoseMode.REMAINDER,
                         onClick = {
                             ending = FinalPoseChoice.remainder()
                             acceptedWarning = false; approved = null
                         },
-                        label = { Text("Last gets remaining time") },
+                        label = {
+                            Text("Last gets\nremaining time",
+                                maxLines = 2, textAlign = TextAlign.Center)
+                        },
                     )
                     FilterChip(
+                        modifier = Modifier.weight(0.8f),
                         selected = ending?.mode == FinalPoseMode.EVEN_SPLIT,
                         enabled = candidate.canSplitFinalTwo,
                         onClick = {
@@ -488,6 +496,7 @@ fun SessionEditorScreen() {
                         label = { Text("Even") },
                     )
                     FilterChip(
+                        modifier = Modifier.weight(0.9f),
                         selected = ending?.mode == FinalPoseMode.CUSTOM_SPLIT,
                         enabled = candidate.canSplitFinalTwo,
                         onClick = {
