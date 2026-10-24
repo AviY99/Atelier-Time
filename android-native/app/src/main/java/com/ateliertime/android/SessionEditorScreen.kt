@@ -16,6 +16,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import android.os.SystemClock
+import java.util.Calendar
+import com.ateliertime.domain.DesignClock
+import com.ateliertime.domain.DesignPreferences
 import com.ateliertime.domain.*
 import kotlinx.coroutines.delay
 
@@ -24,7 +27,7 @@ import kotlinx.coroutines.delay
  * Timer owns the saved-class library, Run and real-time countdown.
  * Style is a neutral Material 3 baseline, NOT final branding.
  */
-private enum class MainTab { EDITOR, SOUNDS, TIMER }
+private enum class MainTab { EDITOR, SOUNDS, TIMER, DESIGN, ABOUT }
 
 @Composable
 fun SessionEditorScreen() {
@@ -34,6 +37,10 @@ fun SessionEditorScreen() {
         PresetCatalog(AndroidPresetStore(context), engine) {
             UUID.randomUUID().toString()
         }
+    }
+    val designStore = remember(context) { DesignSettingsStore(context) }
+    var designPreferences by remember(designStore) {
+        mutableStateOf(designStore.load())
     }
     val melodyPreferences = remember(context) { MelodyPreferences(context) }
     var melodySelections by remember(melodyPreferences) {
@@ -72,6 +79,11 @@ fun SessionEditorScreen() {
     }
     var timerView by remember(liveTimer) { mutableStateOf(liveTimer?.view()) }
     var wallClockMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    val hourOfDay = remember(wallClockMillis) {
+        Calendar.getInstance().apply { timeInMillis = wallClockMillis }
+            .get(Calendar.HOUR_OF_DAY)
+    }
+    val designPalette = DesignClock.resolve(designPreferences, hourOfDay)
     val classClockTracker = remember(liveTimer) { ClassClockTracker() }
     var classClockTimes by remember(liveTimer) { mutableStateOf(ClassClockTimes()) }
     var timerError by remember(liveTimer) { mutableStateOf<String?>(null) }
@@ -270,8 +282,9 @@ fun SessionEditorScreen() {
 
     // Keep the tab bar BELOW Android status icons/notch and content ABOVE
     // gesture navigation in edge-to-edge mode. All tabs share these insets.
+    AtelierDesignTheme(designPalette) {
     Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
-        TabRow(selectedTabIndex = activeTab.ordinal) {
+        ScrollableTabRow(selectedTabIndex = activeTab.ordinal, edgePadding = 4.dp) {
             MainTab.entries.forEach { tab ->
                 Tab(
                     selected = activeTab == tab,
@@ -281,6 +294,15 @@ fun SessionEditorScreen() {
             }
         }
         when (activeTab) {
+            MainTab.DESIGN -> DesignSettingsPanel(
+                settings = designPreferences,
+                currentPalette = designPalette,
+                onChange = { updated ->
+                    designPreferences = updated
+                    designStore.save(updated)
+                },
+            )
+            MainTab.ABOUT -> AtelierAboutPanel()
             MainTab.EDITOR -> Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(16.dp),
@@ -673,6 +695,7 @@ fun SessionEditorScreen() {
                         wallClockMillis = wallClockMillis,
                         classClockTimes = classClockTimes,
                         timerError = timerError,
+                        designPalette = designPalette,
                         onStart = {
                             timerAction { timer.start() }
                             timerView?.takeIf {
@@ -748,6 +771,7 @@ fun SessionEditorScreen() {
                 TextButton(onClick = { helpSection = null }) { Text("Close") }
             },
         )
+    }
     }
 }
 
