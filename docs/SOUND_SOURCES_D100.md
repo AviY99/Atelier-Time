@@ -1,5 +1,7 @@
 # Atelier Time — D-100 expanded sound sources and duration controls (2026-10-24)
 
+> **D-100 DEVICE ACCEPTED (2026-10-24):** User explicitly confirms "הכל עובד כנדרש" for the installed D-100 Sound sources and duration release after the screenshot-verified 41s Gradle build. Older 'installation/QA pending' statements below are historical. A NEW D-101 compact Sound-only UX increment with separate vs shared sound and 5/10s shared length is source-only: [SOUND_COMPACT_D101.md](SOUND_COMPACT_D101.md). The D-100 acceptance does not imply D-101 built/installed/accepted or background/Doze PASS.
+
 **CURRENT STATUS (2026-10-24): D-100 user-phone Gradle build/test task PASS and debug APK assembly PASS** (screenshot shows `BUILD SUCCESSFUL in 41s`, 42 tasks: 8 executed, 34 up-to-date, including `:app:testDebugUnitTest` and `:app:assembleDebug`). **The D-100 APK has NOT yet been confirmed copied to Downloads, update-installed, audibly tested, or user-approved.** The screenshot does not show the local HEAD SHA or individual JUnit method results. No rebuild is needed before the next gate. This is a new functional increment AFTER user-accepted design-frozen Android Stable 2 / D-098. Do NOT move or rewrite `stable/android-d098` or `stable/android-d086`.
 
 ## Approved user requirement
