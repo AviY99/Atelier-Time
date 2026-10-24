@@ -466,13 +466,13 @@ fun DesignSettingsPanel(
 @Composable
 fun AtelierAboutPanel() {
     val context = androidx.compose.ui.platform.LocalContext.current
-    // Display actual installed version number, excluding its dev/suffix label.
+    // Show the actual installed package versionName verbatim (e.g. D-104).
+    // Stable checkpoint number and Android numeric versionCode are separate.
     val version = androidx.compose.runtime.remember(context) {
-        val installedVersion = runCatching {
+        runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0)
                 .versionName.orEmpty()
-        }.getOrDefault("")
-        Regex("""\d+(?:\.\d+)*""").find(installedVersion)?.value ?: "—"
+        }.getOrDefault("").trim().ifEmpty { "—" }
     }
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
