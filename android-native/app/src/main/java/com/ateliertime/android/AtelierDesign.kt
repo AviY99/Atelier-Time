@@ -216,10 +216,12 @@ fun AtelierAboutPanel() {
     val context = androidx.compose.ui.platform.LocalContext.current
     // Read actual installed APK metadata: never show an invented app version.
     val version = androidx.compose.runtime.remember(context) {
-        runCatching {
+        val installedVersion = runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0)
-                .versionName ?: "unknown"
-        }.getOrDefault("unknown")
+                .versionName.orEmpty()
+        }.getOrDefault("")
+        // Render just the numeric component, e.g. "0.1.0-dev" -> "0.1.0".
+        Regex("""\\d+(?:\\.\\d+)*""").find(installedVersion)?.value ?: "—"
     }
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
@@ -231,15 +233,15 @@ fun AtelierAboutPanel() {
             Column(modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Atlier Time", style = MaterialTheme.typography.headlineMedium)
-                Text("Version $version  ·  © 2026",
-                    style = MaterialTheme.typography.bodyMedium)
-                Text("פותח ע״י Avi Yosfan בסיוע Open AI",
+                Text(version, style = MaterialTheme.typography.titleMedium)
+                Text("© 2026", style = MaterialTheme.typography.bodyMedium)
+                Text("Developed by Avi Yosfan with assistance from Open AI",
                     style = MaterialTheme.typography.titleMedium)
                 HorizontalDivider()
                 Text(
-                    "Atlier Time מאפשרת לתכנן שיעורי סטודיו, לקבוע מקטעי עבודה " +
-                        "והפסקות, לשמור מערכי שיעור ולהפעיל טיימר עם התראות " +
-                        "קוליות ומעקב זמנים בזמן אמת.",
+                    "Atlier Time helps you plan art studio classes, organize " +
+                        "work sessions and breaks, save reusable class schedules, " +
+                        "and run a timer with sound alerts and live time tracking.",
                     style = MaterialTheme.typography.bodyLarge,
                 )
             }
