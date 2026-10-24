@@ -91,6 +91,72 @@ class MonotonicSessionTimer(
         return view()
     }
 
+    /**
+     * Restart only the CURRENT work Session, never the whole Class.
+     *
+     * Previously completed sessions/breaks stay completed. The active Session
+     * restarts at its own phase start, and the time already spent on it (plus
+     * any current pause) is deducted from the final TWO regular sessions,
+     * using the originally approved Remainder/Even/Custom ending choice.
+     * If preceding Next actions gained time, this net correction may also
+     * EXTEND the final pair. The Class start and original finish deadline
+     * stay unchanged. Neither approved schedule nor stored preset is edited.
+     *
+     * A break/summary has no current Session to restart. Once the LAST final
+     * regular session has started, its first partner is already completed;
+     * rebalancing both would rewrite past work, so reject atomically.
+     * Restarting the FIRST final regular Session remains valid because it is
+     * explicitly reset and no earlier completed phase is altered.
+     */
+    fun restartCurrentSessionKeepingEndTime(): TimerView {
+        check(status == TimerStatus.RUNNING || status == TimerStatus.PAUSED) {
+            "Start the class before restarting a session."
+        }
+        val current = view().phase
+            ?: error("There is no active session to restart.")
+        check(current.kind == PhaseKind.POSE) {
+            "Restart session works during a Session, not a Break or class summary. " +
+                "Use Next to finish the current break."
+        }
+        val index = activePhases.indexOfFirst { it.id == current.id }
+        check(index >= 0) { "Current session is missing from the timeline." }
+        val regularIndices = session.phases.indices.filter {
+            session.phases[it].kind == PhaseKind.POSE &&
+                session.phases[it].poseSource == PoseSource.REGULAR
+        }.takeLast(2)
+        check(regularIndices.size == 2 && index < regularIndices.last()) {
+            "The last regular Session has already started. Cannot rebalance " +
+                "two final sessions without rewriting a completed one."
+        }
+        val now = nowMillis()
+        val elapsedWithinMs = (elapsedMs() -
+            current.startSeconds.toLong() * 1_000L).coerceAtLeast(0L)
+        val pausedMs = if (status == TimerStatus.PAUSED) {
+            (now - (suspendedFromMs ?: now)).coerceAtLeast(0L)
+        } else 0L
+        val addedSeconds = (elapsedWithinMs + pausedMs + 999L) / 1_000L
+        val correction = lostSeconds.toLong() + addedSeconds
+        require(correction in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
+            "Restart delay is too large for the class timeline."
+        }
+        val revised = FinalPairCompensation.adjust(session, correction.toInt())
+        val target = revised.phases[index]
+        check(target.id == current.id &&
+            target.startSeconds == current.startSeconds) {
+            "The current session start would change. No restart was performed."
+        }
+        // All failure checks completed. Commit the transition atomically.
+        activePhases = revised.phases
+        activeTotalMs = revised.totalSeconds.toLong() * 1_000L
+        lostSeconds = revised.recoveredSeconds
+        elapsedBeforeRunMs = target.startSeconds.toLong() * 1_000L
+        runningFromMs = now
+        suspendedFromMs = null
+        lastPhaseIndex = index
+        status = TimerStatus.RUNNING
+        return view()
+    }
+
     fun pause(): TimerView {
         if (status == TimerStatus.RUNNING) {
             elapsedBeforeRunMs = elapsedMs()
