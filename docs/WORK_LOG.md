@@ -1,5 +1,15 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-24 — Installed Android APK confirmed working by user; previous "install pending" closed
+
+**Explicit user confirmation after the phone Gradle 13:03 PASS:** "השלב הזה כבר בוצע והאפליקציה הותקנה ותקינה" — the native Android APK **has been update-installed**, and the user says the application is **working correctly**. This is first-hand **user-reported device acceptance**, not a terminal-captured installer log nor exhaustive proof of every manual scenario. User also challenged repeated assistant instructions to reinstall after already completing the step; hence **DO NOT ask again to copy APK, install update or re-run the same successful native build solely because previous docs still say PENDING**.
+
+**Evidence chain:** 13:03 phone screenshot displayed successful fast-forward to `bab39b3` and `67:BUILD SUCCESSFUL in 52s` for the native Gradle combined Kotlin task + APK assembly. Subsequently the user explicitly reports successful updated installation and functional operation. Current reported app has D-080 Editor final Save, Timer saved-class list/Run/Edit/end behavior and D-081 current-Session Restart + clear final-pair name **in the shipped source**; do not claim each UX branch was individually tested unless explicitly observed. Android instrumentation tests, locked/background audio and reliability still not shown to pass. No paid Actions; PR #3 remains draft and unmerged.
+
+**Next action:** move forward with a concrete next development/testing item from [TEST_PLAN](TEST_PLAN.md), not generic APK deployment/rebuild guidance. Safeguard offline saved classes and data compatibility.
+
+---
+
 ## 2026-10-24 13:03 — D-080/D-081 Android Kotlin unit-test and debug APK build PASS after import fix
 
 **User-provided real Android Code on the Go screenshot at 13:03 local time** shows `git pull --ff-only` fast-forwarding native branch from `c1bf428` to **`bab39b3`**, with `SessionEditorScreen.kt | 1 +`; then the user ran Bash Gradle 9.6.1 `:app:testDebugUnitTest :app:assembleDebug --no-daemon --console=plain` with the native phone AAPT2 override, logging all output to `$HOME/atelier-build.log`. Subsequent command `grep -nE '(^e:|^error:|BUILD FAILED|BUILD SUCCESSFUL|tests completed)' "$HOME/atelier-build.log" | tail -40` printed **`67:BUILD SUCCESSFUL in 52s`**. This **verifies Gradle test task and debug APK assembly completed** for the fast-forwarded working tree. Screenshot does not show numeric individual test count, copied APK in Downloads, update-install, or manual acceptance of D-080/D-081 behavior. The prior `compileDebugKotlin` failure is superseded by this PASS. **Do not treat 89 tests written as an independently observed run count.**
