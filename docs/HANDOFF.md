@@ -1,5 +1,11 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v3.4)
 
+## LATEST USER DEVICE RESULT — 2026-10-24: FIVE-SECOND A/B/C MELODY PREVIEWS WORK (USER-REPORTED)
+
+After `AudioTrack.MODE_STATIC` state-order correction, successful phone Gradle build and instructions to update-install and test three `Play 5s` buttons, user answered **"הכל עובד"**. Treat this as **manual melody-preview functional PASS per user's confirmation**, not confirmation of automatic runtime cue scheduling or any audio recording evidence. **NEXT:** execute the genuine app's short 3-minute `POSE_FIRST` session: total 3m, end summary 0, no opening groups, pose 1m, regular break 1m, special break count 0; expect automatic A when pose ends at 01:00, B when break ends at 02:00, C at overall 03:00. Then test interruption reflow for REMAINDER/EVEN/CUSTOM approved finishing pose pair in a longer session. Do not mark K04 complete for lock/background audio; native foreground service absent. Draft PR #3 still open, GitHub Actions remain unused.
+
+---
+
 ## LATEST (2026-10-24 10:28) — AUDIO FIX FOLLOW-UP PHONE GRADLE PASS; LISTENING TEST STILL PENDING
 
 User phone screenshot after `AudioTrack.MODE_STATIC` initialization fix instructions shows `:app:testDebugUnitTest`, `:app:assembleDebug` and **`BUILD SUCCESSFUL in 28s`** (42 tasks, 8 executed and 34 up-to-date). Screenshot does not show Git SHA, exact JUnit case totals, APK copy success, update installation or audible results. **Do not treat audio bug as fixed on device yet.** Next user step update-install `/storage/emulated/0/Download/Atelier-Time-update.apk` (or copy from current project's `app/build/outputs/apk/debug/app-debug.apk` if necessary), retain existing saved-session data, then press all three `Play 5s` melody previews to check no red `Android audio output is not initialized` error, tune distinction and full 5-second duration. After passing, test foreground automatic A/B/C and final-pair reflow separately. Android instrumentation and lock/background reliability still pending.
