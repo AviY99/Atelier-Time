@@ -1,5 +1,11 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v3.4)
 
+## ACTIVE VERIFICATION UPDATE — 2026-10-24 D-082 GRADLE GATE SUCCESS (APK DEVICE ACCEPTANCE OPEN)
+
+New conversation continued from [binding handoff](NEXT_CHAT_HANDOFF_2026_10_24.md). User-provided Code on the Go phone terminal screenshots show fast-forward `bab39b3..b51620d` on `android-native-kotlin-compose`, followed from the `android-native` Gradle root by the combined `:app:testDebugUnitTest :app:assembleDebug` invocation ending **`BUILD SUCCESSFUL in 12s`** with **42/42 tasks UP-TO-DATE**. Gradle considers the test task and assembled APK outputs current for the checked-out source. Since no tasks executed afresh in this invocation, the screenshot **does not establish a newly executed 97-test JUnit count** (97 remain written source methods), and it does not prove an update-install or runtime behavior for D-082. Next: install the existing debug APK as an update **without uninstall/clearing saved classes**, then verify timer-card phase clocks, larger Clock, Restart session=A / Restart break=B, unchanged Class start/deadline, final-break safe compensation and atomic refusal. Previous D-080/D-081 APK remains user-confirmed working. Nine Android instrumentation methods and background/locked-screen audio remain independent unverified gates. No Actions/merge; PR #3 stays Draft. This status supersedes historical D-082 "not built" statements below without changing the archived handoff record.
+
+---
+
 ## CHAT CLOSED — NEW BINDING HANDOFF FOR NEXT CONVERSATION (2026-10-24)
 
 **Read [NEXT_CHAT_HANDOFF_2026_10_24.md](NEXT_CHAT_HANDOFF_2026_10_24.md) FIRST.** This is the new authoritative, dedicated next-chat document, committed and verified on `main`. The user explicitly ended this conversation. **Do not continue coding or ask for phone work in this closed chat.** The prior installed APK is **user-confirmed working** after screenshot-verified 13:03 Gradle success; subsequent D-082 start/end clocks in timer card, 2× Clock and Restart Break are **already implemented in GitHub source**, but **not yet built/tested/installed on phone**. Read new handoff for next-chat task ordering and distinctions. Older sections below remain historical. Native branch observed head at handoff: `b51620d64e87db129dcf44c153fb7bc986fcacf6`; PR #3 remains open Draft, not merged. No paid Actions.
