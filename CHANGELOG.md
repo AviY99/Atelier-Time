@@ -1,5 +1,11 @@
 # Changelog — Atelier Time
 
+## 2026-10-24 — D-102 active-only sound source guard — source fix, on-phone Gradle/QA pending
+
+User screenshot from installed D-101 confirms compact Sound UI works overall but the source-disable error is triggered by a sound used only in the *hidden* mode. Current D-102 dev source now checks only Shared's single active sound or Separate's active A/B/C; persisted dormant choices do not block disabling their source. On mode switch, required libraries are auto-reenabled so the preserved sound can play. New pure JVM tests and Android preference persistence instrumentation test sources cover both mode directions and the still-required active/last-source protection. **Tests are written, not run; D-102 not yet phone built, installed or approved.** D-101 is accepted with this identified defect. User-approved `stable/android-d098` remains untouched. [Reproduction and QA](docs/SOUND_ACTIVE_SOURCE_D102.md).
+
+---
+
 ## D-101 phone build pass — 2026-10-24
 
 **D-101 build evidence, 2026-10-24:** Phone screenshot verifies Gradle `BUILD SUCCESSFUL in 42s`, 42 tasks (8 executed, 34 up-to-date), `:app:testDebugUnitTest`, `:app:assembleDebug`, and copied `Atelier-Time-D101.apk` (12M, Downloads). Individual JUnit method count/local SHA not visible. **Installation and manual Sound UI/audio acceptance pending**; D-100 last phone-accepted build. Do not rerun build; install existing APK as update preserving stored Classes. Stable 2 unchanged. Details: [SOUND_COMPACT_D101.md](docs/SOUND_COMPACT_D101.md).
