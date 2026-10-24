@@ -1,5 +1,13 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-24 — User confirms audio previews now work after MODE_STATIC fix
+
+**New user confirmation:** In direct reply to the request to update-install the rebuilt APK and press A/B/C `Play 5s` selections, user wrote **"הכל עובד"** ("everything works"). Interpreted in the scope of the immediately preceding device test as **three user-tested melody selection previews working**, following the real `AudioTrack.MODE_STATIC` pre/post PCM initialization fix. This is a **USER-REPORTED DEVICE PASS** for preview playback, not machine-captured waveform/duration measurement; the requested 5-second distinct previews are accepted as working by user report. The user did not separately provide evidence yet for **automatic cue events at phase transitions, lock/background reliability, pause/resume and stop/continue final-two-pose runtime compression, or Android instrumentation test execution**. Those gates remain OPEN.
+
+**Next actual on-phone functional check:** In the updated installed app, create and approve a three-minute session with `total=3m`, `summary=0`, `opening groups=none`, `regular pose=1m`, `regular break=1m`, `special break count=0`, `POSE_FIRST`. Start timer in foreground: A expected at **01:00**, B at **02:00**, C at **03:00**. This is real Atelier Time feature validation, not a disposable development proof app. Preserve saved presets and run later an independent longer real session test for final-two-pose compensation across all 3 selected ending modes. PR #3 stays draft; no paid Actions.
+
+---
+
 ## 2026-10-24 — Native audio initialization fix: follow-up phone Gradle build PASSED, audible acceptance pending
 
 **Screenshot evidence (user, 10:28 local Android Code on the Go terminal):** Kotlin/Android Gradle output includes `:app:compileDebugUnitTestKotlin`, `:app:testDebugUnitTest`, `:app:packageDebug`, `:app:assembleDebug` and **`BUILD SUCCESSFUL in 28s`**; **42 actionable tasks, 8 executed, 34 up-to-date**. This was provided in response to the previous instruction to pull the fixed `MODE_STATIC` audio-init code, run JVM tests and build the Android APK. Screenshot does **not** show `git rev-parse HEAD`, the exact JUnit XML count, copy completion, install success, or audio output; avoid claiming any unobserved item.
