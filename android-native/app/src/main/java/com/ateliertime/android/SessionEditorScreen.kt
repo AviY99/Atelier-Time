@@ -474,7 +474,7 @@ fun SessionEditorScreen() {
                 Row(modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     FilterChip(
-                        modifier = Modifier.weight(1.6f),
+                        modifier = Modifier.weight(1.5f),
                         selected = ending?.mode == FinalPoseMode.REMAINDER,
                         onClick = {
                             ending = FinalPoseChoice.remainder()
@@ -496,7 +496,7 @@ fun SessionEditorScreen() {
                         label = { Text("Even") },
                     )
                     FilterChip(
-                        modifier = Modifier.weight(0.9f),
+                        modifier = Modifier.weight(1.1f),
                         selected = ending?.mode == FinalPoseMode.CUSTOM_SPLIT,
                         enabled = candidate.canSplitFinalTwo,
                         onClick = {
