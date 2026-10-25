@@ -104,4 +104,70 @@ class RunEndTimeDeviceTest {
         } catch (_: IllegalArgumentException) { }
         assertEquals(TimerStatus.READY, timer.view().status)
     }
+
+    @Test fun devicePauseAfterPenultimateSessionOnlyShortensLastUnstartedOne() {
+        val session = session()
+        val regular = session.phases.filter {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.takeLast(2)
+        val breakBetween = session.phases.first {
+            it.startSeconds == regular.first().endSeconds
+        }
+        var now = SystemClock.elapsedRealtime()
+        val timer = MonotonicSessionTimer(session) { now }
+        timer.start()
+        now += (breakBetween.startSeconds + 2L) * 1000L
+        timer.pause()
+        now += 20_000L
+        val resumed = timer.resume()
+        assertEquals(TimerStatus.RUNNING, resumed.status)
+        assertEquals(regular.first().durationSeconds,
+            timer.finalTwoPoseDurations()?.first)
+        assertEquals(regular.last().durationSeconds - 20,
+            timer.finalTwoPoseDurations()?.second)
+    }
+
+    @Test fun deviceRejectsLateEndBeyondTwiceOriginalClass() {
+        val session = session()
+        val original = session.phases.toList()
+        val now = System.currentTimeMillis()
+        try {
+            RunEndTimePlanner.plan(session, now, now + m(361).toLong() * 1_000L)
+            fail("Overlong finish should be rejected.")
+        } catch (e: IllegalArgumentException) {
+            assertTrue(e.message!!.contains("too late"))
+        }
+        assertEquals(original, session.phases)
+    }
+
+    @Test fun rejectedFinishDoesNotLaunchClockOrEmitMelodyCue() {
+        val session = session()
+        var now = SystemClock.elapsedRealtime()
+        val timer = MonotonicSessionTimer(session) { now }
+        try {
+            RunEndTimePlanner.plan(session, 0L, m(151) * 1000L)
+            fail("Impossible early time should not start the Class")
+        } catch (_: IllegalArgumentException) { }
+        now += 10_000L
+        val event = timer.update()
+        assertEquals(TimerStatus.READY, event.view.status)
+        assertNull(event.cue)
+        assertEquals(session.rules.totalSeconds, event.view.totalSeconds)
+    }
+
+    @Test fun expiredMonotonicPhysicalDeadlineFinishesPausedClassExactlyOnce() {
+        val session = session()
+        var now = SystemClock.elapsedRealtime()
+        val timer = MonotonicSessionTimer(session) { now }
+        val tracker = ClassClockTracker { now }
+        val epoch = System.currentTimeMillis()
+        tracker.newClass(timer.start(-m(6)), epoch, epoch + m(186) * 1000L)
+        now += 30_000L
+        timer.pause()
+        now += m(186).toLong() * 1000L
+        assertTrue(tracker.hasReachedClassDeadline(epoch))
+        assertEquals(TimerCue.SESSION_FINISHED, timer.finishAtDeadline().cue)
+        assertNull(timer.finishAtDeadline().cue)
+    }
+
 }
