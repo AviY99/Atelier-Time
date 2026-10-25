@@ -1,5 +1,9 @@
 # Atelier Time — ordered QA 3→4: unexpected-stop recovery, then Android instrumentation
 
+## 2026-10-25 — AndroidTest APK successfully copied to Downloads
+
+- 2026-10-25 — **Test APK copied to shared Downloads, user screenshot PASS.** In Code on the Go terminal under `/storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native`, the user ran `APK="$(find app/build/outputs/apk/androidTest -type f -name '*.apk' -print -quit)"`, then guarded `cp "$APK" /storage/emulated/0/Download/Atelier-Time-D110-Tests.apk`. The resulting `ls -lh` shows a **1.1 MB APK at** `/storage/emulated/0/Download/Atelier-Time-D110-Tests.apk`, dated Oct 25 18:03. The copy step passed without rebuilding. **Next:** in Termux grant shared-storage access via `termux-setup-storage`, then `adb install -t -r ~/storage/downloads/Atelier-Time-D110-Tests.apk`. Android ADB transport confirmed via `adb devices -l` on device `10.0.0.6:34545` Samsung SM-S921B. Installing just the AndroidTest APK must not uninstall or clear target app data; make sure no Class active before instrumenting. **Install and all 14 Android instrumentation tests remain NOT YET VERIFIED**.
+
 ## 2026-10-25 — Wireless ADB transport CONFIRMED on user's phone
 
 - User supplied actual Termux `adb devices -l` output: `10.0.0.6:34545         device product:e1sxeea model:SM_S921B device:e1s transport_id:1`. This proves connected/authorized Samsung SM-S921B, **ADB device-state PASS**. Previous entries below are historical and superseded as to current connection status.
