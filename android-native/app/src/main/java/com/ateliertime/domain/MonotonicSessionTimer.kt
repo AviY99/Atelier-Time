@@ -37,20 +37,29 @@ class MonotonicSessionTimer(
     private var runningFromMs: Long? = null
     private var suspendedFromMs: Long? = null
     private var lostSeconds = 0
+    // Initial user-approved end-time shift is part of every later correction.
+    private var initialEndCorrectionSeconds = 0
     private var activePhases: List<SchedulePhase> = session.phases
     private var activeTotalMs = session.rules.totalSeconds.toLong() * 1000L
     private var lastPhaseIndex: Int? = null
 
-    fun start(): TimerView {
-        if (status == TimerStatus.STOPPED) return resume()
+    fun start(initialCorrectionSeconds: Int = 0): TimerView {
+        if (status == TimerStatus.STOPPED) {
+            require(initialCorrectionSeconds == 0) { "Resume an existing Class before changing its end time." }
+            return resume()
+        }
         check(status == TimerStatus.READY || status == TimerStatus.FINISHED) {
             "Pause, continue or stop before starting again."
         }
-        // A completed session starts over with a new finish deadline.
+        // Compute the entire adjusted plan before mutating timer state.
+        // A rejected deadline leaves the Class READY, never half-started.
+        val revised = if (initialCorrectionSeconds == 0) null
+            else FinalPairCompensation.adjust(session, initialCorrectionSeconds)
         elapsedBeforeRunMs = 0L
-        lostSeconds = 0
-        activePhases = session.phases
-        activeTotalMs = session.rules.totalSeconds.toLong() * 1000L
+        initialEndCorrectionSeconds = initialCorrectionSeconds
+        lostSeconds = initialCorrectionSeconds
+        activePhases = revised?.phases ?: session.phases
+        activeTotalMs = (revised?.totalSeconds ?: session.rules.totalSeconds).toLong() * 1000L
         runningFromMs = nowMillis()
         originalStartMs = runningFromMs
         suspendedFromMs = null
@@ -81,7 +90,11 @@ class MonotonicSessionTimer(
         require(secondsToRecover <= Int.MAX_VALUE.toLong()) {
             "Too much time has elapsed to restart this session."
         }
-        val adjusted = FinalPairCompensation.adjust(session, secondsToRecover.toInt())
+        val combinedCorrection = initialEndCorrectionSeconds.toLong() + secondsToRecover
+        require(combinedCorrection in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
+            "The time change exceeds the supported finish-time adjustment range."
+        }
+        val adjusted = FinalPairCompensation.adjust(session, combinedCorrection.toInt())
         activePhases = adjusted.phases
         activeTotalMs = adjusted.totalSeconds.toLong() * 1000L
         lostSeconds = adjusted.recoveredSeconds
