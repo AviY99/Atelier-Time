@@ -304,7 +304,7 @@ fun SessionEditorScreen(
                 ).correctionSeconds
                 val view = clock.start(correction)
                 timerView = view
-                classClockTimes = classClockTracker.newClass(view, startEpochMs)
+                classClockTimes = classClockTracker.newClass(view, startEpochMs, target)
                 timerError = null
             } catch (error: IllegalArgumentException) {
                 val session = playingSession
