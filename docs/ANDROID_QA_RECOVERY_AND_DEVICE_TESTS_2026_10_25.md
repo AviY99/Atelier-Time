@@ -1,5 +1,12 @@
 # Atelier Time — ordered QA 3→4: unexpected-stop recovery, then Android instrumentation
 
+## 2026-10-25 — User reports successful external-IP ADB pairing/connection
+
+- User message: **"הצליח מחובר"** ("Succeeded, connected") after switching from localhost attempts to the phone's external/Wi-Fi IP route in Termux with Samsung split-screen for Wireless debugging.
+- **PAIRING/CONNECTION USER-REPORTED SUCCESS**. A device-state readout `adb devices -l` has not yet been supplied, so **`device` authorization not independently screenshot-verified** and **14 Android instrumentation tests still NOT RUN**.
+- Next safe gate: `adb devices -l`, verify connected phone in `device` state. Next inspect the *existing* Android test APK output at `android-native/app/build/outputs/apk/androidTest/app-debug-androidTest.apk`; do not assume it exists at another path or install until exact artifact path is checked. On the connected device, install the test-only package preserving already-installed D-110; launch its declared `androidx.test.runner.AndroidJUnitRunner` to collect real Android `INSTRUMENTATION_STATUS` results.
+- **Protection:** app data in saved Classes/Sound remains untouched intentionally by existing test namespaces; nevertheless verify tests and package names, and do not launch instrumentation during a live Class because the runner may restart the target app process. No Android app source, Gradle version, stable branches or APK rebuilt by this note. Turn off Wireless debugging after tests.
+
 ## 2026-10-25 — Correct PIN still fails: use on-device loopback diagnostic
 
 - User explicitly reports correct Wireless debugging pairing PIN but repeated pairing failures (`protocol fault (couldn't read status message): Success`). **Do not assume user typo**: a Termux issue publicly reports the exact failure, though a specific older report was closed as likely mistyped PIN: https://github.com/termux/termux-packages/issues/24984.
