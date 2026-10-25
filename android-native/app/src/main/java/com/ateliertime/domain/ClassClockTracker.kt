@@ -27,7 +27,12 @@ data class ClassClockTimes(
  *   on a normal tick; pause keeps this start, but hides an uncertain phase end.
  * - All timestamps survive tab switches (tracker is owned by root composition).
  */
-class ClassClockTracker {
+class ClassClockTracker(
+    /** Android supplies elapsedRealtime; JVM legacy tests may omit this clock. */
+    private val monotonicNowMs: (() -> Long)? = null,
+) {
+    private var classStartedMonotonic: Long? = null
+    private var classDeadlineMonotonic: Long? = null
     private var classStarted: Long? = null
     private var classDeadline: Long? = null
     private var phaseId: String? = null
@@ -39,6 +44,10 @@ class ClassClockTracker {
         }
         classStarted = nowEpochMs
         classDeadline = nowEpochMs + view.totalSeconds.toLong() * 1_000L
+        classStartedMonotonic = monotonicNowMs?.invoke()
+        classDeadlineMonotonic = classStartedMonotonic?.plus(
+            view.totalSeconds.toLong() * 1_000L
+        )
         phaseId = null
         phaseStarted = null
         return observe(view, nowEpochMs)
@@ -48,8 +57,14 @@ class ClassClockTracker {
     fun restartClass(view: TimerView, nowEpochMs: Long): ClassClockTimes {
         require(view.status == TimerStatus.RUNNING && view.elapsedSeconds == 0)
         classStarted = nowEpochMs
+        classStartedMonotonic = monotonicNowMs?.invoke()
         if (classDeadline == null) {
             classDeadline = nowEpochMs + view.totalSeconds.toLong() * 1_000L
+        }
+        if (classDeadlineMonotonic == null) {
+            classDeadlineMonotonic = classStartedMonotonic?.plus(
+                view.totalSeconds.toLong() * 1_000L
+            )
         }
         phaseId = null
         phaseStarted = null
@@ -79,21 +94,34 @@ class ClassClockTracker {
         return restartCurrentSegment(view, nowEpochMs)
     }
 
+    /** The Class deadline uses the physical clock even after wall-clock correction. */
+    fun hasReachedClassDeadline(nowEpochMs: Long): Boolean {
+        val deadline = classDeadlineMonotonic ?: classDeadline ?: return false
+        val now = if (classDeadlineMonotonic != null) {
+            monotonicNowMs?.invoke() ?: return false
+        } else nowEpochMs
+        return now >= deadline
+    }
+
     fun observe(view: TimerView, nowEpochMs: Long): ClassClockTimes {
         if (view.status == TimerStatus.READY && classStarted == null) {
             return ClassClockTimes()
         }
-        // These values come from actual wall-clock time, not the virtual
-        // schedule cursor which Next moves and Pause freezes.
-        val elapsedReal = classStarted?.let { start ->
-            val seconds = (nowEpochMs - start).coerceAtLeast(0L) / 1_000L
-            val classLength = classDeadline?.let { finish ->
+        // Class durations and the physical deadline share elapsedRealtime,
+        // never the virtual cursor moved by Next or frozen by Pause.
+        // Clock-of-day labels remain epoch-based as approved.
+        val physicalNowMs = monotonicNowMs?.invoke() ?: nowEpochMs
+        val physicalStartMs = classStartedMonotonic ?: classStarted
+        val physicalDeadlineMs = classDeadlineMonotonic ?: classDeadline
+        val elapsedReal = physicalStartMs?.let { start ->
+            val seconds = (physicalNowMs - start).coerceAtLeast(0L) / 1_000L
+            val classLength = physicalDeadlineMs?.let { finish ->
                 ((finish - start).coerceAtLeast(0L) / 1_000L)
             } ?: Int.MAX_VALUE.toLong()
             seconds.coerceAtMost(classLength).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
         }
-        val remainingReal = classDeadline?.let { finish ->
-            ((finish - nowEpochMs).coerceAtLeast(0L) + 999L)
+        val remainingReal = physicalDeadlineMs?.let { finish ->
+            ((finish - physicalNowMs).coerceAtLeast(0L) + 999L)
                 .div(1_000L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
         }
         if (view.status == TimerStatus.FINISHED) {
