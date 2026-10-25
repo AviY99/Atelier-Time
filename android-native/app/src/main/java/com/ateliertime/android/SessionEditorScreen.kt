@@ -33,6 +33,9 @@ import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import java.util.Calendar
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import com.ateliertime.domain.DesignClock
 import com.ateliertime.domain.*
 import kotlinx.coroutines.delay
@@ -43,6 +46,13 @@ import kotlinx.coroutines.delay
  * Style is a neutral Material 3 baseline, NOT final branding.
  */
 private enum class MainTab { EDITOR, TIMER, SOUNDS, DESIGN, ABOUT }
+
+/** Pending approval is ephemeral: no Class clock or sound starts before Confirm. */
+private data class PendingRunApproval(
+    val presetId: String,
+    val session: ApprovedSession,
+    val suggestedEndEpochMs: Long,
+)
 
 @Composable
 fun SessionEditorScreen() {
@@ -162,6 +172,11 @@ fun SessionEditorScreen() {
     var overwriteTarget by remember { mutableStateOf<StoredPreset?>(null) }
     var libraryRevision by remember { mutableIntStateOf(0) }
     var launchRunRequested by remember { mutableStateOf(false) }
+    var runStartCorrectionSeconds by remember { mutableIntStateOf(0) }
+    var pendingRunApproval by remember { mutableStateOf<PendingRunApproval?>(null) }
+    var customFinishEnabled by remember { mutableStateOf(false) }
+    var customFinishClock by remember { mutableStateOf("") }
+    var runApprovalError by remember { mutableStateOf<String?>(null) }
     var playingSession by remember { mutableStateOf<ApprovedSession?>(null) }
     var activeTab by remember { mutableStateOf(MainTab.EDITOR) }
     var soundEnabled by remember { mutableStateOf(true) }
@@ -261,16 +276,23 @@ fun SessionEditorScreen() {
         null
     }
 
-    // Run from the Timer library starts the actual class without another
-    // intermediate approval or 'Start' button.
+    // Run starts only AFTER explicit end-clock approval. Never auto-start
+    // while the approval dialog is visible or after its cancellation.
     LaunchedEffect(liveTimer, launchRunRequested) {
         val clock = liveTimer
         if (clock != null && launchRunRequested) {
-            val view = clock.start()
-            timerView = view
-            classClockTimes = classClockTracker.newClass(view, System.currentTimeMillis())
-            timerError = null
-            launchRunRequested = false
+            try {
+                val view = clock.start(runStartCorrectionSeconds)
+                timerView = view
+                classClockTimes = classClockTracker.newClass(view, System.currentTimeMillis())
+                timerError = null
+            } catch (error: IllegalArgumentException) {
+                timerError = error.message ?: "The selected finish cannot be used."
+                playingSession = null
+            } finally {
+                launchRunRequested = false
+                runStartCorrectionSeconds = 0
+            }
         }
     }
 
@@ -844,11 +866,19 @@ fun SessionEditorScreen() {
                                 activeTab = MainTab.EDITOR
                             },
                             onRun = { record, restored ->
-                                requestClassStatusNotificationPermission()
-                                selectedPresetId = record.id
-                                playingSession = restored
-                                launchRunRequested = true
-                                activeTab = MainTab.TIMER
+                                // Snapshot the expected finish at the moment
+                                // Run is pressed. It becomes a real constraint
+                                // only after explicit confirmation below.
+                                pendingRunApproval = PendingRunApproval(
+                                    presetId = record.id,
+                                    session = restored,
+                                    suggestedEndEpochMs = RunEndTimePlanner.suggestedEndEpochMs(
+                                        restored, System.currentTimeMillis()
+                                    ),
+                                )
+                                customFinishEnabled = false
+                                customFinishClock = ""
+                                runApprovalError = null
                             },
                             onDeleted = { id ->
                                 if (selectedPresetId == id) {
@@ -913,6 +943,84 @@ fun SessionEditorScreen() {
                 }
             }
         }
+    }
+
+    pendingRunApproval?.let { request ->
+        val clockFormat = remember { SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()) }
+        AlertDialog(
+            onDismissRequest = {
+                pendingRunApproval = null
+                runApprovalError = null
+            },
+            title = { Text("Confirm Class finish time") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(request.session.rules.name)
+                    Text("Calculated finish: " +
+                        clockFormat.format(Date(request.suggestedEndEpochMs)),
+                        style = MaterialTheme.typography.titleMedium)
+                    Text("Approve this finish time or enter another HH:mm. " +
+                        "An earlier or later finish adjusts only the final two Sessions. " +
+                        "Each must remain at least one minute. Saved Classes are unchanged.")
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Choose a different end time", modifier = Modifier.weight(1f))
+                        Switch(checked = customFinishEnabled, onCheckedChange = {
+                            customFinishEnabled = it
+                            runApprovalError = null
+                        })
+                    }
+                    if (customFinishEnabled) {
+                        OutlinedTextField(
+                            colors = atelierInputColors(),
+                            value = customFinishClock,
+                            onValueChange = {
+                                customFinishClock = it
+                                runApprovalError = null
+                            },
+                            label = { Text("Finish time (HH:mm)") },
+                            placeholder = { Text("21:30") },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Text("The next occurrence of this clock time is used " +
+                            "(today or tomorrow). Finish date is checked at confirmation.",
+                            style = MaterialTheme.typography.bodySmall)
+                    }
+                    runApprovalError?.let { error ->
+                        Text(error, color = atelierErrorTextColor())
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(colors = atelierTextColors(), onClick = {
+                    val now = System.currentTimeMillis()
+                    try {
+                        val chosen = if (customFinishEnabled)
+                            RunEndTimePlanner.nextOccurrence(customFinishClock, now)
+                        else request.suggestedEndEpochMs
+                        val plan = RunEndTimePlanner.plan(request.session, now, chosen)
+                        // No timer state was touched until all validation passed.
+                        selectedPresetId = request.presetId
+                        runStartCorrectionSeconds = plan.correctionSeconds
+                        playingSession = request.session
+                        launchRunRequested = true
+                        pendingRunApproval = null
+                        runApprovalError = null
+                        activeTab = MainTab.TIMER
+                        requestClassStatusNotificationPermission()
+                    } catch (error: IllegalArgumentException) {
+                        runApprovalError = error.message ?: "Choose a feasible finish time."
+                    }
+                }) { Text("Confirm & Run") }
+            },
+            dismissButton = {
+                TextButton(colors = atelierTextColors(), onClick = {
+                    pendingRunApproval = null
+                    runApprovalError = null
+                }) { Text("Cancel") }
+            },
+        )
     }
 
     overwriteTarget?.let { target ->
