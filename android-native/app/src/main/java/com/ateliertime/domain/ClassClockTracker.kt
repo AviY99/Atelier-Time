@@ -38,12 +38,19 @@ class ClassClockTracker(
     private var phaseId: String? = null
     private var phaseStarted: Long? = null
 
-    fun newClass(view: TimerView, nowEpochMs: Long): ClassClockTimes {
+    fun newClass(
+        view: TimerView,
+        nowEpochMs: Long,
+        approvedFinishEpochMs: Long? = null,
+    ): ClassClockTimes {
         require(view.status == TimerStatus.RUNNING && view.elapsedSeconds == 0) {
             "A new class must start at its first phase."
         }
         classStarted = nowEpochMs
-        classDeadline = nowEpochMs + view.totalSeconds.toLong() * 1_000L
+        // Use the EXACT approved clock instant for the visible Class end.
+        // Monotonic duration remains rounded down to avoid exceeding it.
+        classDeadline = approvedFinishEpochMs ?:
+            nowEpochMs + view.totalSeconds.toLong() * 1_000L
         classStartedMonotonic = monotonicNowMs?.invoke()
         classDeadlineMonotonic = classStartedMonotonic?.plus(
             view.totalSeconds.toLong() * 1_000L
