@@ -1,5 +1,7 @@
 # D-108 — Close Class notification when Android closes Atelier Time
 
+> **D-108 REAL ON-PHONE BUILD FAILURE (2026-10-25, USER SCREENSHOT):** Code on the Go Android Gradle stopped at `:app:compileDebugKotlin` with `Compilation error. See log for more details`; **BUILD FAILED in 25s**, 31 actionable tasks (6 executed, 25 up-to-date). The screenshot shows only Gradle's generic failure summary, **not the actual Kotlin compiler diagnostic** (`e: ... .kt:<line>`). The failed command included `tee "$HOME/atelier-d108-build.log"`; next diagnostic is to extract exact lines via `grep -n -E '(^e:|error:|Unresolved reference|Type mismatch|Cannot access)' "$HOME/atelier-d108-build.log" | head -50` **without rebuilding**. Do not guess a Kotlin fix or claim compilation PASS. D-108 APK NOT generated/copied, update-install and new notification lifecycle QA NOT attempted; D-107 user-tested runtime remains installed. Back and Recents swipe stale-notification defects still OPEN, Home/other-app background operation previously PASS. Stable 3 checkpoint unchanged. When exact compiler error is provided, fix only offending lines, then rerun on-device test/assemble.
+
 **Date:** 2026-10-25. **Status:** DEVELOPMENT SOURCE COMMITTED; no D-108 Gradle/JVM/device build, APK update-install or real-device behavior acceptance yet. Do not report a fix as verified until the Samsung phone test. User-approved Stable 3 is immutable.
 
 ## Reproduction from user's real-phone D-107 test
