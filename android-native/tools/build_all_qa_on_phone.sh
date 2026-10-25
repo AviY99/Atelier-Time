@@ -4,6 +4,10 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+if ! grep -q 'versionName = "D-111"' app/build.gradle.kts; then
+    echo "ERROR: checkout is not D-111. Check branch and git pull --ff-only." >&2
+    exit 2
+fi
 : "${ANDROID_HOME:?CoGo ANDROID_HOME must point to its Android SDK}"
 gradle="$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle"
 aapt2="$ANDROID_HOME/build-tools/36.0.0/aapt2"
