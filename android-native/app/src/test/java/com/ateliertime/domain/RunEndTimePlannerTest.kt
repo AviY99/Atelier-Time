@@ -102,11 +102,11 @@ class RunEndTimePlannerTest {
         }
     }
 
-    @Test fun subSecondTargetRoundsUpConservatively() {
+    @Test fun subSecondTargetNeverFinishesAfterUserChoice() {
         val session = approved()
         val p = RunEndTimePlanner.plan(session, 123L, 123L + mins(180) * 1000L - 1L)
-        assertEquals(0, p.correctionSeconds)
-        assertEquals(mins(180), p.adjustedDurationSeconds)
+        assertEquals(1, p.correctionSeconds)
+        assertEquals(mins(180) - 1, p.adjustedDurationSeconds)
     }
 
     @Test fun clockTimeTodayAndTomorrowResolvedInUtc() {
