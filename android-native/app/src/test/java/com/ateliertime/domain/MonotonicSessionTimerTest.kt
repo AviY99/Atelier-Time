@@ -570,7 +570,7 @@ class MonotonicSessionTimerTest {
         assertEquals(TimerCue.BREAK_FINISHED, timer.update().cue)
     }
 
-    @Test fun interruptionCannotSilentlyRewriteFinalPairAlreadyInProgress() {
+    @Test fun interruptionWithinFirstFinalSessionKeepsItFrozenAndChangesLastOnly() {
         var now = 0L
         val evenRules = SessionRules(
             id = "even", name = "Even", totalSeconds = 180 * minute,
@@ -580,17 +580,25 @@ class MonotonicSessionTimerTest {
         val even = engine.approve(
             engine.generate(evenRules, FinalPoseChoice.even())
         )
+        val originalPair = even.phases.filter {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.takeLast(2)
         val timer = MonotonicSessionTimer(even) { now }
         timer.start()
         now = 140L * minute * 1000L
-        timer.update()
+        assertEquals(originalPair.first().id, timer.update().view.phase?.id)
         timer.pause()
         now += minute * 1000L
-        try {
-            timer.resume()
-            fail("Must refuse to change an already-started final pose.")
-        } catch (_: IllegalStateException) { }
-        assertEquals(TimerStatus.PAUSED, timer.view().status)
+        val resumed = timer.resume()
+        assertEquals(TimerStatus.RUNNING, resumed.status)
+        assertEquals(originalPair.first().durationSeconds,
+            timer.finalTwoPoseDurations()?.first)
+        assertEquals(originalPair.last().durationSeconds - minute,
+            timer.finalTwoPoseDurations()?.second)
+        assertEquals(even.rules.totalSeconds.toLong(),
+            now / 1000L + resumed.totalRemainingSeconds)
+        assertEquals(originalPair.first().durationSeconds,
+            even.phases.first { it.id == originalPair.first().id }.durationSeconds)
     }
 
     @Test fun interruptionBeyondFinalPairCapacityRequiresNewApprovedPlan() {
