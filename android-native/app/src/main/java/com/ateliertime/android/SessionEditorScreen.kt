@@ -983,9 +983,42 @@ fun SessionEditorScreen() {
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                             modifier = Modifier.fillMaxWidth(),
                         )
-                        Text("The next occurrence of this clock time is used " +
-                            "(today or tomorrow). Finish date is checked at confirmation.",
+                        Text("A clock time earlier than now refers to tomorrow.",
                             style = MaterialTheme.typography.bodySmall)
+                        if (customFinishClock.isNotBlank()) {
+                            val previewTime = runCatching {
+                                RunEndTimePlanner.nextOccurrence(
+                                    customFinishClock, wallClockMillis
+                                )
+                            }.getOrNull()
+                            previewTime?.let { resolved ->
+                                Text("Selected finish: " +
+                                    clockFormat.format(Date(resolved)),
+                                    style = MaterialTheme.typography.titleSmall)
+                            }
+                            val preview = previewTime?.let { selected ->
+                                runCatching {
+                                    RunEndTimePlanner.plan(
+                                        request.session, wallClockMillis, selected
+                                    )
+                                }.getOrNull()
+                            }
+                            if (preview != null) {
+                                Text(
+                                    "Final two Sessions: " +
+                                        (preview.adjusted.firstFinalPoseSeconds / 60) + "m + " +
+                                        (preview.adjusted.lastFinalPoseSeconds / 60) + "m",
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            } else {
+                                Text(
+                                    "Enter a feasible HH:mm finish; both final Sessions " +
+                                        "must remain at least one minute.",
+                                    color = atelierErrorTextColor(),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                        }
                     }
                     runApprovalError?.let { error ->
                         Text(error, color = atelierErrorTextColor())
