@@ -1,5 +1,7 @@
 # Test and acceptance plan — Atelier Time
 
+> **CURRENT AUTHORITATIVE STATE — 2026-10-25, D-109 / ANDROID STABLE 4:** Android D-108 user-accepted and frozen at [`stable/android-d108`](https://github.com/AviY99/Atelier-Time/tree/stable/android-d108), commit `02beb0af46719301cccb72ad4698a337ab416d73`. The historical Flutter/Dart and early pre-build status below is **SUPERSEDED** by [Stable 4 handoff](CHAT_HANDOFF_AFTER_STABLE_4_2026_10_25.md), [Stable 4 checkpoint](ANDROID_STABLE_4_D108.md), and the [next open Android reliability QA gate](ANDROID_RELIABILITY_QA_POST_D108.md). Kotlin + Jetpack Compose / Code on the Go is approved. No further app build or re-test of accepted UI, sounds, timers or Back/Swipe notifications is needed for the handoff. Connected Android instrumentation, Doze/process kill, long-run, reboot/storage recovery and Play FGS policy are not yet passed. Real D-ID and increasing `versionCode` are mandatory for each future APK, as is logo/icon user approval before Play publication.
+
 Version: 0.3 planning baseline (2026-10-22). Tests are **planned, not executed**; no app or scheduling engine exists yet.
 
 ## Approved requirement tests: D-031 + D-036 (NOT EXECUTED)
