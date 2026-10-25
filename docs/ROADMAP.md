@@ -1,5 +1,8 @@
 # Delivery roadmap and approval gates
 
+> **QA-R02 STATUS — 2026-10-25:** Accelerated Kotlin/JVM **simulation subgate QA-R02a PASS** for a virtual 180-minute Class (mathematical deadline discrepancy 0ms; expected A/B/C counts; scheduler-jitter detection latency measured). **QA-R02b real Android multi-hour accuracy/audio/Doze remains OPEN.** QA-R01 instrumentation BLOCKED. See [post-D108 QA record](ANDROID_RELIABILITY_QA_POST_D108.md). No APK source/build or stable branch changed.
+
+
 > **POST-STABLE-4 RELIABILITY GATE UPDATE — 2026-10-25:** **QA-R04 reboot-persistence subcase PASS (user-observed):** saved Classes and Sound preferences remain after normal phone restart of installed D-108. Not a claim about restoring a running timer or surviving OS process kill, Doze, corrupted data or future APK updates. **QA-R01 Android instrumentation BLOCKED (terminal ADB is zero-byte, not executable); QA-R02 real multi-hour device endurance NEXT/OPEN.** No new build or user-facing change. Details: [Android reliability QA](ANDROID_RELIABILITY_QA_POST_D108.md).
 
 > **POST-STABLE-4 DOCS-ONLY QA AUDIT (2026-10-25; no new D-build):** [Android reliability QA after D-108](ANDROID_RELIABILITY_QA_POST_D108.md) inventories 14 existing Android `@Test` source methods (7 preset persistence, 6 melody preferences, 1 silent AudioTrack). **No connected execution or APK build has occurred.** First open gate QA-R01 is validation of the CoGo phone instrumentation path, preserving all user data. D-108 Stable 4 and its code/behavior remain frozen; next actual APK must show its true D-ID and increasing Android versionCode. No prior user-approved behavior needs retesting.
