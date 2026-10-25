@@ -1,5 +1,13 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — D-114 Stage 1: explain RED wheel blocking (source updated; phone QA pending)
+
+- User confirmed **D-113 runs correctly** except at a blocked red finish boundary there is no explanation for why the wheel stopped. Do not repeat prior feature redesign: D-113 live calculated finish, on-demand wheels and hard red boundary remain accepted.
+- `EndClockWheel.kt` now invokes `onBlocked(candidate)` both for blocked swipe and blocked tap on a red neighboring value, while still refusing to move into red; rapid drags check each step and never jump across invalid ranges.
+- `SessionEditorScreen.kt` uses `RunEndTimePlanner.plan` to generate the exact rejection reason for the attempted candidate hour/minute, and immediately renders a **red explanatory message** under the wheel (`run_end_blocked_reason`) with attempted HH:mm and corrective instruction. A permitted green move, `Use calculated finish`, or a newly opened Run clears the message. Calculated finish keeps moving while the dialog is open, wheels remain hidden until `Change finish time`, and `Confirm & Run` still validates/blocks impossible endings.
+- Gradle version advanced to `versionName="D-114"`, `versionCode=9` on **android-native-kotlin-compose** development branch only. GitHub source readback verifies both blocked callbacks, message display, clearing logic and version. Frozen `stable/android-d108` unaffected; saved Class and Sounds persistence code untouched.
+- **Status: source change completed; D-114 on-device build, APK install and user acceptance NOT YET VERIFIED.** User requested approval checkpoint between Stage 1 finish UX and Stage 2 all automated QA; do not run tests until user explicitly approves. Next phone command: git pull --ff-only; use CoGo Gradle `:app:assembleDebug` (no tests), copy APK to Downloads/Atelier-Time-D114.apk, update-install with Termux ADB `adb install -r`. Test red boundary swipe/tap gives visible explanation and other accepted features remain.
+
 ## 2026-10-25 — D-113 phone assembleDebug PASS, installation pending
 
 - User-provided Code on the Go screenshot shows **BUILD SUCCESSFUL in 12s**, **36 actionable tasks: 10 executed / 26 up-to-date** for `:app:assembleDebug`.
