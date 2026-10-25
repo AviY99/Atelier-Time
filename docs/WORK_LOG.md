@@ -1,5 +1,12 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — D-113 phone assembleDebug PASS, installation pending
+
+- User-provided Code on the Go screenshot shows **BUILD SUCCESSFUL in 12s**, **36 actionable tasks: 10 executed / 26 up-to-date** for `:app:assembleDebug`.
+- Generated `/storage/emulated/0/Download/Atelier-Time-D113.apk` exists and is **12M**, dated Oct 25 21:09 local.
+- Nonfatal warning `SessionEditorScreen.kt:677:29 Elvis operator (?:) always returns the left operand of non-nullable type String` was displayed; package build succeeded.
+- User has **not yet shown installation/visual acceptance of D-113**. Next: `adb install -r ~/storage/downloads/Atelier-Time-D113.apk` via connected Termux ADB, then check wheels hidden before `Change finish time`, hard stop at first infeasible red adjacent value, reverse into green, no run without approval, and saved Classes/Sounds preserved. **Stage 2 comprehensive automated testing remains on hold until explicit user approval.** Stable D-108 frozen.
+
 ## 2026-10-25 — D-113 Stage 1 UX refinement: stopped-at-red wheel and on-demand picker
 
 **User correction to D-112 (user says all else works great):** (1) An hour/minute wheel must hard-stop at the first infeasible RED neighboring value and NOT be allowed to scroll/choose deeper into red; user can reverse toward feasible GREEN. (2) Hide both wheels initially: show them ONLY after explicit Change finish time selection. Calculated finish stays live while deciding. No comprehensive automated QA until Stage 1 approval.
