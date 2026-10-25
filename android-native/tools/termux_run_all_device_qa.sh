@@ -11,7 +11,7 @@ downloads="$HOME/storage/downloads"
 app="$downloads/Atelier-Time-D111.apk"
 tests="$downloads/Atelier-Time-D111-Tests.apk"
 log="$downloads/Atelier-Time-D111-QA-result.txt"
-expected_tests=28
+expected_tests=32
 runner="com.ateliertime.android.test/androidx.test.runner.AndroidJUnitRunner"
 
 for path in "$app" "$tests"; do
