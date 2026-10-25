@@ -977,6 +977,17 @@ fun SessionEditorScreen(
         val trial = runCatching { RunEndTimePlanner.plan(request.session, now, chosen) }
         val plan = trial.getOrNull()
         val isValid = plan != null
+        // Validate each ADJACENT hour/minute step. Invalid (red) candidates
+        // are visible at the wheel edge but cannot become selected, even by a
+        // long swipe. The actual Run is revalidated again at confirmation.
+        fun canSelectClock(candidateHour: Int, candidateMinute: Int): Boolean =
+            runCatching {
+                val candidate = RunEndTimePlanner.nextOccurrence(
+                    "%02d:%02d".format(Locale.US, candidateHour, candidateMinute),
+                    now,
+                )
+                RunEndTimePlanner.plan(request.session, now, candidate)
+            }.isSuccess
         val dark = atelierNightActive()
         val statusColor = if (isValid) {
             if (dark) Color(0xFF91F0B7) else Color(0xFF166E39)
@@ -1004,69 +1015,86 @@ fun SessionEditorScreen(
                         modifier = Modifier.testTag("run_end_calculated"),
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    Text(
-                        "Calculated finish keeps updating. Scroll hours and minutes " +
-                            "to choose a different end. Only the final two Sessions " +
-                            "can be adjusted (minimum one minute each).",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    Surface(
-                        color = pickerBackground,
-                        contentColor = if (dark) Color.White
-                            else if (isValid) Color(0xFF155D30) else Color(0xFF941B27),
-                        shape = MaterialTheme.shapes.medium,
-                        modifier = Modifier.fillMaxWidth().testTag("run_end_wheels"),
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(vertical = 4.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
+                    if (!customFinishEnabled) {
+                        Text(
+                            "Approve the live calculated finish, or choose to " +
+                                "change it using hour and minute wheels.",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        TextButton(
+                            modifier = Modifier.testTag("run_end_change_finish"),
+                            colors = atelierTextColors(),
+                            onClick = {
+                                // Wheels are created ONLY after the user opts in.
+                                // Seed both values from the currently live finish.
+                                customFinishHour =
+                                    calculatedClock.get(Calendar.HOUR_OF_DAY)
+                                customFinishMinute =
+                                    calculatedClock.get(Calendar.MINUTE)
+                                customFinishEnabled = true
+                                runApprovalError = null
+                            },
+                        ) { Text("Change finish time") }
+                    } else {
+                        Text(
+                            "Scroll hours and minutes. Red values are blocked; " +
+                                "the wheel stops at the last green value.",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        Surface(
+                            color = pickerBackground,
+                            contentColor = if (dark) Color.White
+                                else if (isValid) Color(0xFF155D30) else Color(0xFF941B27),
+                            shape = MaterialTheme.shapes.medium,
+                            modifier = Modifier.fillMaxWidth().testTag("run_end_wheels"),
                         ) {
-                            Text(
-                                if (isValid) "Valid finish" else "Invalid finish",
-                                style = MaterialTheme.typography.labelMedium,
-                            )
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            Column(
+                                modifier = Modifier.padding(vertical = 4.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                EndClockWheel(
-                                    label = "Hour", value = hour, limit = 24,
-                                    tag = "run_end_hour",
-                                    onChange = { next ->
-                                        if (!customFinishEnabled) {
-                                            customFinishMinute =
-                                                calculatedClock.get(Calendar.MINUTE)
-                                        }
-                                        customFinishHour = next
-                                        customFinishEnabled = true
-                                        runApprovalError = null
-                                    },
+                                Text(
+                                    if (isValid) "Valid finish" else "Invalid finish",
+                                    style = MaterialTheme.typography.labelMedium,
                                 )
-                                Text(":", style = MaterialTheme.typography.headlineMedium)
-                                EndClockWheel(
-                                    label = "Minute", value = minute, limit = 60,
-                                    tag = "run_end_minute",
-                                    onChange = { next ->
-                                        if (!customFinishEnabled) {
-                                            customFinishHour =
-                                                calculatedClock.get(Calendar.HOUR_OF_DAY)
-                                        }
-                                        customFinishMinute = next
-                                        customFinishEnabled = true
-                                        runApprovalError = null
-                                    },
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    EndClockWheel(
+                                        label = "Hour", value = hour, limit = 24,
+                                        tag = "run_end_hour",
+                                        canSelect = { candidateHour ->
+                                            canSelectClock(candidateHour, minute)
+                                        },
+                                        onChange = { next ->
+                                            customFinishHour = next
+                                            runApprovalError = null
+                                        },
+                                    )
+                                    Text(":", style = MaterialTheme.typography.headlineMedium)
+                                    EndClockWheel(
+                                        label = "Minute", value = minute, limit = 60,
+                                        tag = "run_end_minute",
+                                        canSelect = { candidateMinute ->
+                                            canSelectClock(hour, candidateMinute)
+                                        },
+                                        onChange = { next ->
+                                            customFinishMinute = next
+                                            runApprovalError = null
+                                        },
+                                    )
+                                }
                             }
                         }
+                        TextButton(
+                            modifier = Modifier.testTag("run_end_reset_calculated"),
+                            colors = atelierTextColors(),
+                            onClick = {
+                                customFinishEnabled = false
+                                runApprovalError = null
+                            },
+                        ) { Text("Use calculated finish") }
                     }
-                    TextButton(
-                        modifier = Modifier.testTag("run_end_reset_calculated"),
-                        colors = atelierTextColors(),
-                        onClick = {
-                            customFinishEnabled = false
-                            runApprovalError = null
-                        },
-                    ) { Text("Use calculated finish") }
                     Text(
                         "Selected finish: " + clockFormat.format(Date(chosen)),
                         color = statusColor,
