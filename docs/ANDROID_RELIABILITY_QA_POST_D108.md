@@ -1,5 +1,20 @@
 # Android reliability QA gate — after Stable 4 (D-108)
 
+## QA-R02a — accelerated Kotlin/JVM three-hour timing simulation (2026-10-25)
+
+**Outcome: PASS for the extracted uninterrupted timekeeping path in a Kotlin/JVM harness — NOT a real 3-hour Android-device test.**
+
+- Baseline: frozen D-108 Kotlin logic at `02beb0af46719301cccb72ad4698a337ab416d73`. Assistant compiled and ran an isolated Kotlin harness with the production `MonotonicSessionTimer` logic for `start/view/update/elapsedMs/phaseIndex`, the D-108 `ClassClockTracker` clock calculation, and an independently constructed canonical Example B 180-minute phase fixture.
+- Excluded: full Android APK, Android OS scheduler/Doze/process reclaim/audio playback, exact `ScheduleEngine` fixture generation, and Pause/Resume/Next/Restart paths (those are omitted or stubbed). All four runs use a **virtual monotonic clock** and a separate **mathematical reference clock**, not a physical standard clock. Results therefore prove arithmetic and alert-state invariants in the exercised path, **not real-device elapsed-time accuracy**.
+- 200ms periodic ticking: **54,001 updates**, PASS; 6 A / 5 B / 1 C, scheduled completion exactly 10,800,000ms, calculated deadline drift 0ms.
+- 1000ms periodic ticking: **10,801 updates**, PASS; 6 A / 5 B / 1 C, completion exactly at target, calculated deadline drift 0ms.
+- Deterministic random update spacing 120–2200ms: **9,346 updates**, PASS; 6 A / 5 B / 1 C, same Class target, detection of final completion at 10,800,887ms (887ms later than target); max intermediate phase-cue detection lag 1845ms due to sparse updates, not deadline drift.
+- One-hour simulated UI update silence between Class hour 1 and hour 2: **7,202 updates**, PASS for specified missed-cue suppression; 5 A / 4 B / 1 C (skipped alerts not replayed), Class completes once at target.
+- Across all sampled observations Class-clock mathematical deadline discrepancy 0ms. No regression to signed preset; no new build on phone.
+- Source of evidence: compiled Kotlin/JVM test console output in this assistant execution, with downloadable runnable harness/report in the conversation. No independent Android-connected JUnit reports or external-clock chronometer observation.
+
+**Gate disposition: QA-R02a SIMULATED PASS; QA-R02b real-phone multi-hour wall-clock/audio/battery/Doze = OPEN/UNVERIFIED.** Do not promote the simulated result to full QA-R02 PASS or Stable 5, and do not require user to repeat already-approved short A/B/C or Back/Swipe functional tests.
+
 ## QA-R04 — real-device reboot persistence observation (2026-10-25)
 
 **Result: PASS for reboot persistence subcase only — user-reported acceptance.**
