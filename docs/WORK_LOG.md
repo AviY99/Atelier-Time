@@ -1,5 +1,11 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — QA-R01 terminal blocker confirmed (user's second CoGo screenshot)
+
+- CoGo Git root verified at `/storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time`; local checkout at original accepted source `02beb0a`.
+- `$ANDROID_HOME/platform-tools/adb` exists as a **zero-byte**, non-executable file; `adb` is not on PATH. Connected instrumentation cannot currently be invoked through this terminal. **QA-R01 BLOCKED**, not failed; 14 source `@Test` methods remain unexecuted.
+- No changes to app code, installed APK, saved user Classes, SDKs or untracked `../../.cg/`. Subsequent independent reliability/storage QA can proceed separately; no old accepted UI/Sound/notification tests need repeating.
+
 ## 2026-10-25 — Post-Android Stable 4 QA audit (documentation only; NO new APK)
 
 - Read authoritative D-109/Stable 4 handoff, stable checkpoint, updated test plan/roadmap and current Kotlin/Android test sources. Verified `android-native-kotlin-compose` was identical to `stable/android-d108` at `02beb0af` before documentation changes.
