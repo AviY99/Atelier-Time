@@ -24,7 +24,7 @@
    - **Swipe app card away in Recents:** app closes, notification is removed.
    - **Exit / Class end:** notification is cleared.
    The user reported "הכל תקין כעת" for D-108 following the specific Back/Swipe regression checks.
-6. **About versioning policy:** displayed text is the real **D-build ID**, not Stable ordinal. Frozen D-108 package has `versionName = "D-108"`, Android `versionCode = 4`; About directly displays the installed PackageManager versionName, so it should show **Version D-108**. On each NEXT development APK increment, update `versionName = "D-109"`, `"D-110"`, etc. to actual revision, and increment `versionCode` monotonically. Do not write `Version 4` in About simply because the stable milestone is 4.
+6. **About versioning policy:** displayed text is the real **D-build ID**, not Stable ordinal. Frozen D-108 package has `versionName = "D-108"`, Android `versionCode = 4`; About directly displays the installed PackageManager versionName, so it should show **Version D-108**. On each NEXT development APK increment, update `versionName` to the **actual next coding iteration**, starting at **`"D-110"`** because **D-109 is this Stable 4 approval/handoff milestone**, and increment `versionCode` monotonically. Do not write `Version 4` in About simply because the stable milestone is 4.
 
 ## Evidence that does—and does not—exist
 
@@ -56,12 +56,12 @@ Development work happens on `android-native-kotlin-compose`, NOT the frozen `sta
 ```bash
 git pull --ff-only &&
 set -o pipefail &&
-bash "$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle" :app:testDebugUnitTest :app:assembleDebug --no-daemon --console=plain "-Pandroid.aapt2FromMavenOverride=$ANDROID_HOME/build-tools/36.0.0/aapt2" 2>&1 | tee "$HOME/atelier-d109-build.log" &&
-cp app/build/outputs/apk/debug/app-debug.apk /storage/emulated/0/Download/Atelier-Time-D109.apk &&
-ls -lh /storage/emulated/0/Download/Atelier-Time-D109.apk
+bash "$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle" :app:testDebugUnitTest :app:assembleDebug --no-daemon --console=plain "-Pandroid.aapt2FromMavenOverride=$ANDROID_HOME/build-tools/36.0.0/aapt2" 2>&1 | tee "$HOME/atelier-d110-build.log" &&
+cp app/build/outputs/apk/debug/app-debug.apk /storage/emulated/0/Download/Atelier-Time-D110.apk &&
+ls -lh /storage/emulated/0/Download/Atelier-Time-D110.apk
 ```
 
-**This is an example for a future D-109 update, not an instruction to build now.** Set development Gradle versionName/versionCode to the actual next build identifier **before** issuing this command. Build and test on phone with native AAPT2 override; update-install without uninstall or data wipe. Present tool results and real on-phone screenshots as separate evidence. Keep all canonical docs current: HANDOFF, DECISIONS, TEST_PLAN, ROADMAP, WORK_LOG, CHANGELOG.
+**This is an example for a future D-110 update, not an instruction to build now.** Set development Gradle versionName/versionCode to the actual next build identifier **before** issuing this command. Build and test on phone with native AAPT2 override; update-install without uninstall or data wipe. Present tool results and real on-phone screenshots as separate evidence. Keep all canonical docs current: HANDOFF, DECISIONS, TEST_PLAN, ROADMAP, WORK_LOG, CHANGELOG.
 
 ## New-chat protocol
 
