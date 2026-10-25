@@ -1022,10 +1022,13 @@ fun SessionEditorScreen(
                                 }.getOrNull()
                             }
                             if (preview != null) {
+                                val first = preview.adjusted.firstFinalPoseSeconds
+                                val last = preview.adjusted.lastFinalPoseSeconds
                                 Text(
                                     "Final two Sessions: " +
-                                        (preview.adjusted.firstFinalPoseSeconds / 60) + "m + " +
-                                        (preview.adjusted.lastFinalPoseSeconds / 60) + "m",
+                                        "%02d:%02d + %02d:%02d".format(
+                                            first / 60, first % 60, last / 60, last % 60
+                                        ),
                                     style = MaterialTheme.typography.bodySmall,
                                 )
                             } else {
