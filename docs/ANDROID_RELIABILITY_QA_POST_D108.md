@@ -1,5 +1,10 @@
 # Android reliability QA gate — after Stable 4 (D-108)
 
+## QA-R03 next-gate result — accelerated runtime reliability (2026-10-25)
+
+- **QA-R03 2026-10-25 / ACCELERATED KOTLIN RELIABILITY TESTS — COMPLETED WITH ONE OPEN DEFECT CANDIDATE:** [Report](ANDROID_QA_R03_ACCELERATED_2026_10_25.md). In local Kotlin/JVM (extracted D-108 timing paths, not APK), 150 seeded 3h simulations / **2,483,558 virtual updates** passed exact monotonic/deadline/one C-cue expectations; 30-day sparse samples and 0ms/5,999ms/6,000ms boundary tests passed current policy. Simulating a **±120-second device wall-clock correction** left monotonic engine remaining correct but changed **Class remaining/elapsed** wall-based values by 120s; static screen-source review confirms the UI consumes these fields. This is a **simulated, source-supported display discrepancy**, not an Android phone defect confirmed in vivo. Do not modify accepted UI/timer without targeted follow-on scope. Actual three-hour device/audio/Doze gate OPEN; connected instrumentation BLOCKED; normal reboot saved-data PASS. **No APK, code or stable-ref changes.**
+- **Next engineering gate:** triage wall-clock-correction display behavior (do not silently change approved UI); real long Android QA remains unexecuted.
+
 ## QA-R02a — accelerated Kotlin/JVM three-hour timing simulation (2026-10-25)
 
 **Outcome: PASS for the extracted uninterrupted timekeeping path in a Kotlin/JVM harness — NOT a real 3-hour Android-device test.**
