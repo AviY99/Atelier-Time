@@ -1,5 +1,11 @@
 # Changelog — Atelier Time
 
+## 2026-10-25 — D-108 successful 35s phone rebuild, APK ready; installation QA pending
+
+Following correction of Kotlin compiler `ClassNotificationTaskService.kt:35:17 'val' cannot be reassigned` to Intent `addFlags(...)`, the user's phone screenshot now verifies **`BUILD SUCCESSFUL in 35s`**, 42 Gradle tasks (9 executed, 33 up-to-date), successful `:app:testDebugUnitTest` and `:app:assembleDebug`, and copied ~12M `/storage/emulated/0/Download/Atelier-Time-D108.apk` (Oct 25 at 10:09). Earlier D-108 `BUILD FAILED in 25s` is superseded by this successful rebuild. **D-108 install/notification dismissal QA STILL PENDING**: after update-install preserving app data, verify About Version D-108; Home/Recents overview preserve live notification, Back and swipe-out remove notification. Individual JUnit counts/Android instrumentation not shown. Frozen Stable 3 untouched, Play FGS specialUse permission policy and pre-store app icon/logo still to review.
+
+---
+
 ## 2026-10-25 — D-108 targeted compile-error fix committed; retest pending
 
 User's actual on-device `grep` from `~/atelier-d108-build.log` reveals the **only shown Kotlin diagnostic**: `ClassNotificationTaskService.kt:35:17 'val' cannot be reassigned`. Exact source check ties it to `onStartCommand(..., flags: Int, ...)` shadowing the Intent.flags property inside `Intent.apply`. Source-only fix in Android development branch commit [`02beb0af`](https://github.com/AviY99/Atelier-Time/commit/02beb0af46719301cccb72ad4698a337ab416d73) uses `addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)` rather than assigning to the immutable `flags` argument. **NO D-108 retest BUILD SUCCESSFUL has occurred yet**. Next phone pull, JVM Gradle unit tests and APK assemble, then update-install to QA Back/Recents notification removal. No changes to timer, audio, design or frozen Stable 3.
