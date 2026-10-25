@@ -185,6 +185,7 @@ fun SessionEditorScreen(
     var runFollowSuggestedFinish by remember { mutableStateOf(false) }
     var pendingRunApproval by remember { mutableStateOf<PendingRunApproval?>(null) }
     var customFinishEnabled by remember { mutableStateOf(false) }
+    var finishPickerVisible by remember { mutableStateOf(false) }
     var customFinishHour by remember { mutableIntStateOf(0) }
     var customFinishMinute by remember { mutableIntStateOf(0) }
     var runApprovalError by remember { mutableStateOf<String?>(null) }
@@ -904,6 +905,7 @@ fun SessionEditorScreen(
                                 // No frozen finish: the confirmation view is live.
                                 pendingRunApproval = PendingRunApproval(record.id, restored)
                                 customFinishEnabled = false
+                                finishPickerVisible = false
                                 runApprovalError = null
                             },
                             onDeleted = { id ->
@@ -1015,7 +1017,7 @@ fun SessionEditorScreen(
                         modifier = Modifier.testTag("run_end_calculated"),
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    if (!customFinishEnabled) {
+                    if (!finishPickerVisible) {
                         Text(
                             "Approve the live calculated finish, or choose to " +
                                 "change it using hour and minute wheels.",
@@ -1025,13 +1027,10 @@ fun SessionEditorScreen(
                             modifier = Modifier.testTag("run_end_change_finish"),
                             colors = atelierTextColors(),
                             onClick = {
-                                // Wheels are created ONLY after the user opts in.
-                                // Seed both values from the currently live finish.
-                                customFinishHour =
-                                    calculatedClock.get(Calendar.HOUR_OF_DAY)
-                                customFinishMinute =
-                                    calculatedClock.get(Calendar.MINUTE)
-                                customFinishEnabled = true
+                                // Reveal wheels without fixing/truncating the
+                                // live finish until a number actually changes.
+                                finishPickerVisible = true
+                                customFinishEnabled = false
                                 runApprovalError = null
                             },
                         ) { Text("Change finish time") }
@@ -1067,7 +1066,13 @@ fun SessionEditorScreen(
                                             canSelectClock(candidateHour, minute)
                                         },
                                         onChange = { next ->
+                                            // First movement freezes the chosen clock,
+                                            // not merely opening the picker.
+                                            if (!customFinishEnabled) {
+                                                customFinishMinute = minute
+                                            }
                                             customFinishHour = next
+                                            customFinishEnabled = true
                                             runApprovalError = null
                                         },
                                     )
@@ -1079,7 +1084,11 @@ fun SessionEditorScreen(
                                             canSelectClock(hour, candidateMinute)
                                         },
                                         onChange = { next ->
+                                            if (!customFinishEnabled) {
+                                                customFinishHour = hour
+                                            }
                                             customFinishMinute = next
+                                            customFinishEnabled = true
                                             runApprovalError = null
                                         },
                                     )
@@ -1091,6 +1100,7 @@ fun SessionEditorScreen(
                             colors = atelierTextColors(),
                             onClick = {
                                 customFinishEnabled = false
+                                finishPickerVisible = false
                                 runApprovalError = null
                             },
                         ) { Text("Use calculated finish") }
