@@ -50,7 +50,8 @@ fun PresetLibrarySection(
             modifier = Modifier.weight(1f))
         TextButton(colors = atelierTextColors(), onClick = { showHelp = true }) { Text("Help") }
     }
-    Text("Run starts the chosen class timer. Edit opens its approved plan " +
+    Text("Run first asks you to approve or change the calculated finish time. " +
+        "Edit opens its approved plan " +
         "in Editor, where Save can replace it after confirmation.")
     error?.let { Text(it, color = atelierErrorTextColor()) }
     if (collection.entries.isEmpty()) {
@@ -68,7 +69,7 @@ fun PresetLibrarySection(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Button(colors = atelierFilledColors(), 
-                        onClick = { action { onRun(preset, catalog.activate(preset.id)) } },
+                        onClick = { action { onRun(preset, catalog.open(preset.id)) } },
                         modifier = Modifier.weight(1f),
                     ) { Text("Run", maxLines = 1) }
                     OutlinedButton(colors = atelierOutlinedColors(), 
@@ -120,7 +121,7 @@ fun PresetLibrarySection(
         AlertDialog(
             onDismissRequest = { showHelp = false },
             title = { Text("Managing saved classes") },
-            text = { Text("Run starts the class in Timer. Edit opens its plan in " +
+            text = { Text("Run first confirms the Class finish time. Edit opens its plan in " +
                 "Editor and requires Save before changes are stored. Duplicate " +
                 "makes a separate saved copy. Rename changes only the class name; " +
                 "Delete permanently removes the selected class after confirmation.") },
