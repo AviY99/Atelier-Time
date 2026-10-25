@@ -1,5 +1,11 @@
 # Atelier Time — ordered QA 3→4: unexpected-stop recovery, then Android instrumentation
 
+## Authoritative correction — user-defined end-of-run semantics
+
+**USER-APPROVED INTERRUPTION RULE (2026-10-25, clarified during active Timer):** If Atelier Time is actually **closed/terminated while a Class Timer is running**, or the **phone shuts down/reboots while it runs**, that Class run ends. **On a subsequent app launch the Timer MUST NOT remain running, automatically resume, restore elapsed progress, or replay missed audio cues.** Open at the saved-Class library / idle Timer; preserved saved Classes and Sound preferences remain available. This does **NOT** change the already accepted behavior when the user merely presses Android **Home**, switches apps or **locks the screen** without terminating the app: Timer/audio/background notification continue as previously approved. Existing Back / Recents-swipe closure behavior remains frozen. Do not build persistent active-run recovery features or demand a reboot-during-run test to prove a feature the user explicitly rejects. Source audit of D-110 already found no saved active Timer state; no user-device crash or running-reboot test has been executed, and immediate cleanup of stale OS notifications after unexpected **process** death remains an independent reliability check. Prior ordinary reboot persistence of stored Classes/Sound remains PASS. Proceed to Stage 4 Android automated tests.
+
+**Stage 3 disposition:** user product requirement RESOLVED: termination means no active run on restart. D-110 code/source audit CONFORMS to no automatic resume. Unexpected process-death/notification behavior has not been verified on a device; do not label the unrun reboot-during-active-Class or OS reclaim tests PASS. The earlier optional Stage 3 phone reboot test below is **NOT a prerequisite to Stage 4** and should not be imposed merely to test unwanted auto-resume.
+
 **Date:** 2026-10-25. **Installed baseline:** D-110, user states "הכל תקין". **Stable rollback:** frozen D-108 `stable/android-d108`. **Changes in this checkpoint:** documentation only, no app code edits, no APK, no settings/data edits.
 
 ## Stage 3 first: active-Class recovery and process-reclaim audit
