@@ -55,7 +55,11 @@ private data class PendingRunApproval(
 )
 
 @Composable
-fun SessionEditorScreen() {
+fun SessionEditorScreen(
+    // Android UI tests may inject isolated stores; production defaults unchanged.
+    presetStoreOverride: AndroidPresetStore? = null,
+    melodyPreferencesOverride: MelodyPreferences? = null,
+) {
     val engine = remember { ScheduleEngine() }
     val context = LocalContext.current
     val classStatusNotification = remember(context) { ActiveClassStatusNotification(context) }
@@ -72,8 +76,8 @@ fun SessionEditorScreen() {
     DisposableEffect(classStatusNotification) {
         onDispose { classStatusNotification.clear() }
     }
-    val catalog = remember(context) {
-        PresetCatalog(AndroidPresetStore(context), engine) {
+    val catalog = remember(context, presetStoreOverride) {
+        PresetCatalog(presetStoreOverride ?: AndroidPresetStore(context), engine) {
             UUID.randomUUID().toString()
         }
     }
@@ -82,7 +86,9 @@ fun SessionEditorScreen() {
         mutableStateOf(designStore.load())
     }
     var autoPreviewHour by remember { mutableStateOf<Int?>(null) }
-    val melodyPreferences = remember(context) { MelodyPreferences(context) }
+    val melodyPreferences = remember(context, melodyPreferencesOverride) {
+        melodyPreferencesOverride ?: MelodyPreferences(context)
+    }
     var soundSettings by remember(melodyPreferences) {
         mutableStateOf(melodyPreferences.loadSettings())
     }
