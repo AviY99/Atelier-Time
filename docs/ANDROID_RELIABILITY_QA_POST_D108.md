@@ -10,6 +10,17 @@
 - Do not uninstall the existing app, clear app data, overwrite user Classes/preferences, move any frozen stable ref, merge draft PR #3, or run paid Actions.
 - Current accepted package has `versionName = "D-108"`, `versionCode = 4`. For the next **actual APK** use its real coding D identifier (next reserved D-110 unless subsequently superseded) and a strictly larger versionCode. Documentation-only activity requires **no new build**.
 
+## QA-R01 field observation — 2026-10-25, 13:14 Asia/Jerusalem (user screenshot)
+
+**Evidence scope: environment inspection only; NOT a connected test run.**
+
+- In Code on the Go terminal, `git branch --show-current` displays `android-native-kotlin-compose` (the first multi-command paste is visually garbled, but the branch text is visible).
+- `git rev-parse --short HEAD` displays `02beb0a`, matching the frozen D-108 source and demonstrating that the phone checkout has **not yet pulled the documentation-only post-D108 commits**.
+- `git status --short` displays `?? ../../.cg/`. This is an **untracked path** whose location and function have not been independently verified. Do not add/delete/clean it. Next use `git rev-parse --show-toplevel` to establish the worktree root.
+- `command -v adb` yields no path, and `adb devices -l` returns `bash: adb: command not found`. No connected Android instrumentation runner is currently available through the terminal PATH.
+- This is **QA-R01 DEVICE RUN BLOCKED / TOOL ACCESS NOT VERIFIED**, **not** an app test failure and **not** proof that `$ANDROID_HOME/platform-tools/adb` or any CoGo-integrated device runner is absent.
+- **Safe next action:** inspect the Git worktree root and check whether `$ANDROID_HOME/platform-tools/adb` is executable; do not install platform tools, pair devices, or attempt Gradle connected tests yet. Existing D-108 accepted APK and personal data remain untouched.
+
 ## Source audit of existing connected Android instrumentation tests
 
 Read the Android sources from Stable 4 / the identical native development branch. These are **test methods present in source**, NOT results or confirmed discoverable tests on the phone:
