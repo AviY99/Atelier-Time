@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import com.ateliertime.domain.NotificationExitPolicy
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,7 +27,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         // Back finishes this Activity; Home and Recents overview do not.
-        if (isFinishing && !isChangingConfigurations) {
+        if (NotificationExitPolicy.shouldDismissOnActivityStop(isFinishing, isChangingConfigurations)) {
             ClassNotificationTaskService.closeTask(applicationContext)
         }
         super.onStop()
@@ -35,7 +36,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         // Fallback for Back/predictive Back when finish skipped onStop cleanup.
         // Do not treat a rotation or other configuration change as an exit.
-        if (isFinishing && !isChangingConfigurations) {
+        if (NotificationExitPolicy.shouldDismissOnActivityStop(isFinishing, isChangingConfigurations)) {
             ClassNotificationTaskService.closeTask(applicationContext)
         }
         super.onDestroy()
