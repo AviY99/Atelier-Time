@@ -32,7 +32,7 @@
 5. **עבודה ברקע:** מעבר לאפליקציה אחרת, לחיצה על Home/ריבוע, מסך נעול, תפריט Recents — משתמש דיווח שהטיימר והצלילים פועלים כרצוי.
 6. **התראת סטטוס:** D-107 הוסיף התראה שקטה של שיעור פעיל עם שם Class, מצב Running/Paused, המקטע והזמן שנותר. D-108 תיקן את הישארותה לאחר סגירה.
 7. **D-108 תיקון וסגירה:** לחצן **Back** סוגר את האפליקציה ומסיר את ההתראה; **Swipe out** מתוך Recents סוגר ומסיר את ההתראה. **Home/Recents overview** משאירים אותה פעילה כששיעור עובד ברקע. המשתמש: "הכל תקין כעת". **D-108 התקבלה; Stable 4 אושרה במפורש.**
-8. **מסך About** צריך להציג את *מזהה פיתוח D האמיתי*, לא את מספר נקודת היציבות. D-108 מציגה `Version D-108`; גרסת פיתוח עתידית תהיה D-109/הבאה בפועל, ו־`versionCode` חייב לגדול בהתאם לדרישות Android.
+8. **מסך About** צריך להציג את *מזהה פיתוח D האמיתי*, לא את מספר נקודת היציבות. D-108 מציגה `Version D-108`; D-109 מוקצה להחלטת יציבה 4 ולהנדאוף, לכן גרסת הפיתוח הבאה תהיה D-110 (או מזהה D אמיתי מאוחר יותר), ו־`versionCode` חייב לגדול בהתאם לדרישות Android.
 
 ## 3. הוכחות בנייה ובדיקות — גבולות אמת
 
@@ -76,12 +76,12 @@
 ```bash
 git pull --ff-only &&
 set -o pipefail &&
-bash "$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle" :app:testDebugUnitTest :app:assembleDebug --no-daemon --console=plain "-Pandroid.aapt2FromMavenOverride=$ANDROID_HOME/build-tools/36.0.0/aapt2" 2>&1 | tee "$HOME/atelier-d109-build.log" &&
-cp app/build/outputs/apk/debug/app-debug.apk /storage/emulated/0/Download/Atelier-Time-D109.apk &&
-ls -lh /storage/emulated/0/Download/Atelier-Time-D109.apk
+bash "$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle" :app:testDebugUnitTest :app:assembleDebug --no-daemon --console=plain "-Pandroid.aapt2FromMavenOverride=$ANDROID_HOME/build-tools/36.0.0/aapt2" 2>&1 | tee "$HOME/atelier-d110-build.log" &&
+cp app/build/outputs/apk/debug/app-debug.apk /storage/emulated/0/Download/Atelier-Time-D110.apk &&
+ls -lh /storage/emulated/0/Download/Atelier-Time-D110.apk
 ```
 
-זו דוגמה בלבד לגרסת D-109 עתידית. **אין לשנות את D-108 המאושרת או להריץ בנייה כרגע.**
+זו דוגמה בלבד לגרסת D-110 עתידית. **אין לשנות את D-108 המאושרת או להריץ בנייה כרגע.**
 
 ## 7. איך לפתוח את השיחה החדשה
 
