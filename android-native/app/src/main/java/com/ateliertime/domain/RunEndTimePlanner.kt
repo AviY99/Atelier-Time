@@ -55,10 +55,10 @@ object RunEndTimePlanner {
         require(remainingMillis > 0) {
             "The finish time must be in the future. Choose another time."
         }
-        // Round up: never promise to finish AFTER the chosen clock time.
-        // A millisecond rounding error must not silently turn an invalid
-        // near-zero duration into a valid Class.
-        val plannedSeconds = (remainingMillis + 999L) / 1_000L
+        // Round down to full seconds, so the monotonic deadline is never
+        // later than the user-approved absolute clock instant. The subsecond
+        // remainder is a harmless early margin (less than one second).
+        val plannedSeconds = remainingMillis / 1_000L
         require(plannedSeconds in 1L..Int.MAX_VALUE.toLong()) {
             "The selected finish time is outside the supported range."
         }
