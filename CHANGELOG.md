@@ -1,5 +1,11 @@
 # Changelog — Atelier Time
 
+## 2026-10-25 — D-107 44s on-phone Gradle/JVM build PASS; notification UX open
+
+User terminal screenshot confirms `BUILD SUCCESSFUL in 44s` for Android `:app:testDebugUnitTest :app:assembleDebug` (42 tasks: 21 executed, 21 up-to-date) and successful copy of ~12M `Atelier-Time-D107.apk` to Downloads, Oct 25 09:16. **Only build and JVM test task PASS**; exact JUnit case count and connected instrumentation not shown. **New APK update-install and user acceptance of notification permission, notification shade content, countdown, Pause/Resume and Exit cleanup still unconfirmed.** Next install the already copied D-107 APK as an update, preserving user Classes/sounds, and verify About Version D-107 and notification; no need for another build. Frozen Stable 3 unchanged; final branded launcher/logo remains future pre-store work.
+
+---
+
 ## 2026-10-25 — D-107 requested ongoing Class status notification (source only)
 
 User explicitly asked to add the missing ongoing Android notification after accepting locked-screen/background operation of existing Timer and A/B/C audio. Committed native development source: new optional LOW-importance silent notification channel with active Class name, current Session/Break and phase/Class remaining, a running countdown and Paused/Stopped state; tapping reopens the Activity; cancels at Exit/end. Android 13+ notification permission requested only at Run/Start; denial never blocks Timer/audio. Five new JVM test methods written, not yet run, for pure Kotlin notification status. Functional monochrome STATUS icon is not the pending launcher/Play-store brand logo. Next debug build `versionName = "D-107"`, `versionCode = 3`; **NO D-107 Gradle/JVM PASS, APK install or live notification QA verified yet**. No FGS or new assurance after Recents swipe/process death/Doze. Stable 3 remains frozen; PR #3 Draft/unmerged. [Details and phone gate](docs/ONGOING_CLASS_NOTIFICATION_D107.md).
