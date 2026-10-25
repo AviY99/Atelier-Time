@@ -183,6 +183,7 @@ fun SessionEditorScreen(
     var libraryRevision by remember { mutableIntStateOf(0) }
     var launchRunRequested by remember { mutableStateOf(false) }
     var runStartTargetEpochMs by remember { mutableStateOf<Long?>(null) }
+    var runFollowDefaultForSingleSession by remember { mutableStateOf(false) }
     var pendingRunApproval by remember { mutableStateOf<PendingRunApproval?>(null) }
     var customFinishEnabled by remember { mutableStateOf(false) }
     var customFinishClock by remember { mutableStateOf("") }
@@ -293,10 +294,16 @@ fun SessionEditorScreen(
         if (clock != null && launchRunRequested) {
             try {
                 val startEpochMs = System.currentTimeMillis()
-                val target = runStartTargetEpochMs
+                val selectedTarget = runStartTargetEpochMs
                     ?: throw IllegalArgumentException("No confirmed Class finish time.")
                 val session = playingSession
                     ?: throw IllegalArgumentException("No approved Class selected.")
+                // The default finish of a legacy one-Session Class must be
+                // recomputed at actual start: it has no final pair to absorb
+                // even a single second of button-to-start delay.
+                val target = if (runFollowDefaultForSingleSession)
+                    RunEndTimePlanner.suggestedEndEpochMs(session, startEpochMs)
+                else selectedTarget
                 // Re-evaluate at ACTUAL start, not button press, to keep the
                 // accepted wall-clock deadline after UI/scheduling latency.
                 val correction = RunEndTimePlanner.plan(
@@ -322,6 +329,7 @@ fun SessionEditorScreen(
             } finally {
                 launchRunRequested = false
                 runStartTargetEpochMs = null
+                runFollowDefaultForSingleSession = false
             }
         }
     }
@@ -1074,8 +1082,15 @@ fun SessionEditorScreen(
                     colors = atelierTextColors(), onClick = {
                     val now = System.currentTimeMillis()
                     try {
+                        val hasFinalPair = request.session.phases.count {
+                            it.kind == PhaseKind.POSE &&
+                                it.poseSource == PoseSource.REGULAR
+                        } >= 2
+                        val followDefault = !customFinishEnabled && !hasFinalPair
                         val chosen = if (customFinishEnabled)
                             RunEndTimePlanner.nextOccurrence(customFinishClock, now)
+                        else if (followDefault)
+                            RunEndTimePlanner.suggestedEndEpochMs(request.session, now)
                         else request.suggestedEndEpochMs
                         val plan = RunEndTimePlanner.plan(request.session, now, chosen)
                         // No timer state was touched until all validation passed.
@@ -1083,6 +1098,7 @@ fun SessionEditorScreen(
                         val activatedSession = catalog.activate(request.presetId)
                         selectedPresetId = request.presetId
                         runStartTargetEpochMs = plan.targetEndEpochMs
+                        runFollowDefaultForSingleSession = followDefault
                         playingSession = activatedSession
                         launchRunRequested = true
                         pendingRunApproval = null
