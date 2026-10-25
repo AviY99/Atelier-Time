@@ -18,8 +18,8 @@ import com.ateliertime.domain.TimerView
  * D-107 — quiet, permission-aware ongoing Class status notification.
  *
  * The existing Compose Timer remains the sole clock/cue owner. This observer
- * only mirrors its snapshots; it does NOT turn the app into a foreground
- * service or promise survival when Android removes/kills the task.
+ * only mirrors snapshots. D-108's small notification-only foreground service
+ * handles Recents task removal; it never controls the timer or audio.
  *
  * If the user declined POST_NOTIFICATIONS, the timer works as before.
  */
@@ -30,6 +30,7 @@ class ActiveClassStatusNotification(context: Context) {
     private var lastSnapshot: TimerNotificationStatus? = null
     private var lastPostedSecond: Long? = null
     private var posted = false
+    private var serviceStarted = false
 
     init {
         val channel = NotificationChannel(
@@ -47,6 +48,10 @@ class ActiveClassStatusNotification(context: Context) {
     }
 
     fun update(className: String, view: TimerView, classRemainingSeconds: Int, nowEpochMs: Long) {
+        if (ClassNotificationTaskService.isTaskClosed()) {
+            clear()
+            return
+        }
         if (view.status != TimerStatus.RUNNING &&
             view.status != TimerStatus.PAUSED &&
             view.status != TimerStatus.STOPPED) {
@@ -69,6 +74,11 @@ class ActiveClassStatusNotification(context: Context) {
             className, view, classRemainingSeconds,
         )
         val nowSecond = nowEpochMs / 1000L
+        // Start task-lifecycle monitoring only after the user begins a Class.
+        // Android's onTaskRemoved removes this notification after Recents swipe.
+        if (!serviceStarted) {
+            serviceStarted = ClassNotificationTaskService.start(appContext, snapshot)
+        }
         // The underlying clock updates every 200ms, but avoid posting five
         // identical notification updates per second; its chronometer handles ticks.
         if (posted && nowSecond == lastPostedSecond &&
@@ -119,16 +129,20 @@ class ActiveClassStatusNotification(context: Context) {
     }
 
     fun clear() {
-        if (posted) {
-            notifications.cancel(NOTIFICATION_ID)
+        if (posted || serviceStarted) {
+            // stopService also removes its foreground notification. Cancel
+            // unconditionally: a stale item can survive while this instance
+            // has lost its in-memory posted flag.
+            ClassNotificationTaskService.dismiss(appContext)
         }
         posted = false
+        serviceStarted = false
         lastSnapshot = null
         lastPostedSecond = null
     }
 
     companion object {
-        private const val CHANNEL_ID = "atelier_active_class_v1"
-        private const val NOTIFICATION_ID = 107
+        internal const val CHANNEL_ID = "atelier_active_class_v1"
+        internal const val NOTIFICATION_ID = 107
     }
 }
