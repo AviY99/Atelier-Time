@@ -1,5 +1,13 @@
 # Delivery roadmap and approval gates
 
+## 2026-10-25 — D-114 STAGE 1 USER ACCEPTED; Stage 2 requires explicit approval
+
+- User explicitly confirmed **"הכל עובד"** (everything works) after building D-114 and receiving installation/verification instructions. Treat this as user acceptance of the D-114 Run end-time UX, including live Calculated finish, explicit opt-in hour/minute wheels, hard stop at first infeasible red boundary, explanatory red feedback when a blocked selection is attempted, ability to return to green and reset, and pre-Run confirmation. Do not assert independent instrumentation proof from this manual approval.
+- D-114 `versionCode=9`/`versionName=D-114` source on `android-native-kotlin-compose` is the approved development iteration. Last observed phone build: `:app:assembleDebug` BUILD SUCCESSFUL in 11s, APK copied to Downloads. User's "everything works" after guided installation supports acceptance on phone; an `adb install` Success screenshot for D-114 was not separately supplied.
+- **STOP GATE:** User previously specified **"בין שלבים תבקש אישור להמשיך"**: ask for EXPLICIT permission before starting Stage 2 comprehensive automation, including changing old Compose instrumentation tests, Gradle build of test APKs, and running device tests. Do not start Stage 2 until user approves.
+- Proposed Stage 2 scope once approved: reconcile stale `RunEndApprovalUiTest` typed HH:mm test tags against wheel/blocked-feedback UI; add deterministic domain/JVM tests for feasibility boundaries, live calculated finish and red-stop rule; execute complete :app:testDebugUnitTest + :app:assembleDebugAndroidTest, update-install test-only APK and run complete AndroidJUnitRunner on Samsung via Termux ADB, then safe notification/lifecycle probes with explicit protections for real saved Classes/Sounds. Previously observed D-110 14/14 device PASS is baseline, NOT proof D-114 passed.
+- Frozen Stable 4 `stable/android-d108` untouched; preserve installed app settings and saved Classes, no `adb shell pm clear`/uninstall of app. D-114 is not automatically declared Stable 5.
+
 ## 2026-10-25 — D-114 Stage 1: explain RED wheel blocking (source updated; phone QA pending)
 
 - User confirmed **D-113 runs correctly** except at a blocked red finish boundary there is no explanation for why the wheel stopped. Do not repeat prior feature redesign: D-113 live calculated finish, on-demand wheels and hard red boundary remain accepted.
