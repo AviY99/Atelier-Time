@@ -1,5 +1,16 @@
 # Test and acceptance plan — Atelier Time
 
+## 2026-10-25 — Stage 1 D-111 Run end-time feature: source checkpoint; approval gate
+
+**User-requested ordering:** Stage 1 implement/repair end-time feature, obtain user approval; Stage 2 only AFTER that approval run every feasible automated test.
+
+- Preexisting development branch implementation already calculates a suggested absolute Class finish before Run, shows a confirm-or-edit dialog, accepts earlier/equal/later fixed end time (not optional/unlimited), previews adjustments restricted to the final two regular Sessions, blocks infeasible HH:mm times with a corrective error, and reevaluates at actual start. Saved presets never change. The selected finish uses the monotonic physical deadline, and original pause/Next/restart routines compensate in the last eligible Session(s). Single-Session legacy Classes can use only their unaltered default duration.
+- **Actual gap corrected now:** removed the old direct Start action and button from SessionEditorScreen.kt and SessionTimerScreen.kt. It could bypass finish-time confirmation while the Timer was READY. The READY UI now displays 'Starting approved Class...' only; new runs must pass saved-library Run -> Confirm Class finish time.
+- The existing Gradle file is already versionCode=6 and versionName=D-111. GitHub source readback verified no dangling onStart parameter/callback and Run approval dialog remains present.
+- **Stage 1: SOURCE READY; not compiled, installed, or accepted on the phone.** Installed user-approved D-110 remains unchanged; frozen Stable 4 D-108 remains untouched. Do not claim a new APK or a test PASS.
+- **Stage 1 next on phone:** git pull --ff-only in the existing CoGo checkout, assemble the debug APK only (:app:assembleDebug), copy it to Downloads and update-install without wiping existing saved Classes or Sounds. User validates the before-Run dialog and approves Stage 1. No tests before user confirms next stage.
+- Already-authored but not yet executed for D-111: RunEndTimePlannerTest, RunEndTimePropertyTest (JVM), RunEndTimeDeviceTest and RunEndApprovalUiTest (device), plus all existing unit and instrumentation suites. The earlier D-110 device result 14/14 PASS is historical baseline and must not be misrepresented as D-111 verification.
+
 ## 2026-10-25 — D-111: confirmed-finish Run and full automated QA prepared (DEVICE GATES PENDING)
 
 - **Feature-first user direction:** on Run show calculated finish, require explicit approval or HH:mm override (earlier/later), and use signed changes to only the final two work Sessions. Block infeasible early targets (each final Session must retain >=1 minute), unrealistic late targets (2× original Class maximum) and invalid clock inputs with corrective feedback. The selected Class finish is a physical monotonic deadline. During pauses after the first final Session begins, only the unstarted last Session can be changed; completed phases remain immutable. Legacy one-Session default Run tolerates UI confirmation/start latency without enabling arbitrary custom adjustments.
