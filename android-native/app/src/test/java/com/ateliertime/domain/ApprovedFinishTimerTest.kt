@@ -111,7 +111,7 @@ class ApprovedFinishTimerTest {
         timer.start(m(3))
         val next = timer.nextPhase()
         assertEquals(TimerStatus.RUNNING, next.view.status)
-        assertEquals(m(3) - next.view.phase!!.startSeconds + next.view.elapsedSeconds,
+        assertEquals(m(3) - session.phases.first().durationSeconds,
             next.view.recoveredSeconds)
         assertEquals(m(180), session.rules.totalSeconds)
     }
