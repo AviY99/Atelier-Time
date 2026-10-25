@@ -20,7 +20,6 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -111,13 +110,9 @@ class RunEndApprovalUiTest {
         clickWheel("run_end_minute_next")
     }
 
-    /** Guaranteed -1 minute except at midnight: the UI cannot step backwards
-     * across midnight through the planner's next-occurrence-only day selection.
-     */
+    /** -1 minute, including 00:00 -> 23:59 (same-day next occurrence). */
     private fun chooseOneMinuteEarlier() {
-        val hour = wheelValue("run_end_hour")
         val minute = wheelValue("run_end_minute")
-        assumeTrue("Midnight back-step cannot be selected through this wheel", hour != 0 || minute != 0)
         if (minute == 0) clickWheel("run_end_minute_previous")
         clickWheel(if (minute == 0) "run_end_hour_previous" else "run_end_minute_previous")
     }
