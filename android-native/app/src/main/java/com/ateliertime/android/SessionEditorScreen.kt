@@ -189,6 +189,7 @@ fun SessionEditorScreen(
     var customFinishHour by remember { mutableIntStateOf(0) }
     var customFinishMinute by remember { mutableIntStateOf(0) }
     var runApprovalError by remember { mutableStateOf<String?>(null) }
+    var runFinishBlockedReason by remember { mutableStateOf<String?>(null) }
     var playingSession by remember { mutableStateOf<ApprovedSession?>(null) }
     var activeTab by remember { mutableStateOf(MainTab.EDITOR) }
     var soundEnabled by remember { mutableStateOf(true) }
@@ -907,6 +908,7 @@ fun SessionEditorScreen(
                                 customFinishEnabled = false
                                 finishPickerVisible = false
                                 runApprovalError = null
+                                runFinishBlockedReason = null
                             },
                             onDeleted = { id ->
                                 if (selectedPresetId == id) {
@@ -982,14 +984,22 @@ fun SessionEditorScreen(
         // Validate each ADJACENT hour/minute step. Invalid (red) candidates
         // are visible at the wheel edge but cannot become selected, even by a
         // long swipe. The actual Run is revalidated again at confirmation.
-        fun canSelectClock(candidateHour: Int, candidateMinute: Int): Boolean =
+        fun checkClock(candidateHour: Int, candidateMinute: Int): Result<RunEndTimePlan> =
             runCatching {
                 val candidate = RunEndTimePlanner.nextOccurrence(
                     "%02d:%02d".format(Locale.US, candidateHour, candidateMinute),
                     now,
                 )
                 RunEndTimePlanner.plan(request.session, now, candidate)
-            }.isSuccess
+            }
+        fun canSelectClock(candidateHour: Int, candidateMinute: Int): Boolean =
+            checkClock(candidateHour, candidateMinute).isSuccess
+        fun explainBlockedClock(candidateHour: Int, candidateMinute: Int): String {
+            val attempted = "%02d:%02d".format(Locale.US, candidateHour, candidateMinute)
+            val why = checkClock(candidateHour, candidateMinute).exceptionOrNull()?.message
+                ?: "The selected finish is outside this Class's adjustable range."
+            return "Cannot select $attempted: $why"
+        }
         val dark = atelierNightActive()
         val statusColor = if (isValid) {
             if (dark) Color(0xFF91F0B7) else Color(0xFF166E39)
@@ -1032,6 +1042,7 @@ fun SessionEditorScreen(
                                 finishPickerVisible = true
                                 customFinishEnabled = false
                                 runApprovalError = null
+                                runFinishBlockedReason = null
                             },
                         ) { Text("Change finish time") }
                     } else {
@@ -1065,6 +1076,11 @@ fun SessionEditorScreen(
                                         canSelect = { candidateHour ->
                                             canSelectClock(candidateHour, minute)
                                         },
+                                        onBlocked = { candidateHour ->
+                                            runFinishBlockedReason = explainBlockedClock(
+                                                candidateHour, minute
+                                            )
+                                        },
                                         onChange = { next ->
                                             // First movement freezes the chosen clock,
                                             // not merely opening the picker.
@@ -1074,6 +1090,7 @@ fun SessionEditorScreen(
                                             customFinishHour = next
                                             customFinishEnabled = true
                                             runApprovalError = null
+                                            runFinishBlockedReason = null
                                         },
                                     )
                                     Text(":", style = MaterialTheme.typography.headlineMedium)
@@ -1083,6 +1100,11 @@ fun SessionEditorScreen(
                                         canSelect = { candidateMinute ->
                                             canSelectClock(hour, candidateMinute)
                                         },
+                                        onBlocked = { candidateMinute ->
+                                            runFinishBlockedReason = explainBlockedClock(
+                                                hour, candidateMinute
+                                            )
+                                        },
                                         onChange = { next ->
                                             if (!customFinishEnabled) {
                                                 customFinishHour = hour
@@ -1090,10 +1112,20 @@ fun SessionEditorScreen(
                                             customFinishMinute = next
                                             customFinishEnabled = true
                                             runApprovalError = null
+                                            runFinishBlockedReason = null
                                         },
                                     )
                                 }
                             }
+                        }
+                        runFinishBlockedReason?.let { reason ->
+                            Text(
+                                "Blocked at the red boundary. " + reason +
+                                    " Scroll back toward green or use the calculated finish.",
+                                modifier = Modifier.testTag("run_end_blocked_reason"),
+                                color = atelierErrorTextColor(),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
                         }
                         TextButton(
                             modifier = Modifier.testTag("run_end_reset_calculated"),
@@ -1102,6 +1134,7 @@ fun SessionEditorScreen(
                                 customFinishEnabled = false
                                 finishPickerVisible = false
                                 runApprovalError = null
+                                runFinishBlockedReason = null
                             },
                         ) { Text("Use calculated finish") }
                     }
