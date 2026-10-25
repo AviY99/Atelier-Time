@@ -1,5 +1,27 @@
 # Test and acceptance plan — Atelier Time
 
+## 2026-10-25 — D-110 Stage 4 Android instrumentation: 14/14 DEVICE PASS
+
+**DEVICE RESULT VERIFIED FROM USER TERMUX SCREENSHOT (2026-10-25, ~18:08 Israel):** On Samsung Galaxy SM-S921B (ADB transport `10.0.0.6:34545`, `device`), the previously assembled 1.1 MB AndroidTest APK was installed successfully (`adb install -t -r ~/storage/downloads/Atelier-Time-D110-Tests.apk` → `Success`). The user executed:
+
+```bash
+adb shell am instrument -w com.ateliertime.android.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+**Actual AndroidJUnitRunner output:**
+
+```text
+com.ateliertime.android.AndroidPresetStoreTest:.......
+com.ateliertime.android.MelodyPreferencesTest:......
+com.ateliertime.android.StaticAudioTrackLifecycleTest:.
+
+Time: 0.295
+
+OK (14 tests)
+```
+
+**Acceptance:** Stage 4 connected Android instrumentation **PASS: 14 / 14**, zero observed failures (7 preset storage, 6 melody preferences, 1 silent AudioTrack lifecycle); actual phone execution, not merely compilation. No app source edit, no replacement of target D-110 regular APK, no `pm clear` / `adb uninstall` or intentional modification of real saved Classes/Sound; tests used isolated randomized preference namespaces. Stable 4 D-108 frozen and D-110 remains development/approved-on-phone, **not** implicitly promoted to Stable 5. **Out of scope and still not device-verified:** active physical Class ±120 s wall-clock adjustment, full 3-hour endurance/Doze/audio, and unexpected OS process-reclaim notification cleanup; the approved user-closure/reboot semantics remain unchanged. After QA, turn off Developer options → Wireless debugging; users can reopen Atelier Time normally. Earlier pre-PASS entries in these docs are chronological historical progress, superseded by this result.
+
 > **2026-10-25 — Stage 4 AndroidTest APK COMPILE/PACKAGE PASS on user's CoGo phone (screenshot):** `:app:compileDebugAndroidTestKotlin`, `:app:packageDebugAndroidTest`, `:app:assembleDebugAndroidTest` completed, terminal shows **BUILD SUCCESSFUL in 34s; 50 actionable tasks (30 executed, 20 up-to-date)**. These Gradle tasks assemble the Android instrumentation package but DO **NOT** invoke device tests; the **14 `androidTest` source methods remain NOT RUN**. The previously observed `$ANDROID_HOME/platform-tools/adb` is a 0-byte, non-executable placeholder; `adb` not found on PATH. Before requesting `:app:connectedDebugAndroidTest`, discover a supported usable ADB/device path rather than modify CoGo SDK, add untrusted binaries, install test package by hand, or infer a PASS. No new regular app build/update, no user-data changes, D-110 still approved and D-108 Stable 4 frozen. [Ordered QA documentation](ANDROID_QA_RECOVERY_AND_DEVICE_TESTS_2026_10_25.md).
 
 > **USER-APPROVED INTERRUPTION RULE (2026-10-25, clarified during active Timer):** If Atelier Time is actually **closed/terminated while a Class Timer is running**, or the **phone shuts down/reboots while it runs**, that Class run ends. **On a subsequent app launch the Timer MUST NOT remain running, automatically resume, restore elapsed progress, or replay missed audio cues.** Open at the saved-Class library / idle Timer; preserved saved Classes and Sound preferences remain available. This does **NOT** change the already accepted behavior when the user merely presses Android **Home**, switches apps or **locks the screen** without terminating the app: Timer/audio/background notification continue as previously approved. Existing Back / Recents-swipe closure behavior remains frozen. Do not build persistent active-run recovery features or demand a reboot-during-run test to prove a feature the user explicitly rejects. Source audit of D-110 already found no saved active Timer state; no user-device crash or running-reboot test has been executed, and immediate cleanup of stale OS notifications after unexpected **process** death remains an independent reliability check. Prior ordinary reboot persistence of stored Classes/Sound remains PASS. Proceed to Stage 4 Android automated tests. [Active-run policy / Stage 4 handoff](ANDROID_QA_RECOVERY_AND_DEVICE_TESTS_2026_10_25.md).
