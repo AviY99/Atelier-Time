@@ -40,6 +40,8 @@ if [[ ! -d "$report_dir" ]]; then
     exit 3
 fi
 # Count actual JUnit results, not @Test source annotations or historical PASS.
+# CoGo Python is optional; a portable awk fallback reads Gradle's JUnit XML.
+if command -v python3 >/dev/null 2>&1; then
 python3 - "$report_dir" <<'PY'
 import pathlib, sys, xml.etree.ElementTree as ET
 files = sorted(pathlib.Path(sys.argv[1]).glob("TEST-*.xml"))
@@ -58,6 +60,26 @@ if totals["tests"] == 0 or totals["failures"] or totals["errors"]:
 if totals["skipped"]:
     print("WARNING: JVM tests skipped; inspect XML (not full PASS).")
 PY
+else
+    awk '
+        /<testsuite[[:space:]]/ {
+            count++
+            for (n = 1; n <= 4; n++) {
+                key = (n == 1 ? "tests" : n == 2 ? "failures" : n == 3 ? "errors" : "skipped")
+                expression = key "=\"[0-9]+\""
+                if (match($0, expression)) {
+                    value = substr($0, RSTART + length(key) + 2, RLENGTH - length(key) - 3)
+                    sum[n] += value + 0
+                }
+            }
+        }
+        END {
+            printf "D-114 JVM ACTUAL (XML fallback): tests=%d failures=%d errors=%d skipped=%d\\n", sum[1], sum[2], sum[3], sum[4]
+            if (count == 0 || sum[1] == 0 || sum[2] || sum[3]) exit 1
+            if (sum[4]) print "WARNING: JVM tests skipped; inspect XML (not full PASS)."
+        }
+    ' "$report_dir"/TEST-*.xml
+fi
 
 mapfile -t test_apks < <(find app/build/outputs/apk/androidTest -type f -name '*.apk' | sort)
 if (( ${#test_apks[@]} != 1 )) || [[ ! -s "${test_apks[0]:-}" ]]; then
