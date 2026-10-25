@@ -1,5 +1,27 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — D-110 Stage 4 Android instrumentation: 14/14 DEVICE PASS
+
+**DEVICE RESULT VERIFIED FROM USER TERMUX SCREENSHOT (2026-10-25, ~18:08 Israel):** On Samsung Galaxy SM-S921B (ADB transport `10.0.0.6:34545`, `device`), the previously assembled 1.1 MB AndroidTest APK was installed successfully (`adb install -t -r ~/storage/downloads/Atelier-Time-D110-Tests.apk` → `Success`). The user executed:
+
+```bash
+adb shell am instrument -w com.ateliertime.android.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+**Actual AndroidJUnitRunner output:**
+
+```text
+com.ateliertime.android.AndroidPresetStoreTest:.......
+com.ateliertime.android.MelodyPreferencesTest:......
+com.ateliertime.android.StaticAudioTrackLifecycleTest:.
+
+Time: 0.295
+
+OK (14 tests)
+```
+
+**Acceptance:** Stage 4 connected Android instrumentation **PASS: 14 / 14**, zero observed failures (7 preset storage, 6 melody preferences, 1 silent AudioTrack lifecycle); actual phone execution, not merely compilation. No app source edit, no replacement of target D-110 regular APK, no `pm clear` / `adb uninstall` or intentional modification of real saved Classes/Sound; tests used isolated randomized preference namespaces. Stable 4 D-108 frozen and D-110 remains development/approved-on-phone, **not** implicitly promoted to Stable 5. **Out of scope and still not device-verified:** active physical Class ±120 s wall-clock adjustment, full 3-hour endurance/Doze/audio, and unexpected OS process-reclaim notification cleanup; the approved user-closure/reboot semantics remain unchanged. After QA, turn off Developer options → Wireless debugging; users can reopen Atelier Time normally. Earlier pre-PASS entries in these docs are chronological historical progress, superseded by this result.
+
 ## Android instrumentation APK in Downloads — 2026-10-25
 
 - 2026-10-25 — **Test APK copied to shared Downloads, user screenshot PASS.** In Code on the Go terminal under `/storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native`, the user ran `APK="$(find app/build/outputs/apk/androidTest -type f -name '*.apk' -print -quit)"`, then guarded `cp "$APK" /storage/emulated/0/Download/Atelier-Time-D110-Tests.apk`. The resulting `ls -lh` shows a **1.1 MB APK at** `/storage/emulated/0/Download/Atelier-Time-D110-Tests.apk`, dated Oct 25 18:03. The copy step passed without rebuilding. **Next:** in Termux grant shared-storage access via `termux-setup-storage`, then `adb install -t -r ~/storage/downloads/Atelier-Time-D110-Tests.apk`. Android ADB transport confirmed via `adb devices -l` on device `10.0.0.6:34545` Samsung SM-S921B. Installing just the AndroidTest APK must not uninstall or clear target app data; make sure no Class active before instrumenting. **Install and all 14 Android instrumentation tests remain NOT YET VERIFIED**.
