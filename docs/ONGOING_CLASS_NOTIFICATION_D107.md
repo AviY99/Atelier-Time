@@ -1,6 +1,8 @@
 # Atelier Time — D-107 / ongoing Android Class status notification
 
-**State (2026-10-25): Native Android source committed on `android-native-kotlin-compose`; NO D-107 phone Gradle compile, JVM test execution, debug APK install or notification runtime approval has been observed yet.**
+> **D-107 PHONE BUILD/JVM GATE PASS — 2026-10-25, screenshot-confirmed:** Existing Code on the Go on-phone Gradle completed `:app:testDebugUnitTest` and `:app:assembleDebug`: **BUILD SUCCESSFUL in 44s**, 42 actionable tasks (**21 executed, 21 up-to-date**). `ls -lh` confirms copied `Atelier-Time-D107.apk` (~12M) at `/storage/emulated/0/Download/` on Oct 25 at 09:16. This confirms the Android debug APK and Gradle JVM test *task* completed, **not** exact individual test count, Git commit SHA, device instrumentation or notification behavior. **Update-install and real device notification UI/permission/countdown/Exit QA remain PENDING**. No need to rerun build/copy. Next install existing D-107 APK as an update without uninstall/data clearing; verify About Version D-107; allow notification permission on Run; inspect notification during active session while another app is frontmost; confirm Pause/Resume and Exit dismissal. Previously accepted A/B/C phase/audio and background operation need no repeat; Swipe-away/process death survival is not a feature claim. Frozen Stable 3 and mandatory pre-store app logo/icon stage unchanged.
+
+**Current state (2026-10-25): On-phone Gradle JVM test task and APK build PASS (44s); APK copied to Downloads. Installation and notification runtime approval PENDING.**
 
 ## User request, evidence and agreed scope
 
