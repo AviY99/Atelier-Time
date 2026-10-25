@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # D-114 Stage 2. Run in Code on the Go only; JVM tests + test APK ONLY.
-# Does not build/install/replace the regular Atelier Time app or wipe data.
+# Requests test tasks only; Gradle may build dependencies. Never copies/installs\n# the regular Atelier Time APK and never wipes app data.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -105,5 +105,5 @@ echo "SOURCE AndroidTest methods=$count, compiled APK NOT EXECUTED on device."
 ls -lh "$destination/Atelier-Time-D114-Tests.apk" \
     "$destination/Atelier-Time-D114-QA-manifest.txt" \
     "$destination/Atelier-Time-D114-JVM-build.log"
-echo "No regular app APK built, no installation, no device test, no user-data changes."
+echo "No regular app APK copied/installed; no device test or user-data changes."
 echo "Await explicit approval before running the Termux device stage."
