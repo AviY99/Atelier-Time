@@ -65,6 +65,24 @@ class ApprovedFinishTimerTest {
         assertEquals(TimerCue.SESSION_FINISHED, timer.finishAtDeadline().cue)
     }
 
+    @Test fun displayedFinishMatchesApprovedMinuteEvenWithSubsecondRounding() {
+        val session = session()
+        var monotonic = 0L
+        val timer = MonotonicSessionTimer(session) { monotonic }
+        val startEpoch = 123L
+        val absoluteFinish = startEpoch + m(180) * 1_000L - 1L
+        val plan = RunEndTimePlanner.plan(session, startEpoch, absoluteFinish)
+        val started = timer.start(plan.correctionSeconds)
+        val tracker = ClassClockTracker { monotonic }
+        val initial = tracker.newClass(started, startEpoch, absoluteFinish)
+        assertEquals(absoluteFinish, initial.classEndEpochMs)
+        assertEquals(m(180) - 1, started.totalSeconds)
+        monotonic += (m(180) - 1) * 1_000L
+        assertTrue(tracker.hasReachedClassDeadline(0L))
+        assertEquals(absoluteFinish,
+            tracker.observe(timer.update().view, -600_000L).classEndEpochMs)
+    }
+
     @Test fun pauseResumesTowardChosenEndNotOriginal180MinuteEnd() {
         val session = session()
         var now = 0L
