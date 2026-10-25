@@ -52,10 +52,10 @@ else
     exit 4
 fi
 
-if grep -Fq 'OK (21 tests)' "$LOG"; then
-    echo "PASS: 21/21 Android instrumentation tests on physical phone."
+if grep -Fq 'OK (24 tests)' "$LOG"; then
+    echo "PASS: 24/24 Android instrumentation tests on physical phone."
 else
-    echo "FAIL: no exact OK (21 tests) result; inspect $LOG"
+    echo "FAIL: no exact OK (24 tests) result; inspect $LOG"
     exit 5
 fi
 
