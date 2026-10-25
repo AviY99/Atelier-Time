@@ -1,5 +1,13 @@
 # Atelier Time — ordered QA 3→4: unexpected-stop recovery, then Android instrumentation
 
+## 2026-10-25 — AndroidTest test-only package installation PASS; actual execution pending
+
+- User screenshot in Termux confirms `ls -lh ~/storage/downloads/Atelier-Time-D110-Tests.apk` reports **1.1 MB**, readable through existing shared-storage link (the earlier optional `termux-setup-storage` interaction aborted with directory left intact; no need to repeat it).
+- `adb install -t -r ~/storage/downloads/Atelier-Time-D110-Tests.apk` output shows `Performing Streamed Install` and **`Success`**. This is **TEST APK INSTALL PASS**, not instrumentation run PASS.
+- ADB had already shown **`10.0.0.6:34545 ... device ... model:SM_S921B`**, so execute next with installed test package `com.ateliertime.android.test` and project-specified `androidx.test.runner.AndroidJUnitRunner`:
+  `adb shell am instrument -w com.ateliertime.android.test/androidx.test.runner.AndroidJUnitRunner`
+- Expected passing outcome: `OK (14 tests)`; capture actual device output/failures instead of asserting result prematurely. User should leave Atelier Time closed, no active Class. No regular app APK reinstall, data clear, or Stable 4 edits.
+
 ## 2026-10-25 — AndroidTest APK successfully copied to Downloads
 
 - 2026-10-25 — **Test APK copied to shared Downloads, user screenshot PASS.** In Code on the Go terminal under `/storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native`, the user ran `APK="$(find app/build/outputs/apk/androidTest -type f -name '*.apk' -print -quit)"`, then guarded `cp "$APK" /storage/emulated/0/Download/Atelier-Time-D110-Tests.apk`. The resulting `ls -lh` shows a **1.1 MB APK at** `/storage/emulated/0/Download/Atelier-Time-D110-Tests.apk`, dated Oct 25 18:03. The copy step passed without rebuilding. **Next:** in Termux grant shared-storage access via `termux-setup-storage`, then `adb install -t -r ~/storage/downloads/Atelier-Time-D110-Tests.apk`. Android ADB transport confirmed via `adb devices -l` on device `10.0.0.6:34545` Samsung SM-S921B. Installing just the AndroidTest APK must not uninstall or clear target app data; make sure no Class active before instrumenting. **Install and all 14 Android instrumentation tests remain NOT YET VERIFIED**.
