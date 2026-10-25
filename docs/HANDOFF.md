@@ -1,5 +1,18 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v4.0 · Stable 4)
 
+## 2026-10-25 — D-113: requested finish-wheel UX refinement (Stage 1, source only)
+
+**User phone confirmation for D-112:** 'הכל עובד מצויין' ('everything works great') except the two specified UI refinements. This is acceptance of existing D-112 behavior other than the new wheel requirement; do not treat D-113 as tested.
+
+**New exact requirements:** (1) Hour and minute wheels should be displayed **ONLY AFTER** the user elects to change/update the live Calculated finish; accepting default finish uses no wheel. (2) At every boundary where a candidate hour/minute would make the Class end infeasible, the **neighboring candidate is displayed RED but may not be scrolled/tapped into**; the wheel hard-stops at the last feasible GREEN selection and allows reversing into green values. The previous behavior that let users select red values (only then disabling Run) is insufficient.
+
+**Implemented on development branch:**
+- `SessionEditorScreen.kt`: The confirmation dialog initially displays continuously updated Calculated finish plus a `Change finish time` button (test tag `run_end_change_finish`) but no wheel. Pressing the button copies the live suggested HH:mm into the chosen custom time, then reveals the two wheels; `Use calculated finish` resets/hides them. Each prospective neighboring hour/minute is evaluated by the unchanged `RunEndTimePlanner.plan` against the same Class/session/actual current time and other selected wheel. `Confirm & Run` remains disabled if the overall selected finish becomes infeasible (including if wall time advances) and continues to revalidate at actual start.
+- `EndClockWheel.kt`: New `canSelect(Int): Boolean` gate checks EVERY adjacent step in a swipe, including fast multi-step swipes, rather than jumping over red candidates. The first invalid candidate stops traversal, is shown RED as an adjacent number, cannot be selected even by tapping, and user can swipe/tap back into feasible GREEN candidates. The selected number displays green when valid, red if a previously selected fixed time becomes invalid as the clock advances.
+- `app/build.gradle.kts`: bumped `versionCode=8`, `versionName="D-113"`. Frozen Stable 4 D-108 untouched. User data/saved Classes/Sounds unchanged by source edits; no Android functional/domain/notification/sound logic modified.
+
+**Verification:** GitHub source update only; **D-113 has NOT been built on phone, installed, or verified by user.** User should pull development branch in existing CoGo checkout, run `:app:assembleDebug` ONLY, copy APK as `Atelier-Time-D113.apk`, update-install via Termux `adb install -r`, and inspect default/no wheels, changed/wheels, red neighbor hard-stop via swipe and tap, backwards into green, and continuously updating Calculated finish. DO NOT start Stage 2 exhaustive automated tests without explicit approval after Stage 1 device acceptance. Previously authored Compose instrumentation test still references the OLD typed HH:mm UI; it must be replaced during Stage 2 preparation.
+
 ## 2026-10-25 — D-112: live calculated finish and swipe hour/minute picker (STAGE 1 ONLY)
 
 **User's clarified requirement:** In the pre-Run approval dialog, `Calculated finish` must keep advancing with the wall clock until the user confirms, rather than stay frozen at the original Run tap. Replace awkward typed HH:mm plus override switch with visible independently scrollable hour and minute wheels. A feasible selection shows GREEN; an infeasible one shows RED and blocks `Confirm & Run` until corrected back to a feasible (green) time. Keep mandatory explicit approval and compensation only through the last two regular Sessions.
