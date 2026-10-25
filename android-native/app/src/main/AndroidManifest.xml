@@ -3,11 +3,25 @@
     <!-- Android 13+: optional permission for the Class status notification.
          Declining it never blocks the timer or audio cues. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Foreground status service only while a Class runs. Android 14+
+         requires an explicit type; the specialUse subtype also needs
+         a policy review before publication in Google Play. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
     <application
         android:label="Atelier Time"
         android:allowBackup="false"
         android:theme="@android:style/Theme.Material.Light.NoActionBar"
         android:supportsRtl="true">
+        <service
+            android:name=".ClassNotificationTaskService"
+            android:exported="false"
+            android:stopWithTask="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Active user-initiated drawing class countdown; remove status when task is dismissed"/>
+        </service>
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
