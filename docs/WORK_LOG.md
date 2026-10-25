@@ -1,5 +1,11 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — D-107 requested ongoing Class status notification (source only)
+
+User explicitly asked to add the missing ongoing Android notification after accepting locked-screen/background operation of existing Timer and A/B/C audio. Committed native development source: new optional LOW-importance silent notification channel with active Class name, current Session/Break and phase/Class remaining, a running countdown and Paused/Stopped state; tapping reopens the Activity; cancels at Exit/end. Android 13+ notification permission requested only at Run/Start; denial never blocks Timer/audio. Five new JVM test methods written, not yet run, for pure Kotlin notification status. Functional monochrome STATUS icon is not the pending launcher/Play-store brand logo. Next debug build `versionName = "D-107"`, `versionCode = 3`; **NO D-107 Gradle/JVM PASS, APK install or live notification QA verified yet**. No FGS or new assurance after Recents swipe/process death/Doze. Stable 3 remains frozen; PR #3 Draft/unmerged. [Details and phone gate](ONGOING_CLASS_NOTIFICATION_D107.md).
+
+---
+
 ## 2026-10-24 — D-106 real D-build About version and no redundant foreground sound tests
 
 User superseded prior `About Version 3` policy: show the **actual D-development iteration**, currently `Version D-104`, and use matching D-number in future APKs. Only Android DEVELOPMENT files were changed: Gradle `versionName = "D-104"` (`versionCode = 2` unchanged), and Compose About now displays the full installed `PackageManager.versionName` rather than extracting digits. **No new build/install** following this source change; the already assembled `Atelier-Time-D104.apk` remains the earlier Version 3 build. User also confirms normal sound cues and timing/phase transitions had been previously tested and work; **do not repeat the same foreground 3-minute A/B/C acceptance test**. Locked/background/Doze cue reliability, offline persistence and connected Android instrumentation are still separate OPEN QA gates. Stable 3 checkpoint and icon/logo pre-store approval remain unchanged.
