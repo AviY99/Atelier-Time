@@ -1,5 +1,14 @@
 # Atelier Time — Run end-time constraint: options and draft contract (D-110+)
 
+## 2026-10-25 — D-112 phone APK build PASSED; install and UX acceptance pending
+
+- User screenshot from Code on the Go confirms `app:assembleDebug` **BUILD SUCCESSFUL in 13s**, 36 actionable tasks (12 executed, 24 up-to-date).
+- New `/storage/emulated/0/Download/Atelier-Time-D112.apk` exists, **12M**, screenshot timestamp Oct 25 20:53.
+- Non-blocking Kotlin warning at `SessionEditorScreen.kt:676:29` about redundant Elvis operator; build and packaging succeed.
+- Stage 1 now **source implemented + build PASS**. **Update-install is not yet verified**, and actual UI live clock + green/red independent hour/minute wheels are not yet phone verified.
+- Next: from Termux `adb install -r ~/storage/downloads/Atelier-Time-D112.apk`, after closing any live Class; expect `Success`. Verify About D-112; saved Classes/Sounds remain; live Calculated finish increases while dialog open; both wheels change and feasible/infeasible selection changes green/red with Confirm disabled for red; reset calculated finish and cancel. Ask for user approval before stage 2 comprehensive tests.
+- D-108 Stable 4 frozen; no Stage 2 automated tests requested or run for D-112.
+
 ## 2026-10-25 — D-112: live calculated finish and swipe hour/minute picker (STAGE 1 ONLY)
 
 **User's clarified requirement:** In the pre-Run approval dialog, `Calculated finish` must keep advancing with the wall clock until the user confirms, rather than stay frozen at the original Run tap. Replace awkward typed HH:mm plus override switch with visible independently scrollable hour and minute wheels. A feasible selection shows GREEN; an infeasible one shows RED and blocks `Confirm & Run` until corrected back to a feasible (green) time. Keep mandatory explicit approval and compensation only through the last two regular Sessions.
