@@ -1,5 +1,6 @@
 package com.ateliertime.domain
 
+import java.util.Calendar
 import java.util.GregorianCalendar
 import java.util.TimeZone
 import org.junit.Assert.*
@@ -112,7 +113,7 @@ class RunEndTimePlannerTest {
         val utc = TimeZone.getTimeZone("UTC")
         val now = GregorianCalendar(utc).apply {
             set(2026, 9, 25, 18, 30, 10)
-            set(GregorianCalendar.MILLISECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }.timeInMillis
         val today = RunEndTimePlanner.nextOccurrence("21:30", now, utc)
         val tomorrow = RunEndTimePlanner.nextOccurrence("17:45", now, utc)
@@ -124,7 +125,7 @@ class RunEndTimePlannerTest {
         val utc = TimeZone.getTimeZone("UTC")
         val now = GregorianCalendar(utc).apply {
             set(2026, 9, 25, 23, 50, 0)
-            set(GregorianCalendar.MILLISECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }.timeInMillis
         val midnight = RunEndTimePlanner.nextOccurrence("00:15", now, utc)
         assertEquals(25L * 60_000L, midnight - now)
@@ -162,7 +163,7 @@ class RunEndTimePlannerTest {
         val utc = TimeZone.getTimeZone("UTC")
         val now = GregorianCalendar(utc).apply {
             set(2026, 9, 25, 23, 20, 0)
-            set(GregorianCalendar.MILLISECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }.timeInMillis
         val end = RunEndTimePlanner.nextOccurrence("02:20", now, utc)
         assertEquals(0, RunEndTimePlanner.plan(session, now, end).correctionSeconds)
