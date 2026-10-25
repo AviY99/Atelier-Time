@@ -21,6 +21,18 @@
 - This is **QA-R01 DEVICE RUN BLOCKED / TOOL ACCESS NOT VERIFIED**, **not** an app test failure and **not** proof that `$ANDROID_HOME/platform-tools/adb` or any CoGo-integrated device runner is absent.
 - **Safe next action:** inspect the Git worktree root and check whether `$ANDROID_HOME/platform-tools/adb` is executable; do not install platform tools, pair devices, or attempt Gradle connected tests yet. Existing D-108 accepted APK and personal data remain untouched.
 
+## QA-R01 follow-up — second Code on the Go screenshot (2026-10-25)
+
+**Observed directly from screenshot (not an instrumentation PASS):**
+
+- `git rev-parse --show-toplevel`: `/storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time`.
+- Git checkout remains at short SHA `02beb0a`. No pull of documentation-only changes was performed on the phone.
+- `ls -l "$ANDROID_HOME/platform-tools/adb"` returned a **0-byte** regular file without execute bits (`-rw-------`), inside CoGo's SDK. `adb` in the current terminal PATH is also absent.
+- Therefore the SDK path is **not an executable ADB binary**; changing `PATH` or using `chmod` alone would not fix the zero-byte file. Do **not** replace platform tools, install a toolchain, change app code or issue a connected Gradle test yet.
+- The existing `?? ../../.cg/` untracked status entry is left untouched; its role is unknown.
+- **QA-R01 result: BLOCKED — no usable terminal ADB/device test transport verified.** The 14 declared instrumented test methods have not executed and are neither PASS nor FAIL. A CoGo-integrated alternative runner could be investigated later if supported, without treating this blocker as an app defect.
+- Other independent gates can continue without this harness: next recommended minimally disruptive user-device gate is **QA-R04 reboot persistence using the already installed D-108**, limited to checking existing saved Class names and Sound choices before/after one ordinary phone reboot. Do not run it until baseline values are recorded; do not clear application storage or run unapproved recovery semantics. Active timer restart after OS death/reboot is **not** an accepted capability and must not be implied.
+
 ## Source audit of existing connected Android instrumentation tests
 
 Read the Android sources from Stable 4 / the identical native development branch. These are **test methods present in source**, NOT results or confirmed discoverable tests on the phone:
