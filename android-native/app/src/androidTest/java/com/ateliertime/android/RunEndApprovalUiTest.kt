@@ -1,30 +1,39 @@
 package com.ateliertime.android
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertExists
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.fetchSemanticsNode
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeDown
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ateliertime.domain.*
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.UUID
-import java.util.Calendar
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 /**
- * End-to-end Compose UI checks use separate randomized Class and Sound stores.
- * Nothing is written to the user's real saved Classes or Sound choices.
- * Only run when there is no actual Class running on the device.
+ * D-114 Compose regression suite. Never use the retired typed HH:mm widgets.
+ *
+ * Only randomized Class/Sound preference namespaces are used. The device must
+ * have NO real Class running: Compose instrumentation briefly owns the target
+ * process and exercises an isolated running test Class/notification.
+ * Installation and execution require separate device permission.
  */
 @RunWith(AndroidJUnit4::class)
 class RunEndApprovalUiTest {
@@ -33,18 +42,22 @@ class RunEndApprovalUiTest {
     private val soundNamespace = "atelier_qa_ui_sound_" + UUID.randomUUID()
     private val store = AndroidPresetStore(target, presetNamespace)
     private val isolatedMelody = MelodyPreferences(target, soundNamespace)
+    private val engine = ScheduleEngine()
+    private val catalog = PresetCatalog(store, engine) { UUID.randomUUID().toString() }
+    private lateinit var storedId: String
+    private lateinit var savedSignature: String
 
     @get:Rule val compose = createComposeRule()
 
     @Before fun seedOnlyTestLibrary() {
-        val engine = ScheduleEngine()
         val approved = engine.approve(engine.generate(SessionRules(
             id = "qa-ui", name = "QA Test Class",
             totalSeconds = 180 * 60, summarySeconds = 15 * 60,
             poseSeconds = 25 * 60, specialBreakCount = 1,
         ), FinalPoseChoice.remainder()))
-        val catalog = PresetCatalog(store, engine) { UUID.randomUUID().toString() }
-        catalog.save(approved, "QA Test Class")
+        val entry = catalog.save(approved, "QA Test Class")
+        storedId = entry.id
+        savedSignature = PresetCatalog.signature(catalog.open(storedId))
     }
 
     @After fun removeOnlyTestArtifacts() {
@@ -68,82 +81,187 @@ class RunEndApprovalUiTest {
         compose.onNodeWithText("Confirm Class finish time").assertExists()
     }
 
-    @Test fun runShowsPredictedFinishAndCancelDoesNotStartClass() {
+    private fun textAt(tag: String): String =
+        compose.onNodeWithTag(tag).fetchSemanticsNode()
+            .config[SemanticsProperties.Text].joinToString("") { it.text }
+
+    private fun wheelValue(tag: String): Int = textAt(tag + "_value").trim().toInt()
+
+    private fun clickWheel(tag: String) {
+        compose.onNodeWithTag(tag).performScrollTo().performClick()
+    }
+
+    private fun showWheels() {
+        compose.onNodeWithTag("run_end_change_finish").performClick()
+        compose.onNodeWithTag("run_end_wheels").assertExists()
+        compose.onNodeWithTag("run_end_hour").assertExists()
+        compose.onNodeWithTag("run_end_minute").assertExists()
+    }
+
+    private fun assertStoredClassUnchanged() {
+        val reread = PresetCatalog(store, engine) { UUID.randomUUID().toString() }
+        assertEquals(savedSignature, PresetCatalog.signature(reread.open(storedId)))
+        assertEquals(1, reread.state().entries.size)
+    }
+
+    /** Guaranteed +1 minute, including HH:59 rollover. */
+    private fun chooseOneMinuteLater() {
+        val minute = wheelValue("run_end_minute")
+        if (minute == 59) clickWheel("run_end_hour_next")
+        clickWheel("run_end_minute_next")
+    }
+
+    /** Guaranteed -1 minute except at midnight: the UI cannot step backwards
+     * across midnight through the planner's next-occurrence-only day selection.
+     */
+    private fun chooseOneMinuteEarlier() {
+        val hour = wheelValue("run_end_hour")
+        val minute = wheelValue("run_end_minute")
+        assumeTrue("Midnight back-step cannot be selected through this wheel", hour != 0 || minute != 0)
+        if (minute == 0) clickWheel("run_end_minute_previous")
+        clickWheel(if (minute == 0) "run_end_hour_previous" else "run_end_minute_previous")
+    }
+
+    @Test fun predictedFinishIsLiveWithoutShowingWheelsByDefault() {
         openRunApproval()
-        compose.onNodeWithText("Calculated finish:", substring = true).assertExists()
+        compose.onNodeWithTag("run_end_calculated").assertExists()
+        compose.onNodeWithTag("run_end_selected").assertExists()
+        compose.onNodeWithTag("run_end_change_finish").assertExists()
+        compose.onNodeWithTag("run_end_wheels").assertDoesNotExist()
+        compose.onNodeWithTag("run_end_hour").assertDoesNotExist()
+        compose.onNodeWithTag("run_end_minute").assertDoesNotExist()
+        val before = textAt("run_end_calculated")
+        compose.waitUntil(timeoutMillis = 6_000L) {
+            textAt("run_end_calculated") != before
+        }
+        assertStoredClassUnchanged()
+    }
+
+    @Test fun openingPickerWithoutMovingWheelsStillTracksLiveFinish() {
+        openRunApproval()
+        showWheels()
+        val before = textAt("run_end_selected")
+        compose.waitUntil(timeoutMillis = 6_000L) {
+            textAt("run_end_selected") != before
+        }
+        compose.onNodeWithTag("run_end_blocked_reason").assertDoesNotExist()
+        compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
+    }
+
+    @Test fun cancelBeforeRunDoesNotActivateClassOrChangeSavedData() {
+        openRunApproval()
         compose.onNodeWithText("Cancel").performClick()
         compose.onNodeWithTag("run_end_dialog").assertDoesNotExist()
         compose.onNodeWithText("Class timer").assertDoesNotExist()
-        compose.onNodeWithText("Saved classes").assertExists()
+        assertTrue(catalog.state().activeId == null)
+        assertStoredClassUnchanged()
     }
 
-    @Test fun invalidClockIsRejectedInDialogAndUserCanCorrectIt() {
+    @Test fun tappingRedEarlierHourStopsAtGreenAndShowsAttemptedClockReason() {
         openRunApproval()
-        compose.onNodeWithTag("run_end_override").performClick()
-        compose.onNodeWithTag("run_end_clock").performTextInput("25:99")
+        showWheels()
+        val before = wheelValue("run_end_hour")
+        clickWheel("run_end_hour_previous") // 180 -> about 120 minutes: impossible.
+        assertEquals(before, wheelValue("run_end_hour"))
+        compose.onNodeWithTag("run_end_blocked_reason").assertExists()
+        assertTrue(textAt("run_end_blocked_reason").contains("Cannot select"))
+        assertTrue(textAt("run_end_blocked_reason").contains("last two Sessions") ||
+            textAt("run_end_blocked_reason").contains("too late"))
+        compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
+        assertTrue(catalog.state().activeId == null)
+    }
+
+    @Test fun rapidDownwardSwipeCannotSkipTheFirstRedHour() {
+        openRunApproval()
+        showWheels()
+        val before = wheelValue("run_end_hour")
+        compose.onNodeWithTag("run_end_hour").performScrollTo()
+            .performTouchInput { swipeDown() }
+        assertEquals(before, wheelValue("run_end_hour"))
+        compose.onNodeWithTag("run_end_blocked_reason").assertExists()
+        assertTrue(catalog.state().activeId == null)
+    }
+
+    @Test fun permittedGreenMoveClearsBlockedReason() {
+        openRunApproval()
+        showWheels()
+        clickWheel("run_end_hour_previous")
+        compose.onNodeWithTag("run_end_blocked_reason").assertExists()
+        // +1 hour is feasible for a 3-hour Class and safely clears feedback.
+        clickWheel("run_end_hour_next")
+        compose.onNodeWithTag("run_end_blocked_reason").assertDoesNotExist()
+        compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
+        assertStoredClassUnchanged()
+    }
+
+    @Test fun resetHidesWheelsAndClearsBlockedReason() {
+        openRunApproval()
+        showWheels()
+        clickWheel("run_end_hour_previous")
+        compose.onNodeWithTag("run_end_blocked_reason").assertExists()
+        compose.onNodeWithTag("run_end_reset_calculated")
+            .performScrollTo().performClick()
+        compose.onNodeWithTag("run_end_wheels").assertDoesNotExist()
+        compose.onNodeWithTag("run_end_blocked_reason").assertDoesNotExist()
+        compose.onNodeWithTag("run_end_change_finish").assertExists()
+        compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
+    }
+
+    @Test fun minuteWheelChangesOnlyAfterUserActionAndCanBeReset() {
+        openRunApproval()
+        showWheels()
+        val before = wheelValue("run_end_minute")
+        chooseOneMinuteLater()
+        val after = wheelValue("run_end_minute")
+        assertEquals((before + 1) % 60, after)
+        compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
+        compose.onNodeWithTag("run_end_reset_calculated")
+            .performScrollTo().performClick()
+        compose.onNodeWithTag("run_end_wheels").assertDoesNotExist()
+        assertStoredClassUnchanged()
+    }
+
+    @Test fun confirmingLiveCalculatedFinishStartsOnlyAfterApproval() {
+        openRunApproval()
+        assertTrue(catalog.state().activeId == null)
         compose.onNodeWithTag("run_end_confirm").performClick()
-        compose.onNodeWithText("Enter a valid finish time as HH:mm", substring = true).assertExists()
-        compose.onNodeWithTag("run_end_dialog").assertExists()
-        compose.onNodeWithText("Class timer").assertDoesNotExist()
+        compose.onNodeWithTag("run_end_dialog").assertDoesNotExist()
+        compose.onNodeWithText("Class timer").assertExists()
+        compose.onNodeWithText("Running").assertExists()
+        assertStoredClassUnchanged()
+    }
+
+    @Test fun feasibleEarlierMinuteIsApprovedWithoutMutatingSavedClass() {
+        openRunApproval()
+        showWheels()
+        chooseOneMinuteEarlier()
+        compose.onNodeWithText("Final two Sessions:", substring = true).assertExists()
+        compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
+        compose.onNodeWithTag("run_end_confirm").performClick()
+        compose.onNodeWithTag("run_end_dialog").assertDoesNotExist()
+        compose.onNodeWithText("Running").assertExists()
+        assertStoredClassUnchanged()
+    }
+
+    @Test fun feasibleLaterMinuteIsApprovedWithoutMutatingSavedClass() {
+        openRunApproval()
+        showWheels()
+        chooseOneMinuteLater()
+        compose.onNodeWithText("Final two Sessions:", substring = true).assertExists()
+        compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
+        compose.onNodeWithTag("run_end_confirm").performClick()
+        compose.onNodeWithTag("run_end_dialog").assertDoesNotExist()
+        compose.onNodeWithText("Running").assertExists()
+        assertStoredClassUnchanged()
+    }
+
+    @Test fun cancelledCustomFinishNeverRunsOrChangesOriginalSchedule() {
+        openRunApproval()
+        showWheels()
+        chooseOneMinuteLater()
         compose.onNodeWithText("Cancel").performClick()
-    }
-
-    @Test fun confirmingCalculatedFinishLaunchesClassAndExitReturnsToLibrary() {
-        openRunApproval()
-        compose.onNodeWithTag("run_end_confirm").performClick()
-        compose.onNodeWithText("Class timer").assertExists()
-        compose.onNodeWithText("Running").assertExists()
-        compose.onNodeWithText("Exit", useUnmergedTree = true).performClick()
-        compose.onNodeWithText("Confirm").performClick()
-        compose.onNodeWithText("Timer · saved classes").assertExists()
-    }
-
-    private fun clockFromNow(minutesAhead: Int): String =
-        SimpleDateFormat("HH:mm", Locale.US).format(
-            Calendar.getInstance().apply { add(Calendar.MINUTE, minutesAhead) }.time
-        )
-
-    private fun chooseFinish(minutesAhead: Int) {
-        compose.onNodeWithTag("run_end_override").performClick()
-        compose.onNodeWithTag("run_end_clock").performTextInput(clockFromNow(minutesAhead))
-    }
-
-    @Test fun impossibleEarlyFinishKeepsDialogOpenForCorrection() {
-        openRunApproval()
-        chooseFinish(10) // Requires more than the adjustable last pair can remove.
-        compose.onNodeWithTag("run_end_confirm").performClick()
-        compose.onNodeWithTag("run_end_dialog").assertExists()
-        compose.onNodeWithText("last two Sessions", substring = true).assertExists()
-        compose.onNodeWithText("Class timer").assertDoesNotExist()
-    }
-
-    @Test fun unrealisticLaterFinishCannotTurnIntoOvernightClass() {
-        openRunApproval()
-        chooseFinish(370) // More than twice the original three-hour Class.
-        compose.onNodeWithTag("run_end_confirm").performClick()
-        compose.onNodeWithTag("run_end_dialog").assertExists()
-        compose.onNodeWithText("too late", substring = true).assertExists()
-        compose.onNodeWithText("Class timer").assertDoesNotExist()
-    }
-
-    @Test fun validEarlierFinishCanBeApprovedAndStartsClass() {
-        openRunApproval()
-        chooseFinish(175)
-        compose.onNodeWithText("Final two Sessions:", substring = true).assertExists()
-        compose.onNodeWithTag("run_end_confirm").performClick()
         compose.onNodeWithTag("run_end_dialog").assertDoesNotExist()
-        compose.onNodeWithText("Class timer").assertExists()
-        compose.onNodeWithText("Running").assertExists()
+        assertFalse(catalog.state().activeId == storedId)
+        assertStoredClassUnchanged()
     }
-
-    @Test fun validLaterFinishCanBeApprovedAndStartsClass() {
-        openRunApproval()
-        chooseFinish(190)
-        compose.onNodeWithText("Final two Sessions:", substring = true).assertExists()
-        compose.onNodeWithTag("run_end_confirm").performClick()
-        compose.onNodeWithTag("run_end_dialog").assertDoesNotExist()
-        compose.onNodeWithText("Class timer").assertExists()
-        compose.onNodeWithText("Running").assertExists()
-    }
-
 }
