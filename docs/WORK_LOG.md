@@ -1,5 +1,13 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — QA-R04 phone reboot persistence PASS (user-reported)
+
+- The user completed the previously specified reboot-retention check on the existing D-108 installation and confirmed: **"הכל נשמר לאחר ריסטארט לנייד"**.
+- **PASS — normal phone reboot preserves previously saved Classes and Sound choices.** Evidence is user's on-phone observation, not automated connected instrumentation or independently captured screenshots.
+- Scope strictly excludes active Class timer restoration after reboot, unexpected OS process kill/Doze, malformed-data recovery and versioned APK update continuity. Those gates remain open.
+- No APK build, code modification, data removal or repeated approved UI/notification/cue tests.
+- QA-R01 instrumentation remains BLOCKED by zero-byte/nonexecutable ADB SDK placeholder in CoGo. Next independent reliability focus: QA-R02 real multi-hour timing/drift and unattended boundary behavior.
+
 ## 2026-10-25 — QA-R01 terminal blocker confirmed (user's second CoGo screenshot)
 
 - CoGo Git root verified at `/storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time`; local checkout at original accepted source `02beb0a`.
