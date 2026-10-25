@@ -1,5 +1,15 @@
 # Atelier Time — ordered QA 3→4: unexpected-stop recovery, then Android instrumentation
 
+## 2026-10-25 — STABLE 5 APPROVED AND FROZEN: D-114
+
+**User decision:** After personally testing D-114 on their Android phone, user explicitly stated: "הכל עובד , זאת גרסה יציבה 5" (everything works; this is Stable 5). This supersedes the previous Stage 1 acceptance-only status. The user accepted the complete D-114 Run finish-time feature, including live calculated end, user opt-in hours/minutes wheels, hard red-boundary stop and explanation when attempted selection is infeasible.
+
+- **Stable 5 source snapshot:** `stable/android-d114` at exact commit **`34a692a98282944a76e314efcc228dac3bd072ff`**, created from the development branch HEAD *before* this documentation update. Readback from GitHub confirms the branch ref, `versionName = "D-114"` and `versionCode = 9`. **Treat this branch and commit as immutable; never develop on it, force-push it or merge further changes into it.**
+- **Stable 4 remains untouched:** `stable/android-d108` is still at **`02beb0af46719301cccb72ad4698a337ab416d73`**. No Play Store, production distribution or signing is implied by Stable 5.
+- The user previously supplied **D-114 on-phone Gradle `:app:assembleDebug` BUILD SUCCESSFUL in 11s**, resulting in a 12M debug APK in Downloads. User confirms installed application works. **This is a user-accepted product milestone, NOT a claim that all D-114 automated tests have run.** A D-110 baseline AndroidTest run yielded `OK (14 tests)`, but this cannot be attributed to D-114.
+- **Strict stage gate:** Stage 1 feature implementation and personal device validation are completed and accepted. User earlier instructed "between the stages request approval"; therefore **Stage 2 — upgrade and execute ALL feasible automated tests (JVM + AndroidTest Compose UI/device + safe ADB checks) — remains PENDING EXPLICIT USER APPROVAL.** Do not start tests or mutate source before asking. Existing `RunEndApprovalUiTest.kt` still references retired typed HH:mm controls and will need migration to D-114 wheel tags on the **development branch only** when authorized. Tests must use isolated preferences and avoid clearing saved Classes/Sounds.
+- Future work stays on `android-native-kotlin-compose`; fork/branch from Stable 5 only for emergency patches, never edit the frozen snapshot. Handoff and current-status documentation must distinguish the accepted Stable 5 from the not-yet-run D-114 automated QA.
+
 ## 2026-10-25 — D-110 Stage 4 Android instrumentation: 14/14 DEVICE PASS
 
 **DEVICE RESULT VERIFIED FROM USER TERMUX SCREENSHOT (2026-10-25, ~18:08 Israel):** On Samsung Galaxy SM-S921B (ADB transport `10.0.0.6:34545`, `device`), the previously assembled 1.1 MB AndroidTest APK was installed successfully (`adb install -t -r ~/storage/downloads/Atelier-Time-D110-Tests.apk` → `Success`). The user executed:
