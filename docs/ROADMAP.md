@@ -1,5 +1,7 @@
 # Delivery roadmap and approval gates
 
+> **D-109 / 2026-10-25 — ANDROID STABLE 4 AND NEW-CHAT HANDOFF:** User explicitly declares D-108 Stable 4, accepted on phone. Frozen source branch `stable/android-d108` at `02beb0af46719301cccb72ad4698a337ab416d73`; D-108 notification/back/swipe defect CLOSED, confirmed 35s Gradle JVM+debug build PASS. Read [CHAT_HANDOFF_AFTER_STABLE_4_2026_10_25.md](CHAT_HANDOFF_AFTER_STABLE_4_2026_10_25.md), [ANDROID_STABLE_4_D108.md](ANDROID_STABLE_4_D108.md) FIRST. Remaining reliability, connected instrumentation, persistent data QA, FGS specialUse Play review and user-approved logo/icon before store remain OPEN. All older pending D-108 or Stable 3-only labels below are historical.
+
 > **LATEST D-108 USER DEVICE ACCEPTANCE — 2026-10-25 (10:34 Israel):** User reports **"הכל תקין כעת"** after the D-108 fixed APK was built on the phone (`BUILD SUCCESSFUL in 35s`; Gradle JVM test task and assembleDebug PASS; APK copied to Downloads). Mark **D-108 FUNCTIONAL QA ACCEPTED/CLOSED** for the previously user-reported stuck notification when closing by Back or Recents swipe. Background notifications on Home/Recents overview remain as previously user-confirmed. This is user-reported phone acceptance (no individual screen captures of each subcase, no new connected instrumentation or Doze/OS-kill claims). The earlier `compileDebugKotlin` failure was fixed by Intent `addFlags(...)`; no rebuild needed now. Frozen `stable/android-d102` Stable 3 immutable. **Do not infer approval to create Stable 4**. Remaining QA: data recovery/restarts, connected instrumentation, multi-hour reliability/accessibility, potential Play policy review for specialUse foreground service, mandatory app logo/launcher/store art before publication. Historical D-108 'installation/notification QA pending' status is superseded.
 
 > **LATEST D-108 PHONE REBUILD PASS — 2026-10-25 (user screenshot):** After the confirmed one-line Kotlin `addFlags(...)` fix to `ClassNotificationTaskService.kt:35`, the on-phone Gradle run completed **`BUILD SUCCESSFUL in 35s`** with 42 actionable tasks (9 executed, 33 up-to-date). The screenshot explicitly shows `:app:compileDebugUnitTestKotlin`, `:app:testDebugUnitTest` and `:app:assembleDebug` and confirms the ~12M APK was copied to `/storage/emulated/0/Download/Atelier-Time-D108.apk` (Oct 25, 10:09). This **supersedes the historical failed compile gate**; JVM test task and debug APK assembly now PASS. **No evidence yet of D-108 update-install, About `Version D-108`, or real Back/Recents-swipe notification dismissal**: these remain PENDING phone QA. User's previous D-107 observations stand: Home/overview/other-app background status PASS, Back and Recents swipe left a stuck notification. Next install existing APK from Downloads as update (never uninstall/clear stored Classes), verify notification remains on Home/overview and disappears on Back/swipe; no redundant rebuild, and no retesting previously accepted A/B/C phase cues. Frozen Stable 3 unchanged, PR #3 not merged; Google Play FGS specialUse policy review and pre-store logo stage still OPEN.
@@ -22,24 +24,24 @@
 
 > LATEST ACTIVE D-104 (2026-10-24): User added an explicit MANDATORY logo and launcher/store-icon design/approval stage before any Play publication, described in [ICON_LOGO_PRESTORE_GATE.md](ICON_LOGO_PRESTORE_GATE.md). Testing starts with four new pure Kotlin/JVM Timer regression methods (3m real-cue schedule simulated at 200ms ticks, 3h clock deadline, stale cue suppression and paused deadline) in TimerReliabilityGateTest.kt. Tests are WRITTEN, NOT YET EXECUTED on phone. Existing Timer code, Sound and UI are untouched. Next APK About Version 3 requirement is implemented in development app/build.gradle.kts as versionName="3" and versionCode=2; not built/installed yet, frozen Stable 3 D-102 stays unmodified. Next run on-device Gradle :app:testDebugUnitTest :app:assembleDebug with CoGo ARM64 AAPT2, record actual test PASS, then update-install keeping all saved Classes, verify About Version 3 and focused real Timer cues. Then background/lock/Doze, persistence, connected instrumented tests, long-run/accessibility, release candidate, mandatory icon/logo, publication only if explicitly approved. Canonical [TIMER_RELIABILITY_D104.md](TIMER_RELIABILITY_D104.md). PR #3 Draft/unmerged, no paid CI.
 
-## CURRENT Android-first completion order — post-Stable 3 (2026-10-24)
+## CURRENT Android-first completion order — Android Stable 4 accepted (2026-10-25)
 
-Historical Flutter/Dart stage rows below are ARCHIVED context; native Kotlin + Jetpack Compose remains the authorized Android-first stack.
+**Authoritative user checkpoint:** [Android Stable 4, `stable/android-d108`](ANDROID_STABLE_4_D108.md), source SHA `02beb0af46719301cccb72ad4698a337ab416d73`. D-108 notification behavior user-accepted and CLOSED. [Use new-chat handoff](CHAT_HANDOFF_AFTER_STABLE_4_2026_10_25.md). Historical Flutter/Dart stage tables further below are superseded; native Kotlin + Jetpack Compose remains approved.
 
-| Current gate | Exit requirement | State |
+| Gate | Evidence required | State |
 |---|---|---|
-| QA-1 Timer deterministic and manual reliability | D-104 JVM A/B/C, deadline tests and phone Pause/Resume/Next/Restart verification | **GRADLE/JVM BUILD PASS; APK INSTALL + MANUAL QA OPEN** |
-| QA-2 locked-screen/background/Doze | Real audio/notifications/service policy validated under Android system restrictions | **OPEN** |
-| QA-3 persistence/recovery | Saved Classes and sounds through app restarts, updates/reboot, corrupt/unsupported JSON safety | **OPEN** |
-| QA-4 connected instrumentation | Execute device Android test methods with per-test evidence | **OPEN** |
-| QA-5 sustained usage, accessibility and quality | Multi-hour device observation, battery/thermal, font scale, assistive technology | **OPEN** |
-| Android release candidate | Signing, build number, package update/data continuity, legal/privacy/release notes | **OPEN** |
-| **MANDATORY icon + logo stage BEFORE Play store** | User approves artwork; install adaptive/monochrome/legacy icons, Play 512×512 store icon and 1024×500 feature graphic; test on device | **OPEN — MUST PASS BEFORE STORE** |
-| Store publication | Store assets/policies, final release approval and user authorization | **BLOCKED UNTIL ALL REQUIRED GATES PASS** |
-| Later iOS/iPadOS, Windows, macOS | Reuse Kotlin domain; native OS adapters, build/sign/install/test | **LATER** |
+| **ACCEPTED Stable 4 functional behavior** | User-installed D-108 debug APK; Gradle JVM task+assemble PASS 35s; user-confirmed Timer/Sounds/background notification Home/Back/Recents behavior | **CLOSED / FROZEN — no new build needed** |
+| Remaining Android lifecycle & long-run reliability | Test genuine Doze/OS process kill/reboot, multi-hour Class/battery and transition issues separately; do not repeat accepted everyday Home/Recents/Back/A-B-C | **OPEN** |
+| Android connected instrumentation | Run `:app:connectedDebugAndroidTest` (or approved on-device equivalent), record individual case PASS/FAIL | **OPEN** |
+| Data persistence and crash/recovery | Verify restart/reboot/update, JSON integrity/corrupt-format handling and preservation of saved Classes and sound settings | **OPEN** |
+| FGS `specialUse` / Android & Play policy | Review Android service-type eligibility, permissions, notification lifecycle and future store declaration; user-approved behavior must remain intact | **OPEN — STORE BLOCKER** |
+| Full accessibility and device/quality matrix | Assistive technology, larger text, different screen sizes, battery/thermal and permission-denied robustness | **OPEN** |
+| Production Android candidate | Release keystore/signature security, non-debug packaging, versioning, privacy/licenses and real update-install QA | **OPEN** |
+| **MANDATORY approved app logo/launcher icon and Play imagery** | User selects visual logo; Android adaptive/monochrome/legacy icon; Play 512x512 app icon, 1024x500 feature graphic; tested on device | **OPEN — REQUIRED BEFORE STORE** |
+| Google Play publication | Complete release, legal and design gates, and explicit user authorization | **BLOCKED** |
+| iOS/iPadOS, Windows and macOS | Reuse pure Kotlin domain, build/test OS adapters separately | **LATER** |
 
-Icon/logo acceptance details: [ICON_LOGO_PRESTORE_GATE.md](ICON_LOGO_PRESTORE_GATE.md).
-Next APK About Version 3 source update: development Gradle versionName = "3", versionCode = 2, not yet compiled/installed; [D-104 plan](TIMER_RELIABILITY_D104.md).
+**About/versioning:** About displays actual installed D-build ID (**D-108** at Stable 4), **not Stable 4**. For next code increment update versionName to its true D-number and versionCode monotonically. No new APK or release step is requested by handoff. [Logo gate](ICON_LOGO_PRESTORE_GATE.md). [Test plan](TEST_PLAN.md).
 
 ---
 
