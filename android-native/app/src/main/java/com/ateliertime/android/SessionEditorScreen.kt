@@ -182,7 +182,7 @@ fun SessionEditorScreen(
     var overwriteTarget by remember { mutableStateOf<StoredPreset?>(null) }
     var libraryRevision by remember { mutableIntStateOf(0) }
     var launchRunRequested by remember { mutableStateOf(false) }
-    var runStartCorrectionSeconds by remember { mutableIntStateOf(0) }
+    var runStartTargetEpochMs by remember { mutableStateOf<Long?>(null) }
     var pendingRunApproval by remember { mutableStateOf<PendingRunApproval?>(null) }
     var customFinishEnabled by remember { mutableStateOf(false) }
     var customFinishClock by remember { mutableStateOf("") }
@@ -292,16 +292,36 @@ fun SessionEditorScreen(
         val clock = liveTimer
         if (clock != null && launchRunRequested) {
             try {
-                val view = clock.start(runStartCorrectionSeconds)
+                val startEpochMs = System.currentTimeMillis()
+                val target = runStartTargetEpochMs
+                    ?: throw IllegalArgumentException("No confirmed Class finish time.")
+                val session = playingSession
+                    ?: throw IllegalArgumentException("No approved Class selected.")
+                // Re-evaluate at ACTUAL start, not button press, to keep the
+                // accepted wall-clock deadline after UI/scheduling latency.
+                val correction = RunEndTimePlanner.plan(
+                    session, startEpochMs, target
+                ).correctionSeconds
+                val view = clock.start(correction)
                 timerView = view
-                classClockTimes = classClockTracker.newClass(view, System.currentTimeMillis())
+                classClockTimes = classClockTracker.newClass(view, startEpochMs)
                 timerError = null
             } catch (error: IllegalArgumentException) {
-                timerError = error.message ?: "The selected finish cannot be used."
+                val session = playingSession
+                val presetId = selectedPresetId
+                if (session != null && presetId != null) {
+                    pendingRunApproval = PendingRunApproval(
+                        presetId, session,
+                        RunEndTimePlanner.suggestedEndEpochMs(
+                            session, System.currentTimeMillis()
+                        )
+                    )
+                    runApprovalError = error.message ?: "Choose another finish time."
+                }
                 playingSession = null
             } finally {
                 launchRunRequested = false
-                runStartCorrectionSeconds = 0
+                runStartTargetEpochMs = null
             }
         }
     }
@@ -1060,7 +1080,7 @@ fun SessionEditorScreen(
                         // Only Confirm may make this selection active in storage.
                         val activatedSession = catalog.activate(request.presetId)
                         selectedPresetId = request.presetId
-                        runStartCorrectionSeconds = plan.correctionSeconds
+                        runStartTargetEpochMs = plan.targetEndEpochMs
                         playingSession = activatedSession
                         launchRunRequested = true
                         pendingRunApproval = null
