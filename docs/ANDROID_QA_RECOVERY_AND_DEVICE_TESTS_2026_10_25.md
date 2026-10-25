@@ -1,5 +1,13 @@
 # Atelier Time — ordered QA 3→4: unexpected-stop recovery, then Android instrumentation
 
+## QA Stage 4 — Termux ADB daemon running (2026-10-25, user screenshot)
+
+- User executed `adb start-server && adb devices -l` in Termux.
+- Output explicitly shows `* daemon started successfully`, followed by `List of devices attached` with **no devices listed**.
+- Status: **ADB CLIENT/SERVER PASS; DEVICE PAIRING AND CONNECTION PENDING**. Blank list before Wireless debugging pairing is expected and is not an Atelier Time test failure. No claim of instrumentation execution.
+- Next safe action: Android Settings > Developer options > Wireless debugging > Pair device with pairing code, keeping transient pairing code private. In Termux run `adb pair <phone-IP>:<pairing-port>`; enter PIN in Termux only; after successful pairing run `adb connect <phone-IP>:<connection-port>` with the distinct connection port shown on Wireless debugging main screen, then `adb devices -l` and require a device in `device` state before any `am instrument` command.
+- Do not send one-time PIN, disable Wireless debugging again after device QA; do not touch the CoGo SDK, installed D-110 or saved Classes.
+
 ## QA Stage 4 — Termux android-tools installation verified
 
 - 2026-10-25 — **Termux ADB tool successfully installed, verified by user screenshots.** `pkg install -y android-tools && adb version` installed `android-tools 37.0.0p1-3` (plus `fmt` and `libprotobuf`), and reported `Android Debug Bridge version 1.0.41`, package version `37.0.0p1-android-tools`, binary `/data/data/com.termux/files/usr/bin/adb`, Android ARM64. Earlier `cannot connect to daemon at tcp:5037: Connection refused` appeared during setup, but `adb version` worked. **ADB server startup, Wireless Debugging pairing, device connection, and instrumentation execution NOT YET VERIFIED**; no test APK installed by this action. Next safe step: `adb start-server && adb devices -l`, then pair with Settings > Developer options > Wireless debugging on the same device, avoiding sharing one-time pairing code. Do not change CoGo SDK or installed D-110, and do not run tests during a real Class.
