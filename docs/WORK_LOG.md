@@ -1,5 +1,11 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — D-108 targeted compile-error fix committed; retest pending
+
+User's actual on-device `grep` from `~/atelier-d108-build.log` reveals the **only shown Kotlin diagnostic**: `ClassNotificationTaskService.kt:35:17 'val' cannot be reassigned`. Exact source check ties it to `onStartCommand(..., flags: Int, ...)` shadowing the Intent.flags property inside `Intent.apply`. Source-only fix in Android development branch commit [`02beb0af`](https://github.com/AviY99/Atelier-Time/commit/02beb0af46719301cccb72ad4698a337ab416d73) uses `addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)` rather than assigning to the immutable `flags` argument. **NO D-108 retest BUILD SUCCESSFUL has occurred yet**. Next phone pull, JVM Gradle unit tests and APK assemble, then update-install to QA Back/Recents notification removal. No changes to timer, audio, design or frozen Stable 3.
+
+---
+
 > **D-108 ACTUAL PHONE COMPILE GATE FAILED (2026-10-25).** User screenshot confirms `:app:compileDebugKotlin` failed with `Compilation error. See log for more details`, **BUILD FAILED in 25s**, **31 actionable tasks: 6 executed, 25 up-to-date**. Screenshot does not show the Kotlin `e:` filename/line diagnostic. The full output was saved by `tee` to `$HOME/atelier-d108-build.log` on the user phone. Requested precise first compiler errors using `grep -n -E '(^e:|error:|Unresolved reference|Type mismatch|Cannot access)' "$HOME/atelier-d108-build.log" | head -50` WITHOUT rebuilding. Do NOT claim that D-108 builds, or its APK was copied/installed, or that Back/Recents notification cleanup works yet. Source code fix is pending compiler diagnostic. D-107 installed active background notification remains previously user-tested but has stale-on-Back/swipe defect; frozen Stable 3 remains unchanged.
 
 ## 2026-10-25 — D-108 Back and Recents swipe notification dismissal (source-only; device gate open)
