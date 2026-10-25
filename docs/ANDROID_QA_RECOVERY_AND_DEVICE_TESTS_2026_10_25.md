@@ -1,5 +1,9 @@
 # Atelier Time — ordered QA 3→4: unexpected-stop recovery, then Android instrumentation
 
+## QA Stage 4 — Termux android-tools installation verified
+
+- 2026-10-25 — **Termux ADB tool successfully installed, verified by user screenshots.** `pkg install -y android-tools && adb version` installed `android-tools 37.0.0p1-3` (plus `fmt` and `libprotobuf`), and reported `Android Debug Bridge version 1.0.41`, package version `37.0.0p1-android-tools`, binary `/data/data/com.termux/files/usr/bin/adb`, Android ARM64. Earlier `cannot connect to daemon at tcp:5037: Connection refused` appeared during setup, but `adb version` worked. **ADB server startup, Wireless Debugging pairing, device connection, and instrumentation execution NOT YET VERIFIED**; no test APK installed by this action. Next safe step: `adb start-server && adb devices -l`, then pair with Settings > Developer options > Wireless debugging on the same device, avoiding sharing one-time pairing code. Do not change CoGo SDK or installed D-110, and do not run tests during a real Class.
+
 ## 2026-10-25 — QA Stage 4 ADB availability: phone screenshot confirmed
 
 - The user executed a read-only check in Code on the Go terminal, from the existing `Atelier-Time/android-native` checkout: `find "$HOME" "$ANDROID_HOME" -type f -name adb -size +0c 2>/dev/null | head -n 10`. **Output: no nonempty ADB candidates** under either search root (not a system-wide filesystem proof).
