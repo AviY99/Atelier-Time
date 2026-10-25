@@ -1054,15 +1054,19 @@ fun SessionEditorScreen(
                         else request.suggestedEndEpochMs
                         val plan = RunEndTimePlanner.plan(request.session, now, chosen)
                         // No timer state was touched until all validation passed.
+                        // Only Confirm may make this selection active in storage.
+                        val activatedSession = catalog.activate(request.presetId)
                         selectedPresetId = request.presetId
                         runStartCorrectionSeconds = plan.correctionSeconds
-                        playingSession = request.session
+                        playingSession = activatedSession
                         launchRunRequested = true
                         pendingRunApproval = null
                         runApprovalError = null
                         activeTab = MainTab.TIMER
                     } catch (error: IllegalArgumentException) {
                         runApprovalError = error.message ?: "Choose a feasible finish time."
+                    } catch (error: IllegalStateException) {
+                        runApprovalError = error.message ?: "This saved Class is no longer available."
                     }
                 }) { Text("Confirm & Run") }
             },
