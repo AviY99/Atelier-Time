@@ -126,7 +126,7 @@ fun SessionTimerScreen(
                     )
                     WallClockRow(
                         "Class length",
-                        formatClassLength(session.rules.totalSeconds),
+                        formatClassLength(view.totalSeconds),
                         enlargeLabel = true, compact = true,
                     )
                 }
@@ -136,7 +136,7 @@ fun SessionTimerScreen(
                 SolidProgressBar(
                     progressFraction = (
                         (classClockTimes.classElapsedSeconds ?: 0).toFloat() /
-                            session.rules.totalSeconds.coerceAtLeast(1).toFloat()
+                            view.totalSeconds.coerceAtLeast(1).toFloat()
                     ).coerceIn(0f, 1f),
                     fillColor = tahini,
                     modifier = Modifier.width(178.dp).height(4.dp),
