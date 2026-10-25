@@ -130,6 +130,22 @@ class RunEndTimePlannerTest {
         assertEquals(25L * 60_000L, midnight - now)
     }
 
+    @Test fun originalFinishOfLegacySingleSessionStillRunsUnchanged() {
+        val rules = SessionRules(
+            id = "one-pose", name = "Short legacy Class",
+            totalSeconds = mins(25), summarySeconds = 0,
+            poseSeconds = mins(25), specialBreakCount = 0,
+        )
+        val session = engine.approve(engine.generate(rules))
+        val suggested = RunEndTimePlanner.plan(session, 0L, mins(25) * 1_000L)
+        assertEquals(0, suggested.correctionSeconds)
+        assertEquals(session.phases, suggested.adjusted.phases)
+        try {
+            RunEndTimePlanner.plan(session, 0L, mins(26) * 1_000L)
+            fail("A Class without an adjustable pair cannot change its finish")
+        } catch (_: IllegalArgumentException) { }
+    }
+
     @Test fun invalidClockInputsProvideCorrectableError() {
         listOf("", "24:00", "10:60", "4", "noon", "-1:20", "17:5").forEach { input ->
             try {
