@@ -52,7 +52,6 @@ private enum class MainTab { EDITOR, TIMER, SOUNDS, DESIGN, ABOUT }
 private data class PendingRunApproval(
     val presetId: String,
     val session: ApprovedSession,
-    val suggestedEndEpochMs: Long,
 )
 
 @Composable
@@ -183,10 +182,11 @@ fun SessionEditorScreen(
     var libraryRevision by remember { mutableIntStateOf(0) }
     var launchRunRequested by remember { mutableStateOf(false) }
     var runStartTargetEpochMs by remember { mutableStateOf<Long?>(null) }
-    var runFollowDefaultForSingleSession by remember { mutableStateOf(false) }
+    var runFollowSuggestedFinish by remember { mutableStateOf(false) }
     var pendingRunApproval by remember { mutableStateOf<PendingRunApproval?>(null) }
     var customFinishEnabled by remember { mutableStateOf(false) }
-    var customFinishClock by remember { mutableStateOf("") }
+    var customFinishHour by remember { mutableIntStateOf(0) }
+    var customFinishMinute by remember { mutableIntStateOf(0) }
     var runApprovalError by remember { mutableStateOf<String?>(null) }
     var playingSession by remember { mutableStateOf<ApprovedSession?>(null) }
     var activeTab by remember { mutableStateOf(MainTab.EDITOR) }
@@ -298,10 +298,9 @@ fun SessionEditorScreen(
                     ?: throw IllegalArgumentException("No confirmed Class finish time.")
                 val session = playingSession
                     ?: throw IllegalArgumentException("No approved Class selected.")
-                // The default finish of a legacy one-Session Class must be
-                // recomputed at actual start: it has no final pair to absorb
-                // even a single second of button-to-start delay.
-                val target = if (runFollowDefaultForSingleSession)
+                // The calculated finish keeps advancing while approval is open.
+                // Recompute it at the actual physical start for ALL Class shapes.
+                val target = if (runFollowSuggestedFinish)
                     RunEndTimePlanner.suggestedEndEpochMs(session, startEpochMs)
                 else selectedTarget
                 // Re-evaluate at ACTUAL start, not button press, to keep the
@@ -317,19 +316,14 @@ fun SessionEditorScreen(
                 val session = playingSession
                 val presetId = selectedPresetId
                 if (session != null && presetId != null) {
-                    pendingRunApproval = PendingRunApproval(
-                        presetId, session,
-                        RunEndTimePlanner.suggestedEndEpochMs(
-                            session, System.currentTimeMillis()
-                        )
-                    )
+                    pendingRunApproval = PendingRunApproval(presetId, session)
                     runApprovalError = error.message ?: "Choose another finish time."
                 }
                 playingSession = null
             } finally {
                 launchRunRequested = false
                 runStartTargetEpochMs = null
-                runFollowDefaultForSingleSession = false
+                runFollowSuggestedFinish = false
             }
         }
     }
@@ -907,18 +901,9 @@ fun SessionEditorScreen(
                                 // Ask for notification permission before showing
                                 // the clock approval, never AFTER user chose a target.
                                 requestClassStatusNotificationPermission()
-                                // Snapshot the expected finish at the moment
-                                // Run is pressed. It becomes a real constraint
-                                // only after explicit confirmation below.
-                                pendingRunApproval = PendingRunApproval(
-                                    presetId = record.id,
-                                    session = restored,
-                                    suggestedEndEpochMs = RunEndTimePlanner.suggestedEndEpochMs(
-                                        restored, System.currentTimeMillis()
-                                    ),
-                                )
+                                // No frozen finish: the confirmation view is live.
+                                pendingRunApproval = PendingRunApproval(record.id, restored)
                                 customFinishEnabled = false
-                                customFinishClock = ""
                                 runApprovalError = null
                             },
                             onDeleted = { id ->
@@ -976,7 +961,31 @@ fun SessionEditorScreen(
     }
 
     pendingRunApproval?.let { request ->
-        val clockFormat = remember { SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()) }
+        val clockFormat = remember { SimpleDateFormat("dd/MM HH:mm:ss", Locale.getDefault()) }
+        val now = wallClockMillis
+        val calculatedFinish = RunEndTimePlanner.suggestedEndEpochMs(request.session, now)
+        val calculatedClock = Calendar.getInstance().apply { timeInMillis = calculatedFinish }
+        val hour = if (customFinishEnabled) customFinishHour
+            else calculatedClock.get(Calendar.HOUR_OF_DAY)
+        val minute = if (customFinishEnabled) customFinishMinute
+            else calculatedClock.get(Calendar.MINUTE)
+        val chosen = if (customFinishEnabled) {
+            RunEndTimePlanner.nextOccurrence(
+                "%02d:%02d".format(Locale.US, hour, minute), now
+            )
+        } else calculatedFinish
+        val trial = runCatching { RunEndTimePlanner.plan(request.session, now, chosen) }
+        val plan = trial.getOrNull()
+        val isValid = plan != null
+        val dark = atelierNightActive()
+        val statusColor = if (isValid) {
+            if (dark) Color(0xFF91F0B7) else Color(0xFF166E39)
+        } else atelierErrorTextColor()
+        val pickerBackground = if (isValid) {
+            if (dark) Color(0xFF20543B) else Color(0xFFDEF3E4)
+        } else {
+            if (dark) Color(0xFF773342) else Color(0xFFFFE5E5)
+        }
         AlertDialog(
             onDismissRequest = {
                 pendingRunApproval = null
@@ -985,120 +994,149 @@ fun SessionEditorScreen(
             title = { Text("Confirm Class finish time") },
             text = {
                 Column(
-                    modifier = Modifier.testTag("run_end_dialog"),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.testTag("run_end_dialog")
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Text(request.session.rules.name)
-                    Text("Calculated finish: " +
-                        clockFormat.format(Date(request.suggestedEndEpochMs)),
-                        style = MaterialTheme.typography.titleMedium)
-                    Text("Approve this finish time or enter another HH:mm. " +
-                        "An earlier or later finish adjusts only the final two Sessions. " +
-                        "Each must remain at least one minute; the Class may be extended " +
-                        "by at most its original length. Saved Classes are unchanged.")
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Choose a different end time", modifier = Modifier.weight(1f))
-                        Switch(
-                            modifier = Modifier.testTag("run_end_override"),
-                            checked = customFinishEnabled, onCheckedChange = {
-                            customFinishEnabled = it
-                            runApprovalError = null
-                        })
-                    }
-                    if (customFinishEnabled) {
-                        OutlinedTextField(
-                            colors = atelierInputColors(),
-                            value = customFinishClock,
-                            onValueChange = {
-                                customFinishClock = it
-                                runApprovalError = null
-                            },
-                            label = { Text("Finish time (HH:mm)") },
-                            placeholder = { Text("21:30") },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                            modifier = Modifier.fillMaxWidth().testTag("run_end_clock"),
-                        )
-                        Text("A clock time earlier than now refers to tomorrow.",
-                            style = MaterialTheme.typography.bodySmall)
-                        if (customFinishClock.isNotBlank()) {
-                            val previewTime = runCatching {
-                                RunEndTimePlanner.nextOccurrence(
-                                    customFinishClock, wallClockMillis
+                    Text(
+                        "Calculated finish: " + clockFormat.format(Date(calculatedFinish)),
+                        modifier = Modifier.testTag("run_end_calculated"),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        "Calculated finish keeps updating. Scroll hours and minutes " +
+                            "to choose a different end. Only the final two Sessions " +
+                            "can be adjusted (minimum one minute each).",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Surface(
+                        color = pickerBackground,
+                        contentColor = if (dark) Color.White
+                            else if (isValid) Color(0xFF155D30) else Color(0xFF941B27),
+                        shape = MaterialTheme.shapes.medium,
+                        modifier = Modifier.fillMaxWidth().testTag("run_end_wheels"),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(
+                                if (isValid) "Valid finish" else "Invalid finish",
+                                style = MaterialTheme.typography.labelMedium,
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                EndClockWheel(
+                                    label = "Hour", value = hour, limit = 24,
+                                    tag = "run_end_hour",
+                                    onChange = { next ->
+                                        if (!customFinishEnabled) {
+                                            customFinishMinute =
+                                                calculatedClock.get(Calendar.MINUTE)
+                                        }
+                                        customFinishHour = next
+                                        customFinishEnabled = true
+                                        runApprovalError = null
+                                    },
                                 )
-                            }.getOrNull()
-                            previewTime?.let { resolved ->
-                                Text("Selected finish: " +
-                                    clockFormat.format(Date(resolved)),
-                                    style = MaterialTheme.typography.titleSmall)
-                            }
-                            val check = previewTime?.let { selected ->
-                                runCatching {
-                                    RunEndTimePlanner.plan(
-                                        request.session, wallClockMillis, selected
-                                    )
-                                }
-                            }
-                            val preview = check?.getOrNull()
-                            if (preview != null) {
-                                val first = preview.adjusted.firstFinalPoseSeconds
-                                val last = preview.adjusted.lastFinalPoseSeconds
-                                Text(
-                                    "Final two Sessions: " +
-                                        "%02d:%02d + %02d:%02d".format(
-                                            first / 60, first % 60, last / 60, last % 60
-                                        ),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            } else if (runApprovalError == null) {
-                                Text(
-                                    check?.exceptionOrNull()?.message ?:
-                                        "Enter a valid HH:mm finish time.",
-                                    color = atelierErrorTextColor(),
-                                    style = MaterialTheme.typography.bodySmall,
+                                Text(":", style = MaterialTheme.typography.headlineMedium)
+                                EndClockWheel(
+                                    label = "Minute", value = minute, limit = 60,
+                                    tag = "run_end_minute",
+                                    onChange = { next ->
+                                        if (!customFinishEnabled) {
+                                            customFinishHour =
+                                                calculatedClock.get(Calendar.HOUR_OF_DAY)
+                                        }
+                                        customFinishMinute = next
+                                        customFinishEnabled = true
+                                        runApprovalError = null
+                                    },
                                 )
                             }
                         }
                     }
-                    runApprovalError?.let { error ->
-                        Text(error, color = atelierErrorTextColor())
+                    TextButton(
+                        modifier = Modifier.testTag("run_end_reset_calculated"),
+                        colors = atelierTextColors(),
+                        onClick = {
+                            customFinishEnabled = false
+                            runApprovalError = null
+                        },
+                    ) { Text("Use calculated finish") }
+                    Text(
+                        "Selected finish: " + clockFormat.format(Date(chosen)),
+                        color = statusColor,
+                        modifier = Modifier.testTag("run_end_selected"),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    if (plan != null) {
+                        val adjusted = plan.adjusted
+                        Text(
+                            "Final two Sessions: " +
+                                "%02d:%02d + %02d:%02d".format(
+                                    Locale.US,
+                                    adjusted.firstFinalPoseSeconds / 60,
+                                    adjusted.firstFinalPoseSeconds % 60,
+                                    adjusted.lastFinalPoseSeconds / 60,
+                                    adjusted.lastFinalPoseSeconds % 60,
+                                ),
+                            color = statusColor,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    } else {
+                        Text(
+                            (trial.exceptionOrNull()?.message ?:
+                                "Choose another finish time.") +
+                                " Scroll back to green to continue.",
+                            color = statusColor,
+                            modifier = Modifier.testTag("run_end_invalid"),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
                     }
+                    runApprovalError?.let { Text(it, color = atelierErrorTextColor()) }
                 }
             },
             confirmButton = {
                 TextButton(
                     modifier = Modifier.testTag("run_end_confirm"),
-                    colors = atelierTextColors(), onClick = {
-                    val now = System.currentTimeMillis()
-                    try {
-                        val hasFinalPair = request.session.phases.count {
-                            it.kind == PhaseKind.POSE &&
-                                it.poseSource == PoseSource.REGULAR
-                        } >= 2
-                        val followDefault = !customFinishEnabled && !hasFinalPair
-                        val chosen = if (customFinishEnabled)
-                            RunEndTimePlanner.nextOccurrence(customFinishClock, now)
-                        else if (followDefault)
-                            RunEndTimePlanner.suggestedEndEpochMs(request.session, now)
-                        else request.suggestedEndEpochMs
-                        val plan = RunEndTimePlanner.plan(request.session, now, chosen)
-                        // No timer state was touched until all validation passed.
-                        // Only Confirm may make this selection active in storage.
-                        val activatedSession = catalog.activate(request.presetId)
-                        selectedPresetId = request.presetId
-                        runStartTargetEpochMs = plan.targetEndEpochMs
-                        runFollowDefaultForSingleSession = followDefault
-                        playingSession = activatedSession
-                        launchRunRequested = true
-                        pendingRunApproval = null
-                        runApprovalError = null
-                        activeTab = MainTab.TIMER
-                    } catch (error: IllegalArgumentException) {
-                        runApprovalError = error.message ?: "Choose a feasible finish time."
-                    } catch (error: IllegalStateException) {
-                        runApprovalError = error.message ?: "This saved Class is no longer available."
-                    }
-                }) { Text("Confirm & Run") }
+                    colors = atelierTextColors(),
+                    enabled = isValid,
+                    onClick = {
+                        val actualNow = System.currentTimeMillis()
+                        try {
+                            val actualTarget = if (customFinishEnabled)
+                                RunEndTimePlanner.nextOccurrence(
+                                    "%02d:%02d".format(
+                                        Locale.US, customFinishHour, customFinishMinute
+                                    ), actualNow,
+                                )
+                            else RunEndTimePlanner.suggestedEndEpochMs(
+                                request.session, actualNow
+                            )
+                            val approvedPlan = RunEndTimePlanner.plan(
+                                request.session, actualNow, actualTarget
+                            )
+                            // Never activate/run an invalid finish.
+                            val activatedSession = catalog.activate(request.presetId)
+                            selectedPresetId = request.presetId
+                            runStartTargetEpochMs = approvedPlan.targetEndEpochMs
+                            runFollowSuggestedFinish = !customFinishEnabled
+                            playingSession = activatedSession
+                            launchRunRequested = true
+                            pendingRunApproval = null
+                            runApprovalError = null
+                            activeTab = MainTab.TIMER
+                        } catch (error: IllegalArgumentException) {
+                            runApprovalError = error.message ?: "Choose a feasible finish time."
+                        } catch (error: IllegalStateException) {
+                            runApprovalError = error.message ?: "This saved Class is no longer available."
+                        }
+                    },
+                ) { Text("Confirm & Run") }
             },
             dismissButton = {
                 TextButton(colors = atelierTextColors(), onClick = {
