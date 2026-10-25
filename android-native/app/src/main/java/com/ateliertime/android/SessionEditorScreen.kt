@@ -184,7 +184,9 @@ fun SessionEditorScreen() {
         designPreferences.mode == com.ateliertime.domain.DesignMode.AUTO) {
         DesignClock.sliderPreview(autoPreviewHour ?: designPreferences.nightStartsAtHour)
     } else realClockPalette
-    val classClockTracker = remember(liveTimer) { ClassClockTracker() }
+    val classClockTracker = remember(liveTimer) {
+        ClassClockTracker { SystemClock.elapsedRealtime() }
+    }
     var classClockTimes by remember(liveTimer) { mutableStateOf(ClassClockTimes()) }
     var timerError by remember(liveTimer) { mutableStateOf<String?>(null) }
     var helpSection by remember { mutableStateOf<Pair<String, String>?>(null) }
@@ -282,8 +284,7 @@ fun SessionEditorScreen() {
                 // uncompensated Next leaves virtual phases, finish exactly
                 // when the originally approved wall-time deadline is reached.
                 val before = clock.view()
-                val deadline = classClockTimes.classEndEpochMs
-                val deadlineReached = deadline != null && nowEpochMs >= deadline &&
+                val deadlineReached = classClockTracker.hasReachedClassDeadline(nowEpochMs) &&
                     (before.status == TimerStatus.RUNNING ||
                         before.status == TimerStatus.PAUSED)
                 val tick = if (deadlineReached) clock.finishAtDeadline()
