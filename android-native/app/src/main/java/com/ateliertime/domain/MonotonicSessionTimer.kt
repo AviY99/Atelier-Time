@@ -214,19 +214,31 @@ class MonotonicSessionTimer(
             "Interruption is too long to resume."
         }
         if (nextLost != lostSeconds.toLong()) {
-            val revised = FinalPairCompensation.adjust(session, nextLost.toInt())
-            val firstAdjusted = revised.phases.indexOfFirst {
-                it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR &&
-                    it.endSeconds != session.phases.find { source -> source.id == it.id }?.endSeconds
+            val finalPair = activePhases.indices.filter {
+                activePhases[it].kind == PhaseKind.POSE &&
+                    activePhases[it].poseSource == PoseSource.REGULAR
+            }.takeLast(2)
+            val revised = if (finalPair.size == 2 &&
+                elapsedBeforeRunMs >= activePhases[finalPair.first()].startSeconds.toLong() * 1_000L) {
+                // Once the penultimate Session begins it is an observed
+                // phase. Keep it (and its intervening Break) unchanged; only
+                // the not-yet-started final Session may absorb interruption.
+                check(elapsedBeforeRunMs <
+                    activePhases[finalPair.last()].startSeconds.toLong() * 1_000L) {
+                    "The final Session has already begun. Its time cannot be " +
+                        "changed after an interruption."
+                }
+                FinalPairCompensation.adjustLastOnly(session, activePhases, nextLost.toInt())
+            } else {
+                FinalPairCompensation.adjust(session, nextLost.toInt())
             }
-            // Never rewrite phases already reached/seen by the user.
-            check(firstAdjusted < 0 ||
-                elapsedBeforeRunMs < revised.phases[firstAdjusted].startSeconds * 1000L) {
-                "The last two poses have already begun. Choose a revised end time " +
-                    "and approve a new timeline instead of silently changing them."
-            }
+            // An interruption cannot silently rewrite a completed phase.
+            check(activePhases.indices.all { index ->
+                activePhases[index].endSeconds.toLong() * 1_000L > elapsedBeforeRunMs ||
+                    activePhases[index] == revised.phases[index]
+            }) { "A previously completed Session or Break cannot be changed." }
             activePhases = revised.phases
-            activeTotalMs = revised.totalSeconds.toLong() * 1000L
+            activeTotalMs = revised.totalSeconds.toLong() * 1_000L
             lostSeconds = revised.recoveredSeconds
         }
         suspendedFromMs = null
