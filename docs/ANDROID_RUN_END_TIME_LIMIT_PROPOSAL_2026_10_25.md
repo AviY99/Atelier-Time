@@ -1,6 +1,17 @@
 # Atelier Time — Run end-time constraint: options and draft contract (D-110+)
 
-**Status: PRODUCT DESIGN DRAFT; no implementation authorized by this draft.**
+## 2026-10-25 — Stage 1 D-111 Run end-time feature: source checkpoint; approval gate
+
+**User-requested ordering:** Stage 1 implement/repair end-time feature, obtain user approval; Stage 2 only AFTER that approval run every feasible automated test.
+
+- Preexisting development branch implementation already calculates a suggested absolute Class finish before Run, shows a confirm-or-edit dialog, accepts earlier/equal/later fixed end time (not optional/unlimited), previews adjustments restricted to the final two regular Sessions, blocks infeasible HH:mm times with a corrective error, and reevaluates at actual start. Saved presets never change. The selected finish uses the monotonic physical deadline, and original pause/Next/restart routines compensate in the last eligible Session(s). Single-Session legacy Classes can use only their unaltered default duration.
+- **Actual gap corrected now:** removed the old direct Start action and button from SessionEditorScreen.kt and SessionTimerScreen.kt. It could bypass finish-time confirmation while the Timer was READY. The READY UI now displays 'Starting approved Class...' only; new runs must pass saved-library Run -> Confirm Class finish time.
+- The existing Gradle file is already versionCode=6 and versionName=D-111. GitHub source readback verified no dangling onStart parameter/callback and Run approval dialog remains present.
+- **Stage 1: SOURCE READY; not compiled, installed, or accepted on the phone.** Installed user-approved D-110 remains unchanged; frozen Stable 4 D-108 remains untouched. Do not claim a new APK or a test PASS.
+- **Stage 1 next on phone:** git pull --ff-only in the existing CoGo checkout, assemble the debug APK only (:app:assembleDebug), copy it to Downloads and update-install without wiping existing saved Classes or Sounds. User validates the before-Run dialog and approves Stage 1. No tests before user confirms next stage.
+- Already-authored but not yet executed for D-111: RunEndTimePlannerTest, RunEndTimePropertyTest (JVM), RunEndTimeDeviceTest and RunEndApprovalUiTest (device), plus all existing unit and instrumentation suites. The earlier D-110 device result 14/14 PASS is historical baseline and must not be misrepresented as D-111 verification.
+
+**Status: HISTORICAL DRAFT BELOW; D-111 source is implemented as described above; phone build/acceptance and Stage 2 tests pending.**
 **User request: 2026-10-25.** Implement the feature first, then prepare and run the complete feasible automated QA suite. Preserve frozen Stable 4 `stable/android-d108` and use development branch only. Do not add production code or trigger tests prior to choosing the behavioral contract.
 
 ## User-requested behavior
