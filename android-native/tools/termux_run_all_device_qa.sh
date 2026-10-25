@@ -1,74 +1,96 @@
 #!/usr/bin/env bash
-# Atelier Time D-111 — run the full Android instrumentation QA on ONE connected
-# authorized device, after the CoGo build gate succeeded.
-#
-# IMPORTANT: this updates the installed app to D-111 using adb install -r.
-# It does NOT run when a real Class is active: finish/close your Class first.
-# There is no uninstall, pm clear, permission change or reset of saved data.
+# D-114 Stage 2: Termux-only test APK update + instrumentation runner.
+# DOES NOT install the regular app. Running instrumentation may stop/restart
+# the target process, use a temporary test Class and touch its notification.
+# Do not run while an actual Class is active; explicit approval required.
 set -euo pipefail
 
-downloads="$HOME/storage/downloads"
-app="$downloads/Atelier-Time-D111.apk"
-tests="$downloads/Atelier-Time-D111-Tests.apk"
-log="$downloads/Atelier-Time-D111-QA-result.txt"
-expected_tests=32
-runner="com.ateliertime.android.test/androidx.test.runner.AndroidJUnitRunner"
+if [[ "${1:-}" != "--run" ]]; then
+    echo "PREVIEW ONLY. Device tests change the test APK/process; separate user approval required."
+    echo "Once approved AND no live Class exists, use: bash ~/storage/downloads/Atelier-Time-D114-QA.sh --run"
+    exit 2
+fi
 
-for path in "$app" "$tests"; do
-    if [ ! -s "$path" ]; then
-        echo "ERROR: missing APK $path. Run the CoGo build QA gate first." >&2
+downloads="$HOME/storage/downloads"
+tests="$downloads/Atelier-Time-D114-Tests.apk"
+manifest="$downloads/Atelier-Time-D114-QA-manifest.txt"
+runner="com.ateliertime.android.test/androidx.test.runner.AndroidJUnitRunner"
+log="$downloads/Atelier-Time-D114-Instrumentation.log"
+for file in "$tests" "$manifest"; do
+    if [[ ! -s "$file" ]]; then
+        echo "ERROR: missing $file. Run the D-114 CoGo build stage first." >&2
         exit 2
     fi
 done
 if ! command -v adb >/dev/null 2>&1; then
-    echo "ERROR: adb is not installed in Termux." >&2
+    echo "ERROR: Termux android-tools/adb missing." >&2
     exit 2
 fi
-
 serials="$(adb devices | awk 'NR>1 && $2=="device" {print $1}')"
 count="$(printf '%s\n' "$serials" | awk 'NF{n++} END{print n+0}')"
-if [ "$count" != 1 ]; then
-    echo "ERROR: exactly one authorized ADB device is required (found $count)." >&2
-    echo "Check Developer options > Wireless debugging and adb devices -l." >&2
+if [[ "$count" != 1 ]]; then
+    echo "ERROR: exactly one authorized device required, found $count." >&2
+    adb devices -l
     exit 3
 fi
 serial="$serials"
-echo "Connected device: $serial"
-echo "Updating regular Atelier Time to D-111 IN PLACE (app data retained)."
-adb -s "$serial" install -r "$app"
+version="$(sed -n 's/^version=//p' "$manifest")"
+branch="$(sed -n 's/^branch=//p' "$manifest")"
+commit="$(sed -n 's/^commit=//p' "$manifest")"
+expected="$(sed -n 's/^test_count=//p' "$manifest")"
+hash="$(sed -n 's/^test_sha256=//p' "$manifest")"
+if [[ "$version" != "D-114" || "$branch" != "android-native-kotlin-compose" ||
+      ! "$commit" =~ ^[0-9a-f]{40}$ ||
+      ! "$expected" =~ ^[0-9]+$ || "$expected" -lt 1 ||
+      ! "$hash" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "ERROR: invalid D-114 QA manifest." >&2
+    exit 3
+fi
+actual_hash="$(sha256sum "$tests" | awk '{print $1}')"
+if [[ "$hash" != "$actual_hash" ]]; then
+    echo "ERROR: TEST APK hash differs from CoGo build manifest." >&2
+    exit 3
+fi
 
-package_info="$(adb -s "$serial" shell dumpsys package com.ateliertime.android)"
-if [[ "$package_info" != *"versionName=D-111"* ]]; then
-    echo "ERROR: installed Atelier Time is not D-111; aborting instrumentation." >&2
+echo "ADB device=$serial; expected app=D-114; suite commit=$commit; source methods=$expected."
+installed="$(adb -s "$serial" shell dumpsys package com.ateliertime.android)"
+if [[ "$installed" != *"versionName=D-114"* ]] ||
+   [[ "$installed" != *"versionCode=9"* ]]; then
+    echo "ERROR: installed app is not D-114/versionCode 9. NO app update allowed." >&2
     exit 4
 fi
-echo "Installed app: D-111 confirmed."
+echo "D-114 application installed. NO regular APK will be installed."
+echo "WARNING: instrumentation restarts/uses target app and a test Class."
+echo "DO NOT continue if a real Class is active or saved activity is in progress."
+read -r -p "Type NO-ACTIVE-CLASS to confirm approval and idle app: " confirm
+if [[ "$confirm" != "NO-ACTIVE-CLASS" ]]; then
+    echo "Cancelled: no installation or instrumentation performed."
+    exit 2
+fi
 
-echo "Installing the TEST-ONLY APK."
+echo "Installing TEST package only (adb install -t -r)."
 adb -s "$serial" install -t -r "$tests"
-
 instruments="$(adb -s "$serial" shell pm list instrumentation)"
 if [[ "$instruments" != *"$runner"* ]]; then
-    echo "ERROR: expected AndroidJUnitRunner missing after installation." >&2
+    echo "ERROR: test runner absent after test APK installation." >&2
     printf '%s\n' "$instruments"
     exit 5
 fi
-
-echo "Running all Android device tests (including isolated Compose UI tests)."
-if output="$(adb -s "$serial" shell am instrument -w "$runner" 2>&1)"; then
-    printf '%s\n' "$output" | tee "$log"
+echo "D-114 full Android instrumentation; log=$log"
+{
+    printf 'D-114 device instrumentation; source commit=%s\n' "$commit"
+    printf 'installed=D-114; expected_methods=%s\n' "$expected"
+} > "$log"
+if adb -s "$serial" shell am instrument -w "$runner" >> "$log" 2>&1; then
+    cat "$log"
 else
-    printf '%s\n' "$output" | tee "$log"
-    echo "FAIL: Android instrumentation command could not complete." >&2
+    cat "$log"
+    echo "FAIL: instrumentation command returned nonzero status; inspect log." >&2
     exit 6
 fi
-
-if [[ "$output" == *"OK ($expected_tests tests)"* ]]; then
-    echo "PASS: $expected_tests / $expected_tests Android tests on D-111."
-    echo "Saved local QA result: $log"
-else
-    echo "FAIL: expected OK ($expected_tests tests), inspect $log." >&2
+if ! grep -Eq "^OK \\($expected tests\\)" "$log"; then
+    echo "FAIL: missing expected OK ($expected tests); inspect log for failures/skips." >&2
     exit 7
 fi
-
-echo "QA completed. Wireless debugging may now be disabled in Developer options."
+echo "PASS: $expected Android instrumentation methods on D-114; actual log=$log"
+echo "No app update/uninstall/pm clear/force-stop/system clock change was invoked."
