@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # D-114 Stage 2. Run in Code on the Go only; JVM tests + test APK ONLY.
-# Requests test tasks only; Gradle may build dependencies. Never copies/installs\n# the regular Atelier Time APK and never wipes app data.
+# Requests test tasks only; Gradle may build dependencies. Never copies/installs
+# the regular Atelier Time APK and never wipes app data.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
