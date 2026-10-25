@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import java.util.UUID
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,6 +68,9 @@ fun SessionEditorScreen(
         ActivityResultContracts.RequestPermission()
     ) { /* If accepted, the live Timer tick posts the status notification. */ }
     fun requestClassStatusNotificationPermission() {
+        // Instrumentation UI tests use isolated data and do not prompt for
+        // runtime notification permissions on the user's actual app.
+        if (presetStoreOverride != null) return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
                 PackageManager.PERMISSION_GRANTED) {
@@ -963,7 +967,10 @@ fun SessionEditorScreen(
             },
             title = { Text("Confirm Class finish time") },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column(
+                    modifier = Modifier.testTag("run_end_dialog"),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
                     Text(request.session.rules.name)
                     Text("Calculated finish: " +
                         clockFormat.format(Date(request.suggestedEndEpochMs)),
@@ -973,7 +980,9 @@ fun SessionEditorScreen(
                         "Each must remain at least one minute. Saved Classes are unchanged.")
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Choose a different end time", modifier = Modifier.weight(1f))
-                        Switch(checked = customFinishEnabled, onCheckedChange = {
+                        Switch(
+                            modifier = Modifier.testTag("run_end_override"),
+                            checked = customFinishEnabled, onCheckedChange = {
                             customFinishEnabled = it
                             runApprovalError = null
                         })
@@ -990,7 +999,7 @@ fun SessionEditorScreen(
                             placeholder = { Text("21:30") },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().testTag("run_end_clock"),
                         )
                         Text("A clock time earlier than now refers to tomorrow.",
                             style = MaterialTheme.typography.bodySmall)
@@ -1035,7 +1044,9 @@ fun SessionEditorScreen(
                 }
             },
             confirmButton = {
-                TextButton(colors = atelierTextColors(), onClick = {
+                TextButton(
+                    modifier = Modifier.testTag("run_end_confirm"),
+                    colors = atelierTextColors(), onClick = {
                     val now = System.currentTimeMillis()
                     try {
                         val chosen = if (customFinishEnabled)
