@@ -1,5 +1,11 @@
 # Changelog — Atelier Time
 
+## 2026-10-25 — D-108 phone acceptance: notification dismissal fix CLOSED
+
+Following the successful D-108 on-phone Gradle compile/JVM-test-task/debug APK build (35s, 42 tasks: 9 executed/33 up-to-date), the user reports **"הכל תקין כעת"** and accepts the notification lifecycle repair. **Mark D-108 FUNCTIONAL USER QA PASS / CLOSED**: existing notification remains active when app goes to background via Home or Recents overview, while Back/task-swipe closes app and clears the formerly stale notification. The one-line Kotlin fix `Intent.addFlags(...)` resolved the previous compile failure; no further rebuild requested. Acceptance is user-reported, not per-step captured device footage; Android instrumentation, Doze/process-kill, Play `specialUse` foreground-service policy review, data recovery and branded app logo remain independently OPEN. Frozen Stable 3 `stable/android-d102` unchanged, no Stable 4 branch created. [D-108 acceptance](docs/NOTIFICATION_EXIT_CLEANUP_D108.md).
+
+---
+
 ## 2026-10-25 — D-108 successful 35s phone rebuild, APK ready; installation QA pending
 
 Following correction of Kotlin compiler `ClassNotificationTaskService.kt:35:17 'val' cannot be reassigned` to Intent `addFlags(...)`, the user's phone screenshot now verifies **`BUILD SUCCESSFUL in 35s`**, 42 Gradle tasks (9 executed, 33 up-to-date), successful `:app:testDebugUnitTest` and `:app:assembleDebug`, and copied ~12M `/storage/emulated/0/Download/Atelier-Time-D108.apk` (Oct 25 at 10:09). Earlier D-108 `BUILD FAILED in 25s` is superseded by this successful rebuild. **D-108 install/notification dismissal QA STILL PENDING**: after update-install preserving app data, verify About Version D-108; Home/Recents overview preserve live notification, Back and swipe-out remove notification. Individual JUnit counts/Android instrumentation not shown. Frozen Stable 3 untouched, Play FGS specialUse permission policy and pre-store app icon/logo still to review.
