@@ -1,5 +1,10 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — ADB device transport verified on Samsung SM-S921B
+
+- User supplied verbatim `adb devices -l` output: `10.0.0.6:34545         device product:e1sxeea model:SM_S921B device:e1s transport_id:1`. **WIRELESS ADB CONNECTED, AUTHORIZED (PASS)**, after successful 6-digit pairing via external Wi-Fi IP. No need to pair again for this session.
+- Next locate previously built `androidTest` APK in CoGo checkout, copy test-only APK to Downloads (no rebuild and do not touch app/data), then install test-only APK and execute instrumentation. **14 device tests still NOT RUN**.
+
 ## 2026-10-25 — Android instrumentation transport: Termux ADB verified
 
 - 2026-10-25 — **Termux ADB tool successfully installed, verified by user screenshots.** `pkg install -y android-tools && adb version` installed `android-tools 37.0.0p1-3` (plus `fmt` and `libprotobuf`), and reported `Android Debug Bridge version 1.0.41`, package version `37.0.0p1-android-tools`, binary `/data/data/com.termux/files/usr/bin/adb`, Android ARM64. Earlier `cannot connect to daemon at tcp:5037: Connection refused` appeared during setup, but `adb version` worked. **ADB server startup, Wireless Debugging pairing, device connection, and instrumentation execution NOT YET VERIFIED**; no test APK installed by this action. Next safe step: `adb start-server && adb devices -l`, then pair with Settings > Developer options > Wireless debugging on the same device, avoiding sharing one-time pairing code. Do not change CoGo SDK or installed D-110, and do not run tests during a real Class.
