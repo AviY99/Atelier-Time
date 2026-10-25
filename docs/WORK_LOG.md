@@ -1,5 +1,13 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — D-114 phone build PASS; on-device install/feedback verification still pending
+
+- User screenshot proves Code on the Go `:app:assembleDebug` **BUILD SUCCESSFUL in 11s**, 36 actionable tasks (10 executed / 26 up-to-date).
+- `/storage/emulated/0/Download/Atelier-Time-D114.apk` exists, **12M**, dated October 25 21:26 local.
+- Kotlin reported non-fatal warning `SessionEditorScreen.kt:678:29 Elvis operator (?:) always returns the left operand of non-nullable type String`; compilation/packaging still succeeded.
+- **Stage 1 remains open:** user must update-install with `adb install -r ~/storage/downloads/Atelier-Time-D114.apk`, and confirm that attempting to swipe/tap a blocked red time still stops at the last green selection **and displays the new immediate explanatory reason**, then that moving to a valid green value clears the message. Run calculated finish should still tick; picker hidden until explicitly chosen. App data to be preserved.
+- **Stage 2 comprehensive automated tests are NOT RUN/APPROVED for D-114 yet**. Prior D-110 instrumentation 14/14 PASS does not apply to D-114. Stable 4 D-108 remains frozen.
+
 ## 2026-10-25 — D-114 Stage 1: explain RED wheel blocking (source updated; phone QA pending)
 
 - User confirmed **D-113 runs correctly** except at a blocked red finish boundary there is no explanation for why the wheel stopped. Do not repeat prior feature redesign: D-113 live calculated finish, on-demand wheels and hard red boundary remain accepted.
