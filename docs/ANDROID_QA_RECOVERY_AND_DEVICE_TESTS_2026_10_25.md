@@ -1,3 +1,11 @@
+## 2026-10-25 — D-114 Stage 2 approved / source audit and safe QA preparation
+
+User approved Stage 2 after the mandatory Stable 5 handoff. **A second permission checkpoint is mandatory for installed-app/device operations.** Stable 5 ref `stable/android-d114` confirmed unchanged at `34a692a98282944a76e314efcc228dac3bd072ff`; changes only in `android-native-kotlin-compose`.
+
+**Source-only work completed:** replaced obsolete D-111 typed HH:mm Compose test interactions with D-114 live/wheel/tap/blocked-swipe/red-reason/green-reset, Confirm/Cancel and isolated persisted-Class assertions; expanded UI suite 7→12. Added six deterministic JVM finish-clock/boundary cases. Full current source counts: **185 JVM @Test across 18 files; 37 device @Test across 5 files; @Ignore=0**. Migrated `build_all_qa_on_phone.sh` to CoGo all-JVM + test-only APK/manifest with digest; migrated `termux_run_all_device_qa.sh` to strict installed D-114 preflight + test-only install + real instrumentation log, guarded with explicit no-active-Class confirmation. Retired `qa_build_d111.sh` and `qa_device_d111.sh` as fail-closed D-111 paths. No Classes/Sounds deletion, no regular APK installation.
+
+**Not yet executed:** CoGo Gradle JVM task, AndroidTest APK build, phone test package install, on-device JUnit instrumentation, ADB read-only probes. All D-114 automated outcomes **PENDING**, no fabricated PASS. Old D-110 `OK (14 tests)` remains historical only. Full runbook & future actual result ledger: [ANDROID_D114_STAGE2_QA_2026_10_25.md](ANDROID_D114_STAGE2_QA_2026_10_25.md).
+
 # Atelier Time — ordered QA 3→4: unexpected-stop recovery, then Android instrumentation
 
 ## 2026-10-25 — STABLE 5 APPROVED AND FROZEN: D-114
