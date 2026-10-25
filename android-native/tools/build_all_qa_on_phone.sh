@@ -74,7 +74,7 @@ else
             }
         }
         END {
-            printf "D-114 JVM ACTUAL (XML fallback): tests=%d failures=%d errors=%d skipped=%d\\n", sum[1], sum[2], sum[3], sum[4]
+            printf "D-114 JVM ACTUAL (XML fallback): tests=%d failures=%d errors=%d skipped=%d\n", sum[1], sum[2], sum[3], sum[4]
             if (count == 0 || sum[1] == 0 || sum[2] || sum[3]) exit 1
             if (sum[4]) print "WARNING: JVM tests skipped; inspect XML (not full PASS)."
         }
