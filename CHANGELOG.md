@@ -1,5 +1,11 @@
 # Changelog — Atelier Time
 
+## 2026-10-25 — D-109 Android Stable 4 explicitly approved; frozen checkpoint and new-chat handoff
+
+Following the screenshot-verified D-108 35s Gradle debug build/JVM test task PASS and user's reported installation/functional acceptance `"הכל תקין כעת"`, the user explicitly declared **Android Stable 4** and asked to close this conversation with a self-contained handoff. **Created immutable `stable/android-d108`** exactly at development source SHA `02beb0af46719301cccb72ad4698a337ab416d73`; prior Stable 1/2/3 checkpoints preserved. D-108 bugfix accepted: ongoing Class notification remains live on Home/Recents overview and is removed on Back or Recents task swipe-away. Native Kotlin/Jetpack Compose, closed Design/Sound/Timer behavior and phone APK data remain unchanged. **This is user-accepted debug Stable 4, not Play release signing/FGS specialUse certification/connected instrumentation/Doze/reboot/stress proof.** Main docs updated; canonical [Stable 4 record](docs/ANDROID_STABLE_4_D108.md) and [standalone new-chat handoff](docs/CHAT_HANDOFF_AFTER_STABLE_4_2026_10_25.md). User-mandated approved app logo/launcher icon gate still before store publishing; further QA/Release gates remain OPEN. No code, Gradle build or APK install performed for handoff itself; only GitHub docs and frozen rollback branch.
+
+---
+
 ## 2026-10-25 — D-108 phone acceptance: notification dismissal fix CLOSED
 
 Following the successful D-108 on-phone Gradle compile/JVM-test-task/debug APK build (35s, 42 tasks: 9 executed/33 up-to-date), the user reports **"הכל תקין כעת"** and accepts the notification lifecycle repair. **Mark D-108 FUNCTIONAL USER QA PASS / CLOSED**: existing notification remains active when app goes to background via Home or Recents overview, while Back/task-swipe closes app and clears the formerly stale notification. The one-line Kotlin fix `Intent.addFlags(...)` resolved the previous compile failure; no further rebuild requested. Acceptance is user-reported, not per-step captured device footage; Android instrumentation, Doze/process-kill, Play `specialUse` foreground-service policy review, data recovery and branded app logo remain independently OPEN. Frozen Stable 3 `stable/android-d102` unchanged, no Stable 4 branch created. [D-108 acceptance](docs/NOTIFICATION_EXIT_CLEANUP_D108.md).
