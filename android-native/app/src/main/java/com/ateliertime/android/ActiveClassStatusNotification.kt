@@ -75,7 +75,8 @@ class ActiveClassStatusNotification(context: Context) {
             snapshot.title == lastSnapshot?.title &&
             snapshot.summary == lastSnapshot?.summary) return
 
-        val openApp = PendingIntent.getActivity(
+        try {
+            val openApp = PendingIntent.getActivity(
             appContext,
             107,
             Intent(appContext, MainActivity::class.java).apply {
@@ -106,14 +107,14 @@ class ActiveClassStatusNotification(context: Context) {
                 .setChronometerCountDown(true)
         }
 
-        try {
             notifications.notify(NOTIFICATION_ID, notification.build())
             posted = true
             lastSnapshot = snapshot
             lastPostedSecond = nowSecond
-        } catch (_: SecurityException) {
-            // Android settings/permissions can change mid-Class.
-            posted = false
+        } catch (_: RuntimeException) {
+            // Optional status UI must never crash a running Class, including
+            // when Android settings, notification icons or permissions change.
+            // Keep previous posted-state so Exit still cancels an older item.
         }
     }
 
