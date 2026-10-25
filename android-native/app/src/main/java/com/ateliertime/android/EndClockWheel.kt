@@ -24,7 +24,9 @@ import kotlin.math.abs
  * drag. The first red (unreachable) value is visible, but cannot become the
  * selected value and the drag cannot jump over it to another green value.
  * Swipe back or tap a permitted neighboring value to move in the other
- * direction. This UI guard never replaces the Run planner's final validation.
+ * direction. A blocked gesture reports the rejected candidate to the
+ * parent so it can show the exact reason immediately. This UI guard never
+ * replaces the Run planner's final validation.
  */
 @Composable
 internal fun EndClockWheel(
@@ -33,10 +35,12 @@ internal fun EndClockWheel(
     limit: Int,
     tag: String,
     canSelect: (Int) -> Boolean,
+    onBlocked: (Int) -> Unit,
     onChange: (Int) -> Unit,
 ) {
     val currentValue = rememberUpdatedState(value)
     val currentCanSelect = rememberUpdatedState(canSelect)
+    val currentOnBlocked = rememberUpdatedState(onBlocked)
     val currentOnChange = rememberUpdatedState(onChange)
     val validColor = if (atelierNightActive()) Color(0xFF91F0B7)
         else Color(0xFF166E39)
@@ -65,7 +69,9 @@ internal fun EndClockWheel(
                             val step = if (travel > 0f) -1 else 1
                             val candidate = (chosenValue + step + limit) % limit
                             if (!currentCanSelect.value(candidate)) {
-                                // Hard stop at the FIRST red neighbor.
+                                // Stop at the green edge and explain which red
+                                // finish was refused; do not select it.
+                                currentOnBlocked.value(candidate)
                                 travel = 0f
                                 break
                             }
@@ -83,6 +89,7 @@ internal fun EndClockWheel(
             modifier = Modifier.testTag(tag + "_previous"),
             onClick = {
                 if (previousIsValid) onChange(previous)
+                else onBlocked(previous)
             },
         ) {
             Text("%02d".format(Locale.US, previous),
@@ -97,6 +104,7 @@ internal fun EndClockWheel(
             modifier = Modifier.testTag(tag + "_next"),
             onClick = {
                 if (nextIsValid) onChange(next)
+                else onBlocked(next)
             },
         ) {
             Text("%02d".format(Locale.US, next),
