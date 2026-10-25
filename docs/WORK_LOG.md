@@ -1,5 +1,9 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — User confirms D-110 works after update
+
+- 2026-10-25 — **D-110 USER PHONE CONFIRMATION: "הכל תקין" (everything is OK)**, reported directly in reply to instructions for opening the freshly built `Atelier-Time-D110.apk` as an **update**, checking About, and ensuring saved Classes/Sound choices survive. **Status: user-reported D-110 functional acceptance / installation workflow OK**, not independently captured screenshots of About or a database inspection. The preceding Code on the Go Gradle `:app:testDebugUnitTest :app:assembleDebug` **BUILD SUCCESSFUL in 47s**, 42 tasks; package prepared as `versionName="D-110"`, `versionCode=5`. **No explicit real-device ±120s manual/system clock correction test was reported**; therefore the targeted wall-clock correction QA remains **OPEN ON DEVICE**, although source-level Kotlin tests and virtual clock simulation passed. Full 3-hour real-device/Doze and QA-R01 connected instrumentation also remain open/blocked. **D-108 Stable 4 frozen unchanged; D-110 is not declared Stable 5, no new build or deployment performed in this documentation update.**
+
 ## 2026-10-25 — D-110 real phone Gradle build and JVM tests PASS
 
 - **D-110 phone build verified from user screenshot (2026-10-25, ~16:10 local):** CoGo Gradle executed `:app:assembleDebug` and `:app:testDebugUnitTest`; terminal displayed **BUILD SUCCESSFUL in 47s**, **42 actionable tasks: 14 executed, 28 up-to-date**. The subsequent `ls -lh` confirmed a roughly **12MB** APK at `/storage/emulated/0/Download/Atelier-Time-D110.apk`. This is **REAL PHONE BUILD + JVM UNIT TEST TASK PASS**, not Android connected instrumentation. **Install/update, About version readback, preserved data and focused D-110 UI/clock QA NOT YET CONFIRMED.** No evidence of Play/signed release. D-108 Stable 4 remains frozen.
