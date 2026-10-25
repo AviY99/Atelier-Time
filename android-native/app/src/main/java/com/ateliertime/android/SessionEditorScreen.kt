@@ -939,17 +939,6 @@ fun SessionEditorScreen(
                         classClockTimes = classClockTimes,
                         timerError = timerError,
                         designPalette = designPalette,
-                        onStart = {
-                            requestClassStatusNotificationPermission()
-                            timerAction { timer.start() }
-                            timerView?.takeIf {
-                                it.status == TimerStatus.RUNNING && it.elapsedSeconds == 0
-                            }?.let { startingView ->
-                                classClockTimes = classClockTracker.newClass(
-                                    startingView, System.currentTimeMillis()
-                                )
-                            }
-                        },
                         onPauseResume = {
                             timerAction {
                                 if (timer.view().status == TimerStatus.PAUSED ||
