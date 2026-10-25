@@ -300,4 +300,67 @@ class ClassClockTrackerTest {
             two.copy(kind = PhaseKind.SPECIAL_BREAK)))
         assertEquals("Session 2", clockPhaseLabel(one.copy(poseNumber = 2)))
     }
+
+    @Test fun monotonicDeadlineSurvivesWallClockForwardAndBackwardCorrections() {
+        var physicalNow = 50_000L
+        val startEpoch = 1_800_000_000_000L
+        val tracker = ClassClockTracker { physicalNow }
+        val started = tracker.newClass(view(), startEpoch)
+        assertEquals(startEpoch + 180_000L, started.classEndEpochMs)
+        physicalNow += 30_000L
+        val forward = tracker.observe(view(elapsed = 30, remaining = 30),
+            startEpoch + 150_000L) // Wall clock suddenly advanced +120 seconds.
+        assertEquals(30, forward.classElapsedSeconds)
+        assertEquals(150, forward.classRemainingSeconds)
+        assertFalse(tracker.hasReachedClassDeadline(startEpoch + 150_000L))
+        val backward = tracker.observe(view(elapsed = 30, remaining = 30),
+            startEpoch - 90_000L) // Wall clock suddenly moved back -120 seconds.
+        assertEquals(30, backward.classElapsedSeconds)
+        assertEquals(150, backward.classRemainingSeconds)
+        assertFalse(tracker.hasReachedClassDeadline(startEpoch - 90_000L))
+        physicalNow += 149_999L
+        assertFalse(tracker.hasReachedClassDeadline(startEpoch - 90_000L))
+        physicalNow += 1L
+        assertTrue(tracker.hasReachedClassDeadline(startEpoch - 90_000L))
+        val complete = tracker.observe(view(phase = null, elapsed = 180,
+            status = TimerStatus.FINISHED, remaining = 0), startEpoch - 90_000L)
+        assertEquals(180, complete.classElapsedSeconds)
+        assertEquals(0, complete.classRemainingSeconds)
+    }
+
+    @Test fun monotonicClassClockAdvancesDuringPauseButNotByVirtualNext() {
+        var physicalNow = 5_000L
+        val epoch = 1_800_000_000_000L
+        val tracker = ClassClockTracker { physicalNow }
+        tracker.newClass(view(), epoch)
+        physicalNow += 15_000L
+        val paused = tracker.observe(view(elapsed = 15,
+            status = TimerStatus.PAUSED, remaining = 45), epoch + 15_000L)
+        assertEquals(15, paused.classElapsedSeconds)
+        physicalNow += 30_000L
+        val waiting = tracker.observe(view(elapsed = 15,
+            status = TimerStatus.PAUSED, remaining = 45), epoch + 165_000L)
+        assertEquals(45, waiting.classElapsedSeconds)
+        assertEquals(135, waiting.classRemainingSeconds)
+        val skipped = tracker.afterNext(
+            view(phase = two, elapsed = 60, remaining = 60), epoch + 165_000L)
+        assertEquals(45, skipped.classElapsedSeconds)
+        assertEquals(135, skipped.classRemainingSeconds)
+        assertEquals(epoch + 180_000L, skipped.classEndEpochMs)
+    }
+
+    @Test fun monotonicRestartPreservesOriginalPhysicalDeadline() {
+        var physicalNow = 90_000L
+        val epoch = 1_800_000_000_000L
+        val tracker = ClassClockTracker { physicalNow }
+        tracker.newClass(view(), epoch)
+        physicalNow += 10_000L
+        val restarted = tracker.restartClass(view(), epoch + 130_000L)
+        assertEquals(epoch + 130_000L, restarted.classStartEpochMs)
+        assertEquals(epoch + 180_000L, restarted.classEndEpochMs)
+        assertEquals(0, restarted.classElapsedSeconds)
+        assertEquals(170, restarted.classRemainingSeconds)
+        physicalNow += 170_000L
+        assertTrue(tracker.hasReachedClassDeadline(epoch - 120_000L))
+    }
 }
