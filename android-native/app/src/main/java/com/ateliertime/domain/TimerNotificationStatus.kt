@@ -28,7 +28,7 @@ object TimerNotificationFormatter {
             else -> error("Only active classes have a status notification.")
         }
         val phaseTitle = when (view.phase?.kind) {
-            PhaseKind.POSE -> "Session " + (view.phase.poseNumber ?: "")
+            PhaseKind.POSE -> "Session " + (view.phase?.poseNumber ?: "")
             PhaseKind.SHORT_BREAK -> if (view.phase.openingGroupId != null)
                 "Opening break" else "Break"
             PhaseKind.SPECIAL_BREAK -> "Special break"
