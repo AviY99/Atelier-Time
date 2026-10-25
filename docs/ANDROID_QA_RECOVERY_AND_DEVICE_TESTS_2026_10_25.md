@@ -1,5 +1,13 @@
 # Atelier Time — ordered QA 3→4: unexpected-stop recovery, then Android instrumentation
 
+## 2026-10-25 — Correct PIN still fails: use on-device loopback diagnostic
+
+- User explicitly reports correct Wireless debugging pairing PIN but repeated pairing failures (`protocol fault (couldn't read status message): Success`). **Do not assume user typo**: a Termux issue publicly reports the exact failure, though a specific older report was closed as likely mistyped PIN: https://github.com/termux/termux-packages/issues/24984.
+- Termux ADB client/server is already verified working, and both target and Termux are **the same phone**. Prefer localhost (`127.0.0.1`) to avoid Wi-Fi/vpn/routing variations, following documented same-device Termux ADB instructions: https://gist.github.com/kairusds/1d4e32d3cf0d6ca44dc126c1a383a48d .
+- **First attempt without re-pairing:** From Wireless debugging *main screen*, get the current **connection port** and try `adb connect 127.0.0.1:<CONNECTION_PORT>`, then `adb devices -l`; failed pairing attempts might not have enrolled a key, so this may return authentication failure, which is useful evidence.
+- If not connected: open *Pair device with pairing code* and keep its popup visible using Samsung split-screen. Use the **new pairing port**, not the connection port: `adb pair 127.0.0.1:<PAIRING_PORT>` and privately enter the code at the interactive prompt. Pairing and connection use different ports; do not send PINs, paste PINs into shell arguments/history or screenshot codes. Pair only in a trusted Wi-Fi context.
+- If it still fails, STOP repeating guessing: record the exact error and `adb server-status` output, then choose an alternative Android instrumented-test transport. **No automated device tests executed so far**, no changes to installed D-110, no need to modify CoGo SDK or saved Classes.
+
 ## QA Stage 4 — Termux Wireless ADB pairing failed; corrective procedure (user screenshot, 2026-10-25)
 
 - `adb pair IP:PORT` was initially entered with the literal placeholder instead of a real endpoint; a later proper-shaped `adb pair <actual-host>:<port>` attempt ended with `error: protocol fault (couldn't read status message): Success`. This does **NOT** confirm successful pairing. The screenshot shows at least one interactive PIN entry with fewer than six digits.
