@@ -1,5 +1,9 @@
 # Changelog — Atelier Time
 
+## 2026-10-25 — D-110 clock-correction reliability fix (source only)
+
+- **D-110 / 2026-10-25 — MONOTONIC CLASS DEADLINE FIX IN SOURCE, NOT YET BUILT:** QA-R03 identified Class remaining/elapsed display drift after ±120s wall-clock correction and a more serious wall-clock-based physical Class finish check. The narrow fix uses `SystemClock.elapsedRealtime()` (already the Timer clock) for physical Class elapsed/remaining and Class deadline enforcement, retaining Clock/Start/End wall-time labels and all approved controls/cues/UI. Added 3 Kotlin JVM test methods for clock corrections, Pause/Next and fixed original deadline. Prepared next actual APK `versionName="D-110"`, `versionCode=5`. Assistant-side extracted Kotlin clock harness PASSED 7 targeted groups and a 3-hour/10,801-checkpoint simulation; **full CoGo Gradle `:app:testDebugUnitTest :app:assembleDebug`, real D-110 APK and device acceptance NOT EXECUTED**. No edit to frozen `stable/android-d108` or production user data. [Scope and execution plan](ANDROID_D110_MONOTONIC_DEADLINE.md).
+
 ## 2026-10-25 — Post-Android Stable 4 QA documentation sync (no build)
 
 - Synchronized up-to-date Stable 4 handoff/checkpoint, user-required pre-store logo/icon gate, current project decision/test/roadmap records from authoritative `main` into `android-native-kotlin-compose`.
