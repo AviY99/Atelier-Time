@@ -1,5 +1,15 @@
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v5.0 · Stable 5 D-114)
 
+## 2026-10-25 — HANDOFF לשיחה חדשה, Stable 5 D-114
+
+**השיחה הנוכחית נסגרה ביוזמת המשתמש. השלב הבא יתבצע רק בשיחה הבאה.** מסמך העברה עצמאי ועדכני, המציג בדיוק את הגרסה הקפואה, תשתית CoGo/Termux/ADB, בדיקות שכבר עברו, פערי Compose והסקריפטים הישנים, גבולות השמירה על הנתונים ותוכנית שלב 2:
+
+**[HANDOFF_STABLE5_D114_TO_AUTOMATED_QA_2026_10_25.md](HANDOFF_STABLE5_D114_TO_AUTOMATED_QA_2026_10_25.md)**
+
+- `stable/android-d114` SHA `34a692a98282944a76e314efcc228dac3bd072ff` — **קפוא, לא לשנות**.
+- Stage 1 אושר; Stage 2 — כלל הבדיקות האוטומטיות — **ממתין לאישור מפורש בשיחה החדשה**.
+- אין להריץ את קבצי ה־QA המיועדים ל־D-111 כנגד D-114 בלי תיקון.
+
 ## 2026-10-25 — STABLE 5 APPROVED AND FROZEN: D-114
 
 **User decision:** After personally testing D-114 on their Android phone, user explicitly stated: "הכל עובד , זאת גרסה יציבה 5" (everything works; this is Stable 5). This supersedes the previous Stage 1 acceptance-only status. The user accepted the complete D-114 Run finish-time feature, including live calculated end, user opt-in hours/minutes wheels, hard red-boundary stop and explanation when attempted selection is infeasible.
