@@ -1,5 +1,19 @@
 # Atelier Time — Run end-time constraint: options and draft contract (D-110+)
 
+## 2026-10-25 — D-112: live calculated finish and swipe hour/minute picker (STAGE 1 ONLY)
+
+**User's clarified requirement:** In the pre-Run approval dialog, `Calculated finish` must keep advancing with the wall clock until the user confirms, rather than stay frozen at the original Run tap. Replace awkward typed HH:mm plus override switch with visible independently scrollable hour and minute wheels. A feasible selection shows GREEN; an infeasible one shows RED and blocks `Confirm & Run` until corrected back to a feasible (green) time. Keep mandatory explicit approval and compensation only through the last two regular Sessions.
+
+**Implemented in development branch:**
+- `SessionEditorScreen.kt`: `PendingRunApproval` no longer snapshots a finish time. The dialog recomputes the calculated finish from `wallClockMillis` (root updates every 200ms), shows seconds (`dd/MM HH:mm:ss`), and uses the updated actual-clock finish when confirming the calculated default. Once either wheel is moved, the chosen clock (HH:mm) remains fixed, while the calculated value still advances independently. The selected finish date is resolved by `RunEndTimePlanner.nextOccurrence` and previewed. `RunEndTimePlanner.plan` is evaluated live for green/red coloring and error messages; Confirm & Run has `enabled = isValid` and revalidates against `System.currentTimeMillis()` immediately before any preset activation or timer start. 'Use calculated finish' resets wheels/default.
+- Added `android-native/app/src/main/java/com/ateliertime/android/EndClockWheel.kt`: two simple independently vertically swipeable numeric wheels (hours 00–23, minutes 00–59), with adjacent tappable previous/next values, stable pointer gesture and accessibility test tags. Parent Surface tint changes green/red according to feasibility.
+- `app/build.gradle.kts` bumped monotonically to `versionCode=7`, `versionName=D-112` so installed D-111 (or D-110) is clearly distinguished from updated source. All changes confined to development branch. Frozen Stable 4 D-108 untouched; no user Classes/Sounds data altered by GitHub edits.
+- Existing backend `FinalPairCompensation`, `RunEndTimePlanner` 1-minute minimums, schedule invariants, monotonic physical deadline and no auto-resume on app closure/reboot remain unchanged. Unfeasible wheel values remain selectable only for correction; RUN is always disabled while red.
+
+**Verification gate:** GitHub write/readback confirms source and version; **no CoGo compiler/device build, install, or UI verification has yet run for D-112**. The previous D-111 assembleDebug PASS was for the *old* typed-time dialog. User must pull, run `:app:assembleDebug` only, copy APK to Downloads, update-install, verify live calculated finish/scroll hours/scroll minutes/green-red block/reset, then approve Stage 1. Do NOT start Stage 2 automated tests before explicit approval.
+
+**Stage 2 pending on approval:** Existing `RunEndApprovalUiTest.kt` targets old text input test tags `run_end_override` / `run_end_clock` and MUST be updated to the wheel tags (`run_end_hour`, `run_end_minute`, `run_end_confirm`, `run_end_invalid`, `run_end_reset_calculated`, `run_end_calculated`) before instrumented tests run. Add cases for live tick, green/red transition, invalid disabled, reset and user-confirmed deadline preservation. Then run all feasible JVM, device and ADB suites, preserving isolated data and D-108 Stable 4.
+
 ## 2026-10-25 — Stage 1 D-111 Run end-time feature: source checkpoint; approval gate
 
 **User-requested ordering:** Stage 1 implement/repair end-time feature, obtain user approval; Stage 2 only AFTER that approval run every feasible automated test.
