@@ -1,5 +1,7 @@
 # Delivery roadmap and approval gates
 
+> **QA-R03 2026-10-25 / ACCELERATED KOTLIN RELIABILITY TESTS — COMPLETED WITH ONE OPEN DEFECT CANDIDATE:** [Report](ANDROID_QA_R03_ACCELERATED_2026_10_25.md). In local Kotlin/JVM (extracted D-108 timing paths, not APK), 150 seeded 3h simulations / **2,483,558 virtual updates** passed exact monotonic/deadline/one C-cue expectations; 30-day sparse samples and 0ms/5,999ms/6,000ms boundary tests passed current policy. Simulating a **±120-second device wall-clock correction** left monotonic engine remaining correct but changed **Class remaining/elapsed** wall-based values by 120s; static screen-source review confirms the UI consumes these fields. This is a **simulated, source-supported display discrepancy**, not an Android phone defect confirmed in vivo. Do not modify accepted UI/timer without targeted follow-on scope. Actual three-hour device/audio/Doze gate OPEN; connected instrumentation BLOCKED; normal reboot saved-data PASS. **No APK, code or stable-ref changes.**
+
 > **QA-R02 STATUS — 2026-10-25:** Accelerated Kotlin/JVM **simulation subgate QA-R02a PASS** for a virtual 180-minute Class (mathematical deadline discrepancy 0ms; expected A/B/C counts; scheduler-jitter detection latency measured). **QA-R02b real Android multi-hour accuracy/audio/Doze remains OPEN.** QA-R01 instrumentation BLOCKED. See [post-D108 QA record](ANDROID_RELIABILITY_QA_POST_D108.md). No APK source/build or stable branch changed.
 
 
