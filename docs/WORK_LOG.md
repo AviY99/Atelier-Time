@@ -1,5 +1,12 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — D-111 first phone APK build PASS (Stage 1 only)
+
+- User supplied CoGo screenshot proving `app:assembleDebug` **BUILD SUCCESSFUL in 54s**, **36 actionable tasks (10 executed / 26 up-to-date)** on phone, and `/storage/emulated/0/Download/Atelier-Time-D111.apk` exists, size **12M**, dated Oct 25 20:31 local.
+- Kotlin compile warning `SessionEditorScreen.kt:682:29 Elvis operator (?:) always returns the left operand of non-nullable type String` is non-fatal; compilation/package completed.
+- Stage 1 production source is already updated with Run → calculated Class finish → explicit approve or edit HH:mm → final-two-Session compensation feasibility, and removed legacy timer Start bypass. **D-111 PHONE BUILD PASS; D-111 UPDATE-INSTALL + MANUAL FEATURE ACCEPTANCE NOT YET VERIFIED.** Only `:app:assembleDebug` was requested; no new automated tests executed. Historic D-110 device instrumentation **14/14 PASS** pertains to D-110, not D-111.
+- Next request user to install the D-111 APK as an **update** preserving user app data, then manually confirm About D-111 / saved Classes/Sounds / Run finish approval and corrected-invalid-input behavior. Explicit user approval needed before Stage 2 exhaustive automation. Frozen D-108 Stable 4 unaffected.
+
 ## 2026-10-25 — Stage 1 D-111 Run end-time feature: source checkpoint; approval gate
 
 **User-requested ordering:** Stage 1 implement/repair end-time feature, obtain user approval; Stage 2 only AFTER that approval run every feasible automated test.
