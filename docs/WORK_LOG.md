@@ -1,5 +1,16 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — D-113 Stage 1 UX refinement: stopped-at-red wheel and on-demand picker
+
+**User correction to D-112 (user says all else works great):** (1) An hour/minute wheel must hard-stop at the first infeasible RED neighboring value and NOT be allowed to scroll/choose deeper into red; user can reverse toward feasible GREEN. (2) Hide both wheels initially: show them ONLY after explicit Change finish time selection. Calculated finish stays live while deciding. No comprehensive automated QA until Stage 1 approval.
+
+**Code now in development branch, versionCode=8 / versionName=D-113:**
+- `EndClockWheel.kt`: independent hour/minute swipe wheels with `canSelect(candidate)` checked for EACH adjacent step, including fast drags (no skipping invalid boundary). Next/previous candidate shown red when blocked, green when feasible; invalid red step is visible but not selected. `RunEndTimePlanner.plan` remains authority; no mutation of saved Classes.
+- `SessionEditorScreen.kt`: no wheels on opening `Run` approval. `Change finish time` (testTag `run_end_change_finish`) reveals them. Important follow-up safeguard: revealing the picker does NOT freeze/truncate the continuously calculated finish; custom absolute HH:mm becomes active only on the first accepted wheel movement. `Use calculated finish` resets to live default and hides wheels. `Confirm & Run` still validates before activation; explicit default recomputes at actual start. No direct unapproved Start shortcut.
+- `app/build.gradle.kts`: versionCode=8 and versionName=D-113. GitHub source readback checked the wheel gating, canSelect bindings, on-demand visibility and version; **no D-113 CoGo build/APK installation, real-device screen acceptance or Stage 2 QA run has yet been observed.**
+
+**Next Stage 1 on user's Samsung phone:** In Code on the Go, git pull --ff-only, run only `:app:assembleDebug` using established Gradle/AAPT2, copy to Download/Atelier-Time-D113.apk, update-install with `adb install -r` from Termux (preserve saved Classes/Sounds), verify the two UX requirements, then request user's explicit acceptance of Stage 1. D-108 Stable 4 frozen. Existing RunEndApprovalUiTest targets old text-input tags and must be revised only in Stage 2 after approval; previous 14/14 Android device PASS pertained to D-110, not D-113.
+
 ## 2026-10-25 — D-113: requested finish-wheel UX refinement (Stage 1, source only)
 
 **User phone confirmation for D-112:** 'הכל עובד מצויין' ('everything works great') except the two specified UI refinements. This is acceptance of existing D-112 behavior other than the new wheel requirement; do not treat D-113 as tested.
