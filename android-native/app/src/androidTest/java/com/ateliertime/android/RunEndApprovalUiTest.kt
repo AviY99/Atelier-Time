@@ -17,6 +17,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.UUID
+import java.util.Calendar
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 /**
  * End-to-end Compose UI checks use separate randomized Class and Sound stores.
@@ -94,4 +97,53 @@ class RunEndApprovalUiTest {
         compose.onNodeWithText("Confirm").performClick()
         compose.onNodeWithText("Timer · saved classes").assertExists()
     }
+
+    private fun clockFromNow(minutesAhead: Int): String =
+        SimpleDateFormat("HH:mm", Locale.US).format(
+            Calendar.getInstance().apply { add(Calendar.MINUTE, minutesAhead) }.time
+        )
+
+    private fun chooseFinish(minutesAhead: Int) {
+        compose.onNodeWithTag("run_end_override").performClick()
+        compose.onNodeWithTag("run_end_clock").performTextInput(clockFromNow(minutesAhead))
+    }
+
+    @Test fun impossibleEarlyFinishKeepsDialogOpenForCorrection() {
+        openRunApproval()
+        chooseFinish(10) // Requires more than the adjustable last pair can remove.
+        compose.onNodeWithTag("run_end_confirm").performClick()
+        compose.onNodeWithTag("run_end_dialog").assertExists()
+        compose.onNodeWithText("last two Sessions", substring = true).assertExists()
+        compose.onNodeWithText("Class timer").assertDoesNotExist()
+    }
+
+    @Test fun unrealisticLaterFinishCannotTurnIntoOvernightClass() {
+        openRunApproval()
+        chooseFinish(370) // More than twice the original three-hour Class.
+        compose.onNodeWithTag("run_end_confirm").performClick()
+        compose.onNodeWithTag("run_end_dialog").assertExists()
+        compose.onNodeWithText("too late", substring = true).assertExists()
+        compose.onNodeWithText("Class timer").assertDoesNotExist()
+    }
+
+    @Test fun validEarlierFinishCanBeApprovedAndStartsClass() {
+        openRunApproval()
+        chooseFinish(175)
+        compose.onNodeWithText("Final two Sessions:", substring = true).assertExists()
+        compose.onNodeWithTag("run_end_confirm").performClick()
+        compose.onNodeWithTag("run_end_dialog").assertDoesNotExist()
+        compose.onNodeWithText("Class timer").assertExists()
+        compose.onNodeWithText("Running").assertExists()
+    }
+
+    @Test fun validLaterFinishCanBeApprovedAndStartsClass() {
+        openRunApproval()
+        chooseFinish(190)
+        compose.onNodeWithText("Final two Sessions:", substring = true).assertExists()
+        compose.onNodeWithTag("run_end_confirm").performClick()
+        compose.onNodeWithTag("run_end_dialog").assertDoesNotExist()
+        compose.onNodeWithText("Class timer").assertExists()
+        compose.onNodeWithText("Running").assertExists()
+    }
+
 }
