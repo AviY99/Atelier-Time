@@ -1,0 +1,129 @@
+package com.ateliertime.android
+
+import android.Manifest
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import com.ateliertime.domain.TimerNotificationFormatter
+import com.ateliertime.domain.TimerNotificationStatus
+import com.ateliertime.domain.TimerStatus
+import com.ateliertime.domain.TimerView
+
+/**
+ * D-107 — quiet, permission-aware ongoing Class status notification.
+ *
+ * The existing Compose Timer remains the sole clock/cue owner. This observer
+ * only mirrors its snapshots; it does NOT turn the app into a foreground
+ * service or promise survival when Android removes/kills the task.
+ *
+ * If the user declined POST_NOTIFICATIONS, the timer works as before.
+ */
+class ActiveClassStatusNotification(context: Context) {
+    private val appContext = context.applicationContext
+    private val notifications =
+        appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private var lastSnapshot: TimerNotificationStatus? = null
+    private var lastPostedSecond: Long? = null
+    private var posted = false
+
+    init {
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "Active class status",
+            NotificationManager.IMPORTANCE_LOW,
+        ).apply {
+            description = "Live session and class time remaining while Atelier Time runs"
+            setSound(null, null)
+            enableVibration(false)
+            setShowBadge(false)
+            lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+        }
+        notifications.createNotificationChannel(channel)
+    }
+
+    fun update(className: String, view: TimerView, classRemainingSeconds: Int, nowEpochMs: Long) {
+        if (view.status != TimerStatus.RUNNING &&
+            view.status != TimerStatus.PAUSED &&
+            view.status != TimerStatus.STOPPED) {
+            clear()
+            return
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            appContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED) {
+            // A denied notification permission never prevents a Class from running.
+            clear()
+            return
+        }
+        if (!notifications.areNotificationsEnabled()) {
+            clear()
+            return
+        }
+
+        val snapshot = TimerNotificationFormatter.forActiveClass(
+            className, view, classRemainingSeconds,
+        )
+        val nowSecond = nowEpochMs / 1000L
+        if (posted && snapshot == lastSnapshot && nowSecond == lastPostedSecond) return
+
+        val openApp = PendingIntent.getActivity(
+            appContext,
+            107,
+            Intent(appContext, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        val notification = Notification.Builder(appContext, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_atelier_class_status)
+            .setContentTitle(snapshot.title)
+            .setContentText(snapshot.summary)
+            .setStyle(Notification.BigTextStyle().bigText(snapshot.detail))
+            .setContentIntent(openApp)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setCategory(Notification.CATEGORY_STATUS)
+            .setVisibility(Notification.VISIBILITY_PRIVATE)
+            .setShowWhen(false)
+            // Avoid an orphaned ongoing notification after an unexpected app
+            // process death: Android removes it by the planned Class deadline.
+            .setTimeoutAfter(classRemainingSeconds.coerceAtLeast(1).toLong() *
+                1_000L + 2_000L)
+
+        if (snapshot.countdownMillis != null) {
+            notification.setWhen(nowEpochMs + snapshot.countdownMillis)
+                .setShowWhen(true)
+                .setUsesChronometer(true)
+                .setChronometerCountDown(true)
+        }
+
+        try {
+            notifications.notify(NOTIFICATION_ID, notification.build())
+            posted = true
+            lastSnapshot = snapshot
+            lastPostedSecond = nowSecond
+        } catch (_: SecurityException) {
+            // Android settings/permissions can change mid-Class.
+            posted = false
+        }
+    }
+
+    fun clear() {
+        if (posted) {
+            notifications.cancel(NOTIFICATION_ID)
+        }
+        posted = false
+        lastSnapshot = null
+        lastPostedSecond = null
+    }
+
+    companion object {
+        private const val CHANNEL_ID = "atelier_active_class_v1"
+        private const val NOTIFICATION_ID = 107
+    }
+}
