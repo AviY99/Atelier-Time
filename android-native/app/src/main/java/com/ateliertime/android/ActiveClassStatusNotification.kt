@@ -69,7 +69,7 @@ class ActiveClassStatusNotification(context: Context) {
             className, view, classRemainingSeconds,
         )
         val nowSecond = nowEpochMs / 1000L
-        if (posted && snapshot == lastSnapshot && nowSecond == lastPostedSecond) return
+        // The underlying clock updates every 200ms, but avoid posting five\n        // identical notification updates per second; its chronometer handles ticks.\n        if (posted && nowSecond == lastPostedSecond &&\n            snapshot.title == lastSnapshot?.title &&\n            snapshot.summary == lastSnapshot?.summary) return
 
         val openApp = PendingIntent.getActivity(
             appContext,
