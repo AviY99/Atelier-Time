@@ -1,6 +1,12 @@
 # Atelier Time — D-110 monotonic Class deadline correction
 
-**Date:** 2026-10-25. **Status:** KOTLIN SOURCE + UNIT TESTS COMMITTED; LOCAL EXTRACTED-PATH JVM GATES PASS; **ANDROID GRADLE BUILD / ON-PHONE TESTS NOT YET RUN**.
+## Latest real CoGo phone evidence — D-110 build PASS
+
+- **D-110 phone build verified from user screenshot (2026-10-25, ~16:10 local):** CoGo Gradle executed `:app:assembleDebug` and `:app:testDebugUnitTest`; terminal displayed **BUILD SUCCESSFUL in 47s**, **42 actionable tasks: 14 executed, 28 up-to-date**. The subsequent `ls -lh` confirmed a roughly **12MB** APK at `/storage/emulated/0/Download/Atelier-Time-D110.apk`. This is **REAL PHONE BUILD + JVM UNIT TEST TASK PASS**, not Android connected instrumentation. **Install/update, About version readback, preserved data and focused D-110 UI/clock QA NOT YET CONFIRMED.** No evidence of Play/signed release. D-108 Stable 4 remains frozen.
+- Installation gate: open the downloaded APK through Android Downloads / My Files and **update** the installed application, never uninstall or clear data. Verify About shows `D-110`; verify existing Classes and selected sounds persist; then do focused monotonic Class clock behavior check only. Avoid changing phone system time during an actual user Class. Other previously approved cues/UI/background/notification behavior does not require repeating.
+- Earlier below section labeled `Build/acceptance gate — NOT YET PERFORMED` was written **before** this actual build and is retained as historical instructions; the Gradle build portion is now complete, while update-install/acceptance remains open.
+
+**Date:** 2026-10-25. **Latest status:** D-110 **PHONE GRADLE BUILD AND JVM UNIT TEST TASK PASS** (user screenshot; 47s, 42 tasks). **APK INSTALL / ON-PHONE ACCEPTANCE NOT YET VERIFIED**.
 
 ## Why
 
