@@ -1,5 +1,20 @@
 # Android reliability QA gate — after Stable 4 (D-108)
 
+## QA-R04 — real-device reboot persistence observation (2026-10-25)
+
+**Result: PASS for reboot persistence subcase only — user-reported acceptance.**
+
+- Device: the user's existing Android phone, with previously accepted D-108 debug APK; exact OS build and device model were not separately captured for this check.
+- Scenario: ordinary phone restart, then reopen Atelier Time and verify existing saved Classes and Sound settings/selections.
+- Expected: previously saved Classes and Sound choices remain after reboot, without uninstalling/clearing app storage.
+- Actual user feedback: **"הכל נשמר לאחר ריסטארט לנייד"** ("Everything was preserved after restarting the phone").
+- Evidence: explicit user's device observation in chat; not independent connected-instrumentation output, screen recording or JUnit assertion.
+- **PASS: saved Classes and Sound preferences persist across a normal device reboot.**
+- **Not tested / no inferred PASS:** recovery of a Class/timer that was running before reboot; restoration after unexpected OS process kill/Doze; corrupt/future-schema handling on the real device; data survival during a future versioned APK update. These remain separately open.
+- No source/Gradle version modifications, APK rebuild/install, data reset, or repeat of previously approved A/B/C/Back/Home/Swipe scenarios.
+
+**Next reliability step:** QA-R02 — verify real multi-hour session wall-clock drift/deadline and unattended boundary behavior during a normal future Class, avoiding redundant short A/B/C tests. Do not equate existing injected-monotonic-clock JVM tests with actual multi-hour Android-device endurance.
+
 **Prepared:** 2026-10-25. **Status:** SOURCE AUDIT COMPLETE; DEVICE EXECUTION NOT STARTED. This is documentation and evidence planning only; it does not constitute a new APK, a passed test, or a change to accepted product behavior.
 
 ## Fixed baseline and non-regression boundary
