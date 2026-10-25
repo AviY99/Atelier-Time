@@ -66,7 +66,20 @@ object RunEndTimePlanner {
         require(difference in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
             "The selected finish time is outside the supported range."
         }
-        val adjustment = try {
+        // Backwards compatibility: a Class with no adjustable pair can still
+        // run at its ORIGINAL finish. Only a changed finish requires a pair.
+        val adjustment = if (difference == 0L) {
+            val pair = session.phases.filter {
+                it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+            }.takeLast(2)
+            CompensatedTimeline(
+                phases = session.phases,
+                totalSeconds = session.rules.totalSeconds,
+                recoveredSeconds = 0,
+                firstFinalPoseSeconds = pair.getOrNull(0)?.durationSeconds ?: 0,
+                lastFinalPoseSeconds = pair.getOrNull(1)?.durationSeconds ?: 0,
+            )
+        } else try {
             FinalPairCompensation.adjust(session, difference.toInt())
         } catch (_: IllegalArgumentException) {
             throw IllegalArgumentException(
