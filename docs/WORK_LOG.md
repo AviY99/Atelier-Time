@@ -1,5 +1,10 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — QA-R03 assistant-executed virtual Kotlin stress suite
+
+- **QA-R03 2026-10-25 / ACCELERATED KOTLIN RELIABILITY TESTS — COMPLETED WITH ONE OPEN DEFECT CANDIDATE:** [Report](ANDROID_QA_R03_ACCELERATED_2026_10_25.md). In local Kotlin/JVM (extracted D-108 timing paths, not APK), 150 seeded 3h simulations / **2,483,558 virtual updates** passed exact monotonic/deadline/one C-cue expectations; 30-day sparse samples and 0ms/5,999ms/6,000ms boundary tests passed current policy. Simulating a **±120-second device wall-clock correction** left monotonic engine remaining correct but changed **Class remaining/elapsed** wall-based values by 120s; static screen-source review confirms the UI consumes these fields. This is a **simulated, source-supported display discrepancy**, not an Android phone defect confirmed in vivo. Do not modify accepted UI/timer without targeted follow-on scope. Actual three-hour device/audio/Doze gate OPEN; connected instrumentation BLOCKED; normal reboot saved-data PASS. **No APK, code or stable-ref changes.**
+- Exact local stdout and reproducible sources exported in `Atelier_Time_QA_R03_Results_and_Repro.zip` in conversation. Source-equivalent timing paths only; pause/restart/Next and any real Android behavior remain untested in this step.
+
 ## 2026-10-25 — QA-R02a simulated Kotlin three-hour run; QA-R02b device endurance open
 
 - Assistant built and executed a local Kotlin/JVM harness extracting D-108 uninterrupted timer path and ClassClockTracker math; a virtual monotonic clock was independently checked against a mathematical reference timeline for 180 minutes. **This is not a full original Android APK execution or 3h physical measurement.**
