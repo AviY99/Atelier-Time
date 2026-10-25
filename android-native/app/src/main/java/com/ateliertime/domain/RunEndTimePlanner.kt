@@ -62,6 +62,15 @@ object RunEndTimePlanner {
         require(plannedSeconds in 1L..Int.MAX_VALUE.toLong()) {
             "The selected finish time is outside the supported range."
         }
+        // Explicit feasibility policy for late clock choices: a 3-hour
+        // Class cannot silently turn into an overnight marathon because a
+        // user entered a clock that has already passed today. The maximum
+        // full Class length is twice its approved length; the actual added
+        // time still goes ONLY into the final two regular Sessions.
+        require(plannedSeconds <= session.rules.totalSeconds.toLong() * 2L) {
+            "This finish is too late: a Class may be extended by at most " +
+                "its original duration. Choose a closer finish time."
+        }
         val difference = session.rules.totalSeconds.toLong() - plannedSeconds
         require(difference in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
             "The selected finish time is outside the supported range."
