@@ -77,35 +77,35 @@ class ActiveClassStatusNotification(context: Context) {
 
         try {
             val openApp = PendingIntent.getActivity(
-            appContext,
-            107,
-            Intent(appContext, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            },
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-        )
-        val notification = Notification.Builder(appContext, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_atelier_class_status)
-            .setContentTitle(snapshot.title)
-            .setContentText(snapshot.summary)
-            .setStyle(Notification.BigTextStyle().bigText(snapshot.detail))
-            .setContentIntent(openApp)
-            .setOngoing(true)
-            .setOnlyAlertOnce(true)
-            .setCategory(Notification.CATEGORY_STATUS)
-            .setVisibility(Notification.VISIBILITY_PRIVATE)
-            .setShowWhen(false)
-            // Avoid an orphaned ongoing notification after an unexpected app
-            // process death: Android removes it by the planned Class deadline.
-            .setTimeoutAfter(classRemainingSeconds.coerceAtLeast(1).toLong() *
-                1_000L + 2_000L)
+                appContext,
+                107,
+                Intent(appContext, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                },
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
+            val notification = Notification.Builder(appContext, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_atelier_class_status)
+                .setContentTitle(snapshot.title)
+                .setContentText(snapshot.summary)
+                .setStyle(Notification.BigTextStyle().bigText(snapshot.detail))
+                .setContentIntent(openApp)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setCategory(Notification.CATEGORY_STATUS)
+                .setVisibility(Notification.VISIBILITY_PRIVATE)
+                .setShowWhen(false)
+                // If the process is lost unexpectedly, expire the notification
+                // near the original Class deadline instead of leaving it stale.
+                .setTimeoutAfter(classRemainingSeconds.coerceAtLeast(1).toLong() *
+                    1_000L + 2_000L)
 
-        if (snapshot.countdownMillis != null) {
-            notification.setWhen(nowEpochMs + snapshot.countdownMillis)
-                .setShowWhen(true)
-                .setUsesChronometer(true)
-                .setChronometerCountDown(true)
-        }
+            if (snapshot.countdownMillis != null) {
+                notification.setWhen(nowEpochMs + snapshot.countdownMillis)
+                    .setShowWhen(true)
+                    .setUsesChronometer(true)
+                    .setChronometerCountDown(true)
+            }
 
             notifications.notify(NOTIFICATION_ID, notification.build())
             posted = true
