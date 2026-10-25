@@ -1,5 +1,13 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — QA-R02a simulated Kotlin three-hour run; QA-R02b device endurance open
+
+- Assistant built and executed a local Kotlin/JVM harness extracting D-108 uninterrupted timer path and ClassClockTracker math; a virtual monotonic clock was independently checked against a mathematical reference timeline for 180 minutes. **This is not a full original Android APK execution or 3h physical measurement.**
+- **PASS simulated:** 54,001 ticks at 200ms (6 A / 5 B / 1 C, zero deadline discrepancy), 10,801 ticks at 1000ms (same), 9,346 deterministic jittered ticks (max intermediate cue observation delay 1845ms, final completion observed 887ms late), 7,202 ticks with simulated one-hour update inactivity (skipped cue replay suppressed, final C once).
+- No observed *calculated* Class deadline drift. Device scheduler latency and physical time accuracy, long-run Android audio, battery/Doze, process death remain OPEN.
+- No phone build/install, source code changes, user data changes, or repeated previously approved checks. Read the [detailed QA record](ANDROID_RELIABILITY_QA_POST_D108.md) for exact bounds.
+
+
 ## 2026-10-25 — QA-R04 phone reboot persistence PASS (user-reported)
 
 - The user completed the previously specified reboot-retention check on the existing D-108 installation and confirmed: **"הכל נשמר לאחר ריסטארט לנייד"**.
