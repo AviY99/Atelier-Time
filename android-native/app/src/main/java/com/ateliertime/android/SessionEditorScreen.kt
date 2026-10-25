@@ -1053,7 +1053,7 @@ fun SessionEditorScreen(
                                         ),
                                     style = MaterialTheme.typography.bodySmall,
                                 )
-                            } else {
+                            } else if (runApprovalError == null) {
                                 Text(
                                     check?.exceptionOrNull()?.message ?:
                                         "Enter a valid HH:mm finish time.",
