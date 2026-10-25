@@ -866,6 +866,9 @@ fun SessionEditorScreen() {
                                 activeTab = MainTab.EDITOR
                             },
                             onRun = { record, restored ->
+                                // Ask for notification permission before showing
+                                // the clock approval, never AFTER user chose a target.
+                                requestClassStatusNotificationPermission()
                                 // Snapshot the expected finish at the moment
                                 // Run is pressed. It becomes a real constraint
                                 // only after explicit confirmation below.
@@ -1041,7 +1044,6 @@ fun SessionEditorScreen() {
                         pendingRunApproval = null
                         runApprovalError = null
                         activeTab = MainTab.TIMER
-                        requestClassStatusNotificationPermission()
                     } catch (error: IllegalArgumentException) {
                         runApprovalError = error.message ?: "Choose a feasible finish time."
                     }
