@@ -1,3 +1,13 @@
+## 2026-10-25 — STAGE 2 NOW APPROVED; D-114 AUTOMATED QA SOURCE PREPARED
+
+**CURRENT STATUS (supersedes older "pending approval" notes below):** User explicitly approved Stage 2 in the new conversation, requiring a separate approval before operations that affect the installed phone app. Stable 5 `stable/android-d114` remains frozen at `34a692a98282944a76e314efcc228dac3bd072ff`; no production app / Classes / Sounds source was changed.
+
+- On `android-native-kotlin-compose`: D-114 Compose UI suite migrated from retired typed HH:mm controls to live finish, optional hour/minute wheels, blocked red tap/rapid swipe, green recovery, reset, Cancel, Confirm and saved-plan checks. New 6-case deterministic JVM boundary suite added.
+- Source-audited inventory: **185 JVM methods across 18 files; 37 AndroidTest methods across 5 files; 0 @Ignore annotations**. **SOURCE ONLY — neither D-114 JVM nor D-114 Android Instrumentation has run/been proven PASS in this stage.** The earlier 14/14 on-phone PASS is D-110, not D-114.
+- QA runners updated to D-114. CoGo runner executes all JVM tests and builds only the AndroidTest APK; Termux runner first verifies installed D-114 and APK hash, prompts confirmation, and installs only test package. Both legacy D-111 scripts are disabled. No regular app install or data wipe. No device-facing QA was run in this conversation.
+- **Current instructions and actual-results ledger:** [ANDROID_D114_STAGE2_QA_2026_10_25.md](ANDROID_D114_STAGE2_QA_2026_10_25.md). First user phone step is the approved **CoGo build/JVM gate**; before Termux installation/instrumentation obtain separate user approval and confirm no real Class active.
+- Previous sections below are historical milestones, NOT current authorization or verification status.
+
 # ATELIER TIME — CURRENT CROSS-CHAT PROJECT HANDOFF (v5.0 · Stable 5 D-114)
 
 ## 2026-10-25 — HANDOFF לשיחה חדשה, Stable 5 D-114
