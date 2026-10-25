@@ -1,5 +1,11 @@
 # Atelier Time — ordered QA 3→4: unexpected-stop recovery, then Android instrumentation
 
+## 2026-10-25 — Wireless ADB transport CONFIRMED on user's phone
+
+- User supplied actual Termux `adb devices -l` output: `10.0.0.6:34545         device product:e1sxeea model:SM_S921B device:e1s transport_id:1`. This proves connected/authorized Samsung SM-S921B, **ADB device-state PASS**. Previous entries below are historical and superseded as to current connection status.
+- Next action: in Code on the Go checkout find actual existing `app/build/outputs/apk/androidTest/**/app-*-androidTest.apk` (path needs local confirmation), copy **test APK only** to `/storage/emulated/0/Download/Atelier-Time-D110-Tests.apk` without rebuilding or altering installed app. From Termux, verify accessibility and run `adb install -t -r` for **the test APK**, verify registered instrumentation runner, execute `adb shell am instrument -w com.ateliertime.android.test/androidx.test.runner.AndroidJUnitRunner` only when no Class is running. Capture results; **14 instrumentation tests are still NOT RUN and are NOT marked PASS**.
+- No changes to D-110 app code, frozen Stable 4, or saved Classes/Sound, and no force-stop/uninstall/data clear commands issued.
+
 ## 2026-10-25 — User reports successful external-IP ADB pairing/connection
 
 - User message: **"הצליח מחובר"** ("Succeeded, connected") after switching from localhost attempts to the phone's external/Wi-Fi IP route in Termux with Samsung split-screen for Wireless debugging.
