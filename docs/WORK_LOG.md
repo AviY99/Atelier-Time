@@ -1,5 +1,11 @@
 # Work log — every iteration and approval checkpoint
 
+## 2026-10-25 — D-108 Back and Recents swipe notification dismissal (source-only; device gate open)
+
+Real D-107 phone QA finds the in-background notification works with Home/square and Recents overview, but notification freezes after real app exit through Android Back and after swiping the task out of Recents. D-108 source now ensures that Back explicitly finishes the Activity, and guards notification dismissal on Activity `isFinishing && !isChangingConfigurations` (not on Home, task overview or rotation). For Recents swipe, a small notification-only Android service receives `onTaskRemoved` and cancels the same notification ID, without modifying Compose Timer/audio state. Added Android 14+ `specialUse` FGS manifest and permission declarations (Play policy type review pending), three pure-JVM exit-policy tests authored but not executed on device, next app `versionName=D-108` and `versionCode=4`. **No new on-phone build/APK install or user QA has yet occurred; D-107 stale notification defect is not claimed resolved.** Stable 3 unchanged. [D-108 status and QA](NOTIFICATION_EXIT_CLEANUP_D108.md).
+
+---
+
 ## 2026-10-25 — D-107 44s on-phone Gradle/JVM build PASS; notification UX open
 
 User terminal screenshot confirms `BUILD SUCCESSFUL in 44s` for Android `:app:testDebugUnitTest :app:assembleDebug` (42 tasks: 21 executed, 21 up-to-date) and successful copy of ~12M `Atelier-Time-D107.apk` to Downloads, Oct 25 09:16. **Only build and JVM test task PASS**; exact JUnit case count and connected instrumentation not shown. **New APK update-install and user acceptance of notification permission, notification shade content, countdown, Pause/Resume and Exit cleanup still unconfirmed.** Next install the already copied D-107 APK as an update, preserving user Classes/sounds, and verify About Version D-107 and notification; no need for another build. Frozen Stable 3 unchanged; final branded launcher/logo remains future pre-store work.
