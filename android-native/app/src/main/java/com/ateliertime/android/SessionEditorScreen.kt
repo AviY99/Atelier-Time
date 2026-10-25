@@ -997,7 +997,8 @@ fun SessionEditorScreen(
                         style = MaterialTheme.typography.titleMedium)
                     Text("Approve this finish time or enter another HH:mm. " +
                         "An earlier or later finish adjusts only the final two Sessions. " +
-                        "Each must remain at least one minute. Saved Classes are unchanged.")
+                        "Each must remain at least one minute; the Class may be extended " +
+                        "by at most its original length. Saved Classes are unchanged.")
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Choose a different end time", modifier = Modifier.weight(1f))
                         Switch(
@@ -1034,13 +1035,14 @@ fun SessionEditorScreen(
                                     clockFormat.format(Date(resolved)),
                                     style = MaterialTheme.typography.titleSmall)
                             }
-                            val preview = previewTime?.let { selected ->
+                            val check = previewTime?.let { selected ->
                                 runCatching {
                                     RunEndTimePlanner.plan(
                                         request.session, wallClockMillis, selected
                                     )
-                                }.getOrNull()
+                                }
                             }
+                            val preview = check?.getOrNull()
                             if (preview != null) {
                                 val first = preview.adjusted.firstFinalPoseSeconds
                                 val last = preview.adjusted.lastFinalPoseSeconds
@@ -1053,8 +1055,8 @@ fun SessionEditorScreen(
                                 )
                             } else {
                                 Text(
-                                    "Enter a feasible HH:mm finish; both final Sessions " +
-                                        "must remain at least one minute.",
+                                    check?.exceptionOrNull()?.message ?:
+                                        "Enter a valid HH:mm finish time.",
                                     color = atelierErrorTextColor(),
                                     style = MaterialTheme.typography.bodySmall,
                                 )
