@@ -22,6 +22,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import android.os.SystemClock
+import android.os.Build
+import android.Manifest
+import android.content.pm.PackageManager
 import android.app.Activity
 import android.content.Intent
 import android.media.RingtoneManager
@@ -45,6 +48,20 @@ private enum class MainTab { EDITOR, TIMER, SOUNDS, DESIGN, ABOUT }
 fun SessionEditorScreen() {
     val engine = remember { ScheduleEngine() }
     val context = LocalContext.current
+    val classStatusNotification = remember(context) { ActiveClassStatusNotification(context) }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* If accepted, the live Timer tick posts the status notification. */ }
+    fun requestClassStatusNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+    DisposableEffect(classStatusNotification) {
+        onDispose { classStatusNotification.clear() }
+    }
     val catalog = remember(context) {
         PresetCatalog(AndroidPresetStore(context), engine) {
             UUID.randomUUID().toString()
@@ -273,6 +290,12 @@ fun SessionEditorScreen() {
                     else clock.update()
                 timerView = tick.view
                 classClockTimes = classClockTracker.observe(tick.view, nowEpochMs)
+                classStatusNotification.update(
+                    playingSession?.rules?.name ?: "Class",
+                    tick.view,
+                    classClockTimes.classRemainingSeconds ?: tick.view.totalRemainingSeconds,
+                    nowEpochMs,
+                )
                 if (soundEnabled && tick.cue != null) {
                     melodyPlayer.play(soundSettings.soundFor(tick.cue),
                         soundSettings.secondsFor(tick.cue)) { message ->
@@ -280,6 +303,7 @@ fun SessionEditorScreen() {
                     }
                 }
                 if (tick.view.status == TimerStatus.FINISHED) {
+                    classStatusNotification.clear()
                     // Return to Timer's saved-class HOME once the class ends.
                     playingSession = null
                     activeTab = MainTab.TIMER
@@ -327,6 +351,7 @@ fun SessionEditorScreen() {
                 }
             }
             if (event.view.status == TimerStatus.FINISHED) {
+                classStatusNotification.clear()
                 playingSession = null
                 activeTab = MainTab.TIMER
             }
@@ -818,6 +843,7 @@ fun SessionEditorScreen() {
                                 activeTab = MainTab.EDITOR
                             },
                             onRun = { record, restored ->
+                                requestClassStatusNotificationPermission()
                                 selectedPresetId = record.id
                                 playingSession = restored
                                 launchRunRequested = true
@@ -842,6 +868,7 @@ fun SessionEditorScreen() {
                         timerError = timerError,
                         designPalette = designPalette,
                         onStart = {
+                            requestClassStatusNotificationPermission()
                             timerAction { timer.start() }
                             timerView?.takeIf {
                                 it.status == TimerStatus.RUNNING && it.elapsedSeconds == 0
@@ -876,6 +903,7 @@ fun SessionEditorScreen() {
                             runTimedCue(advancedByNext = true) { timer.nextPhase() }
                         },
                         onExit = {
+                            classStatusNotification.clear()
                             playingSession = null
                             launchRunRequested = false
                             activeTab = MainTab.TIMER
