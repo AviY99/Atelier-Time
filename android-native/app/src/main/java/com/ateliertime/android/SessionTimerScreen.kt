@@ -36,7 +36,6 @@ fun SessionTimerScreen(
     classClockTimes: ClassClockTimes,
     timerError: String?,
     designPalette: DesignPalette,
-    onStart: () -> Unit,
     onPauseResume: () -> Unit,
     onRestartSession: () -> Unit,
     onNextPhase: () -> Unit,
@@ -263,12 +262,18 @@ fun SessionTimerScreen(
                     verticalAlignment = Alignment.CenterVertically) {
                     val underway = view.status == TimerStatus.RUNNING ||
                         view.status == TimerStatus.PAUSED
+                    // Run is allowed ONLY after approving its Class finish
+                    // in the saved-library dialog. Never expose a shortcut
+                    // that starts a READY timer without its chosen deadline.
                     if (view.status == TimerStatus.READY ||
                         view.status == TimerStatus.FINISHED) {
-                        Button(colors = atelierFilledColors(), onClick = onStart, modifier = Modifier.weight(1f),
-                            contentPadding = PaddingValues(horizontal = 5.dp, vertical = 6.dp)) {
-                            Text("Start", maxLines = 1)
-                        }
+                        Text(
+                            if (view.status == TimerStatus.READY)
+                                "Starting approved Class..."
+                            else "Class finished",
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
                     } else {
                         Button(colors = atelierFilledColors(), onClick = onPauseResume, modifier = Modifier.weight(1f),
                             contentPadding = PaddingValues(horizontal = 5.dp, vertical = 6.dp)) {
