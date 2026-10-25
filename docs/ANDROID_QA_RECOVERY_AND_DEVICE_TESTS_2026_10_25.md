@@ -1,5 +1,12 @@
 # Atelier Time — ordered QA 3→4: unexpected-stop recovery, then Android instrumentation
 
+## QA Stage 4 — Termux Wireless ADB pairing failed; corrective procedure (user screenshot, 2026-10-25)
+
+- `adb pair IP:PORT` was initially entered with the literal placeholder instead of a real endpoint; a later proper-shaped `adb pair <actual-host>:<port>` attempt ended with `error: protocol fault (couldn't read status message): Success`. This does **NOT** confirm successful pairing. The screenshot shows at least one interactive PIN entry with fewer than six digits.
+- Official Android ADB Wi-Fi pairing codes are six digits including leading zeros; the pairing port exists **only while the Pair device with pairing code dialog remains open** and is distinct from the connection port on the Wireless debugging main page. Generate a fresh code/port, keep the pairing popup alive in Samsung split-screen, enter all six digits into Termux privately, and look specifically for `Successfully paired`. Do not reuse or disclose screenshots containing one-time pairing codes.
+- Termux documented an identical protocol-fault error in github.com/termux/termux-packages/issues/24984; issue author attributed their repro to a likely mistyped PIN. Thus verify endpoint and six-digit input before investigating binary versions. If `Successfully paired`, next `adb connect` to the **different** Wireless debugging connection port and require `adb devices -l` in `device` state.
+- **State: PAIRING NOT VERIFIED; 14 instrumentation methods still NOT RUN.** No app code, QA test APK, installed D-110, or saved data modified by this troubleshooting.
+
 ## QA Stage 4 — Termux ADB daemon running (2026-10-25, user screenshot)
 
 - User executed `adb start-server && adb devices -l` in Termux.
