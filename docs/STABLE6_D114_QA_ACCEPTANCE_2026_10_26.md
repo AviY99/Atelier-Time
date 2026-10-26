@@ -8,7 +8,7 @@
 
 - Stable 6 is a new **verified stability checkpoint**, promoted **without production-code changes** after Stage 2 testing of D-114.
 - The **installed APK remains D-114** (`versionName = "D-114"`, `versionCode = 9`). This is not D-115, not a new APK and not a request to rebuild or reinstall the application. Do **not** bump the version merely to relabel the QA milestone; a newly compiled binary would require its own validation.
-- **Stable 6 frozen branch:** `stable/android-d114-qa6` — to be created from the development branch after this acceptance record and the canonical status docs are committed. Once frozen, never advance/rewrite the branch. Use the branch ref itself to identify its exact immutable SHA.
+- **Stable 6 frozen branch:** `stable/android-d114-qa6` — the immutable snapshot containing this acceptance record and the canonical updated QA/status documentation. Never advance/rewrite the branch; use GitHub's branch-ref SHA to identify the exact frozen commit.
 - **Previous Stable 5 stays separately frozen:** `stable/android-d114` at `34a692a98282944a76e314efcc228dac3bd072ff`; do not modify or remove it.
 - **Development continues only on** `android-native-kotlin-compose` after this freeze. Subsequent development must not silently modify the Stable 6 snapshot.
 
