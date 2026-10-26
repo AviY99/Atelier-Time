@@ -9,8 +9,14 @@ if [[ "$(git branch --show-current)" != "android-native-kotlin-compose" ]]; then
     echo "ERROR: checkout must be android-native-kotlin-compose." >&2
     exit 2
 fi
-if [[ -n "$(git status --porcelain)" ]]; then
-    echo "ERROR: working tree has local changes. Review them first." >&2
+# CoGo may create unrelated untracked helper directories such as ../../.cg/.
+# Keep them intact. Refuse tracked edits anywhere or untracked test/tool source,
+# but don't block QA on unrelated, untracked IDE caches outside android-native.
+tracked_changes="$(git status --porcelain --untracked-files=no)"
+untracked_qa_sources="$(git ls-files --others --exclude-standard -- app/src tools)"
+if [[ -n "$tracked_changes" || -n "$untracked_qa_sources" ]]; then
+    echo "ERROR: tracked files or untracked test/tool sources require review." >&2
+    printf '%s\n' "$tracked_changes" "$untracked_qa_sources" >&2
     exit 2
 fi
 if ! grep -Eq 'versionName[[:space:]]*=[[:space:]]*"D-114"' app/build.gradle.kts ||
