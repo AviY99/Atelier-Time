@@ -1,3 +1,15 @@
+## 2026-10-26 — USER APPROVED STABLE 6 (D-114, 222/222 QA PASS)
+
+**Current canonical project status:** User explicitly declared **"זאת כרגע גרסה 6 יציבה לאור מעבר מספר רב של בדיקות בהצלחה"** (this is now Stable 6 due to the many tests passing). This **supersedes** historical headings that called Stable 5 the latest. Stable 6 is the *same installed, user-accepted D-114 application code and binary*, now elevated to a **verified QA stability checkpoint**; **no versionName/versionCode bump or APK installation** occurred.
+
+- **Stable 6 immutable branch:** `stable/android-d114-qa6`; snapshot of the tested code plus updated QA/stability documentation. Do not advance, force-push, merge into or develop on this branch.
+- **Frozen Stable 5 unchanged:** `stable/android-d114` SHA `34a692a98282944a76e314efcc228dac3bd072ff`.
+- **Current dev branch:** `android-native-kotlin-compose`, the only branch for subsequent work.
+- **Actual on-phone test evidence:** CoGo JVM **185/185 PASS**, errors=0, failures=0, skipped=0; Termux Android instrumentation **37/37 PASS**, `OK (37 tests)`, 20.602 s; **222/222 executed automated tests PASS**. The previously-built ~1.1MB `Atelier-Time-D114-Tests.apk` was installed as the test package only. Existing regular app was not replaced.
+- **Post-QA persistence:** user confirmed **two saved Classes and Sounds settings preserved unchanged**. This is explicit **manual preservation PASS**, not a binary/byte-level automated comparison.
+- **Boundary:** unresolved long-session/Doze/real clock shift/audio/OS process-reclaim checks and supplemental read-only ADB survey remain outside this test result. Stable 6 is approved despite these explicitly open separate QA gates. Never present the open checks as executed PASS.
+- **Stable 6 acceptance and source/QA evidence:** [STABLE6_D114_QA_ACCEPTANCE_2026_10_26.md](STABLE6_D114_QA_ACCEPTANCE_2026_10_26.md). **D-114 is still the Android versionName**, not a newly compiled D-115.
+
 ## 2026-10-26 — D-114 Stage 2: POST-INSTRUMENTATION SAVED DATA ACCEPTED
 
 **Direct user confirmation after the actual 37/37 Android instrumentation PASS:** "כן נשמרו ללא שינוי הכל תקין" ("Yes, [they] were preserved unchanged; everything is working"). Before the device test, user had confirmed **two saved Classes**. The post-run confirmation means both saved Classes and the selected Sounds settings remained unchanged and functioning, as checked by the user on the real phone. Mark **manual post-test preservation QA PASS (user observed)**, not an automated deep comparison of preference bytes.
