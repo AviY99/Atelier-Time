@@ -1,3 +1,11 @@
+## 2026-10-26 — D-114 AndroidTest compilation: exact two-import fix
+
+Real CoGo compiler output from `Atelier-Time-D114-JVM-build.log` was provided by user. The only `e:` compiler diagnostics visible in the supplied screenshot are `RunEndApprovalUiTest.kt:5:33 Unresolved reference 'assertDoesNotExist'` and `RunEndApprovalUiTest.kt:6:33 Unresolved reference 'assertExists'`. Older lines marked `w:` are warnings, not the cause of this compilation failure. **Compilation FAIL remains an observed result; no new compile/AndroidTest PASS claim.**
+
+On development branch `android-native-kotlin-compose`, commit `5c86956d7feec21aa0f698720131d5b8e0df90ba` removed only the two erroneous top-level imports. The existing Compose `SemanticsNodeInteraction.assertDoesNotExist()` / `assertExists()` method calls and all test assertions remain intact. No production Kotlin, saved presets, Sounds, app version, installed APK or Stable 5 files changed.
+
+**Next safe gate:** in CoGo `cd /storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native`, then `git pull --ff-only` and `bash tools/build_all_qa_on_phone.sh` (JVM test + AndroidTest APK build only). Review full actual `D-114 JVM ACTUAL` and Gradle output before claiming PASS; isolate additional compiler errors if any. Device install/instrumentation still requires separate explicit permission.
+
 ## 2026-10-26 — Actual D-114 CoGo compilation attempt failed (user screenshot)
 
 The user reran `bash tools/build_all_qa_on_phone.sh` after the unrelated `.cg/` guard correction. Screenshot of real Code on the Go terminal shows `Execution failed for task ':app:compileDebugAndroidTestKotlin'`, Kotlin compiler reported `Compilation error. See log for more details`, and **`BUILD FAILED in 47s`**, `48 actionable tasks: 48 executed`. This is **AndroidTest Kotlin compilation FAIL**, not an Android instrumentation execution result. **Do not classify the overall build, JVM suite, or AndroidTest as PASS without separately inspecting actual JUnit XML.** Detailed compiler errors are above the photographed screen area and are not yet available.
