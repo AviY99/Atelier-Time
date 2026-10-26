@@ -1,3 +1,11 @@
+## 2026-10-26 — D-114 Stage 2: POST-INSTRUMENTATION SAVED DATA ACCEPTED
+
+**Direct user confirmation after the actual 37/37 Android instrumentation PASS:** "כן נשמרו ללא שינוי הכל תקין" ("Yes, [they] were preserved unchanged; everything is working"). Before the device test, user had confirmed **two saved Classes**. The post-run confirmation means both saved Classes and the selected Sounds settings remained unchanged and functioning, as checked by the user on the real phone. Mark **manual post-test preservation QA PASS (user observed)**, not an automated deep comparison of preference bytes.
+
+**Consolidated, evidence-accurate status:** D-114 JVM **185/185 PASS** (CoGo JUnit XML); Android instrumentation **37/37 PASS** (`OK (37 tests)` in Termux, 20.602 s); total **222/222 automated PASS**; **two saved Classes + Sounds persisted unchanged (manual user PASS)**. Build and installed test-only APK succeeded. Neither user data nor the regular installed app was reset/replaced. Stable 5 `stable/android-d114` remains frozen at `34a692a98282944a76e314efcc228dac3bd072ff`.
+
+**Stage 2 remaining separate coverage:** read-only ADB package/permission/service/crash-log probes (not yet run in this checkpoint); Home/Back/Recents/lock-screen flows, true 3-hour duration, actual wall-clock ±120 s change, Doze, audible output, abnormal process death/notification cleanup require specific separate evidence and where necessary explicit additional consent. Do **not** claim the full range of these tests is covered by 222/222. Do not create Stable 6 without user's request.
+
 ## 2026-10-26 — REAL D-114 ANDROID INSTRUMENTATION 37/37 PASS (Samsung phone)
 
 **Source of evidence:** user-provided Termux terminal screenshot of completed AndroidJUnitRunner run on the physical Samsung phone. Terminal displays class-by-class dot progress for `MelodyPreferencesTest`, `RunEndApprovalUiTest`, `RunEndTimeDeviceTest`, `StaticAudioTrackLifecycleTest` (with earlier suites above screenshot), followed by **`Time: 20.602`**, **`OK (37 tests)`**, and the D-114 runner's exact final line **`PASS: 37 Android instrumentation methods on D-114`**. This constitutes **observed on-device instrumentation PASS 37/37**, unlike the earlier D-110-only 14/14 baseline. No failures reported in observed result.
