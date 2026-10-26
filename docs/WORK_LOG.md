@@ -1,3 +1,9 @@
+## 2026-10-26 — Actual D-114 CoGo compilation attempt failed (user screenshot)
+
+The user reran `bash tools/build_all_qa_on_phone.sh` after the unrelated `.cg/` guard correction. Screenshot of real Code on the Go terminal shows `Execution failed for task ':app:compileDebugAndroidTestKotlin'`, Kotlin compiler reported `Compilation error. See log for more details`, and **`BUILD FAILED in 47s`**, `48 actionable tasks: 48 executed`. This is **AndroidTest Kotlin compilation FAIL**, not an Android instrumentation execution result. **Do not classify the overall build, JVM suite, or AndroidTest as PASS without separately inspecting actual JUnit XML.** Detailed compiler errors are above the photographed screen area and are not yet available.
+
+The build script piped output to `/storage/emulated/0/Download/Atelier-Time-D114-JVM-build.log`. Next action is to retrieve only compiler `e:` / `error:` lines from the existing log (no rebuild, no phone install, no app data mutation), correct exact offending tests on development branch, then rerun the safe CoGo gate. Stable 5 stays frozen.
+
 ## 2026-10-26 — Stage 2 CoGo guard corrected for an unrelated helper directory
 
 User ran `git pull --ff-only` in CoGo and provided a screenshot confirming the **fast-forward completed** to `bc5114b`. The next `bash tools/build_all_qa_on_phone.sh` invocation stopped **before Gradle** at `ERROR: working tree has local changes`. The requested `git status --short` showed only `?? ../../.cg/` — an unrelated untracked helper directory; the screenshot shows **no tracked file modifications**. This is a **QA script preflight false positive**, not a JVM or instrumentation failure.
