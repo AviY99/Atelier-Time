@@ -1,3 +1,9 @@
+## 2026-10-26 — STABLE 6 FROZEN REF VERIFIED (post-freeze dev-only record)
+
+Stable 6 was created and read back successfully from GitHub: **`stable/android-d114-qa6`**, exact **commit `89ed2873ef3c91fe224f3723f9523d7409e75f7c`**. The preserved earlier Stable 5 branch `stable/android-d114` remained at **`34a692a98282944a76e314efcc228dac3bd072ff`**. Stable 6 includes D-114 `versionName="D-114"`, `versionCode=9`, all 222 previously passing automated test sources and the recorded QA/acceptance documentation. Comparing tested development commit `3e78db0d014ec79f55ad41dd07f25c982a90173b` through the Stable 6 snapshot found **documentation-only intervening changes**. No production Kotlin version bump or new regular application APK was generated; phone installation unchanged. Freeze is intentionally immutable; this extra exact-SHA note was written **only in development branch after the freeze**.
+
+Stable 6 acceptance details: [STABLE6_D114_QA_ACCEPTANCE_2026_10_26.md](STABLE6_D114_QA_ACCEPTANCE_2026_10_26.md). Remaining long-run/Doze/system-clock, actual audio, OS-reclaim, and ADB probes were not included in the 222 automatic test result; continue separately only with appropriate approval.
+
 ## 2026-10-26 — USER APPROVED STABLE 6 (D-114, 222/222 QA PASS)
 
 **Current canonical project status:** User explicitly declared **"זאת כרגע גרסה 6 יציבה לאור מעבר מספר רב של בדיקות בהצלחה"** (this is now Stable 6 due to the many tests passing). This **supersedes** historical headings that called Stable 5 the latest. Stable 6 is the *same installed, user-accepted D-114 application code and binary*, now elevated to a **verified QA stability checkpoint**; **no versionName/versionCode bump or APK installation** occurred.
