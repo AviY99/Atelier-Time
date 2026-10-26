@@ -1,3 +1,17 @@
+## 2026-10-26 — Stage 2 CoGo guard corrected for an unrelated helper directory
+
+User ran `git pull --ff-only` in CoGo and provided a screenshot confirming the **fast-forward completed** to `bc5114b`. The next `bash tools/build_all_qa_on_phone.sh` invocation stopped **before Gradle** at `ERROR: working tree has local changes`. The requested `git status --short` showed only `?? ../../.cg/` — an unrelated untracked helper directory; the screenshot shows **no tracked file modifications**. This is a **QA script preflight false positive**, not a JVM or instrumentation failure.
+
+Fix committed to the development branch only: `android-native/tools/build_all_qa_on_phone.sh` now checks tracked file modifications across the checkout and untracked app source/test/tool files under `app/src` and `tools`, without blocking on unrelated untracked IDE/helper folders such as `../../.cg/`. **Do not delete or reset the `.cg/` directory**. Stable 5 is not changed. GitHub commit `7fedf4b90e89a2b2b31de0d1aff565ca9d015921`.
+
+Next in **Code on the Go** (safe source/test build only):
+```bash
+cd /storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native
+git pull --ff-only
+bash tools/build_all_qa_on_phone.sh
+```
+Await the actual Gradle/JVM and AndroidTest APK build results. **No D-114 JVM, AndroidTest compilation, or device instrumentation PASS has been demonstrated in this stage.** Device installation/instrumentation remains behind a separate user approval checkpoint.
+
 # Atelier Time — D-114 Stage 2 automated QA (working runbook)
 
 **2026-10-25 · Stage 2 explicitly approved by user in new conversation.**
