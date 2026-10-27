@@ -1,3 +1,9 @@
+## QA-D121-03 — FAILED user acceptance: Restart after repeated Next (2026-10-28)
+
+**D-121 is NOT accepted as Stable.** User-provided before/after screenshots show an eight-second Restart of an ordinary five-minute Break after several Next actions. Credit falls by eight seconds and final Even Split changes 16:40+16:41 to 16:36+16:37, which preserves total time, but an automatic genuine special Break visually jumps from near the middle to late in the class.
+
+Source investigation confirms D-121 routed Restart through `adjustFutureTail` before legacy `adjustLastOnly`; this rebuilt the added future and could move the special. The legacy Stable-7 restart route used `adjust(original)` with locked-prefix check, otherwise `adjustLastOnly` (no tail reconstruction). A new D-122 source repair and three targeted regressions are documented in [D-122 investigation](D122_RESTART_AFTER_NEXT_PLACEMENT_REVIEW_2026_10_28.md). D-121 remains rejected even though its 225 JVM tests and Android build passed. **Do not reinstall or rename D-121 Stable.**
+
 ## QA-D121-01 — Samsung build-only evidence (2026-10-27)
 
 **PASS (build-only).** User-supplied Samsung terminal screenshot explicitly shows:
