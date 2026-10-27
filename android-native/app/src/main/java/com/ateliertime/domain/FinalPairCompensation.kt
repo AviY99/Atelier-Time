@@ -86,6 +86,24 @@ object FinalPairCompensation {
                 phases.zipWithNext().any { (a, b) -> a.endSeconds != b.startSeconds } ||
                 phases.filter { it.kind == PhaseKind.SUMMARY }
                     .sumOf { it.durationSeconds } != session.rules.summarySeconds) return false
+            if (boundary.preserveExistingTail) {
+                // Restart/Resume may compensate the final pair, but must not
+                // rebuild any earlier Next-added Session, Break or special
+                // placement. This is the Stable-7 late-restart contract.
+                val tailPair = active.indices.filter {
+                    active[it].kind == PhaseKind.POSE &&
+                        active[it].poseSource == PoseSource.REGULAR
+                }.takeLast(2)
+                if (tailPair.size != 2 || phases.size != active.size) return false
+                val first = tailPair.first()
+                if (phases.take(first) != active.take(first)) return false
+                if (phases.indices.any { i ->
+                    phases[i].id != active[i].id ||
+                    phases[i].kind != active[i].kind ||
+                    (i !in tailPair &&
+                        phases[i].durationSeconds != active[i].durationSeconds)
+                }) return false
+            }
             if (session.rules.specialBreakSeconds > session.rules.shortBreakSeconds) {
                 val existing = active.filter { it.kind == PhaseKind.SPECIAL_BREAK &&
                     it.durationSeconds > session.rules.shortBreakSeconds }
