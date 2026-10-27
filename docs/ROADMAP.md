@@ -1,4 +1,8 @@
-## 2026-10-27 — D-116 timeline history, Free tab and exact Next threshold
+## 2026-10-27 — D-117 next development candidate (phone build pending)
+
+User D-116 reports all else working but tab title clipping, visually mixed elapsed/schedule bar, and automatic special Break drifting away from Class center after many Next operations. D-117 source implements six unpadded semantic tab cells, adjacent separate 11dp physical elapsed + 33dp actual-past/replanned-future schedule bars, and automatic *future-only* midpoint rebalancing with locked history and strict D-116 last-two-session rule. Manual Break positions and physical Class end are protected. **Local 209/209 Kotlin JVM tests PASS; Android Gradle and phone QA pending.** [D117 specification and gates](D117_TAB_CHART_AND_SPECIAL_BREAK_2026_10_27.md). Stable 5/6 frozen.
+
+## 2026-10-27 — HISTORICAL D-116 timeline history, Free tab and exact Next threshold
 
 D-115 regular APK was actually built and update-installed; user says **"הכל עובד"** (manual initial acceptance). Its 196/196 JVM PASS is CoGo-observed; D-115 AndroidTest instrumentation remained unrun because Termux ADB connection failed. New D-116 is **source-only**: seal performed timeline fragments (Next/Restart), overlay progress onto updated timeline and move both Class clocks inside, remove live activity legend, add Free sixth tab, extend Same sound to Free; only when Next makes A+B **strictly** greater than `2× regular Session + regular Break`, insert complete regular Session+Break and reapply chosen last-two distribution. See [D116 details](D116_TIMELINE_AND_NEXT_RULES_2026_10_27.md). Build D-116 only after GitHub source update; never misattribute D-115 device evidence to D-116.
 

@@ -1,4 +1,11 @@
-## 2026-10-27 — D-116 verification plan (not yet phone verified)
+## 2026-10-27 — D-117 QA (source verified, phone pending)
+
+- **Local actually executed:** Kotlin/JUnit 209/209 PASS across 22 suites, including four new automatic special-Break placement and many-Next tests. Scripts parse-only `bash -n`, `git diff --check` PASS; Android Gradle build not available locally.
+- **Phone build only:** update source on dev branch in correct Code on the Go directory, run `bash tools/build_d117_candidate_on_phone.sh`, obtain actual Gradle result and D-117 JVM XML total. No APK installation as part of build.
+- **User-approved update install later:** after verifying no active Class, install regular candidate as Android **Update** (no uninstall or wipe); confirm About D-117 and two saved Classes/Sounds still intact.
+- **Visual/device acceptance:** six full titles on top, adjacent 11dp/33dp elapsed/schedule bars, Next 5m→1m observed history, Restart retains old slice, future replans forward, special Break seeks center among unstarted regular slots across many Next actions; no modification to manual special positions/already-started phase, fixed Class end. Android instrumentation requires additional gate/working ADB. [Focused D117 checklist](D117_TAB_CHART_AND_SPECIAL_BREAK_2026_10_27.md).
+
+## 2026-10-27 — HISTORICAL D-116 verification plan
 
 - Actual local pure Kotlin/JUnit **205/205 PASS** across 21 classes; includes strict Next insertion threshold equality/above, multiple blocks, no insertion at initial approval, completed Next/Restart fragment lengths, paused/automatic phase history, newly inserted Session/Break interaction, Shared melody with independent Free duration. This is **not Android Compose compilation**.
 - CoGo gate (build only): from `/storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native`, on dev branch after `git pull --ff-only`, run `bash tools/build_d116_candidate_on_phone.sh`; retain actual JUnit XML, Android compilation and APK manifest/hash evidence. Do not update-install app on phone until separately approved; verify saved Classes/Sounds before and after.

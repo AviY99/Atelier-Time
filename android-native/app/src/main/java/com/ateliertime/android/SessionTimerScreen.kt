@@ -141,7 +141,6 @@ fun SessionTimerScreen(
             classRemainingSeconds = classClockTimes.classRemainingSeconds
                 ?: view.totalRemainingSeconds,
             classElapsedSeconds = classClockTimes.classElapsedSeconds ?: 0,
-            runtimeElapsedSeconds = view.elapsedSeconds,
             currentPhaseId = view.phase?.id,
         )
         ElevatedCard(

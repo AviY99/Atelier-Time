@@ -2,6 +2,7 @@ package com.ateliertime.android
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.Role
 import android.os.SystemClock
 import android.os.Build
 import android.Manifest
@@ -532,11 +534,12 @@ fun SessionEditorScreen(
         contentColor = MaterialTheme.colorScheme.onBackground,
     ) {
     Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
-        // Non-scrolling six-way navigation, LTR even in Hebrew/RTL:
-        // Editor | Timer | Free | Sound | Design | About.
+        // Six compact, equal-width destinations. Material Tab reserves side
+        // padding inside each 1/6 cell and clipped Editor/Sound/Design on the
+        // actual phone. These selectable cells have NO hidden label padding.
+        // LTR is intentional even when the device uses a Hebrew locale.
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-            TabRow(selectedTabIndex = activeTab.ordinal,
-                modifier = Modifier.fillMaxWidth()) {
+            Row(modifier = Modifier.fillMaxWidth()) {
                 MainTab.entries.forEach { tab ->
                     val label = when (tab) {
                         MainTab.EDITOR -> "Editor"
@@ -546,17 +549,29 @@ fun SessionEditorScreen(
                         MainTab.DESIGN -> "Design"
                         MainTab.ABOUT -> "About"
                     }
-                    Tab(
-                        selectedContentColor = if (atelierNightActive()) Color.White else MaterialTheme.colorScheme.primary,
-                        unselectedContentColor = if (atelierNightActive()) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                        selected = activeTab == tab,
-                        onClick = { activeTab = tab },
-                        text = {
-                            Text(label, fontSize = 11.sp,
+                    val selected = activeTab == tab
+                    val selectedColor = if (atelierNightActive()) Color.White
+                        else MaterialTheme.colorScheme.primary
+                    val contentColor = if (selected) selectedColor
+                        else if (atelierNightActive()) Color.White
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+                    Column(
+                        modifier = Modifier.weight(1f).testTag("top-tab-$label").selectable(
+                            selected = selected, onClick = { activeTab = tab },
+                            role = Role.Tab,
+                        ),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Box(modifier = Modifier.fillMaxWidth().height(46.dp),
+                            contentAlignment = Alignment.Center) {
+                            Text(label, color = contentColor, fontSize = 10.sp,
                                 maxLines = 1, softWrap = false,
-                                overflow = TextOverflow.Clip)
-                        },
-                    )
+                                textAlign = TextAlign.Center,
+                                overflow = TextOverflow.Ellipsis)
+                        }
+                        Box(modifier = Modifier.fillMaxWidth().height(2.dp).background(
+                            if (selected) selectedColor else Color.Transparent))
+                    }
                 }
             }
         }
@@ -750,7 +765,11 @@ fun SessionEditorScreen(
                     "Special breaks REPLACE selected numbered regular breaks; they are " +
                     "not extra breaks. Choose their own duration, count and automatic " +
                     "or manual placement. Manual positions refer only to numbered " +
-                    "regular-break slots, not opening-group rests."
+                    "regular-break slots, not opening-group rests. While running, " +
+                    "automatic special breaks can move to a future regular-break " +
+                    "slot after Next to keep their centers near the physical Class " +
+                    "midpoint (or evenly spaced for several). An already-started " +
+                    "Break or a manually placed Break is never moved."
             }) { Text("Help") }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

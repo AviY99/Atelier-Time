@@ -1,3 +1,7 @@
+## 2026-10-27 — D-117 runtime placement refinement (no change to saved approval)
+
+In response to field observation after repeated Next, automatic special Breaks are targeted by their **center** near a fraction of the actual Class duration (midpoint for a single Break), using only still-unstarted regular Break slots; closest feasible slot is sufficient. Once begun/performed, a Break is immutable, and manual ordinal choices are never relocated. Physical Class deadline, Summary and approved/saved Class remain unchanged. The elapsed progress and actual/revised schedule become two adjacent 11dp/33dp bars, and all six tab labels must be fully visible. Implemented as D-117 source, 209/209 local JVM PASS; phone QA pending. [Detailed rule](D117_TAB_CHART_AND_SPECIAL_BREAK_2026_10_27.md).
+
 ## 2026-10-26 — USER APPROVED STABLE 6 (D-114, 222/222 QA PASS)
 
 **Current canonical project status:** User explicitly declared **"זאת כרגע גרסה 6 יציבה לאור מעבר מספר רב של בדיקות בהצלחה"** (this is now Stable 6 due to the many tests passing). This **supersedes** historical headings that called Stable 5 the latest. Stable 6 is the *same installed, user-accepted D-114 application code and binary*, now elevated to a **verified QA stability checkpoint**; **no versionName/versionCode bump or APK installation** occurred.

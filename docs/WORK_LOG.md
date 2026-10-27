@@ -1,4 +1,8 @@
-## 2026-10-27 — D-116 source changes following user-confirmed D-115 install
+## 2026-10-27 — D-117 user bug report; unified source fixes and local QA
+
+User-provided D-116 screenshot shows six navigation labels clipped (`Edito`, `Soun`, `Desig`); they request independent adjacent Elapsed and colored schedule bar, with ratios 11dp/33dp, and automatic special Break near physical Class center even after many Next operations. Implemented on development branch only, with `SpecialBreakRebalancer`, protected incremental `adjustFutureTail`, 4 new Kotlin tests, and guarded build/QA scripts. **Actually executed Kotlin/JUnit: 209/209 PASS, 22 suites**. Full Android Gradle compile, D-117 device update-install/acceptance and test instrumentation **not performed**. D-116 remains user-reported operational except those issues; D-114 Stable 5/6 snapshots unchanged. Full record: [D117](D117_TAB_CHART_AND_SPECIAL_BREAK_2026_10_27.md).
+
+## 2026-10-27 — HISTORICAL D-116 source changes following user-confirmed D-115 install
 
 **Observed D-115 phone evidence:** Samsung CoGo screenshot `BUILD SUCCESSFUL in 1m 23s`, 72/72 Gradle tasks, JVM XML `196 failures=0 errors=0 skipped=0`, both regular/test APKs and manifest created, no automatic installation. ADB wireless reconnect/pairing failed (no device connected); user instead used My Files to install regular D-115 and reported **"הכל עובד"**. Do not claim D-115 Android instrumentation ran, or Stable 6 replaced as frozen baseline.
 

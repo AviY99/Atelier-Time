@@ -1,4 +1,8 @@
-## 2026-10-27 — CURRENT DEVELOPMENT D-116 (SOURCE ONLY; PHONE RUNS D-115)
+## 2026-10-27 — CURRENT DEVELOPMENT D-117 (SOURCE; USER RUNS D-116)
+
+User reports **D-116 regular APK functioning on phone except** screenshot-verified clipped six tab titles, confusing elapsed progress overlay, and automatically placed special Break drifting earlier after repeated Next (extra regular Sessions/Breaks accumulate after it). D-116 CoGo actual 72/72 Gradle tasks and 205/205 JVM PASS, AndroidTest device execution not reported. D-117 source repairs all three together: compact six-tab selectable navigation, adjacent independent 11dp Elapsed / 33dp history-and-revised-future bars, and runtime-only future automatic special Break midpoint rebalancing (preserves performed past, fixed Class finish and manual Break placement). Added incremental future-tail normalizer so subsequent Next never reverts a relocated Break by rebuilding observed phases from the original saved plan. **Local pure Kotlin/JUnit 209/209 PASS (22 classes), Android Gradle/Compose and physical D-117 QA PENDING.** Candidate `D-117` / `versionCode=12`; no new phone build, installation or data changes performed. Details, build-only command and phone QA gate: [D117 tab/chart/special-Break handoff](D117_TAB_CHART_AND_SPECIAL_BREAK_2026_10_27.md). Frozen Stable 6/5 untouched. User data: two saved Classes and Sounds must be preserved.
+
+## 2026-10-27 — HISTORICAL D-116 (SOURCE; SUPERSEDED BY D-117)
 
 The user confirmed **D-115 successfully installed and working** after Code on the Go reported actual `BUILD SUCCESSFUL in 1m 23s` and JVM `tests=196 failures=0 errors=0 skipped=0`, regular and AndroidTest APKs built (instrumentation **not executed**). Installation was via Samsung My Files after wireless ADB pairing failed. Stable 6/5 remain frozen, and no device action has occurred for D-116.
 

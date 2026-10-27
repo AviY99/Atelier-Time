@@ -23,7 +23,6 @@ fun TimelinePhaseChart(
     runtimeTimeline: RuntimeTimeline? = null,
     classRemainingSeconds: Int? = null,
     classElapsedSeconds: Int? = null,
-    runtimeElapsedSeconds: Int? = null,
     currentPhaseId: String? = null,
 ) {
     if (phases.isEmpty()) return
@@ -59,10 +58,27 @@ fun TimelinePhaseChart(
                 }
             }
             Text(if (runtimeTimeline != null)
-                    "Left: actual history · Right: updated future (proportional time)."
+                    "Elapsed (thin bar) · Actual past + revised future (colors)."
                 else "Left to right: the complete class, proportional to duration.",
                 style = MaterialTheme.typography.bodySmall)
-            Canvas(modifier = Modifier.fillMaxWidth().height(44.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            // Independent elapsed bar, one third as tall as the schedule bar.
+            // Both are adjacent, not mixed into the same colored segments.
+            if (runtimeTimeline != null) {
+                val physicalElapsed = classElapsedSeconds ?: runtimeTimeline.elapsedSeconds
+                val physicalTotal = (classElapsedSeconds ?: runtimeTimeline.elapsedSeconds) +
+                    (classRemainingSeconds ?: (total - runtimeTimeline.elapsedSeconds))
+                Canvas(modifier = Modifier.fillMaxWidth().height(11.dp)) {
+                    drawRect(color = Color(0xFFB9C0C6).copy(alpha = 0.45f))
+                    val progress = if (physicalTotal > 0)
+                        physicalElapsed.toFloat().div(physicalTotal).coerceIn(0f, 1f)
+                    else 0f
+                    drawRect(color = Color(0xFFD1A34C),
+                        size = Size(size.width * progress, size.height))
+                }
+            }
+            // D-116 schedule 44 dp -> 33 dp (three-quarters of its height).
+            Canvas(modifier = Modifier.fillMaxWidth().height(33.dp)) {
                 val full = size.width
                 var cursorSeconds = 0
                 displaySegments.forEach { phase ->
@@ -71,7 +87,9 @@ fun TimelinePhaseChart(
                     val right = full * cursorSeconds.toFloat() / total
                     val width = (right - x).coerceAtLeast(0f)
                     drawRect(
-                        color = phase.kind?.let(::phaseColor) ?: Color(0xFF7C7C7C),
+                        color = (phase.kind?.let(::phaseColor) ?: Color(0xFF7C7C7C))
+                            .copy(alpha = if (runtimeTimeline != null && !phase.observed)
+                                0.78f else 1f),
                         topLeft = Offset(x, 0f),
                         size = Size(width, size.height),
                     )
@@ -88,19 +106,15 @@ fun TimelinePhaseChart(
                         )
                     }
                 }
-                // One layered bar: chronological segments below, progress
-                // shading over ACTUAL history, updated future remains ahead.
+                // Past is its actual measured length; later segments are the
+                // CURRENT plan. The thin elapsed bar above is separate.
                 runtimeTimeline?.let { actual ->
                     val completedWidth = full * actual.elapsedSeconds.coerceIn(0, total)
                         .toFloat() / total
-                    drawRect(Color(0xFFD1A34C).copy(alpha = 0.32f),
-                        size = Size(completedWidth, size.height))
+                    drawLine(Color(0xFF182631), Offset(completedWidth, 0f),
+                        Offset(completedWidth, size.height), strokeWidth = 3f)
                 }
-                (runtimeTimeline?.elapsedSeconds ?: runtimeElapsedSeconds)?.let { elapsed ->
-                    val x = full * elapsed.coerceIn(0, total).toFloat() / total
-                    drawLine(Color(0xFF182631), Offset(x, 0f),
-                        Offset(x, size.height), strokeWidth = 4f)
-                }
+            }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Start  00:00", style = MaterialTheme.typography.labelSmall,

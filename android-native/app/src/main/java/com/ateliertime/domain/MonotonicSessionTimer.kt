@@ -438,9 +438,16 @@ class MonotonicSessionTimer(
                 val adjusted = if (fullReflow != null &&
                     fullReflow.phases.take(nextIndex) == activePhases.take(nextIndex) &&
                     fullReflow.phases.getOrNull(nextIndex)?.let { next ->
-                        next.startSeconds == activePhases[nextIndex].startSeconds
-                    } == true) fullReflow else FinalPairCompensation.adjustLastOnly(
-                    session, activePhases, corrected.toInt())
+                        next.startSeconds == activePhases[nextIndex].startSeconds &&
+                            next.id == activePhases[nextIndex].id &&
+                            next.kind == activePhases[nextIndex].kind
+                    } == true) fullReflow else runCatching {
+                    FinalPairCompensation.adjustFutureTail(session, activePhases,
+                        nextIndex, corrected.toInt())
+                }.getOrElse {
+                    FinalPairCompensation.adjustLastOnly(session, activePhases,
+                        corrected.toInt())
+                }
                 check(adjusted.phases[nextIndex].startSeconds ==
                         activePhases[nextIndex].startSeconds)
                 adjusted
@@ -450,11 +457,22 @@ class MonotonicSessionTimer(
                 null
             }
         } else null
-        val target = revision?.phases?.get(nextIndex) ?: activePhases[nextIndex]
+        val updatedFuture = SpecialBreakRebalancer.rebalance(
+            revision?.phases ?: activePhases,
+            firstUnstartedIndex = nextIndex,
+            actualElapsedSeconds = ((now - (originalStartMs ?: now)) / 1_000L)
+                .coerceIn(0L, Int.MAX_VALUE.toLong()).toInt(),
+            physicalClassSeconds = session.rules.totalSeconds - initialEndCorrectionSeconds,
+            automatic = session.rules.placement.automatic,
+        )
+        val target = updatedFuture[nextIndex]
+        check(target.startSeconds == activePhases[nextIndex].startSeconds) {
+            "Rebalancing cannot move the next phase start."
+        }
         appendFragment(current, elapsedMs())
         if (status == TimerStatus.PAUSED) appendPause(pausedMs)
+        activePhases = updatedFuture
         if (revision != null) {
-            activePhases = revision.phases
             activeTotalMs = revision.totalSeconds.toLong() * 1000L
             lostSeconds = revision.recoveredSeconds
         }

@@ -26,6 +26,115 @@ data class CompensatedTimeline(
 
 object FinalPairCompensation {
     /**
+     * Incremental reflow after a previously relocated special Break / added
+     * regular block. Rebuilding from the SAVED schedule then would overwrite
+     * observed runtime history, so lock the current Next target and all
+     * preceding phases, and normalize only the untouched adjustable ending.
+     */
+    fun adjustFutureTail(
+        session: ApprovedSession,
+        active: List<SchedulePhase>,
+        protectedThroughIndex: Int,
+        newCorrectionSeconds: Int,
+    ): CompensatedTimeline {
+        val originalPair = session.phases.filter {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.takeLast(2)
+        require(originalPair.size == 2)
+        val firstIndex = active.indexOfFirst { it.id == originalPair[0].id }
+        val lastIndex = active.indexOfFirst { it.id == originalPair[1].id }
+        require(firstIndex > protectedThroughIndex && lastIndex == firstIndex + 2) {
+            "The final two Sessions are already in progress."
+        }
+        val anchor = (protectedThroughIndex + 1 until firstIndex).firstOrNull { i ->
+            active[i].id.startsWith("runtime-added-pose-")
+        } ?: firstIndex
+        val previousTail = active.subList(anchor, lastIndex + 1)
+        require(previousTail.count { it.kind == PhaseKind.SPECIAL_BREAK } <=
+            1 + previousTail.count { it.id.startsWith("runtime-added-break-") })
+        val specialCount = previousTail.count { it.kind == PhaseKind.SPECIAL_BREAK }
+        val prefix = active.take(anchor)
+        val summary = active.drop(lastIndex + 1)
+        require(summary.all { it.kind == PhaseKind.SUMMARY })
+        val summarySeconds = summary.sumOf { it.durationSeconds }.toLong()
+        val total = session.rules.totalSeconds.toLong() - newCorrectionSeconds
+        val budget = total - active[anchor].startSeconds - summarySeconds
+        val regular = session.rules.poseSeconds.toLong()
+        val short = session.rules.shortBreakSeconds.toLong()
+        val special = session.rules.specialBreakSeconds.toLong()
+        val threshold = 2L * regular + short
+        fun pairWork(blocks: Int): Long = budget -
+            blocks.toLong() * (regular + short) - short -
+            specialCount.toLong() * (special - short)
+        var blocks = (specialCount - 1).coerceAtLeast(0)
+        require(pairWork(blocks) >= 2L * SECONDS_PER_MINUTE) {
+            "There is no safe unstarted ending to reflow."
+        }
+        if (newCorrectionSeconds < 0) {
+            while (pairWork(blocks) > threshold &&
+                pairWork(blocks + 1) >=
+                    (if (specialCount > 0) special else short) +
+                        2L * SECONDS_PER_MINUTE) {
+                blocks++
+                require(blocks <= 1_000) { "Too many additional Sessions." }
+            }
+        }
+        val work = pairWork(blocks)
+        require(work in (2L * SECONDS_PER_MINUTE)..Int.MAX_VALUE.toLong())
+        val originalFirst = originalPair[0]
+        val originalLast = originalPair[1]
+        val firstLength = distributeFirst(session, originalFirst, originalLast,
+            work.toInt())
+        val lastLength = work.toInt() - firstLength
+        val result = prefix.toMutableList()
+        var cursor = active[anchor].startSeconds.toLong()
+        val highestLockedAdded = prefix.mapNotNull {
+            if (!it.id.startsWith("runtime-added-pose-")) null
+            else it.id.removePrefix("runtime-added-pose-").toIntOrNull()
+        }.maxOrNull() ?: 0
+        // Keep the same number of special Breaks in the unstarted tail;
+        // the rebalancer can subsequently move them toward the midpoint.
+        val specialFromEnd = specialCount
+        for (i in 1..blocks) {
+            val number = highestLockedAdded + i
+            val poseEnd = cursor + regular
+            result.add(SchedulePhase("runtime-added-pose-$number", PhaseKind.POSE,
+                cursor.toInt(), poseEnd.toInt(),
+                poseNumber = (originalFirst.poseNumber ?: 0) + number - 1,
+                poseSource = PoseSource.REGULAR))
+            cursor = poseEnd
+            val isSpecial = (blocks - i + 1) < specialFromEnd
+            val breakEnd = cursor + if (isSpecial) special else short
+            result.add(SchedulePhase("runtime-added-break-$number",
+                if (isSpecial) PhaseKind.SPECIAL_BREAK else PhaseKind.SHORT_BREAK,
+                cursor.toInt(), breakEnd.toInt(),
+                breakOrdinal = (active[firstIndex + 1].breakOrdinal ?: 0) + number - 1))
+            cursor = breakEnd
+        }
+        val firstEnd = cursor + firstLength
+        result.add(active[firstIndex].shifted(cursor.toInt(), firstEnd.toInt()))
+        cursor = firstEnd
+        val finalSpecial = specialCount > 0
+        val finalBreakEnd = cursor + if (finalSpecial) special else short
+        result.add(active[firstIndex + 1].copy(
+            kind = if (finalSpecial) PhaseKind.SPECIAL_BREAK else PhaseKind.SHORT_BREAK,
+            startSeconds = cursor.toInt(), endSeconds = finalBreakEnd.toInt()))
+        cursor = finalBreakEnd
+        val lastEnd = cursor + lastLength
+        result.add(active[lastIndex].shifted(cursor.toInt(), lastEnd.toInt()))
+        cursor = lastEnd
+        for (phase in summary) {
+            val end = cursor + phase.durationSeconds
+            result.add(phase.shifted(cursor.toInt(), end.toInt()))
+            cursor = end
+        }
+        require(cursor == total && cursor in 0L..Int.MAX_VALUE.toLong()) {
+            "The Class finish would not be preserved."
+        }
+        return CompensatedTimeline(result, cursor.toInt(), newCorrectionSeconds,
+            firstLength, lastLength)
+    }
+    /**
      * Restarting the break BETWEEN the final two sessions is still allowed:
      * the first final Session is already completed and must never be rewritten.
      * Only the not-yet-started last Session can absorb the additional delay.
