@@ -24,7 +24,91 @@ data class CompensatedTimeline(
     val lastFinalPoseSeconds: Int,
 )
 
+/** The one runtime-reflow contract shared by Next, Pause/Resume and Restart. */
+data class ReflowBoundary(
+    /** All phases through this index have started or are otherwise protected. */
+    val protectedThroughIndex: Int = -1,
+    /** For Next, the immediately entered phase and its start must be preserved. */
+    val nextIndex: Int? = null,
+    /** Reuse current runtime layout after Next/rebalancing when feasible. */
+    val preferActiveFuture: Boolean = false,
+    /** First final work Session is already observed: adjust the last only. */
+    val lastOnly: Boolean = false,
+)
+
 object FinalPairCompensation {
+    /**
+     * Single entry point for every proposed runtime correction. All strategies
+     * are verified against the same locked-prefix/next-target constraints.
+     * Failed proposals are discarded: the caller commits nothing until this
+     * returns a complete valid future.
+     *
+     * The underlying normalization subcases are: untouched approved tail,
+     * dynamic unstarted tail (possibly with added blocks), and last-only when
+     * its penultimate work Session has already become fact. They no longer
+     * choose their own call order in unrelated Timer event handlers.
+     */
+    fun reflow(
+        session: ApprovedSession,
+        active: List<SchedulePhase>,
+        correctionSeconds: Int,
+        allowExtraRegular: Boolean = false,
+        boundary: ReflowBoundary = ReflowBoundary(),
+    ): CompensatedTimeline {
+        fun valid(candidate: CompensatedTimeline): Boolean {
+            val phases = candidate.phases
+            if (phases.isEmpty() || phases.first().startSeconds != 0 ||
+                phases.last().endSeconds != candidate.totalSeconds ||
+                phases.any { it.durationSeconds <= 0 } ||
+                phases.zipWithNext().any { (a, b) -> a.endSeconds != b.startSeconds } ||
+                phases.filter { it.kind == PhaseKind.SUMMARY }
+                    .sumOf { it.durationSeconds } != session.rules.summarySeconds) return false
+            if (session.rules.specialBreakSeconds > session.rules.shortBreakSeconds) {
+                val existing = active.filter { it.kind == PhaseKind.SPECIAL_BREAK &&
+                    it.durationSeconds > session.rules.shortBreakSeconds }
+                val proposed = phases.filter { it.kind == PhaseKind.SPECIAL_BREAK &&
+                    it.durationSeconds > session.rules.shortBreakSeconds }
+                if (existing.size != proposed.size) return false
+                if (!session.rules.placement.automatic &&
+                    existing.map { it.id } != proposed.map { it.id }) return false
+            }
+            val index = boundary.protectedThroughIndex
+            if (index >= 0 && (index !in active.indices ||
+                    candidate.phases.take(index + 1) != active.take(index + 1))) return false
+            val target = boundary.nextIndex ?: return true
+            val before = active.getOrNull(target) ?: return false
+            val after = candidate.phases.getOrNull(target) ?: return false
+            return before.id == after.id && before.kind == after.kind &&
+                before.startSeconds == after.startSeconds
+        }
+        if (boundary.lastOnly) {
+            return adjustLastOnly(session, active, correctionSeconds).also {
+                require(valid(it)) { "The completed Class history cannot be changed." }
+            }
+        }
+        val base = { adjust(session, correctionSeconds, allowExtraRegular) }
+        val activeTail = {
+            adjustFutureTail(session, active,
+                boundary.nextIndex ?: boundary.protectedThroughIndex,
+                correctionSeconds)
+        }
+        val ordered = if (boundary.preferActiveFuture &&
+            boundary.protectedThroughIndex >= 0) listOf(activeTail, base)
+        else listOf(base, activeTail)
+        for (attempt in ordered) {
+            val proposed = runCatching(attempt).getOrNull() ?: continue
+            if (valid(proposed)) return proposed
+        }
+        val finalOnly = runCatching {
+            adjustLastOnly(session, active, correctionSeconds)
+        }.getOrNull()
+        if (finalOnly != null && valid(finalOnly)) return finalOnly
+        throw IllegalArgumentException(
+            "The approved finish cannot fit the unstarted future without " +
+                "rewriting completed Sessions or protected Breaks."
+        )
+    }
+
     /**
      * Incremental reflow after a previously relocated special Break / added
      * regular block. Rebuilding from the SAVED schedule then would overwrite
@@ -52,7 +136,10 @@ object FinalPairCompensation {
         val previousTail = active.subList(anchor, lastIndex + 1)
         require(previousTail.count { it.kind == PhaseKind.SPECIAL_BREAK } <=
             1 + previousTail.count { it.id.startsWith("runtime-added-break-") })
-        val specialCount = previousTail.count { it.kind == PhaseKind.SPECIAL_BREAK }
+        val specialCount = previousTail.count {
+            it.kind == PhaseKind.SPECIAL_BREAK &&
+                it.durationSeconds > session.rules.shortBreakSeconds
+        }
         val prefix = active.take(anchor)
         val summary = active.drop(lastIndex + 1)
         require(summary.all { it.kind == PhaseKind.SUMMARY })
@@ -218,10 +305,12 @@ object FinalPairCompensation {
         val combined = first.durationSeconds.toLong() + last.durationSeconds
         val availableLong = combined - lostSeconds.toLong()
         val mergedLength = availableLong + rest.durationSeconds.toLong()
+        val protectedSpecial = rest.kind == PhaseKind.SPECIAL_BREAK &&
+            rest.durationSeconds > session.rules.shortBreakSeconds
         // A short pair has one Session, not two one-minute minimums. The
         // deleted break's time is turned into Session time, so the end clock
         // and every phase after the pair retain their exact position.
-        if (mergedLength <= session.rules.poseSeconds.toLong()) {
+        if (!protectedSpecial && mergedLength <= session.rules.poseSeconds.toLong()) {
             require(mergedLength in SECONDS_PER_MINUTE.toLong()..Int.MAX_VALUE.toLong()) {
                 "The merged final Session must last at least one minute."
             }

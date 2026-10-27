@@ -96,7 +96,7 @@ class FinalPairMergeAndSummaryTest {
         assertNull(timer.update().cue)
     }
 
-    @Test fun manualNextDoesNotSkipSummaryOrPlayCompletionTwice() {
+    @Test fun manualNextCannotShortenFixedSummaryOrPhysicalClassFinish() {
         val session = approved()
         var now = 0L
         val timer = MonotonicSessionTimer(session) { now }
@@ -104,12 +104,14 @@ class FinalPairMergeAndSummaryTest {
         val summary = session.phases.last()
         now = (summary.startSeconds - 5).toLong() * 1_000L
         timer.update()
-        val entered = timer.nextPhase()
-        assertEquals(PhaseKind.SUMMARY, entered.view.phase?.kind)
-        assertEquals(TimerCue.SESSION_FINISHED, entered.cue)
-        val finished = timer.nextPhase()
-        assertEquals(TimerStatus.FINISHED, finished.view.status)
-        assertNull(finished.cue)
+        assertTrue(runCatching { timer.nextPhase() }.isFailure)
+        now = summary.startSeconds.toLong() * 1_000L
+        assertEquals(TimerCue.SESSION_FINISHED, timer.update().cue)
+        assertEquals(PhaseKind.SUMMARY, timer.view().phase?.kind)
+        assertTrue(runCatching { timer.nextPhase() }.isFailure)
+        now = summary.endSeconds.toLong() * 1_000L
+        assertEquals(TimerStatus.FINISHED, timer.update().view.status)
+        assertNull(timer.update().cue)
     }
 
     @Test fun mergedFinalSessionCannotBeRewrittenAfterItStarted() {

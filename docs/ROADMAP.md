@@ -1,3 +1,7 @@
+## 2026-10-27 — D-120 next development gate: unified timer reflow
+
+Product decisions are approved and documented in [D-120 timer logic contract](D120_TIMER_LOGIC_UNIFICATION_DECISIONS_2026_10_27.md). Stage on `android-native-kotlin-compose`: exact monotonic-millisecond accounting, one suffix-reflow mechanism, physical-deadline guard for Next, genuine-versus-ordinary special Break behavior, invariant/property regressions, and only then a new versioned Android build-only candidate. **Stable 7/D-119 is frozen.** No phone install/instrumentation without separate approval.
+
 ## 2026-10-27 — STABLE 7 APPROVED: INSTALLED D-119 / 211 ACTUAL PHONE JVM PASS
 
 **Latest accepted checkpoint.** After screenshot-verified Samsung `BUILD SUCCESSFUL in 1m16s`, all 72 Gradle tasks executed, and **211/211 actual phone JVM tests PASS**, the user confirmed **"הכל עובד"** and declared **"מדובר בגרסה יציבה 7"**. Fixed initial D-119 experimental Slider API compile error, retained code14/versionName D-119, and froze exact accepted code/documentation in `stable/android-d119-qa7`. Stable 5 `stable/android-d114` and Stable 6 `stable/android-d114-qa6` must remain unchanged. Development continues on `android-native-kotlin-compose`. AndroidTest APK was built but **instrumentation was not run**; signed production, Doze/audio endurance and separate persistence proof remain outside this acceptance. [Stable 7 release checkpoint](STABLE7_D119_QA_ACCEPTANCE_2026_10_27.md). Older D-119 source/pending-gate paragraphs below are superseded.

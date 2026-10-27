@@ -19,8 +19,9 @@ object SpecialBreakRebalancer {
         actualElapsedSeconds: Int,
         physicalClassSeconds: Int,
         automatic: Boolean,
+        genuineSpecial: Boolean = true,
     ): List<SchedulePhase> {
-        if (!automatic || firstUnstartedIndex !in phases.indices ||
+        if (!automatic || !genuineSpecial || firstUnstartedIndex !in phases.indices ||
             physicalClassSeconds <= 0) return phases
         val overallSpecials = phases.count { it.kind == PhaseKind.SPECIAL_BREAK }
         if (overallSpecials == 0) return phases

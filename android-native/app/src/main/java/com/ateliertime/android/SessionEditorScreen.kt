@@ -364,7 +364,8 @@ fun SessionEditorScreen(
                 val correction = RunEndTimePlanner.plan(
                     session, startEpochMs, target
                 ).correctionSeconds
-                val view = clock.start(correction)
+                val view = clock.start(correction,
+                    physicalDurationMillis = target - startEpochMs)
                 eventHistory.clear()
                 recordClassEvent("Start", null, view)
                 timerView = view

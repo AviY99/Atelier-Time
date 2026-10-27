@@ -72,12 +72,15 @@ class ApprovedFinishTimerTest {
         val startEpoch = 123L
         val absoluteFinish = startEpoch + m(180) * 1_000L - 1L
         val plan = RunEndTimePlanner.plan(session, startEpoch, absoluteFinish)
-        val started = timer.start(plan.correctionSeconds)
+        val started = timer.start(plan.correctionSeconds,
+            physicalDurationMillis = absoluteFinish - startEpoch)
         val tracker = ClassClockTracker { monotonic }
         val initial = tracker.newClass(started, startEpoch, absoluteFinish)
         assertEquals(absoluteFinish, initial.classEndEpochMs)
         assertEquals(m(180) - 1, started.totalSeconds)
         monotonic += (m(180) - 1) * 1_000L
+        assertFalse(tracker.hasReachedClassDeadline(0L))
+        monotonic += 999L
         assertTrue(tracker.hasReachedClassDeadline(0L))
         assertEquals(absoluteFinish,
             tracker.observe(timer.update().view, -600_000L).classEndEpochMs)

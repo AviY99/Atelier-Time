@@ -48,12 +48,12 @@ class ClassClockTracker(
         }
         classStarted = nowEpochMs
         // Use the EXACT approved clock instant for the visible Class end.
-        // Monotonic duration remains rounded down to avoid exceeding it.
+        // The monotonic Class deadline retains this exact millisecond delta.
         classDeadline = approvedFinishEpochMs ?:
             nowEpochMs + view.totalSeconds.toLong() * 1_000L
         classStartedMonotonic = monotonicNowMs?.invoke()
         classDeadlineMonotonic = classStartedMonotonic?.plus(
-            view.totalSeconds.toLong() * 1_000L
+            (classDeadline!! - nowEpochMs).coerceAtLeast(0L)
         )
         phaseId = null
         phaseStarted = null

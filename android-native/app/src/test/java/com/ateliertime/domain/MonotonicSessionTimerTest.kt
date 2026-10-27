@@ -405,17 +405,19 @@ class MonotonicSessionTimerTest {
         assertEquals(TimerCue.POSE_FINISHED, second.cue)
     }
 
-    @Test fun nextFromEndSummaryFinishesWithMelodyCExactlyOnce() {
+    @Test fun nextCannotSkipSummaryBeforeHardDeadline() {
         val session = approved()
         var now = 0L
         val timer = MonotonicSessionTimer(session) { now }
         timer.start()
         now = (session.rules.totalSeconds - session.rules.summarySeconds).toLong() * 1000L
         timer.update()
-        val finished = timer.nextPhase()
+        assertTrue(runCatching { timer.nextPhase() }.isFailure)
+        assertEquals(PhaseKind.SUMMARY, timer.view().phase?.kind)
+        now = session.rules.totalSeconds.toLong() * 1_000L
+        val finished = timer.update()
         assertEquals(TimerCue.SESSION_FINISHED, finished.cue)
         assertEquals(TimerStatus.FINISHED, finished.view.status)
-        assertEquals(0, finished.view.totalRemainingSeconds)
         assertNull(timer.update().cue)
     }
 
@@ -463,7 +465,7 @@ class MonotonicSessionTimerTest {
             next.view.totalRemainingSeconds)
     }
 
-    @Test fun nextOnLastWorkSessionEntersSummaryAndEmitsCOnlyOnce() {
+    @Test fun nextCannotEndLastWorkBeforeFixedSummaryAndHardDeadline() {
         var now = 0L
         val session = approved()
         val finalWork = session.phases.last {
@@ -473,16 +475,14 @@ class MonotonicSessionTimerTest {
         val timer = MonotonicSessionTimer(session) { now }
         timer.start()
         now = (finalWork.startSeconds + 5).toLong() * 1000L
-        val next = timer.nextPhase()
-        assertEquals(TimerStatus.RUNNING, next.view.status)
-        assertEquals(TimerCue.SESSION_FINISHED, next.cue)
-        assertEquals(PhaseKind.SUMMARY, next.view.phase?.kind)
-        assertNull(timer.nextPhase().cue)
+        assertTrue(runCatching { timer.nextPhase() }.isFailure)
+        assertEquals(finalWork.id, timer.view().phase?.id)
+        assertEquals(TimerStatus.RUNNING, timer.view().status)
         assertNull(timer.update().cue)
         assertEquals(session.rules.totalSeconds, session.phases.last().endSeconds)
     }
 
-    @Test fun nextAfterImpossiblePauseStillAdvancesWithoutMutatingSavedClass() {
+    @Test fun impossibleNextMustNotChangeAnyStateOrTheSavedClass() {
         var now = 0L
         val session = approved()
         val timer = MonotonicSessionTimer(session) { now }
@@ -490,12 +490,9 @@ class MonotonicSessionTimerTest {
         now = 60_000L
         timer.pause()
         now = 61L * minute * 1000L
-        val next = timer.nextPhase()
-        assertEquals(TimerStatus.RUNNING, next.view.status)
-        assertEquals(PhaseKind.SHORT_BREAK, next.view.phase?.kind)
-        assertEquals(TimerCue.POSE_FINISHED, next.cue)
-        assertEquals(session.rules.totalSeconds, next.view.totalSeconds)
-        assertEquals(0, next.view.recoveredSeconds)
+        val before = timer.view()
+        assertTrue(runCatching { timer.nextPhase() }.isFailure)
+        assertEquals(before, timer.view())
         assertEquals(session.rules.totalSeconds, session.phases.last().endSeconds)
         assertNull(timer.update().cue)
     }

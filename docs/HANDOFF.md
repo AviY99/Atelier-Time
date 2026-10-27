@@ -1,3 +1,7 @@
+## 2026-10-27 — D-120 TIMER LOGIC WORK (DEVELOPMENT ONLY)
+
+The user approved a hard physical end, genuine-special-break preservation over final-pair merge, ordinary runtime semantics for `L<=B` while retaining its Editor duration/placement, one unified runtime reflow entry and Editor-only 25/5. [Authoritative D-120 decisions](D120_TIMER_LOGIC_UNIFICATION_DECISIONS_2026_10_27.md). The development branch contains the D-120/code15 source implementation and local 221/221 Kotlin/JUnit regression result; this does not amend the **closed Stable 7/D-119** checkpoint below. D-120 has no Samsung/Android Compose build or installation evidence yet. Do not treat local JVM tests as Android build approval.
+
 ## 2026-10-27 — NEXT CHAT: TIMER LOGIC REVIEW AFTER FROZEN STABLE 7
 
 User requested closing Stable 7 documentation, then ending this conversation and opening a new one **to review (not yet modify)** all Timer rules, edge cases and possible simplifications. Canonical handoff and exact Hebrew opening instruction: [HANDOFF_AFTER_STABLE7_D119_TO_TIMER_LOGIC_REVIEW_2026_10_27.md](HANDOFF_AFTER_STABLE7_D119_TO_TIMER_LOGIC_REVIEW_2026_10_27.md). Stable 7 certificate and snapshot already complete; do not redo or alter frozen Stable 7. Verified known bug: ten 100ms pauses round to ten lost seconds, leading to FINISHED nine seconds before the physical deadline in a pure-Kotlin reproduction. Review all scheduling/runtime code, make no production code/APK changes without approval.

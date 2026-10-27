@@ -1,5 +1,7 @@
 # Stage 1 Step 1.3 — Scheduling and edge-case policies
 
+**Superseding 2026-10-27 runtime decision:** The historical D-038 comparison labeled *open* below was resolved after Stable 7 in [D-120 approved contract](D120_TIMER_LOGIC_UNIFICATION_DECISIONS_2026_10_27.md): any positive `L<=B` retains the approved Editor placement and duration but behaves as ordinary Break during **runtime** changes; only `L>B` has special-runtime privileges. This does not alter the Editor-only 25/5 warning. The older sections remain the historical Step 1.3 record.
+
 **Updated:** 2026-10-22  
 **Status:** **Stage 1 Step 1.3 APPROVED / COMPLETE (2026-10-22)**. User approved placement and edge policies P-01–P-06 as documented in [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md), with **D-036 prohibiting 0-minute sessions and actual breaks**. D-031 retains the advisory 25/5 warning and explicit override for otherwise valid schedules. The one explicitly unresolved case (whether a positive special break may be <= normal break length) stays open.  
 **Scope:** Approved documentation ONLY. **Step 1.4 programming is NOT authorized.**

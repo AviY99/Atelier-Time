@@ -1,3 +1,7 @@
+## 2026-10-27 — D-120 approved timer engine contract after Stable 7 Review
+
+The user approved one runtime reflow engine, a hard physical Class finish (no early completion from Next without explicit end), protection of genuine special Breaks/manual placement over final-pair merging, and duration-based runtime treatment of a configured special Break: `L>B` follows special rules; `0<L<=B` retains its chosen duration and approved initial placement but follows ordinary-break rules during runtime changes. The Editor's 25/5 warning is planning-only and never affects a running Timer. See [full D-120 contract](D120_TIMER_LOGIC_UNIFICATION_DECISIONS_2026_10_27.md). **This approval does not modify Stable 7.**
+
 ## 2026-10-27 — User designates D-119 as Stable 7
 
 After real Samsung `BUILD SUCCESSFUL`, 72 Gradle tasks and 211/211 JVM tests PASS, and the separate report **"הכל עובד"**, user explicitly decided **"מדובר בגרסה יציבה 7"**. Freeze `stable/android-d119-qa7` as the exact D-119/versionCode14 app checkpoint. Do not rename About/Android app version to “7” or rebuild; this is a QA stability ordinal, not a new APK. Keep Stable 5/6 and saved Classes/Sounds unchanged. [Evidence and boundaries](STABLE7_D119_QA_ACCEPTANCE_2026_10_27.md).

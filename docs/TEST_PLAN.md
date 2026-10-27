@@ -1,3 +1,21 @@
+# D-120 unified Class timer engine — approved regression gate (2026-10-27)
+
+The post-Stable-7 user decisions are recorded in [D-120 contract](D120_TIMER_LOGIC_UNIFICATION_DECISIONS_2026_10_27.md). These are development-only tests; **Stable 7 remains frozen**. Every D-120 candidate must run the complete pure Kotlin domain/EditorInput JUnit suite and separately pass Android Gradle compilation before any proposed phone update.
+
+| Gate | Required evidence |
+|---|---|
+| Exact time | 10 × 100ms Pause, deterministic randomized subsecond pauses, an approved finish with a 999ms fractional tail |
+| Hard physical finish | No early FINISHED after failed compensation, Next on final Session/Summary rejected until eligible, physical deadline reached exactly |
+| Immutable past | Next, restarted Session/Break, resumed Class and inserted runtime blocks leave observed prefix unchanged |
+| Suffix normalization | Remainder/Even/Custom, final-pair merge, strict regular-block insertion threshold, multiple additions |
+| Genuine special (`L>B`) | Manual special retains identity/ordinal across reflow, automatic count preserved; merge cannot remove it |
+| Ordinary runtime replacement (`0<L<=B`) | Initial Editor break duration/placement remains; runtime changes may merge it and never apply special rebalancing |
+| Summary/cues | Summary length remains fixed; C once at end of work or deadline, never twice; A/B only on successful transitions |
+| Editor 25/5 | Warning and acknowledgement remain planning-only, never a runtime control |
+| Free timer/Android | Separate Free near-zero Pause, background/Doze/process death, DST, and connected instrumentation are additional device/QA gates — not covered by pure JVM PASS |
+
+**D-120 evidence status:** 221/221 Kotlin 2.2.0 local pure domain + EditorInput JUnit tests passed, zero failures (D-119 prechange baseline: 211/211). Connected Android Gradle/Compose compilation, instrumentation and on-phone endurance have **not** been performed as part of this source-only change. `tools/build_d120_candidate_on_phone.sh` is a build-only script, not permission to run it on the user's phone.
+
 ## 2026-10-27 — D-119 STABLE 7: ACTUAL SAMSUNG BUILD AND USER QA PASS
 
 Original D-119 on-phone Kotlin compile failure was resolved by replacing experimental custom SliderState calls. User's new screenshot proves **BUILD SUCCESSFUL in 1m16s, 72/72 Gradle tasks, actual XML `tests=211 failures=0 errors=0 skipped=0`**, D-119 regular APK and AndroidTest APK built by the build-only script. Following the installed app update, the user stated **"הכל עובד"** and explicitly declared **Stable 7**. D-119 **build, JVM gate and general user acceptance PASS**; prior D-119 “compile pending” and “not yet installed” statements below are historical. Distinguish **AndroidTest APK assembled** from **Android instrumentation executed** (NOT executed). Do not infer separate signed build/Doze/audio/persistence PASS. Keep `stable/android-d119-qa7` frozen; future versions increment code beyond 14 and need separate update approval. [Checkpoint](STABLE7_D119_QA_ACCEPTANCE_2026_10_27.md).

@@ -366,8 +366,10 @@ fun SessionTimerScreen(
                 else if (choice == "next")
                     "Next immediately skips the rest of " + phaseLabel(view.phase) +
                         " and enters " + (view.nextPhase?.let(::phaseLabel) ?: "Class end") +
-                        ". This action cannot be undone. A scheduled Summary " +
-                        "will not be skipped."
+                        " when the approved Class finish can still be preserved. " +
+                        "An impossible skip is rejected without changing the timer. " +
+                        "The fixed-length Summary cannot be shortened; use Exit " +
+                        "if you explicitly want to end the Class early."
                 else
                     "Repeat the current " + (if (isBreak) "break" else "session") +
                         " from its beginning. Previously completed phases and Class " +
@@ -428,14 +430,12 @@ fun SessionTimerScreen(
                     "Use it even during the final two Sessions: earlier completed work is " +
                     "never rewritten. The live timeline keeps actual past duration; " +
                     "sufficient recovered time inserts a full regular Session and Break " +
-                    "before the re-split final two. Next on the final work Session enters the " +
-                    "Summary when one exists and plays melody C BEFORE it; Next " +
-                    "from Summary finishes without a second C. Without Summary, " +
-                    "the final Session finishes with C. On other phase skips, " +
-                    "melody A plays after a Session and B after a Break. The original Class " +
-                    "finish target is maintained when feasible; if an interruption makes " +
-                    "that impossible, Next still advances and the displayed expected " +
-                    "finish adjusts. Your saved Class remains unchanged."
+                    "before the re-split final two. Next is rejected when it would " +
+                    "make the Class finish early, rewrite observed work, or shorten " +
+                    "the fixed Summary. Natural entry to Summary plays C once; " +
+                    "other successful phase skips play A after a Session and B " +
+                    "after a Break. To end the Class early on purpose use Exit. " +
+                    "An impossible Next leaves your running and saved Classes unchanged."
         }
         AlertDialog(
             onDismissRequest = { helpFor = null },
