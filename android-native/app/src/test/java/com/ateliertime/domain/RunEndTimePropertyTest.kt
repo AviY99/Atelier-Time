@@ -26,7 +26,7 @@ class RunEndTimePropertyTest {
                     original[it].poseSource == PoseSource.REGULAR
             }.takeLast(2)
             assertEquals(2, regular.size)
-            for (signedMinutes in -120..28) {
+            for (signedMinutes in -120..34) {
                 val targetSeconds = m(180 - signedMinutes)
                 val plan = RunEndTimePlanner.plan(
                     approved, 50_000L, 50_000L + targetSeconds * 1000L
@@ -35,12 +35,20 @@ class RunEndTimePropertyTest {
                 assertEquals(m(signedMinutes), plan.correctionSeconds)
                 assertEquals(original.take(regular.first()),
                     plan.adjusted.phases.take(regular.first()))
-                assertEquals(original[regular.first() + 1].durationSeconds,
-                    plan.adjusted.phases[regular.first() + 1].durationSeconds)
+                val merged = plan.adjusted.lastFinalPoseSeconds == 0
+                if (merged) {
+                    assertEquals(original.size - 2, plan.adjusted.phases.size)
+                    assertTrue(plan.adjusted.firstFinalPoseSeconds <= approved.rules.poseSeconds)
+                    assertEquals(original[regular.first()].id,
+                        plan.adjusted.phases[regular.first()].id)
+                } else {
+                    assertEquals(original[regular.first() + 1].durationSeconds,
+                        plan.adjusted.phases[regular.first() + 1].durationSeconds)
+                }
                 assertEquals(original.last().durationSeconds,
                     plan.adjusted.phases.last().durationSeconds)
                 assertTrue(plan.adjusted.firstFinalPoseSeconds >= m(1))
-                assertTrue(plan.adjusted.lastFinalPoseSeconds >= m(1))
+                if (!merged) assertTrue(plan.adjusted.lastFinalPoseSeconds >= m(1))
                 assertEquals(plan.adjusted.totalSeconds,
                     plan.adjusted.phases.last().endSeconds)
                 plan.adjusted.phases.zipWithNext().forEach { (left, right) ->
@@ -58,7 +66,7 @@ class RunEndTimePropertyTest {
             poseSeconds = m(25), specialBreakCount = 1,
         ), FinalPoseChoice.remainder()))
         val before = approved.phases.toList()
-        for (tooEarly in 29..60) {
+        for (tooEarly in 35..60) {
             try {
                 RunEndTimePlanner.plan(
                     approved, 0L, m(180 - tooEarly).toLong() * 1000L

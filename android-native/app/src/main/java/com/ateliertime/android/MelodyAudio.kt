@@ -4,8 +4,12 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import android.media.AudioManager
+import android.media.AudioFocusRequest
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import com.ateliertime.domain.CueSound
 import com.ateliertime.domain.MelodyPattern
 import com.ateliertime.domain.MelodySelections
@@ -75,6 +79,11 @@ class MelodyPreferences(
         val a = choice("poseEnd", legacy.poseEnd)
         val b = choice("breakEnd", legacy.breakEnd)
         val c = choice("sessionEnd", legacy.sessionEnd)
+        val freeMelody = runCatching {
+            MelodyPattern.valueOf(prefs.getString("freeTimerMelody", null)
+                ?: defaults.freeTimer.melody.name)
+        }.getOrDefault(defaults.freeTimer.melody)
+        val free = choice("freeTimer", freeMelody)
         // No mode key on D-100 installs: do not silently make their
         // three previously chosen sounds identical during an upgrade.
         val mode = runCatching {
@@ -100,16 +109,18 @@ class MelodyPreferences(
         return SoundSettings(
             // A dormant mode may retain sounds from a disabled library.
             // Restore only libraries required by the CURRENT mode on load.
-            enabledSources = (enabled + (if (mode == SoundAssignmentMode.SHARED)
+            enabledSources = (enabled + free.source + (if (mode == SoundAssignmentMode.SHARED)
                 listOf((shared ?: a).source)
             else listOf(a.source, b.source, c.source)))
                 .ifEmpty { defaults.enabledSources },
-            poseEnd = a, breakEnd = b, classEnd = c,
+            poseEnd = a, breakEnd = b, classEnd = c, freeTimer = free,
             assignmentMode = mode, sharedSound = shared,
             sharedSeconds = seconds("sharedSeconds", 5, false),
             poseEndSeconds = seconds("poseEndSeconds", 5, false),
             breakEndSeconds = seconds("breakEndSeconds", 5, false),
             classEndSeconds = seconds("classEndSeconds", 5, true),
+            freeTimerSeconds = seconds("freeTimerSeconds", 5, true),
+            classAlertsUseAlarmVolume = prefs.getBoolean("classAlertsUseAlarmVolume", false),
         )
     }
 
@@ -118,14 +129,16 @@ class MelodyPreferences(
             "Select a sound from an enabled source in the current mode."
         }
         // Keep dormant selections intact even if their libraries are disabled.
-        require((listOf(settings.poseEnd, settings.breakEnd, settings.classEnd) +
+        require((listOf(settings.poseEnd, settings.breakEnd, settings.classEnd,
+            settings.freeTimer) +
             listOfNotNull(settings.sharedSound)).all { it.isPlayable }) {
             "A saved sound selection is missing its audio file."
         }
         require(settings.sharedSeconds in setOf(5, 10) &&
             settings.poseEndSeconds in setOf(5, 10) &&
             settings.breakEndSeconds in setOf(5, 10) &&
-            settings.classEndSeconds in 5..60) { "Invalid sound duration." }
+            settings.classEndSeconds in 5..60 &&
+            settings.freeTimerSeconds in 5..60) { "Invalid sound duration." }
         val edit = prefs.edit()
             // Save legacy keys so previously selected application melodies remain.
             .putString("poseEnd", settings.poseEnd.melody.name)
@@ -138,6 +151,8 @@ class MelodyPreferences(
             .putInt("poseEndSeconds", settings.poseEndSeconds)
             .putInt("breakEndSeconds", settings.breakEndSeconds)
             .putInt("classEndSeconds", settings.classEndSeconds)
+            .putInt("freeTimerSeconds", settings.freeTimerSeconds)
+            .putBoolean("classAlertsUseAlarmVolume", settings.classAlertsUseAlarmVolume)
         fun write(key: String, value: CueSound) {
             edit.putString("${key}Source", value.source.name)
                 .putString("${key}Uri", value.uri)
@@ -146,6 +161,8 @@ class MelodyPreferences(
         write("poseEnd", settings.poseEnd)
         write("breakEnd", settings.breakEnd)
         write("sessionEnd", settings.classEnd)
+        write("freeTimer", settings.freeTimer)
+        edit.putString("freeTimerMelody", settings.freeTimer.melody.name)
         if (settings.sharedSound == null) {
             edit.remove("sharedSource").remove("sharedUri").remove("sharedTitle")
                 .remove("sharedMelody")
@@ -167,16 +184,38 @@ class MelodyPreferences(
  */
 class MelodyAudioPlayer(context: Context) {
     private val appContext = context.applicationContext
+    private val audioManager = appContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var active: Job? = null
 
-    fun play(choice: CueSound, durationSeconds: Int, onError: (String) -> Unit = {}) {
+    fun play(
+        choice: CueSound,
+        durationSeconds: Int,
+        useAlarmVolume: Boolean = false,
+        onError: (String) -> Unit = {},
+    ) {
         require(durationSeconds in 5..60)
         active?.cancel()
         active = scope.launch {
             var track: AudioTrack? = null
             var media: MediaPlayer? = null
+            val focusRequest = AudioFocusRequest.Builder(
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                .setAudioAttributes(soundAttributes(useAlarmVolume))
+                .setOnAudioFocusChangeListener(
+                    { /* Short cue; Android manages ducking. */ },
+                    Handler(Looper.getMainLooper()),
+                )
+                .build()
             try {
+                // Request short-lived focus; never force media volume or
+                // bypass an intentional mute / Do Not Disturb decision.
+                val focusResult = audioManager.requestAudioFocus(focusRequest)
+                if (focusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                    withContext(Dispatchers.Main) {
+                        onError("Android audio focus was not granted; the cue may be inaudible.")
+                    }
+                }
                 when (choice.source) {
                     SoundSource.APP -> {
                         val clip = render(choice.melody)
@@ -189,7 +228,7 @@ class MelodyAudioPlayer(context: Context) {
                         // No change to the approved 5s PCM waveform.
                         check(repeats >= 1 && remainder in 0..4)
                         val output = AudioTrack.Builder()
-                            .setAudioAttributes(soundAttributes())
+                            .setAudioAttributes(soundAttributes(useAlarmVolume))
                             .setAudioFormat(AudioFormat.Builder()
                                 .setSampleRate(SAMPLE_RATE)
                                 .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
@@ -217,7 +256,7 @@ class MelodyAudioPlayer(context: Context) {
                             ?: error("The selected sound is missing. Choose it again.")
                         val player = MediaPlayer()
                         media = player
-                        player.setAudioAttributes(soundAttributes())
+                        player.setAudioAttributes(soundAttributes(useAlarmVolume))
                         player.setDataSource(appContext, Uri.parse(uri))
                         player.isLooping = true
                         player.prepare()
@@ -237,13 +276,19 @@ class MelodyAudioPlayer(context: Context) {
                 runCatching { track?.release() }
                 runCatching { media?.stop() }
                 runCatching { media?.release() }
+                runCatching { audioManager.abandonAudioFocusRequest(focusRequest) }
             }
         }
     }
 
     fun close() {
-        active?.cancel()
+        stop()
         scope.cancel()
+    }
+
+    fun stop() {
+        active?.cancel()
+        active = null
     }
 
     companion object {
@@ -251,8 +296,10 @@ class MelodyAudioPlayer(context: Context) {
         private const val MELODY_MS = 5_000
         private const val SLOT_MS = 250
 
-        private fun soundAttributes(): AudioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
+        private fun soundAttributes(useAlarmVolume: Boolean = false): AudioAttributes =
+            AudioAttributes.Builder()
+            .setUsage(if (useAlarmVolume) AudioAttributes.USAGE_ALARM
+                else AudioAttributes.USAGE_MEDIA)
             .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
             .build()
 

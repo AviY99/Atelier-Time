@@ -3,6 +3,7 @@ package com.ateliertime.android
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -24,7 +25,7 @@ import org.junit.runner.RunWith
 import java.util.UUID
 
 /**
- * D-114 Compose regression suite. Never use the retired typed HH:mm widgets.
+ * D-115 Compose regression suite, preserving D-114 finish-wheel coverage.
  *
  * Only randomized Class/Sound preference namespaces are used. The device must
  * have NO real Class running: Compose instrumentation briefly owns the target
@@ -72,7 +73,8 @@ class RunEndApprovalUiTest {
             }
         }
         compose.onNodeWithText("Timer", useUnmergedTree = true).performClick()
-        compose.onNodeWithText("Run", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Run", useUnmergedTree = true)
+            .performScrollTo().performClick()
         compose.onNodeWithTag("run_end_dialog").assertExists()
         compose.onNodeWithText("Confirm Class finish time").assertExists()
     }
@@ -98,6 +100,26 @@ class RunEndApprovalUiTest {
         val reread = PresetCatalog(store, engine) { UUID.randomUUID().toString() }
         assertEquals(savedSignature, PresetCatalog.signature(reread.open(storedId)))
         assertEquals(1, reread.state().entries.size)
+    }
+
+    @Test fun freeCountdownStartPauseResumeExitDoesNotEditSavedClass() {
+        compose.setContent {
+            MaterialTheme {
+                SessionEditorScreen(presetStoreOverride = store,
+                    melodyPreferencesOverride = isolatedMelody)
+            }
+        }
+        compose.onNodeWithText("Timer", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("free_timer_section").assertExists()
+        compose.onNodeWithTag("free_timer_start").performClick()
+        compose.onNodeWithTag("free_timer_pause_resume").performClick()
+        compose.onNodeWithTag("free_timer_status").assertTextContains("Paused")
+        compose.onNodeWithTag("free_timer_pause_resume").performClick()
+        compose.onNodeWithTag("free_timer_status").assertTextContains("Running")
+        compose.onNodeWithTag("free_timer_exit").performClick()
+        compose.onNodeWithTag("free_timer_status").assertTextContains("Ready")
+        compose.onNodeWithTag("keep_screen_awake").performClick()
+        assertStoredClassUnchanged()
     }
 
     /** Guaranteed +1 minute, including HH:59 rollover. */
@@ -157,7 +179,7 @@ class RunEndApprovalUiTest {
         assertEquals(before, wheelValue("run_end_hour"))
         compose.onNodeWithTag("run_end_blocked_reason").assertExists()
         assertTrue(textAt("run_end_blocked_reason").contains("Cannot select"))
-        assertTrue(textAt("run_end_blocked_reason").contains("last two Sessions") ||
+        assertTrue(textAt("run_end_blocked_reason").contains("final Session(s)") ||
             textAt("run_end_blocked_reason").contains("too late"))
         compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
         assertTrue(catalog.state().activeId == null)

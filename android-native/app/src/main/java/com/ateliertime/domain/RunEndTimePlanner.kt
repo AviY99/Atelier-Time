@@ -81,7 +81,10 @@ object RunEndTimePlanner {
             val pair = session.phases.filter {
                 it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
             }.takeLast(2)
-            CompensatedTimeline(
+            // A naturally short final pair is merged at runtime too. Classes
+            // without a valid adjustable pair still retain their old plan.
+            runCatching { FinalPairCompensation.adjust(session, 0) }.getOrNull()
+                ?: CompensatedTimeline(
                 phases = session.phases,
                 totalSeconds = session.rules.totalSeconds,
                 recoveredSeconds = 0,
@@ -92,8 +95,9 @@ object RunEndTimePlanner {
             FinalPairCompensation.adjust(session, difference.toInt())
         } catch (_: IllegalArgumentException) {
             throw IllegalArgumentException(
-                "This finish time cannot fit the last two Sessions " +
-                    "(each needs at least one minute). Choose another time."
+                "This finish time cannot fit the final Session(s): " +
+                    "the merged Session must last at least one minute, " +
+                    "or two Sessions must each last one minute. Choose another time."
             )
         }
         require(adjustment.totalSeconds.toLong() == plannedSeconds) {

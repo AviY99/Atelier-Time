@@ -89,13 +89,34 @@ class MelodyPreferencesTest {
         prefs.saveSettings(shared)
         val restored = MelodyPreferences(context, isolatedName).loadSettings()
         assertEquals(shared, restored)
-        TimerCue.entries.forEach { cue ->
+        TimerCue.entries.filter { it != TimerCue.FREE_TIMER_FINISHED }.forEach { cue ->
             assertEquals(10, restored.secondsFor(cue))
             assertEquals(MelodyPattern.CELEBRATION, restored.soundFor(cue).melody)
         }
         val separateAgain = restored.setAssignmentMode(SoundAssignmentMode.SEPARATE)
         assertEquals(37, separateAgain.secondsFor(TimerCue.SESSION_FINISHED))
         assertEquals(MelodyPattern.WARM_BELLS, separateAgain.breakEnd.melody)
+    }
+
+    @Test fun independentFreeTimerChoiceSurvivesReloadWithoutTouchingABC() {
+        val store = MelodyPreferences(context, isolatedName)
+        val original = store.loadSettings()
+        val freeChoice = CueSound(source = SoundSource.FILE,
+            uri = "content://documents/document/free-timer-123", displayName = "Free bell")
+        val changed = original.setSourceEnabled(SoundSource.FILE, true)
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .chooseForVisibleMode(TimerCue.FREE_TIMER_FINISHED, freeChoice)
+            .setDuration(TimerCue.FREE_TIMER_FINISHED, 17)
+            .copy(classAlertsUseAlarmVolume = true)
+        store.saveSettings(changed)
+        val restored = MelodyPreferences(context, isolatedName).loadSettings()
+        assertEquals(changed, restored)
+        assertEquals(freeChoice, restored.soundFor(TimerCue.FREE_TIMER_FINISHED))
+        assertEquals(17, restored.secondsFor(TimerCue.FREE_TIMER_FINISHED))
+        assertEquals(original.poseEnd, restored.poseEnd)
+        assertEquals(original.breakEnd, restored.breakEnd)
+        assertEquals(original.classEnd, restored.classEnd)
+        assertEquals(true, restored.classAlertsUseAlarmVolume)
     }
 
 

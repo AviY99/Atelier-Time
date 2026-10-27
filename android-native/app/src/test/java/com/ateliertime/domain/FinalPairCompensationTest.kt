@@ -96,11 +96,11 @@ class FinalPairCompensationTest {
         assertEquals(original.rules.totalSeconds, zero.totalSeconds)
     }
 
-    @Test fun cannotReduceFinalPosesBelowOneMinuteEach() {
+    @Test fun cannotReduceMergedFinalSessionBelowOneMinute() {
         val original = session(FinalPoseChoice.remainder())
         try {
-            FinalPairCompensation.adjust(original, m(29))
-            fail("Two 1m final poses must be preserved")
+            FinalPairCompensation.adjust(original, m(35))
+            fail("Merged final Session must retain one minute")
         } catch (_: IllegalArgumentException) { }
     }
 }

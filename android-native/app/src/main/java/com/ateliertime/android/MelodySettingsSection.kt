@@ -160,6 +160,44 @@ fun MelodySettingsSection(
         }
     }
 
+    HorizontalDivider()
+    Text("Free countdown · completion sound",
+        style = MaterialTheme.typography.titleSmall)
+    SoundPicker(
+        cue = TimerCue.FREE_TIMER_FINISHED, settings = settings,
+        onSettingsChange = onSettingsChange,
+        onChooseSystemSound = onChooseSystemSound,
+        onChooseAudioFile = onChooseAudioFile,
+        onPreview = onPreview,
+    )
+    Row(verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Free timer sound length", style = MaterialTheme.typography.labelMedium)
+        Text("${settings.freeTimerSeconds}s")
+    }
+    Slider(
+        value = settings.freeTimerSeconds.toFloat(),
+        onValueChange = {
+            onSettingsChange(settings.setDuration(TimerCue.FREE_TIMER_FINISHED,
+                it.roundToInt().coerceIn(5, 60)))
+        },
+        valueRange = 5f..60f, steps = 54,
+    )
+    HorizontalDivider()
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text("Use alarm volume for Class A/B/C",
+                style = MaterialTheme.typography.titleSmall)
+            Text("Optional: uses Android's alarm volume instead of media. " +
+                "Does not override silent alarms or Do Not Disturb.",
+                style = MaterialTheme.typography.bodySmall)
+        }
+        Switch(checked = settings.classAlertsUseAlarmVolume,
+            onCheckedChange = {
+                onSettingsChange(settings.copy(classAlertsUseAlarmVolume = it))
+            })
+    }
+
     if (showHelp) AlertDialog(
         onDismissRequest = { showHelp = false },
         title = { Text("Sound settings") },
@@ -171,6 +209,9 @@ fun MelodySettingsSection(
                 "You can switch modes without losing previous choices. " +
                 "System and file choices use Android pickers; files must " +
                 "remain accessible. Short sounds repeat for the selected time. " +
+                "The independent Free Countdown always keeps its own sound " +
+                "and duration, even when Class A/B/C are shared. " +
+                "Class cues may optionally use the alarm volume stream. " +
                 "Changing sound preferences never changes approved Classes.")
         },
         confirmButton = {
@@ -281,6 +322,6 @@ private fun SoundPicker(
 }
 
 private fun SoundSettings.savedChoices(source: SoundSource): List<CueSound> =
-    (listOf(poseEnd, breakEnd, classEnd) + listOfNotNull(sharedSound))
+    (listOf(poseEnd, breakEnd, classEnd, freeTimer) + listOfNotNull(sharedSound))
         .filter { it.source == source && it.isPlayable }
         .distinctBy { it.uri }

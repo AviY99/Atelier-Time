@@ -463,7 +463,7 @@ class MonotonicSessionTimerTest {
             next.view.totalRemainingSeconds)
     }
 
-    @Test fun nextOnLastWorkSessionFinishesClassAndEmitsCOnlyOnce() {
+    @Test fun nextOnLastWorkSessionEntersSummaryAndEmitsCOnlyOnce() {
         var now = 0L
         val session = approved()
         val finalWork = session.phases.last {
@@ -474,9 +474,10 @@ class MonotonicSessionTimerTest {
         timer.start()
         now = (finalWork.startSeconds + 5).toLong() * 1000L
         val next = timer.nextPhase()
-        assertEquals(TimerStatus.FINISHED, next.view.status)
+        assertEquals(TimerStatus.RUNNING, next.view.status)
         assertEquals(TimerCue.SESSION_FINISHED, next.cue)
-        assertNull(next.view.phase)
+        assertEquals(PhaseKind.SUMMARY, next.view.phase?.kind)
+        assertNull(timer.nextPhase().cue)
         assertNull(timer.update().cue)
         assertEquals(session.rules.totalSeconds, session.phases.last().endSeconds)
     }
@@ -606,10 +607,10 @@ class MonotonicSessionTimerTest {
         val timer = MonotonicSessionTimer(approved()) { now }
         timer.start()
         timer.pause()
-        now = 29L * minute * 1000L
+        now = 35L * minute * 1000L
         try {
             timer.resume()
-            fail("Need at least one minute for each of two final poses.")
+            fail("Merged final Session must retain at least one minute.")
         } catch (_: IllegalArgumentException) { }
         assertEquals(TimerStatus.PAUSED, timer.view().status)
     }

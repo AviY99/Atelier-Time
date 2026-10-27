@@ -82,10 +82,10 @@ class RunEndTimePlannerTest {
         val session = approved()
         val saved = session.phases.toList()
         try {
-            RunEndTimePlanner.plan(session, 0L, mins(150) * 1_000L)
-            fail("A final pair below two minutes must never be accepted")
+            RunEndTimePlanner.plan(session, 0L, mins(145) * 1_000L)
+            fail("A merged final Session below one minute must never be accepted")
         } catch (expected: IllegalArgumentException) {
-            assertTrue(expected.message!!.contains("last two Sessions"))
+            assertTrue(expected.message!!.contains("final Session(s)"))
         }
         assertEquals(saved, session.phases)
     }

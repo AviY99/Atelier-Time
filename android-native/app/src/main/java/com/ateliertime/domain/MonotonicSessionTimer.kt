@@ -10,7 +10,7 @@ package com.ateliertime.domain
  * A restart after FINISHED begins a fresh whole session and new deadline.
  */
 enum class TimerStatus { READY, RUNNING, PAUSED, FINISHED, STOPPED }
-enum class TimerCue { POSE_FINISHED, BREAK_FINISHED, SESSION_FINISHED }
+enum class TimerCue { POSE_FINISHED, BREAK_FINISHED, SESSION_FINISHED, FREE_TIMER_FINISHED }
 
 data class TimerView(
     val status: TimerStatus,
@@ -42,6 +42,7 @@ class MonotonicSessionTimer(
     private var activePhases: List<SchedulePhase> = session.phases
     private var activeTotalMs = session.rules.totalSeconds.toLong() * 1000L
     private var lastPhaseIndex: Int? = null
+    private var classFinishCueIssued = false
 
     fun start(initialCorrectionSeconds: Int = 0): TimerView {
         if (status == TimerStatus.STOPPED) {
@@ -53,8 +54,9 @@ class MonotonicSessionTimer(
         }
         // Compute the entire adjusted plan before mutating timer state.
         // A rejected deadline leaves the Class READY, never half-started.
-        val revised = if (initialCorrectionSeconds == 0) null
-            else FinalPairCompensation.adjust(session, initialCorrectionSeconds)
+        val revised = if (initialCorrectionSeconds == 0)
+            runCatching { FinalPairCompensation.adjust(session, 0) }.getOrNull()
+        else FinalPairCompensation.adjust(session, initialCorrectionSeconds)
         elapsedBeforeRunMs = 0L
         initialEndCorrectionSeconds = initialCorrectionSeconds
         lostSeconds = initialCorrectionSeconds
@@ -64,6 +66,7 @@ class MonotonicSessionTimer(
         originalStartMs = runningFromMs
         suspendedFromMs = null
         lastPhaseIndex = 0
+        classFinishCueIssued = false
         status = TimerStatus.RUNNING
         return view()
     }
@@ -102,6 +105,7 @@ class MonotonicSessionTimer(
         runningFromMs = now
         suspendedFromMs = null
         lastPhaseIndex = 0
+        classFinishCueIssued = false
         status = TimerStatus.RUNNING
         return view()
     }
@@ -136,7 +140,10 @@ class MonotonicSessionTimer(
             session.phases[it].kind == PhaseKind.POSE &&
                 session.phases[it].poseSource == PoseSource.REGULAR
         }.takeLast(2)
-        check(regularIndices.size == 2 && index < regularIndices.last()) {
+        val lastOriginalId = session.phases.getOrNull(regularIndices.lastOrNull() ?: -1)?.id
+        val finalIsMerged = lastOriginalId != null && activePhases.none { it.id == lastOriginalId }
+        check(regularIndices.size == 2 && index < regularIndices.last() &&
+            !(finalIsMerged && current.id == session.phases[regularIndices.first()].id)) {
             "The final regular Session has already started. Cannot rewrite " +
                 "a previously completed final Session."
         }
@@ -214,17 +221,18 @@ class MonotonicSessionTimer(
             "Interruption is too long to resume."
         }
         if (nextLost != lostSeconds.toLong()) {
-            val finalPair = activePhases.indices.filter {
-                activePhases[it].kind == PhaseKind.POSE &&
-                    activePhases[it].poseSource == PoseSource.REGULAR
+            val originalFinal = session.phases.filter {
+                it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
             }.takeLast(2)
-            val revised = if (finalPair.size == 2 &&
-                elapsedBeforeRunMs >= activePhases[finalPair.first()].startSeconds.toLong() * 1_000L) {
+            val firstFinal = activePhases.firstOrNull { it.id == originalFinal.firstOrNull()?.id }
+            val lastFinal = activePhases.firstOrNull { it.id == originalFinal.lastOrNull()?.id }
+            val revised = if (firstFinal != null &&
+                elapsedBeforeRunMs >= firstFinal.startSeconds.toLong() * 1_000L) {
                 // Once the penultimate Session begins it is an observed
                 // phase. Keep it (and its intervening Break) unchanged; only
                 // the not-yet-started final Session may absorb interruption.
-                check(elapsedBeforeRunMs <
-                    activePhases[finalPair.last()].startSeconds.toLong() * 1_000L) {
+                check(lastFinal != null && elapsedBeforeRunMs <
+                    lastFinal.startSeconds.toLong() * 1_000L) {
                     "The final Session has already begun. Its time cannot be " +
                         "changed after an interruption."
                 }
@@ -269,14 +277,21 @@ class MonotonicSessionTimer(
         )
     }
 
+    /** Immutable snapshot of the ACTUAL runtime plan for the live chart. */
+    fun activePhasesSnapshot(): List<SchedulePhase> = activePhases.toList()
+
+    /** One item means the last pair and intervening break were merged. */
+    fun finalEndingDurations(): List<Int> {
+        val ids = session.phases.filter {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.takeLast(2).map { it.id }.toSet()
+        return activePhases.filter { it.id in ids }.map { it.durationSeconds }
+    }
+
     /** Values shown in the timer after a pause/stop changes the selected ending. */
     fun finalTwoPoseDurations(): Pair<Int, Int>? {
-        val final = activePhases.filter {
-            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
-        }.takeLast(2)
-        return if (final.size == 2)
-            final[0].durationSeconds to final[1].durationSeconds
-        else null
+        val lengths = finalEndingDurations()
+        return if (lengths.size == 2) lengths[0] to lengths[1] else null
     }
 
     /**
@@ -310,18 +325,22 @@ class MonotonicSessionTimer(
             session.phases[it].kind == PhaseKind.POSE &&
                 session.phases[it].poseSource == PoseSource.REGULAR
         }.takeLast(2)
-        // The final work Session is the last actionable work phase. A manual
-        // Next there is an explicit end of Class, even with an optional summary.
-        // Next from the terminal summary has the same Exit-like result.
-        if (nextIndex >= activePhases.size ||
-            (finalPair.isNotEmpty() && currentIndex == finalPair.last())) {
+        // An optional Summary must never be skipped by Next on the final
+        // regular Session. C is played ON ENTERING Summary, never twice.
+        if (nextIndex >= activePhases.size) {
             status = TimerStatus.FINISHED
             runningFromMs = null
             suspendedFromMs = null
             elapsedBeforeRunMs = activeTotalMs
             lastPhaseIndex = null
-            return TimerTick(view(), TimerCue.SESSION_FINISHED)
+            val cue = if (classFinishCueIssued) null else TimerCue.SESSION_FINISHED
+            classFinishCueIssued = true
+            return TimerTick(view(), cue)
         }
+
+        val enteringSummary = current.kind == PhaseKind.POSE &&
+            current.poseSource == PoseSource.REGULAR &&
+            activePhases[nextIndex].kind == PhaseKind.SUMMARY
 
         val now = nowMillis()
         val pausedMs = if (status == TimerStatus.PAUSED) {
@@ -333,10 +352,14 @@ class MonotonicSessionTimer(
         // Keep Next usable even when a very long pause exceeds the remaining
         // compensation capacity. Prefer original Class finish when feasible.
         // Never modify a final Session the user has already entered.
-        val revision = if (corrected in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
+        val revision = if (!enteringSummary &&
+            corrected in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
             try {
-                val adjusted = if (finalPair.size == 2 &&
-                    currentIndex >= finalPair.first()) {
+                val activeLastFinal = activePhases.indexOfFirst {
+                    it.id == session.phases.getOrNull(finalPair.lastOrNull() ?: -1)?.id
+                }
+                val adjusted = if (finalPair.size == 2 && activeLastFinal >= 0 &&
+                    currentIndex >= activeLastFinal - 2) {
                     FinalPairCompensation.adjustLastOnly(
                         session, activePhases, corrected.toInt(),
                     )
@@ -365,10 +388,15 @@ class MonotonicSessionTimer(
         suspendedFromMs = null
         status = TimerStatus.RUNNING
         lastPhaseIndex = nextIndex
-        val cue = when (current.kind) {
-            PhaseKind.POSE -> TimerCue.POSE_FINISHED
-            PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK -> TimerCue.BREAK_FINISHED
-            PhaseKind.SUMMARY -> TimerCue.SESSION_FINISHED
+        val cue = when {
+            enteringSummary -> {
+                classFinishCueIssued = true
+                TimerCue.SESSION_FINISHED
+            }
+            current.kind == PhaseKind.POSE -> TimerCue.POSE_FINISHED
+            current.kind == PhaseKind.SHORT_BREAK || current.kind == PhaseKind.SPECIAL_BREAK ->
+                TimerCue.BREAK_FINISHED
+            else -> null
         }
         return TimerTick(view(), cue)
     }
@@ -383,7 +411,9 @@ class MonotonicSessionTimer(
         suspendedFromMs = null
         elapsedBeforeRunMs = activeTotalMs
         lastPhaseIndex = null
-        return TimerTick(view(), TimerCue.SESSION_FINISHED)
+        val cue = if (classFinishCueIssued) null else TimerCue.SESSION_FINISHED
+        classFinishCueIssued = true
+        return TimerTick(view(), cue)
     }
 
     /** One alert per observed phase transition; no stale multi-phase replay. */
@@ -397,13 +427,19 @@ class MonotonicSessionTimer(
             runningFromMs = null
             elapsedBeforeRunMs = activeTotalMs
             lastPhaseIndex = null
-            return TimerTick(view(), TimerCue.SESSION_FINISHED)
+            val cue = if (classFinishCueIssued) null else TimerCue.SESSION_FINISHED
+            classFinishCueIssued = true
+            return TimerTick(view(), cue)
         }
         val cue = if (oldIndex != null && newIndex == oldIndex + 1) {
             val justEnded = activePhases[oldIndex]
             if (current.elapsedSeconds - justEnded.endSeconds > 5) null
             else when (justEnded.kind) {
-                PhaseKind.POSE -> TimerCue.POSE_FINISHED
+                PhaseKind.POSE -> if (current.phase?.kind == PhaseKind.SUMMARY &&
+                    justEnded.poseSource == PoseSource.REGULAR) {
+                    classFinishCueIssued = true
+                    TimerCue.SESSION_FINISHED
+                } else TimerCue.POSE_FINISHED
                 PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK -> TimerCue.BREAK_FINISHED
                 PhaseKind.SUMMARY -> null
             }

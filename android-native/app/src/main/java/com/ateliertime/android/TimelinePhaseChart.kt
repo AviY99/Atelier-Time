@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import com.ateliertime.domain.*
 
@@ -17,7 +18,13 @@ import com.ateliertime.domain.*
  * Widths map to scheduled seconds, not to the number of phases.
  */
 @Composable
-fun TimelinePhaseChart(phases: List<SchedulePhase>) {
+fun TimelinePhaseChart(
+    phases: List<SchedulePhase>,
+    classRemainingSeconds: Int? = null,
+    classElapsedSeconds: Int? = null,
+    runtimeElapsedSeconds: Int? = null,
+    currentPhaseId: String? = null,
+) {
     if (phases.isEmpty()) return
     val total = phases.last().endSeconds
     if (total <= 0) return
@@ -35,6 +42,19 @@ fun TimelinePhaseChart(phases: List<SchedulePhase>) {
             verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("Class timeline at a glance",
                 style = MaterialTheme.typography.titleMedium)
+            if (classRemainingSeconds != null) {
+                val elapsed = (classElapsedSeconds ?: 0).coerceAtLeast(0)
+                val physicalTotal = elapsed + classRemainingSeconds.coerceAtLeast(0)
+                Text("Class remaining  " + chartTime(classRemainingSeconds),
+                    style = MaterialTheme.typography.labelMedium)
+                Canvas(modifier = Modifier.fillMaxWidth().height(7.dp)) {
+                    drawRect(Color.Gray.copy(alpha = 0.27f))
+                    val fraction = if (physicalTotal == 0) 1f else
+                        elapsed.toFloat() / physicalTotal.toFloat()
+                    drawRect(Color(0xFFD1A34C), size = Size(
+                        size.width * fraction.coerceIn(0f, 1f), size.height))
+                }
+            }
             Text("Left to right: the complete class, proportional to actual duration.",
                 style = MaterialTheme.typography.bodySmall)
             Canvas(modifier = Modifier.fillMaxWidth().height(44.dp)) {
@@ -48,6 +68,10 @@ fun TimelinePhaseChart(phases: List<SchedulePhase>) {
                         topLeft = Offset(x, 0f),
                         size = Size(width, size.height),
                     )
+                    if (currentPhaseId != null && phase.id == currentPhaseId) {
+                        drawRect(color = Color.White, topLeft = Offset(x, 0f),
+                            size = Size(width, size.height), style = Stroke(width = 3f))
+                    }
                     if (width > 3f && phase.startSeconds != 0) {
                         drawLine(
                             color = Color.White.copy(alpha = 0.75f),
@@ -55,6 +79,11 @@ fun TimelinePhaseChart(phases: List<SchedulePhase>) {
                             strokeWidth = 1f,
                         )
                     }
+                }
+                runtimeElapsedSeconds?.let { elapsed ->
+                    val x = full * elapsed.coerceIn(0, total).toFloat() / total
+                    drawLine(Color(0xFF182631), Offset(x, 0f),
+                        Offset(x, size.height), strokeWidth = 4f)
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {

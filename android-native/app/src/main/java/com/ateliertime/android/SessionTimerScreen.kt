@@ -7,8 +7,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,6 +34,7 @@ fun SessionTimerScreen(
     classClockTimes: ClassClockTimes,
     timerError: String?,
     designPalette: DesignPalette,
+    eventHistory: List<String>,
     onPauseResume: () -> Unit,
     onRestartSession: () -> Unit,
     onNextPhase: () -> Unit,
@@ -83,8 +82,7 @@ fun SessionTimerScreen(
         null -> "No current session / break"
     }
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-            .padding(16.dp),
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top,
@@ -144,6 +142,14 @@ fun SessionTimerScreen(
                     style = MaterialTheme.typography.labelSmall)
             }
         }
+        TimelinePhaseChart(
+            phases = timer.activePhasesSnapshot(),
+            classRemainingSeconds = classClockTimes.classRemainingSeconds
+                ?: view.totalRemainingSeconds,
+            classElapsedSeconds = classClockTimes.classElapsedSeconds ?: 0,
+            runtimeElapsedSeconds = view.elapsedSeconds,
+            currentPhaseId = view.phase?.id,
+        )
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.elevatedCardColors(
@@ -237,9 +243,11 @@ fun SessionTimerScreen(
                 color = if (atelierNightActive()) Color.White
                     else MaterialTheme.colorScheme.primary,
             )
-            timer.finalTwoPoseDurations()?.let { pair ->
-                Text("Adjusted final two sessions: " +
-                    formatTime(pair.first) + " + " + formatTime(pair.second))
+            timer.finalEndingDurations().let { lengths ->
+                if (lengths.size == 1) Text("Final Sessions merged: " +
+                    formatTime(lengths.single()) + " (intervening break removed)")
+                else if (lengths.size == 2) Text("Adjusted final two sessions: " +
+                    formatTime(lengths.first()) + " + " + formatTime(lengths.last()))
             }
             val endingLabel = when (session.selectedChoice?.mode) {
                 FinalPoseMode.EVEN_SPLIT -> "Even split"
@@ -247,7 +255,8 @@ fun SessionTimerScreen(
                 FinalPoseMode.REMAINDER, null -> "Last gets remaining time"
             }
             Text("Ending choice: " + endingLabel +
-                ". The intervening break, class summary and saved preset remain unchanged.")
+                ". Short final pairs merge with their break when they fit " +
+                "within one regular Session. Class finish and saved preset remain unchanged.")
         }
         timerError?.let { Text(it, color = atelierErrorTextColor()) }
 
@@ -289,7 +298,7 @@ fun SessionTimerScreen(
                     ) { Text(restartTitle, style = MaterialTheme.typography.labelSmall) }
                     OutlinedButton(colors = atelierOutlinedColors(), 
                         enabled = underway,
-                        onClick = onNextPhase,
+                        onClick = { confirmation = "next" },
                         modifier = Modifier.weight(0.8f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     ) { Text("Next", maxLines = 1) }
@@ -325,6 +334,19 @@ fun SessionTimerScreen(
                 }
             }
         }
+        if (eventHistory.isNotEmpty()) {
+            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text("Recent Class actions", style = MaterialTheme.typography.titleSmall)
+                    eventHistory.takeLast(6).asReversed().forEach { event ->
+                        Text(event, style = MaterialTheme.typography.labelSmall)
+                    }
+                    Text("Run-local only · cleared on a new Class or app exit",
+                        style = MaterialTheme.typography.labelSmall)
+                }
+            }
+        }
     }
 
     val choice = confirmation
@@ -333,12 +355,19 @@ fun SessionTimerScreen(
             onDismissRequest = { confirmation = null },
             title = {
                 Text(if (choice == "exit") "End class and return?"
+                    else if (choice == "next") "Skip to " +
+                        (view.nextPhase?.let(::phaseLabel) ?: "Class end") + "?"
                     else "Restart current " + (if (isBreak) "break?" else "session?"))
             },
             text = {
                 Text(if (choice == "exit")
                     "End the current run and return to your saved classes in Timer. " +
                         "The saved approved plan is not changed."
+                else if (choice == "next")
+                    "Next immediately skips the rest of " + phaseLabel(view.phase) +
+                        " and enters " + (view.nextPhase?.let(::phaseLabel) ?: "Class end") +
+                        ". This action cannot be undone. A scheduled Summary " +
+                        "will not be skipped."
                 else
                     "Repeat the current " + (if (isBreak) "break" else "session") +
                         " from its beginning. Previously completed phases and Class " +
@@ -352,7 +381,11 @@ fun SessionTimerScreen(
             confirmButton = {
                 TextButton(colors = atelierTextColors(), onClick = {
                     confirmation = null
-                    if (choice == "exit") onExit() else onRestartSession()
+                    when (choice) {
+                        "exit" -> onExit()
+                        "next" -> onNextPhase()
+                        else -> onRestartSession()
+                    }
                 }) { Text("Confirm") }
             },
             dismissButton = {
@@ -385,17 +418,18 @@ fun SessionTimerScreen(
                     "the Class start and expected finish remain unchanged. The repeat " +
                     "time is balanced against the final two regular Sessions according " +
                     "to the approved ending choice. If the first final Session is already " +
-                    "completed, only the second can change. Both retain at least one " +
-                    "minute. On success the " +
+                    "completed, only the second can change. A short future final " +
+                    "pair may merge with the intervening break. On success the " +
                     (if (isBreak) "break-end melody B" else "session-end melody A") +
                     " plays. Restart is unavailable in Class summary and rejected " +
                     "without sound if a safe adjustment is impossible."
             else ->
                 "Next advances to the next phase of this Class, not another saved Class. " +
                     "Use it even during the final two Sessions: earlier completed work is " +
-                    "never rewritten. If you choose Next on the final work Session or " +
-                    "final Class summary, it completes the Class and returns to saved Classes " +
-                    "with melody C, just like finishing the Class. On other phase skips, " +
+                    "never rewritten. Next on the final work Session enters the " +
+                    "Summary when one exists and plays melody C BEFORE it; Next " +
+                    "from Summary finishes without a second C. Without Summary, " +
+                    "the final Session finishes with C. On other phase skips, " +
                     "melody A plays after a Session and B after a Break. The original Class " +
                     "finish target is maintained when feasible; if an interruption makes " +
                     "that impossible, Next still advances and the displayed expected " +

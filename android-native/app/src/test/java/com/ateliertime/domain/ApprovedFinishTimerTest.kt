@@ -113,7 +113,7 @@ class ApprovedFinishTimerTest {
         val session = session()
         val timer = MonotonicSessionTimer(session) { 0L }
         try {
-            timer.start(m(30))
+            timer.start(m(35))
             fail("Should not start an infeasible Class")
         } catch (_: IllegalArgumentException) { }
         val afterReject = timer.view()

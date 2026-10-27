@@ -1,4 +1,5 @@
 # Stable 6 — real 3-hour Class field observations and next development scope
+> **Later decision and execution (2026-10-27):** The user clarified that the merge threshold includes the intervening Break: `A + Break + B <= Regular Session`. On merge, delete that Break but add its duration to the one resulting Session, preserving the original finish time. The user then authorized **all changes together**. D-115 development source now implements this policy and the other field requests; see [D115 unified changeset](D115_UNIFIED_CHANGESET_2026_10_27.md). The historical unresolved design points below are retained as original field-report context, not current decisions.
 **Date:** 2026-10-27 · **Evidence type:** direct user report after an actual long Class, NOT automated test logs.
 **Status:** requirements reported; follow-up design/engineering and new APK require staged approval. **No app-source change has been made by this document.**
 

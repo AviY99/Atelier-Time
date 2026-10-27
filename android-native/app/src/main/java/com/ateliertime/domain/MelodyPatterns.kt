@@ -48,5 +48,6 @@ data class MelodySelections(
         TimerCue.POSE_FINISHED -> poseEnd
         TimerCue.BREAK_FINISHED -> breakEnd
         TimerCue.SESSION_FINISHED -> sessionEnd
+        TimerCue.FREE_TIMER_FINISHED -> poseEnd // legacy A/B/C-only selection API
     }
 }

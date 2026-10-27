@@ -16,6 +16,21 @@ class SoundSettingsTest {
         }
     }
 
+    @Test fun freeTimerRemainsIndependentFromClassSharedMode() {
+        val separate = SoundSettings().setSourceEnabled(SoundSource.SYSTEM, true)
+            .choose(TimerCue.FREE_TIMER_FINISHED, CueSound(
+                source = SoundSource.SYSTEM, uri = "content://tone/free"))
+            .setDuration(TimerCue.FREE_TIMER_FINISHED, 37)
+        val shared = separate.setAssignmentMode(SoundAssignmentMode.SHARED)
+            .setSharedDuration(10)
+        assertEquals(separate.freeTimer, shared.soundFor(TimerCue.FREE_TIMER_FINISHED))
+        assertEquals(37, shared.secondsFor(TimerCue.FREE_TIMER_FINISHED))
+        assertEquals(10, shared.secondsFor(TimerCue.SESSION_FINISHED))
+        assertEquals(false, shared.classAlertsUseAlarmVolume)
+        assertEquals(true, shared.copy(classAlertsUseAlarmVolume = true)
+            .classAlertsUseAlarmVolume)
+    }
+
     @Test fun enabledLibrariesProvideIndependentChoicesAcrossAllThreeCues() {
         val all = SoundSettings()
             .setSourceEnabled(SoundSource.SYSTEM, true)
@@ -86,13 +101,13 @@ class SoundSettingsTest {
         val shared = original
             .setAssignmentMode(SoundAssignmentMode.SHARED)
             .setSharedDuration(10)
-        TimerCue.entries.forEach { cue ->
+        TimerCue.entries.filter { it != TimerCue.FREE_TIMER_FINISHED }.forEach { cue ->
             assertEquals(original.poseEnd, shared.soundFor(cue))
             assertEquals(10, shared.secondsFor(cue))
         }
         val newSound = CueSound(melody = MelodyPattern.WARM_BELLS)
         val updated = shared.chooseForVisibleMode(TimerCue.SESSION_FINISHED, newSound)
-        TimerCue.entries.forEach { cue ->
+        TimerCue.entries.filter { it != TimerCue.FREE_TIMER_FINISHED }.forEach { cue ->
             assertEquals(newSound, updated.soundFor(cue))
             assertEquals(10, updated.secondsFor(cue))
         }
@@ -104,6 +119,8 @@ class SoundSettingsTest {
         assertEquals(5, restored.secondsFor(TimerCue.BREAK_FINISHED))
         assertEquals(57, restored.secondsFor(TimerCue.SESSION_FINISHED))
         assertEquals(newSound, restored.sharedSound)
+        assertEquals(original.freeTimer, restored.freeTimer)
+        assertEquals(5, restored.freeTimerSeconds)
     }
 
     @Test fun sharedLengthIsRestrictedToFiveOrTenSecondsEvenForClassEnd() {
@@ -173,7 +190,8 @@ class SoundSettingsTest {
         assertThrows(IllegalArgumentException::class.java) {
             sharedFile.setSourceEnabled(SoundSource.FILE, false)
         }
-        val appOnly = sharedFile.setSourceEnabled(SoundSource.APP, false)
+        val appOnly = sharedFile.choose(TimerCue.FREE_TIMER_FINISHED, file)
+            .setSourceEnabled(SoundSource.APP, false)
         assertEquals(setOf(SoundSource.FILE), appOnly.enabledSources)
         assertThrows(IllegalArgumentException::class.java) {
             appOnly.setSourceEnabled(SoundSource.FILE, false)

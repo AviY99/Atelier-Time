@@ -38,6 +38,8 @@ data class SoundSettings(
     val poseEnd: CueSound = CueSound(melody = MelodyPattern.SOFT_CHIMES),
     val breakEnd: CueSound = CueSound(melody = MelodyPattern.RISING_STEPS),
     val classEnd: CueSound = CueSound(melody = MelodyPattern.CELEBRATION),
+    /** Always independent of Shared/Separate Class A/B/C preferences. */
+    val freeTimer: CueSound = CueSound(melody = MelodyPattern.SOFT_CHIMES),
     // The migration-safe default preserves D-100's independent A/B/C choices.
     val assignmentMode: SoundAssignmentMode = SoundAssignmentMode.SEPARATE,
     // Null means the first shared choice inherits the current A sound.
@@ -47,8 +49,12 @@ data class SoundSettings(
     val poseEndSeconds: Int = 5,
     val breakEndSeconds: Int = 5,
     val classEndSeconds: Int = 5,
+    val freeTimerSeconds: Int = 5,
+    /** Opt-in: route Class A/B/C through Android's alarm volume, not media. */
+    val classAlertsUseAlarmVolume: Boolean = false,
 ) {
     fun soundFor(cue: TimerCue): CueSound {
+        if (cue == TimerCue.FREE_TIMER_FINISHED) return freeTimer
         if (assignmentMode == SoundAssignmentMode.SHARED) {
             return sharedSound ?: poseEnd
         }
@@ -56,6 +62,7 @@ data class SoundSettings(
             TimerCue.POSE_FINISHED -> poseEnd
             TimerCue.BREAK_FINISHED -> breakEnd
             TimerCue.SESSION_FINISHED -> classEnd
+            TimerCue.FREE_TIMER_FINISHED -> freeTimer
         }
     }
 
@@ -71,7 +78,7 @@ data class SoundSettings(
     }
 
     /** Only the sounds currently in use by the picker and timer matter. */
-    fun activeSounds(): List<CueSound> = when (assignmentMode) {
+    fun activeSounds(): List<CueSound> = listOf(freeTimer) + when (assignmentMode) {
         SoundAssignmentMode.SHARED -> listOf(sharedSound ?: poseEnd)
         SoundAssignmentMode.SEPARATE -> listOf(poseEnd, breakEnd, classEnd)
     }
@@ -85,7 +92,8 @@ data class SoundSettings(
     fun chooseForVisibleMode(cue: TimerCue, choice: CueSound): SoundSettings {
         require(choice.source in enabledSources) { "Enable the sound source first." }
         require(choice.isPlayable) { "Choose an available sound or audio file." }
-        return if (assignmentMode == SoundAssignmentMode.SHARED) {
+        return if (cue == TimerCue.FREE_TIMER_FINISHED) copy(freeTimer = choice)
+        else if (assignmentMode == SoundAssignmentMode.SHARED) {
             copy(sharedSound = choice)
         } else {
             choose(cue, choice)
@@ -93,11 +101,13 @@ data class SoundSettings(
     }
 
     fun secondsFor(cue: TimerCue): Int {
+        if (cue == TimerCue.FREE_TIMER_FINISHED) return freeTimerSeconds
         if (assignmentMode == SoundAssignmentMode.SHARED) return sharedSeconds
         return when (cue) {
             TimerCue.POSE_FINISHED -> poseEndSeconds
             TimerCue.BREAK_FINISHED -> breakEndSeconds
             TimerCue.SESSION_FINISHED -> classEndSeconds
+            TimerCue.FREE_TIMER_FINISHED -> freeTimerSeconds
         }
     }
 
@@ -115,11 +125,13 @@ data class SoundSettings(
             TimerCue.POSE_FINISHED -> copy(poseEnd = choice)
             TimerCue.BREAK_FINISHED -> copy(breakEnd = choice)
             TimerCue.SESSION_FINISHED -> copy(classEnd = choice)
+            TimerCue.FREE_TIMER_FINISHED -> copy(freeTimer = choice)
         }
     }
 
     fun setDuration(cue: TimerCue, seconds: Int): SoundSettings {
         require(seconds in 5..60 && (cue == TimerCue.SESSION_FINISHED ||
+            cue == TimerCue.FREE_TIMER_FINISHED ||
             seconds == 5 || seconds == 10)) {
             "Session/Break duration must be 5 or 10 seconds; Class must be 5–60 seconds."
         }
@@ -127,6 +139,7 @@ data class SoundSettings(
             TimerCue.POSE_FINISHED -> copy(poseEndSeconds = seconds)
             TimerCue.BREAK_FINISHED -> copy(breakEndSeconds = seconds)
             TimerCue.SESSION_FINISHED -> copy(classEndSeconds = seconds)
+            TimerCue.FREE_TIMER_FINISHED -> copy(freeTimerSeconds = seconds)
         }
     }
 

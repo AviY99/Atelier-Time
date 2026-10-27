@@ -7,8 +7,10 @@ import kotlin.math.roundToInt
  *
  * Signed correction: positive seconds shrink the last two regular poses to
  * recover lost wall time; negative seconds extend them to absorb time gained
- * by skipping a phase. Earlier phases, intervening break and summary retain
- * their exact approved lengths. The approved preset is NEVER mutated.
+ * by skipping a phase. Earlier phases and summary retain their exact approved
+ * lengths. If the two remaining final Sessions AND their intervening break
+ * fit within one regular Session, that break becomes work time and the three
+ * phases collapse into one; the absolute finish stays unchanged.
  *
  * The user's already chosen ending mode decides how remaining posing time is
  * distributed: REMAINDER uses the final pose first, EVEN splits approximately
@@ -101,8 +103,31 @@ object FinalPairCompensation {
         val last = originals[lastIndex]
         val combined = first.durationSeconds.toLong() + last.durationSeconds
         val availableLong = combined - lostSeconds.toLong()
+        val mergedLength = availableLong + rest.durationSeconds.toLong()
+        // A short pair has one Session, not two one-minute minimums. The
+        // deleted break's time is turned into Session time, so the end clock
+        // and every phase after the pair retain their exact position.
+        if (mergedLength <= session.rules.poseSeconds.toLong()) {
+            require(mergedLength in SECONDS_PER_MINUTE.toLong()..Int.MAX_VALUE.toLong()) {
+                "The merged final Session must last at least one minute."
+            }
+            val revised = originals.take(firstIndex).toMutableList()
+            val end = first.startSeconds.toLong() + mergedLength
+            require(end <= Int.MAX_VALUE.toLong()) { "Class timeline exceeds supported range." }
+            revised.add(first.shifted(first.startSeconds, end.toInt()))
+            var cursor = end.toInt()
+            for (phase in originals.drop(lastIndex + 1)) {
+                val next = cursor.toLong() + phase.durationSeconds
+                require(next <= Int.MAX_VALUE.toLong()) { "Class timeline exceeds supported range." }
+                revised.add(phase.shifted(cursor, next.toInt()))
+                cursor = next.toInt()
+            }
+            check(cursor.toLong() == session.rules.totalSeconds.toLong() - lostSeconds)
+            return CompensatedTimeline(revised, cursor, lostSeconds,
+                mergedLength.toInt(), 0)
+        }
         require(availableLong in (2L * SECONDS_PER_MINUTE)..Int.MAX_VALUE.toLong()) {
-            "Final two poses cannot absorb this time change while keeping both " +
+            "Final two Sessions cannot absorb this time change while keeping both " +
                 "at least one minute. Approve a revised end time instead."
         }
         val available = availableLong.toInt()

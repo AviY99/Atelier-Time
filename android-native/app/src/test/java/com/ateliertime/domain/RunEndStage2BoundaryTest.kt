@@ -40,15 +40,15 @@ class RunEndStage2BoundaryTest {
     @Test fun earliestAllowedSecondIsAcceptedButEarlierSecondIsRejected() {
         val saved = approved()
         val start = 456L
-        val earliest = start + minutes(152) * 1_000L
+        val earliest = start + minutes(146) * 1_000L
         val edge = RunEndTimePlanner.plan(saved, start, earliest)
         assertEquals(minutes(1), edge.adjusted.firstFinalPoseSeconds)
-        assertEquals(minutes(1), edge.adjusted.lastFinalPoseSeconds)
+        assertEquals(0, edge.adjusted.lastFinalPoseSeconds)
         for (invalid in listOf(earliest - 1L, earliest - 1_000L)) {
             val error = runCatching { RunEndTimePlanner.plan(saved, start, invalid) }
                 .exceptionOrNull()
             assertTrue("The first red second must be rejected", error is IllegalArgumentException)
-            assertTrue(error!!.message!!.contains("last two Sessions"))
+            assertTrue(error!!.message!!.contains("final Session(s)"))
         }
         assertEquals(minutes(180), saved.rules.totalSeconds)
     }
@@ -57,13 +57,13 @@ class RunEndStage2BoundaryTest {
         val saved = approved()
         val original = saved.phases.toList()
         val previewNow = 99_999L
-        val chosen = previewNow + minutes(152) * 1_000L
-        assertEquals(minutes(152),
+        val chosen = previewNow + minutes(146) * 1_000L
+        assertEquals(minutes(146),
             RunEndTimePlanner.plan(saved, previewNow, chosen).adjustedDurationSeconds)
         val afterDelay = runCatching {
             RunEndTimePlanner.plan(saved, previewNow + 1_000L, chosen)
         }.exceptionOrNull()
-        assertTrue("An expired 1-minute final pair must not launch", afterDelay is IllegalArgumentException)
+        assertTrue("An expired 1-minute merged Session must not launch", afterDelay is IllegalArgumentException)
         assertEquals(original, saved.phases)
     }
 

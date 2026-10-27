@@ -27,7 +27,10 @@ import android.os.Build
 import android.Manifest
 import android.content.pm.PackageManager
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
+import android.view.WindowManager
 import android.media.RingtoneManager
 import android.net.Uri
 import android.provider.OpenableColumns
@@ -96,9 +99,13 @@ fun SessionEditorScreen(
         mutableStateOf(melodyPreferences.loadSettings())
     }
     val melodyPlayer = remember(context) { MelodyAudioPlayer(context) }
+    val freeMelodyPlayer = remember(context) { MelodyAudioPlayer(context) }
     var melodyError by remember { mutableStateOf<String?>(null) }
     DisposableEffect(melodyPlayer) {
         onDispose { melodyPlayer.close() }
+    }
+    DisposableEffect(freeMelodyPlayer) {
+        onDispose { freeMelodyPlayer.close() }
     }
     fun saveSoundSettings(updated: SoundSettings) {
         try {
@@ -193,6 +200,24 @@ fun SessionEditorScreen(
     var playingSession by remember { mutableStateOf<ApprovedSession?>(null) }
     var activeTab by remember { mutableStateOf(MainTab.EDITOR) }
     var soundEnabled by remember { mutableStateOf(true) }
+    var keepScreenAwake by remember { mutableStateOf(false) }
+    val freeTimer = remember { FreeCountdownTimer { SystemClock.elapsedRealtime() } }
+    var freeTimerView by remember { mutableStateOf(freeTimer.view()) }
+    var freeTimerError by remember { mutableStateOf<String?>(null) }
+    val eventHistory = remember { mutableStateListOf<String>() }
+    fun recordClassEvent(source: String, before: TimerView?, after: TimerView,
+                         cue: TimerCue? = null) {
+        val stamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+            .format(Date(System.currentTimeMillis()))
+        val from = before?.phase?.id ?: "—"
+        val to = after.phase?.id ?: "end"
+        val cueNote = cue?.let {
+            " · ${it.name} " + (if (soundEnabled) "play requested" else "alerts disabled")
+        } ?: ""
+        eventHistory.add("$stamp · ${SystemClock.elapsedRealtime()}ms · $source: " +
+            "$from → $to$cueNote")
+        while (eventHistory.size > 30) eventHistory.removeAt(0)
+    }
     val liveTimer = remember(playingSession) {
         playingSession?.let { session ->
             MonotonicSessionTimer(session) { SystemClock.elapsedRealtime() }
@@ -217,6 +242,32 @@ fun SessionEditorScreen(
     }
     var classClockTimes by remember(liveTimer) { mutableStateOf(ClassClockTimes()) }
     var timerError by remember(liveTimer) { mutableStateOf<String?>(null) }
+    val activity = context as? Activity
+    val activeClass = timerView?.status == TimerStatus.RUNNING ||
+        timerView?.status == TimerStatus.PAUSED
+    val activeFree = freeTimerView.status == FreeTimerStatus.RUNNING ||
+        freeTimerView.status == FreeTimerStatus.PAUSED
+    DisposableEffect(activity, keepScreenAwake, activeClass, activeFree) {
+        if (keepScreenAwake && (activeClass || activeFree)) {
+            activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+        onDispose {
+            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+    val mediaVolumeMuted = remember(wallClockMillis / 1_000L) {
+        val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audio.getStreamVolume(AudioManager.STREAM_MUSIC) == 0
+    }
+    val classAlertVolumeMuted = remember(wallClockMillis / 1_000L,
+        soundSettings.classAlertsUseAlarmVolume) {
+        val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val stream = if (soundSettings.classAlertsUseAlarmVolume)
+            AudioManager.STREAM_ALARM else AudioManager.STREAM_MUSIC
+        audio.getStreamVolume(stream) == 0
+    }
     var helpSection by remember { mutableStateOf<Pair<String, String>?>(null) }
     var nextOpeningId by remember { mutableIntStateOf(1) }
     val opening = remember { mutableStateListOf<OpeningDraft>() }
@@ -311,6 +362,8 @@ fun SessionEditorScreen(
                     session, startEpochMs, target
                 ).correctionSeconds
                 val view = clock.start(correction)
+                eventHistory.clear()
+                recordClassEvent("Start", null, view)
                 timerView = view
                 classClockTimes = classClockTracker.newClass(view, startEpochMs, target)
                 timerError = null
@@ -330,7 +383,7 @@ fun SessionEditorScreen(
         }
     }
 
-    LaunchedEffect(liveTimer, soundSettings, soundEnabled) {
+    LaunchedEffect(liveTimer, freeTimer, soundSettings, soundEnabled) {
         while (true) {
             val nowEpochMs = System.currentTimeMillis()
             wallClockMillis = nowEpochMs
@@ -345,6 +398,11 @@ fun SessionEditorScreen(
                         before.status == TimerStatus.PAUSED)
                 val tick = if (deadlineReached) clock.finishAtDeadline()
                     else clock.update()
+                if (before.phase?.id != tick.view.phase?.id ||
+                    before.status != tick.view.status || tick.cue != null) {
+                    recordClassEvent(if (deadlineReached) "Deadline" else "Automatic",
+                        before, tick.view, tick.cue)
+                }
                 timerView = tick.view
                 classClockTimes = classClockTracker.observe(tick.view, nowEpochMs)
                 classStatusNotification.update(
@@ -355,7 +413,8 @@ fun SessionEditorScreen(
                 )
                 if (soundEnabled && tick.cue != null) {
                     melodyPlayer.play(soundSettings.soundFor(tick.cue),
-                        soundSettings.secondsFor(tick.cue)) { message ->
+                        soundSettings.secondsFor(tick.cue),
+                        useAlarmVolume = soundSettings.classAlertsUseAlarmVolume) { message ->
                         melodyError = message
                     }
                 }
@@ -366,13 +425,23 @@ fun SessionEditorScreen(
                     activeTab = MainTab.TIMER
                 }
             }
+            val freeTick = freeTimer.update()
+            freeTimerView = freeTick.view
+            if (freeTick.completedNow && soundEnabled) {
+                freeMelodyPlayer.play(
+                    soundSettings.soundFor(TimerCue.FREE_TIMER_FINISHED),
+                    soundSettings.secondsFor(TimerCue.FREE_TIMER_FINISHED),
+                ) { message -> freeTimerError = message }
+            }
             delay(200)
         }
     }
 
     fun timerAction(block: () -> TimerView) {
         try {
+            val before = liveTimer?.view()
             val updated = block()
+            recordClassEvent("Pause/Resume", before, updated)
             timerView = updated
             classClockTimes = classClockTracker.observe(updated, System.currentTimeMillis())
             timerError = null
@@ -390,7 +459,10 @@ fun SessionEditorScreen(
         action: () -> TimerTick,
     ) {
         try {
+            val before = liveTimer?.view()
             val event = action()
+            recordClassEvent(if (restartCurrentSegment) "Restart" else "Next",
+                before, event.view, event.cue)
             timerView = event.view
             val nowEpochMs = System.currentTimeMillis()
             classClockTimes = if (restartCurrentSegment) {
@@ -403,7 +475,8 @@ fun SessionEditorScreen(
             timerError = null
             if (soundEnabled && event.cue != null) {
                 melodyPlayer.play(soundSettings.soundFor(event.cue),
-                    soundSettings.secondsFor(event.cue)) { error ->
+                    soundSettings.secondsFor(event.cue),
+                    useAlarmVolume = soundSettings.classAlertsUseAlarmVolume) { error ->
                     melodyError = error
                 }
             }
@@ -863,7 +936,9 @@ fun SessionEditorScreen(
                     },
                     onPreview = { cue ->
                         melodyPlayer.play(soundSettings.soundFor(cue),
-                            soundSettings.secondsFor(cue)) { message ->
+                            soundSettings.secondsFor(cue),
+                            useAlarmVolume = cue != TimerCue.FREE_TIMER_FINISHED &&
+                                soundSettings.classAlertsUseAlarmVolume) { message ->
                             melodyError = message
                         }
                     },
@@ -884,10 +959,57 @@ fun SessionEditorScreen(
                 val session = playingSession
                 val timer = liveTimer
                 val view = timerView
+                Column(modifier = Modifier.fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Keep screen awake during timers",
+                            style = MaterialTheme.typography.titleSmall)
+                        Text("While Atelier Time is visible. Uses more battery; " +
+                            "manual locking still works.",
+                            style = MaterialTheme.typography.labelSmall)
+                    }
+                    Switch(checked = keepScreenAwake,
+                        onCheckedChange = { keepScreenAwake = it },
+                        modifier = Modifier.testTag("keep_screen_awake"))
+                }
+                if (mediaVolumeMuted || classAlertVolumeMuted) {
+                    Text((if (classAlertVolumeMuted)
+                        "Class alert volume is at zero. " else "") +
+                        (if (mediaVolumeMuted)
+                            "Media volume is at zero (Free countdown). " else "") +
+                        "Raise the relevant volume if desired.",
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = atelierErrorTextColor(),
+                        style = MaterialTheme.typography.bodySmall)
+                }
+                FreeCountdownSection(
+                    view = freeTimerView,
+                    onStart = { hours, minutes, seconds ->
+                        freeMelodyPlayer.stop()
+                        runCatching { freeTimer.start(hours, minutes, seconds) }
+                            .onSuccess { freeTimerView = it; freeTimerError = null }
+                            .onFailure { freeTimerError = it.message }
+                    },
+                    onPauseResume = {
+                        freeTimerView = if (freeTimerView.status == FreeTimerStatus.RUNNING)
+                            freeTimer.pause() else freeTimer.resume()
+                    },
+                    onExit = {
+                        freeMelodyPlayer.stop()
+                        freeTimerView = freeTimer.exit()
+                        freeTimerError = null
+                    },
+                )
+                freeTimerError?.let {
+                    Text(it, modifier = Modifier.padding(horizontal = 16.dp),
+                        color = atelierErrorTextColor())
+                }
                 if (session == null || timer == null || view == null) {
                     Column(
-                        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                            .padding(16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Text("Timer · saved classes",
@@ -928,6 +1050,7 @@ fun SessionEditorScreen(
                         classClockTimes = classClockTimes,
                         timerError = timerError,
                         designPalette = designPalette,
+                        eventHistory = eventHistory.toList(),
                         onPauseResume = {
                             timerAction {
                                 if (timer.view().status == TimerStatus.PAUSED ||
@@ -953,12 +1076,14 @@ fun SessionEditorScreen(
                             runTimedCue(advancedByNext = true) { timer.nextPhase() }
                         },
                         onExit = {
+                            recordClassEvent("Exit", timer.view(), timer.view())
                             classStatusNotification.clear()
                             playingSession = null
                             launchRunRequested = false
                             activeTab = MainTab.TIMER
                         },
                     )
+                }
                 }
             }
         }
@@ -1022,6 +1147,20 @@ fun SessionEditorScreen(
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Text(request.session.rules.name)
+                    if (classAlertVolumeMuted) {
+                        Text((if (soundSettings.classAlertsUseAlarmVolume)
+                            "Alarm" else "Media") + " volume is at zero. Class cues " +
+                            "may be silent until you raise it.",
+                            color = atelierErrorTextColor(),
+                            style = MaterialTheme.typography.bodySmall)
+                    }
+                    TextButton(onClick = {
+                        melodyPlayer.play(soundSettings.soundFor(TimerCue.POSE_FINISHED),
+                            soundSettings.secondsFor(TimerCue.POSE_FINISHED),
+                            useAlarmVolume = soundSettings.classAlertsUseAlarmVolume) {
+                            message -> melodyError = message
+                        }
+                    }) { Text("Test Class alert sound") }
                     Text(
                         "Calculated finish: " + clockFormat.format(Date(calculatedFinish)),
                         modifier = Modifier.testTag("run_end_calculated"),

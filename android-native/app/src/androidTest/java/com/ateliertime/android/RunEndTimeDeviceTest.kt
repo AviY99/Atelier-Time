@@ -50,7 +50,7 @@ class RunEndTimeDeviceTest {
         val timer = MonotonicSessionTimer(s) { now }
         val chosen = System.currentTimeMillis()
         try {
-            RunEndTimePlanner.plan(s, chosen, chosen + m(150) * 1_000L)
+            RunEndTimePlanner.plan(s, chosen, chosen + m(145) * 1_000L)
             fail("Impossible early finish must be rejected")
         } catch (_: IllegalArgumentException) { }
         assertEquals(TimerStatus.READY, timer.view().status)
@@ -71,12 +71,12 @@ class RunEndTimeDeviceTest {
         assertEquals(tracked.classEndEpochMs, viewed.classEndEpochMs)
     }
 
-    @Test fun finishIsNeverBeforeOneMinutePerLastSession() {
+    @Test fun finishIsNeverBeforeOneMinuteMergedSession() {
         val s = session()
         val now = System.currentTimeMillis()
-        val lastFeasible = RunEndTimePlanner.plan(s, now, now + m(152) * 1_000L)
+        val lastFeasible = RunEndTimePlanner.plan(s, now, now + m(146) * 1_000L)
         assertEquals(m(1), lastFeasible.adjusted.firstFinalPoseSeconds)
-        assertEquals(m(1), lastFeasible.adjusted.lastFinalPoseSeconds)
+        assertEquals(0, lastFeasible.adjusted.lastFinalPoseSeconds)
     }
 
     @Test fun mainActivityAndForegroundServiceHaveExpectedExportSettings() {
@@ -145,7 +145,7 @@ class RunEndTimeDeviceTest {
         var now = SystemClock.elapsedRealtime()
         val timer = MonotonicSessionTimer(session) { now }
         try {
-            RunEndTimePlanner.plan(session, 0L, m(151) * 1000L)
+            RunEndTimePlanner.plan(session, 0L, m(145) * 1000L)
             fail("Impossible early time should not start the Class")
         } catch (_: IllegalArgumentException) { }
         now += 10_000L

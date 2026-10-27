@@ -51,18 +51,18 @@ class ApprovedFinishRecoveryTest {
         assertEquals(saved, session.phases)
     }
 
-    @Test fun earlyEndAtExactlyTwoOneMinuteFinalPosesIsAccepted() {
+    @Test fun earlyEndAtExactlyOneMinuteMergedFinalSessionIsAccepted() {
         val session = approved()
-        val planned = RunEndTimePlanner.plan(session, 0L, minutes(152) * 1000L)
+        val planned = RunEndTimePlanner.plan(session, 0L, minutes(146) * 1000L)
         assertEquals(minutes(1), planned.adjusted.firstFinalPoseSeconds)
-        assertEquals(minutes(1), planned.adjusted.lastFinalPoseSeconds)
+        assertEquals(0, planned.adjusted.lastFinalPoseSeconds)
     }
 
-    @Test fun earlyEndOneSecondBeforeTwoPoseMinimumIsRejected() {
+    @Test fun earlyEndOneSecondBeforeMergedMinimumIsRejected() {
         val session = approved()
         try {
-            RunEndTimePlanner.plan(session, 0L, (minutes(152) - 1L) * 1000L)
-            fail("Two final Sessions must each be at least a minute.")
+            RunEndTimePlanner.plan(session, 0L, (minutes(146) - 1L) * 1000L)
+            fail("The merged final Session must be at least a minute.")
         } catch (_: IllegalArgumentException) { }
     }
 
