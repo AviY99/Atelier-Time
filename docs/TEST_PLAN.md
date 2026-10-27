@@ -1,3 +1,9 @@
+## D-121 — hard Class finish verification (2026-10-27)
+
+**D-120 rejected by user after on-device Next regression report.** Source correction D-121/code16 is UNVERIFIED until fresh Android/JVM build and QA. Refer to [D-121 exact timing contract](D121_NEXT_PHYSICAL_BUDGET_REVIEW_2026_10_27.md).
+
+Regression priorities: (1) eleven rapid Next events within six minutes of a three-hour Class; (2) Next/Break Restart/Pause/Resume and fractional interruptions; (3) after EACH accepted action, compare immutable Class-end epoch with physical remaining and virtual future budget (within <2 seconds of phase quantization); (4) failed Next remains atomic; (5) elapsed graph End label equals approved physical Class duration; (6) final-pair insertions/merges, genuine special manual placement, Summary/C once; (7) preserve two saved Classes and Sound settings during any subsequently authorized update. **The added D-121 JVM tests have NOT BEEN RUN.** No installation or instrumentation has been authorized.
+
 # D-120 unified Class timer engine — approved regression gate (2026-10-27)
 
 The post-Stable-7 user decisions are recorded in [D-120 contract](D120_TIMER_LOGIC_UNIFICATION_DECISIONS_2026_10_27.md). These are development-only tests; **Stable 7 remains frozen**. Every D-120 candidate must run the complete pure Kotlin domain/EditorInput JUnit suite and separately pass Android Gradle compilation before any proposed phone update.
