@@ -67,4 +67,20 @@ class D121NextBudgetTest {
         assertTrue("Pause/Restart/Next moved physical deadline",
             kotlin.math.abs(remaining - (10800000L - now)) < 3000L)
     }
+
+    @Test fun invalidVirtualEndIsRejectedEvenWhenPhasesAreContiguous() {
+        val engine = ScheduleEngine()
+        val session = engine.approve(engine.generate(
+            SessionRules("reject", "Class", 10800, 900, poseSeconds = 1500,
+                specialBreakCount = 1), FinalPoseChoice.remainder()))
+        val invalid = runCatching {
+            FinalPairCompensation.reflow(session, session.phases,
+                correctionSeconds = -1500,
+                boundary = ReflowBoundary(
+                    physicalRemainingMillis = 10800000L,
+                    virtualCursorMillis = 0L))
+        }
+        assertTrue("A contiguous schedule must not override the Class deadline",
+            invalid.isFailure)
+    }
 }
