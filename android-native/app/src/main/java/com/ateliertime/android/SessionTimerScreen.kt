@@ -231,7 +231,7 @@ fun SessionTimerScreen(
         if (view.recoveredSeconds != 0) {
             Text(
                 (if (view.recoveredSeconds > 0) "Time recovered from ending: "
-                else "Time added to ending: ") +
+                else "Next credit redistributed to future Sessions: ") +
                     formatTime(kotlin.math.abs(view.recoveredSeconds)),
                 color = if (atelierNightActive()) Color.White
                     else MaterialTheme.colorScheme.primary,
