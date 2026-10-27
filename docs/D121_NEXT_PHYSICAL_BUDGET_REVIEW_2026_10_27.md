@@ -1,3 +1,20 @@
+## QA-D121-01 — Samsung build-only evidence (2026-10-27)
+
+**PASS (build-only).** User-supplied Samsung terminal screenshot explicitly shows:
+
+- `BUILD SUCCESSFUL in 1m 17s`
+- `72 actionable tasks: 72 executed`
+- `D-121 JVM ACTUAL: tests=225 failures=0 errors=0 skipped=0`
+- `BUILD ONLY PASS`
+- Generated regular candidate: `/storage/emulated/0/Download/Atelier-Time-D121-Candidate.apk`
+- Generated Android test package: `/storage/emulated/0/Download/Atelier-Time-D121-Tests.apk`
+- Generated manifest: `/storage/emulated/0/Download/Atelier-Time-D121-QA-manifest.txt`
+- `NO regular/test APK installed`
+
+**Scope of acceptance:** Android/Gradle compilation, APK assembly and 225 local JVM tests passed on the user's phone. The Android instrumentation APK was built, **not executed**. Device behavior of rapid Next, mixed Pause/Restart, the physical-end invariant and preservation of saved Classes/Sounds **has not been accepted**. The terminal screenshot itself does not reveal the manifest's commit SHA. Status remains **D-121 development candidate; NOT Stable**.
+
+**Gate:** Obtain explicit separate authorization before app installation/updating saved app data; no test APK installation or uninstall/downgrade. If authorized, first verify the manifest corresponds to the intended D-121 source, protect stored Classes/Sounds, and perform focused manual QA against Stable 7 behavior.
+
 # D-121 — Next physical-budget correction and Stable-7 behavior comparison
 
 **Date:** 2026-10-27
