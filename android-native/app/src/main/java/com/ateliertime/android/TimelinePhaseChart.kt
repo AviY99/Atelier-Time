@@ -142,7 +142,12 @@ fun TimelinePhaseChart(
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Start  00:00", style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.weight(1f))
-                Text("End  " + chartTime(total),
+                // Display the approved PHYSICAL duration, not a sum of many
+                // individually truncated observed/forecast fragments.
+                Text("End  " + chartTime(
+                    if (runtimeTimeline != null &&
+                        classElapsedSeconds != null && classRemainingSeconds != null)
+                        classElapsedSeconds + classRemainingSeconds else total),
                     style = MaterialTheme.typography.labelSmall)
             }
             if (runtimeTimeline == null) {
