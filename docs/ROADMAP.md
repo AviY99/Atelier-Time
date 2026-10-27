@@ -1,4 +1,8 @@
-## 2026-10-27 — D-117 next development candidate (phone build pending)
+## 2026-10-27 — D-118 quick Free presets / descriptive timer tabs
+
+After D-117 user-reported phone acceptance, source D-118 renames the two timer tabs to **Programed Timer** and **Free Timer** and adds 8 quick durations (1/4/5/10/15/25/30m/1h) above the Free action controls. Quick selection only fills editable HH:MM:SS; never auto-starts or overrides active countdown. 211/211 local Kotlin JUnit PASS; Android Gradle and device QA pending. [D118 QA handoff](D118_FREE_PRESETS_AND_TAB_LABELS_2026_10_27.md); Stable 5/6 untouched.
+
+## 2026-10-27 — HISTORICAL D-117 next development candidate
 
 User D-116 reports all else working but tab title clipping, visually mixed elapsed/schedule bar, and automatic special Break drifting away from Class center after many Next operations. D-117 source implements six unpadded semantic tab cells, adjacent separate 11dp physical elapsed + 33dp actual-past/replanned-future schedule bars, and automatic *future-only* midpoint rebalancing with locked history and strict D-116 last-two-session rule. Manual Break positions and physical Class end are protected. **Local 209/209 Kotlin JVM tests PASS; Android Gradle and phone QA pending.** [D117 specification and gates](D117_TAB_CHART_AND_SPECIAL_BREAK_2026_10_27.md). Stable 5/6 frozen.
 

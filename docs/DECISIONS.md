@@ -1,4 +1,8 @@
-## 2026-10-27 — D-117 runtime placement refinement (no change to saved approval)
+## 2026-10-27 — D-118 Free shortcuts (explicit Start retained)
+
+Following the user's D-117 functioning report, the user requested exact tab labels `Programed Timer`, `Free Timer`, plus eight Free duration shortcuts. D-118 uses two-line full labels and eight preset-to-HH:MM:SS buttons, requiring an explicit Start and refusing changes during Running/Paused. Class/Free timing and saved presets remain protected. Local 211/211 Kotlin tests PASS; phone gate pending. [Full details](D118_FREE_PRESETS_AND_TAB_LABELS_2026_10_27.md).
+
+## 2026-10-27 — HISTORICAL D-117 runtime placement refinement
 
 In response to field observation after repeated Next, automatic special Breaks are targeted by their **center** near a fraction of the actual Class duration (midpoint for a single Break), using only still-unstarted regular Break slots; closest feasible slot is sufficient. Once begun/performed, a Break is immutable, and manual ordinal choices are never relocated. Physical Class deadline, Summary and approved/saved Class remain unchanged. The elapsed progress and actual/revised schedule become two adjacent 11dp/33dp bars, and all six tab labels must be fully visible. Implemented as D-117 source, 209/209 local JVM PASS; phone QA pending. [Detailed rule](D117_TAB_CHART_AND_SPECIAL_BREAK_2026_10_27.md).
 

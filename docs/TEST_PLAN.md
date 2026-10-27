@@ -1,4 +1,10 @@
-## 2026-10-27 — D-117 QA (source verified, phone pending)
+## 2026-10-27 — D-118 quick preset / renamed tabs QA
+
+- Local actual Kotlin/JUnit **211/211 PASS**, 22 suites (2 new cases: exact ordered durations and HH:MM:SS mapping). Shell syntax and diff checks pass. No Compose build in local runtime.
+- Phone build-only: `cd /storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native`, update `android-native-kotlin-compose`, run `bash tools/build_d118_candidate_on_phone.sh` only after publishing source; inspect Gradle and JVM XML. No installation by script.
+- Separately authorized update-install preserves two Classes and Sounds. Verify six fully readable tab labels including `Programed Timer` and `Free Timer`; eight button labels in 2 rows; 25m sets 00:25:00, 1h sets 01:00:00; changing preset never starts countdown and buttons cannot reset Running/Paused; free sound and regular Class unchanged. AndroidTest execution needs a further gate.
+
+## 2026-10-27 — HISTORICAL D-117 QA
 
 - **Local actually executed:** Kotlin/JUnit 209/209 PASS across 22 suites, including four new automatic special-Break placement and many-Next tests. Scripts parse-only `bash -n`, `git diff --check` PASS; Android Gradle build not available locally.
 - **Phone build only:** update source on dev branch in correct Code on the Go directory, run `bash tools/build_d117_candidate_on_phone.sh`, obtain actual Gradle result and D-117 JVM XML total. No APK installation as part of build.

@@ -1,4 +1,8 @@
-## 2026-10-27 — D-117 user bug report; unified source fixes and local QA
+## 2026-10-27 — D-118 two timer tabs + eight Free quick durations
+
+User reports D-117 working on phone. Requested longer tab titles and eight Free presets; implemented two-line `Programed Timer` / `Free Timer` labels, quick durations 1/4/5/10/15/25/30m and 1h above Free Start/Pause controls, only editable in READY/FINISHED, no auto-start or persistence changes. Compose test selectors updated; 2 JVM mapping regressions added. **Actual local 211/211 Kotlin tests PASS, 22 suites**; on-phone D-118 Gradle build, installation, instrumentation and visual check pending. Frozen Stable 5/6 untouched; [D118 record](D118_FREE_PRESETS_AND_TAB_LABELS_2026_10_27.md).
+
+## 2026-10-27 — HISTORICAL D-117 user bug report
 
 User-provided D-116 screenshot shows six navigation labels clipped (`Edito`, `Soun`, `Desig`); they request independent adjacent Elapsed and colored schedule bar, with ratios 11dp/33dp, and automatic special Break near physical Class center even after many Next operations. Implemented on development branch only, with `SpecialBreakRebalancer`, protected incremental `adjustFutureTail`, 4 new Kotlin tests, and guarded build/QA scripts. **Actually executed Kotlin/JUnit: 209/209 PASS, 22 suites**. Full Android Gradle compile, D-117 device update-install/acceptance and test instrumentation **not performed**. D-116 remains user-reported operational except those issues; D-114 Stable 5/6 snapshots unchanged. Full record: [D117](D117_TAB_CHART_AND_SPECIAL_BREAK_2026_10_27.md).
 

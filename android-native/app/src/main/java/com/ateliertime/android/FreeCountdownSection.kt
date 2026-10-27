@@ -7,10 +7,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.ateliertime.domain.FreeQuickPresets
 import com.ateliertime.domain.FreeTimerStatus
 import com.ateliertime.domain.FreeTimerView
 
-/** Always available in Timer; its state is owned above the tab navigation. */
+/** Free Timer tab. Its running countdown is owned above the tab navigation. */
 @Composable
 fun FreeCountdownSection(
     view: FreeTimerView,
@@ -56,6 +58,35 @@ fun FreeCountdownSection(
             }
             Text(statusText, style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.testTag("free_timer_status"))
+            Text("Quick presets · select a duration, then press Start",
+                style = MaterialTheme.typography.labelMedium)
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                FreeQuickPresets.entries.chunked(4).forEach { choices ->
+                    Row(modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        choices.forEach { preset ->
+                            val selected = hours == preset.hours &&
+                                minutes == preset.minutes && seconds == preset.seconds
+                            OutlinedButton(
+                                onClick = {
+                                    hours = preset.hours
+                                    minutes = preset.minutes
+                                    seconds = preset.seconds
+                                },
+                                enabled = editable,
+                                modifier = Modifier.weight(1f).height(40.dp)
+                                    .testTag("free_preset_${preset.durationSeconds}"),
+                                contentPadding = PaddingValues(horizontal = 0.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = if (selected)
+                                        MaterialTheme.colorScheme.secondaryContainer
+                                    else MaterialTheme.colorScheme.surface,
+                                ),
+                            ) { Text(preset.label, fontSize = 11.sp, maxLines = 1) }
+                        }
+                    }
+                }
+            }
             Row(modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (editable) {

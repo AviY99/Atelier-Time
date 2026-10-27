@@ -11,6 +11,18 @@ data class FreeTimerView(
 
 data class FreeTimerTick(val view: FreeTimerView, val completedNow: Boolean = false)
 
+/** UI-only duration choices: selecting one never starts or changes a timer. */
+data class FreeQuickPreset(val label: String, val durationSeconds: Int) {
+    val hours: Int get() = durationSeconds / 3600
+    val minutes: Int get() = (durationSeconds / 60) % 60
+    val seconds: Int get() = durationSeconds % 60
+}
+
+object FreeQuickPresets {
+    val entries: List<FreeQuickPreset> = listOf(1, 4, 5, 10, 15, 25, 30)
+        .map { FreeQuickPreset("${it}m", it * 60) } + FreeQuickPreset("1h", 3600)
+}
+
 class FreeCountdownTimer(private val nowMillis: () -> Long) {
     private var status = FreeTimerStatus.READY
     private var durationSeconds = 0

@@ -543,8 +543,8 @@ fun SessionEditorScreen(
                 MainTab.entries.forEach { tab ->
                     val label = when (tab) {
                         MainTab.EDITOR -> "Editor"
-                        MainTab.TIMER -> "Timer"
-                        MainTab.FREE_TIMER -> "Free"
+                        MainTab.TIMER -> "Programed Timer"
+                        MainTab.FREE_TIMER -> "Free Timer"
                         MainTab.SOUNDS -> "Sound"
                         MainTab.DESIGN -> "Design"
                         MainTab.ABOUT -> "About"
@@ -564,8 +564,14 @@ fun SessionEditorScreen(
                     ) {
                         Box(modifier = Modifier.fillMaxWidth().height(46.dp),
                             contentAlignment = Alignment.Center) {
-                            Text(label, color = contentColor, fontSize = 10.sp,
-                                maxLines = 1, softWrap = false,
+                            val displayLabel = when (tab) {
+                                MainTab.TIMER -> "Programed\nTimer"
+                                MainTab.FREE_TIMER -> "Free\nTimer"
+                                else -> label
+                            }
+                            Text(displayLabel, color = contentColor,
+                                fontSize = if (tab == MainTab.TIMER) 9.sp else 10.sp,
+                                maxLines = 2, softWrap = false,
                                 textAlign = TextAlign.Center,
                                 overflow = TextOverflow.Ellipsis)
                         }

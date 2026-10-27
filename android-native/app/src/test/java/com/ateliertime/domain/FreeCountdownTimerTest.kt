@@ -4,6 +4,29 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class FreeCountdownTimerTest {
+    @Test fun quickPresetCatalogContainsEightExactDurationsInRequestedOrder() {
+        assertEquals(listOf(60, 240, 300, 600, 900, 1500, 1800, 3600),
+            FreeQuickPresets.entries.map { it.durationSeconds })
+        assertEquals(listOf("1m", "4m", "5m", "10m", "15m", "25m", "30m", "1h"),
+            FreeQuickPresets.entries.map { it.label })
+        assertEquals(8, FreeQuickPresets.entries.distinctBy { it.durationSeconds }.size)
+    }
+
+    @Test fun everyQuickPresetConvertsToExactHoursMinutesAndSeconds() {
+        val timer = FreeCountdownTimer { 1_000L }
+        FreeQuickPresets.entries.forEach { preset ->
+            val start = timer.start(preset.hours, preset.minutes, preset.seconds)
+            assertEquals(preset.durationSeconds, start.durationSeconds)
+            assertEquals(preset.durationSeconds, start.remainingSeconds)
+            assertEquals(FreeTimerStatus.RUNNING, start.status)
+            timer.exit()
+        }
+        val hour = FreeQuickPresets.entries.last()
+        assertEquals(1, hour.hours)
+        assertEquals(0, hour.minutes)
+        assertEquals(0, hour.seconds)
+    }
+
     @Test fun countdownUsesMonotonicClockAndFinishesExactlyOnce() {
         var monotonic = 10_000L
         val timer = FreeCountdownTimer { monotonic }

@@ -3,6 +3,7 @@ package com.ateliertime.android
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -72,7 +73,7 @@ class RunEndApprovalUiTest {
                 )
             }
         }
-        compose.onNodeWithText("Timer", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("top-tab-Programed Timer").performClick()
         compose.onNodeWithText("Run", useUnmergedTree = true)
             .performScrollTo().performClick()
         compose.onNodeWithTag("run_end_dialog").assertExists()
@@ -109,11 +110,13 @@ class RunEndApprovalUiTest {
                     melodyPreferencesOverride = isolatedMelody)
             }
         }
-        compose.onNodeWithText("Timer", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("top-tab-Programed Timer").performClick()
         compose.onNodeWithTag("free_timer_section").assertDoesNotExist()
-        compose.onNodeWithText("Free", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("top-tab-Free Timer").performClick()
         compose.onNodeWithTag("free_timer_section").assertExists()
+        compose.onNodeWithTag("free_preset_60").performScrollTo().performClick()
         compose.onNodeWithTag("free_timer_start").performClick()
+        compose.onNodeWithTag("free_preset_3600").assertIsNotEnabled()
         compose.onNodeWithTag("free_timer_pause_resume").performClick()
         compose.onNodeWithTag("free_timer_status").assertTextContains("Paused")
         compose.onNodeWithTag("free_timer_pause_resume").performClick()
