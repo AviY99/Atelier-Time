@@ -1,3 +1,7 @@
+## 2026-10-27 — D-121 source correction after user rejected D-120 Next behavior
+
+The user reports D-120 broken under Next despite 221/221 passing tests. **Do not call D-120 stable or accepted.** Stable 7/D-119 is frozen and was working. D-121/code16 development source now derives one correction identity from exact monotonic physical elapsed minus virtual phase cursor, restores D-119 candidate selection order, checks the real physical remaining-time budget on candidate reflows and clarifies the UI credit/chart end labels. Exact formulas, boundaries and QA status: [D-121 investigation](D121_NEXT_PHYSICAL_BUDGET_REVIEW_2026_10_27.md). **Unverified source only; do not install APK or claim a green test run.**
+
 ## 2026-10-27 — D-120 TIMER LOGIC WORK (DEVELOPMENT ONLY)
 
 The user approved a hard physical end, genuine-special-break preservation over final-pair merge, ordinary runtime semantics for `L<=B` while retaining its Editor duration/placement, one unified runtime reflow entry and Editor-only 25/5. [Authoritative D-120 decisions](D120_TIMER_LOGIC_UNIFICATION_DECISIONS_2026_10_27.md). The development branch contains the D-120/code15 source implementation and local 221/221 Kotlin/JUnit regression result; this does not amend the **closed Stable 7/D-119** checkpoint below. D-120 has no Samsung/Android Compose build or installation evidence yet. Do not treat local JVM tests as Android build approval.
