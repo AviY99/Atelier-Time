@@ -1,3 +1,11 @@
+## QA-D120-02 — BLOCKED / user-reported Next regression (2026-10-27)
+
+**D-120 is NOT accepted.** Following the successful Samsung build-only result, the user reported and illustrated that using `Next` appeared to add time beyond the fixed Class finish. This is a **user-observed acceptance failure**, not a independently re-run deterministic reproduction of a changed wall-clock deadline. Do not claim the installed build, exact device actions, or changed `classEndEpochMs` until verified.
+
+**Source-level diagnosis:** `MonotonicSessionTimer.nextPhase()` computes a negative signed correction when a phase is skipped, and `FinalPairCompensation.adjust()` / `adjustFutureTail()` increase the virtual schedule end (`totalSeconds = originalDuration - correction`). This transformation existed in D-119 and is only valid if an exactly matching virtual-cursor jump absorbs the same credit, preserving the *physical* finish. `ClassClockTracker.afterNext()` keeps its physical deadline, but the new `reflow().valid()` verifies internal continuity / protected phases / Summary, **not** the invariant `physicalNow + effectiveFutureDuration == approvedPhysicalDeadline` nor the displayed future phase end labels against that deadline. The D-120 consolidation remains a dispatching wrapper around three older calculation strategies, not a fully singular planner. Passing 221 JVM tests is not proof of this missing invariant or UI correctness.
+
+**Release gate now FAIL / BLOCKED** until a targeted deterministic Next sequence reproduces or rules out actual physical-end drift; tests must compare the unchanged `classEndEpochMs`, the virtual-versus-physical relation, phase-end predictions and live timeline after every Next, including repeated Next + Pause + Restart, with the full user-observed case. Avoid equating an increased *virtual* `totalSeconds` with an actual moved `Class end` before validating which label changed. Review and repair on development branch only, with new QA. Keep Stable 7 frozen; do not recommend uninstall/downgrade on the phone because it risks stored Classes/Sounds.
+
 # D-120 — Approved timer logic unification and behavior contract
 
 **Date:** 2026-10-27
