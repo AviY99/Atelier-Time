@@ -1,3 +1,7 @@
+## D-122 — Restart placement regression following D-121 user rejection
+
+Test exactly the before/after case (regular five-minute Break, eight-second restart, eight Next-added blocks, genuine automatic special): verify original special index, identity and phase order stay unchanged; verify every added block remains, only eligible final work time is compensated; verify the Class deadline stays fixed. The new `D122RestartPlacementRegressionTest` has three methods. All previous D-121 tests must still pass. **No tests have yet been run for D-122.** See [D-122 forensic review](D122_RESTART_AFTER_NEXT_PLACEMENT_REVIEW_2026_10_28.md). Never change stable branch or install without approval.
+
 ## D-121 — hard Class finish verification (2026-10-27)
 
 **D-120 rejected by user after on-device Next regression report.** Source correction D-121/code16 is UNVERIFIED until fresh Android/JVM build and QA. Refer to [D-121 exact timing contract](D121_NEXT_PHYSICAL_BUDGET_REVIEW_2026_10_27.md).
