@@ -34,6 +34,10 @@ data class ReflowBoundary(
     val preferActiveFuture: Boolean = false,
     /** First final work Session is already observed: adjust the last only. */
     val lastOnly: Boolean = false,
+    /** Physical time remaining until the immutable approved Class deadline. */
+    val physicalRemainingMillis: Long? = null,
+    /** Virtual cursor immediately after the proposed transition. */
+    val virtualCursorMillis: Long? = null,
 )
 
 object FinalPairCompensation {
@@ -57,6 +61,19 @@ object FinalPairCompensation {
     ): CompensatedTimeline {
         fun valid(candidate: CompensatedTimeline): Boolean {
             val phases = candidate.phases
+            if (candidate.totalSeconds.toLong() !=
+                session.rules.totalSeconds.toLong() - correctionSeconds.toLong()) return false
+            val remaining = boundary.physicalRemainingMillis
+            val cursor = boundary.virtualCursorMillis
+            if (remaining != null || cursor != null) {
+                if (remaining == null || cursor == null || remaining < 0L) return false
+                val virtualRemaining = candidate.totalSeconds.toLong() * 1_000L - cursor
+                // The phase engine has whole-second granularity; the approved
+                // deadline and exact cumulative correction retain milliseconds.
+                // Together their truncations may differ by less than 2 seconds.
+                if (virtualRemaining < 0L ||
+                    kotlin.math.abs(virtualRemaining - remaining) >= 2_000L) return false
+            }
             if (phases.isEmpty() || phases.first().startSeconds != 0 ||
                 phases.last().endSeconds != candidate.totalSeconds ||
                 phases.any { it.durationSeconds <= 0 } ||
@@ -92,9 +109,10 @@ object FinalPairCompensation {
                 boundary.nextIndex ?: boundary.protectedThroughIndex,
                 correctionSeconds)
         }
-        val ordered = if (boundary.preferActiveFuture &&
-            boundary.protectedThroughIndex >= 0) listOf(activeTail, base)
-        else listOf(base, activeTail)
+        // Preserve D-119's tested preference: rebuild from approved source
+        // first, then use the already-relocated future only if history forbids
+        // a fresh source plan. D-120 reversed this order after the first Next.
+        val ordered = listOf(base, activeTail)
         for (attempt in ordered) {
             val proposed = runCatching(attempt).getOrNull() ?: continue
             if (valid(proposed)) return proposed
