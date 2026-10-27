@@ -91,11 +91,13 @@ class MonotonicSessionTimer(
         locked: Int,
         next: Int? = null,
         lastOnly: Boolean = false,
+        preserveExistingTail: Boolean = false,
     ) = ReflowBoundary(
         protectedThroughIndex = locked,
         nextIndex = next,
         preferActiveFuture = nextHasOccurred,
         lastOnly = lastOnly,
+        preserveExistingTail = preserveExistingTail,
         physicalRemainingMillis = physicalDeadlineMs?.minus(nowMs),
         virtualCursorMillis = cursorMs,
     )
@@ -293,7 +295,8 @@ class MonotonicSessionTimer(
         val correction = correctionSeconds(correctionMs)
         val revised = FinalPairCompensation.reflow(
             session, activePhases, correction, allowExtraRegular = nextHasOccurred,
-            boundary = budgetBoundary(now, targetCursor, locked = index),
+            boundary = budgetBoundary(now, targetCursor, locked = index,
+                preserveExistingTail = true),
         )
         val target = revised.phases[index]
         check(target.id == current.id && target.startSeconds == current.startSeconds) {
@@ -376,7 +379,8 @@ class MonotonicSessionTimer(
             val revised = FinalPairCompensation.reflow(
                 session, activePhases, nextLost, allowExtraRegular = nextHasOccurred,
                 boundary = budgetBoundary(now, elapsedBeforeRunMs,
-                    locked = activeIndex, lastOnly = late),
+                    locked = activeIndex, lastOnly = late,
+                    preserveExistingTail = true),
 
             )
             // An interruption cannot silently rewrite a completed phase.
