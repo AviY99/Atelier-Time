@@ -1,3 +1,9 @@
+## 2026-10-27 — D-116 source changes following user-confirmed D-115 install
+
+**Observed D-115 phone evidence:** Samsung CoGo screenshot `BUILD SUCCESSFUL in 1m 23s`, 72/72 Gradle tasks, JVM XML `196 failures=0 errors=0 skipped=0`, both regular/test APKs and manifest created, no automatic installation. ADB wireless reconnect/pairing failed (no device connected); user instead used My Files to install regular D-115 and reported **"הכל עובד"**. Do not claim D-115 Android instrumentation ran, or Stable 6 replaced as frozen baseline.
+
+**New development-only D-116:** chronological actual-history / adjusted-future chart, elapsed+remaining embedded with one overlaid bar, no activity breakdown on live Timer; separate Free tab in six-way LTR navigation; Same sound all four cues; strict Next credit `A+B > 2×regularSession + regularBreak`, insert whole blocks before final two and split remainder, no original Class mutation. See [D116 specification and gate](D116_TIMELINE_AND_NEXT_RULES_2026_10_27.md). **Local 205/205 JVM PASS, Android Gradle/Compose/device QA unexecuted.**
+
 ## 2026-10-27 — D-115 unified changeset / local JVM evidence
 
 User authorized doing every post-Stable-6 change request together. All app edits are confined to `android-native-kotlin-compose`, with Android package candidate D-115/versionCode 10. Source changes cover runtime short-final-pair merge (A + Break + B <= Editor regular Session), C before Summary, guarded Next + ephemeral trace, Free Countdown and sound, Timer live glance/remaining line, keep-awake and sound-volume UX, optional alarm-volume routing and transient focus. Added dedicated D-115 CoGo/Termux guarded scripts; no stable branch, installed APK, real saved Class or Sound settings was changed.

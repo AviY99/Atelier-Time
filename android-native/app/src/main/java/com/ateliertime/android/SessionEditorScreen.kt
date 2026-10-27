@@ -49,7 +49,7 @@ import kotlinx.coroutines.delay
  * Timer owns the saved-class library, Run and real-time countdown.
  * Style is a neutral Material 3 baseline, NOT final branding.
  */
-private enum class MainTab { EDITOR, TIMER, SOUNDS, DESIGN, ABOUT }
+private enum class MainTab { EDITOR, TIMER, FREE_TIMER, SOUNDS, DESIGN, ABOUT }
 
 /** Pending approval is ephemeral: no Class clock or sound starts before Confirm. */
 private data class PendingRunApproval(
@@ -532,8 +532,8 @@ fun SessionEditorScreen(
         contentColor = MaterialTheme.colorScheme.onBackground,
     ) {
     Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
-        // Non-scrolling 5-way navigation. LTR is deliberate, including on
-        // Hebrew/RTL devices: Editor | Timer | Sound | Design | About.
+        // Non-scrolling six-way navigation, LTR even in Hebrew/RTL:
+        // Editor | Timer | Free | Sound | Design | About.
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
             TabRow(selectedTabIndex = activeTab.ordinal,
                 modifier = Modifier.fillMaxWidth()) {
@@ -541,6 +541,7 @@ fun SessionEditorScreen(
                     val label = when (tab) {
                         MainTab.EDITOR -> "Editor"
                         MainTab.TIMER -> "Timer"
+                        MainTab.FREE_TIMER -> "Free"
                         MainTab.SOUNDS -> "Sound"
                         MainTab.DESIGN -> "Design"
                         MainTab.ABOUT -> "About"
@@ -572,6 +573,43 @@ fun SessionEditorScreen(
                 },
             )
             MainTab.ABOUT -> AtelierAboutPanel()
+            MainTab.FREE_TIMER -> Column(
+                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text("Free timer", style = MaterialTheme.typography.headlineSmall)
+                Row(modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Text("Keep screen awake during timers", modifier = Modifier.weight(1f))
+                    Switch(checked = keepScreenAwake,
+                        onCheckedChange = { keepScreenAwake = it },
+                        modifier = Modifier.testTag("free_keep_screen_awake"))
+                }
+                if (mediaVolumeMuted) Text("Media volume is at zero. Free timer " +
+                    "completion may be silent.", color = atelierErrorTextColor())
+                FreeCountdownSection(
+                    view = freeTimerView,
+                    onStart = { hours, minutes, seconds ->
+                        freeMelodyPlayer.stop()
+                        runCatching { freeTimer.start(hours, minutes, seconds) }
+                            .onSuccess { freeTimerView = it; freeTimerError = null }
+                            .onFailure { freeTimerError = it.message }
+                    },
+                    onPauseResume = {
+                        freeTimerView = if (freeTimerView.status == FreeTimerStatus.RUNNING)
+                            freeTimer.pause() else freeTimer.resume()
+                    },
+                    onExit = {
+                        freeMelodyPlayer.stop()
+                        freeTimerView = freeTimer.exit()
+                        freeTimerError = null
+                    },
+                )
+                freeTimerError?.let { Text(it, color = atelierErrorTextColor()) }
+                Text("Completion sound: Sounds → Same sound for all / Free countdown.",
+                    style = MaterialTheme.typography.bodySmall)
+            }
             MainTab.EDITOR -> Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(16.dp),
@@ -975,37 +1013,13 @@ fun SessionEditorScreen(
                         onCheckedChange = { keepScreenAwake = it },
                         modifier = Modifier.testTag("keep_screen_awake"))
                 }
-                if (mediaVolumeMuted || classAlertVolumeMuted) {
+                if (classAlertVolumeMuted) {
                     Text((if (classAlertVolumeMuted)
                         "Class alert volume is at zero. " else "") +
-                        (if (mediaVolumeMuted)
-                            "Media volume is at zero (Free countdown). " else "") +
                         "Raise the relevant volume if desired.",
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = atelierErrorTextColor(),
                         style = MaterialTheme.typography.bodySmall)
-                }
-                FreeCountdownSection(
-                    view = freeTimerView,
-                    onStart = { hours, minutes, seconds ->
-                        freeMelodyPlayer.stop()
-                        runCatching { freeTimer.start(hours, minutes, seconds) }
-                            .onSuccess { freeTimerView = it; freeTimerError = null }
-                            .onFailure { freeTimerError = it.message }
-                    },
-                    onPauseResume = {
-                        freeTimerView = if (freeTimerView.status == FreeTimerStatus.RUNNING)
-                            freeTimer.pause() else freeTimer.resume()
-                    },
-                    onExit = {
-                        freeMelodyPlayer.stop()
-                        freeTimerView = freeTimer.exit()
-                        freeTimerError = null
-                    },
-                )
-                freeTimerError?.let {
-                    Text(it, modifier = Modifier.padding(horizontal = 16.dp),
-                        color = atelierErrorTextColor())
                 }
                 if (session == null || timer == null || view == null) {
                     Column(

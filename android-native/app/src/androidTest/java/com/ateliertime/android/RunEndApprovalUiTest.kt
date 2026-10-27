@@ -110,6 +110,8 @@ class RunEndApprovalUiTest {
             }
         }
         compose.onNodeWithText("Timer", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("free_timer_section").assertDoesNotExist()
+        compose.onNodeWithText("Free", useUnmergedTree = true).performClick()
         compose.onNodeWithTag("free_timer_section").assertExists()
         compose.onNodeWithTag("free_timer_start").performClick()
         compose.onNodeWithTag("free_timer_pause_resume").performClick()
@@ -118,7 +120,7 @@ class RunEndApprovalUiTest {
         compose.onNodeWithTag("free_timer_status").assertTextContains("Running")
         compose.onNodeWithTag("free_timer_exit").performClick()
         compose.onNodeWithTag("free_timer_status").assertTextContains("Ready")
-        compose.onNodeWithTag("keep_screen_awake").performClick()
+        compose.onNodeWithTag("free_keep_screen_awake").performClick()
         assertStoredClassUnchanged()
     }
 

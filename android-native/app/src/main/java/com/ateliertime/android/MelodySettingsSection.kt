@@ -75,7 +75,7 @@ fun MelodySettingsSection(
         horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         listOf(
             SoundAssignmentMode.SHARED to "Same sound for all",
-            SoundAssignmentMode.SEPARATE to "Separate A/B/C",
+            SoundAssignmentMode.SEPARATE to "Separate A/B/C/Free",
         ).forEach { (mode, title) ->
             FilterChip(
                 colors = atelierChipColors(),
@@ -100,7 +100,7 @@ fun MelodySettingsSection(
         Row(modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("All alerts · Length", style = MaterialTheme.typography.titleSmall,
+            Text("Class A/B/C · Length", style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.weight(1f))
             listOf(5, 10).forEach { seconds ->
                 FilterChip(
@@ -163,13 +163,19 @@ fun MelodySettingsSection(
     HorizontalDivider()
     Text("Free countdown · completion sound",
         style = MaterialTheme.typography.titleSmall)
-    SoundPicker(
-        cue = TimerCue.FREE_TIMER_FINISHED, settings = settings,
-        onSettingsChange = onSettingsChange,
-        onChooseSystemSound = onChooseSystemSound,
-        onChooseAudioFile = onChooseAudioFile,
-        onPreview = onPreview,
-    )
+    if (settings.assignmentMode == SoundAssignmentMode.SHARED) {
+        Text("Same sound for all includes the Free countdown. " +
+            "Its completion length stays adjustable below.",
+            style = MaterialTheme.typography.bodySmall)
+    } else {
+        SoundPicker(
+            cue = TimerCue.FREE_TIMER_FINISHED, settings = settings,
+            onSettingsChange = onSettingsChange,
+            onChooseSystemSound = onChooseSystemSound,
+            onChooseAudioFile = onChooseAudioFile,
+            onPreview = onPreview,
+        )
+    }
     Row(verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("Free timer sound length", style = MaterialTheme.typography.labelMedium)
@@ -209,8 +215,9 @@ fun MelodySettingsSection(
                 "You can switch modes without losing previous choices. " +
                 "System and file choices use Android pickers; files must " +
                 "remain accessible. Short sounds repeat for the selected time. " +
-                "The independent Free Countdown always keeps its own sound " +
-                "and duration, even when Class A/B/C are shared. " +
+                "Same sound for all includes the Free countdown melody. " +
+                "Separate restores its individual choice. Its completion " +
+                "length remains independently adjustable. " +
                 "Class cues may optionally use the alarm volume stream. " +
                 "Changing sound preferences never changes approved Classes.")
         },

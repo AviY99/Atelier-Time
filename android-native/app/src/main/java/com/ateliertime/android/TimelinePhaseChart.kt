@@ -20,21 +20,27 @@ import com.ateliertime.domain.*
 @Composable
 fun TimelinePhaseChart(
     phases: List<SchedulePhase>,
+    runtimeTimeline: RuntimeTimeline? = null,
     classRemainingSeconds: Int? = null,
     classElapsedSeconds: Int? = null,
     runtimeElapsedSeconds: Int? = null,
     currentPhaseId: String? = null,
 ) {
     if (phases.isEmpty()) return
-    val total = phases.last().endSeconds
+    val displaySegments = runtimeTimeline?.segments
+        ?: phases.map { RuntimeTimelineSegment(it.id, it.kind,
+            it.durationSeconds, observed = false) }
+    val total = displaySegments.sumOf { it.durationSeconds }
     if (total <= 0) return
-    val poseTotal = phases.filter { it.kind == PhaseKind.POSE }
+    val poseTotal = displaySegments.filter { it.kind == PhaseKind.POSE }
         .sumOf { it.durationSeconds }
-    val normalTotal = phases.filter { it.kind == PhaseKind.SHORT_BREAK }
+    val normalTotal = displaySegments.filter { it.kind == PhaseKind.SHORT_BREAK }
         .sumOf { it.durationSeconds }
-    val specialTotal = phases.filter { it.kind == PhaseKind.SPECIAL_BREAK }
+    val specialTotal = displaySegments.filter { it.kind == PhaseKind.SPECIAL_BREAK }
         .sumOf { it.durationSeconds }
-    val summaryTotal = phases.filter { it.kind == PhaseKind.SUMMARY }
+    val summaryTotal = displaySegments.filter { it.kind == PhaseKind.SUMMARY }
+        .sumOf { it.durationSeconds }
+    val pausedTotal = displaySegments.filter { it.kind == null }
         .sumOf { it.durationSeconds }
 
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
@@ -44,35 +50,37 @@ fun TimelinePhaseChart(
                 style = MaterialTheme.typography.titleMedium)
             if (classRemainingSeconds != null) {
                 val elapsed = (classElapsedSeconds ?: 0).coerceAtLeast(0)
-                val physicalTotal = elapsed + classRemainingSeconds.coerceAtLeast(0)
-                Text("Class remaining  " + chartTime(classRemainingSeconds),
-                    style = MaterialTheme.typography.labelMedium)
-                Canvas(modifier = Modifier.fillMaxWidth().height(7.dp)) {
-                    drawRect(Color.Gray.copy(alpha = 0.27f))
-                    val fraction = if (physicalTotal == 0) 1f else
-                        elapsed.toFloat() / physicalTotal.toFloat()
-                    drawRect(Color(0xFFD1A34C), size = Size(
-                        size.width * fraction.coerceIn(0f, 1f), size.height))
+                Row(modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Class elapsed  " + chartTime(elapsed),
+                        style = MaterialTheme.typography.labelMedium)
+                    Text("Class remaining  " + chartTime(classRemainingSeconds),
+                        style = MaterialTheme.typography.labelMedium)
                 }
             }
-            Text("Left to right: the complete class, proportional to actual duration.",
+            Text(if (runtimeTimeline != null)
+                    "Left: actual history · Right: updated future (proportional time)."
+                else "Left to right: the complete class, proportional to duration.",
                 style = MaterialTheme.typography.bodySmall)
             Canvas(modifier = Modifier.fillMaxWidth().height(44.dp)) {
                 val full = size.width
-                phases.forEach { phase ->
-                    val x = full * phase.startSeconds.toFloat() / total
-                    val right = full * phase.endSeconds.toFloat() / total
+                var cursorSeconds = 0
+                displaySegments.forEach { phase ->
+                    val x = full * cursorSeconds.toFloat() / total
+                    cursorSeconds += phase.durationSeconds
+                    val right = full * cursorSeconds.toFloat() / total
                     val width = (right - x).coerceAtLeast(0f)
                     drawRect(
-                        color = phaseColor(phase.kind),
+                        color = phase.kind?.let(::phaseColor) ?: Color(0xFF7C7C7C),
                         topLeft = Offset(x, 0f),
                         size = Size(width, size.height),
                     )
-                    if (currentPhaseId != null && phase.id == currentPhaseId) {
+                    if (currentPhaseId != null && phase.id == currentPhaseId &&
+                        !phase.observed) {
                         drawRect(color = Color.White, topLeft = Offset(x, 0f),
                             size = Size(width, size.height), style = Stroke(width = 3f))
                     }
-                    if (width > 3f && phase.startSeconds != 0) {
+                    if (width > 3f && cursorSeconds != phase.durationSeconds) {
                         drawLine(
                             color = Color.White.copy(alpha = 0.75f),
                             start = Offset(x, 0f), end = Offset(x, size.height),
@@ -80,7 +88,15 @@ fun TimelinePhaseChart(
                         )
                     }
                 }
-                runtimeElapsedSeconds?.let { elapsed ->
+                // One layered bar: chronological segments below, progress
+                // shading over ACTUAL history, updated future remains ahead.
+                runtimeTimeline?.let { actual ->
+                    val completedWidth = full * actual.elapsedSeconds.coerceIn(0, total)
+                        .toFloat() / total
+                    drawRect(Color(0xFFD1A34C).copy(alpha = 0.32f),
+                        size = Size(completedWidth, size.height))
+                }
+                (runtimeTimeline?.elapsedSeconds ?: runtimeElapsedSeconds)?.let { elapsed ->
                     val x = full * elapsed.coerceIn(0, total).toFloat() / total
                     drawLine(Color(0xFF182631), Offset(x, 0f),
                         Offset(x, size.height), strokeWidth = 4f)
@@ -92,11 +108,16 @@ fun TimelinePhaseChart(
                 Text("End  " + chartTime(total),
                     style = MaterialTheme.typography.labelSmall)
             }
-            Text("Time by activity", style = MaterialTheme.typography.titleSmall)
-            ChartLegend("Sessions", poseTotal, PhaseKind.POSE)
-            ChartLegend("Break · regular", normalTotal, PhaseKind.SHORT_BREAK)
-            ChartLegend("Break · special", specialTotal, PhaseKind.SPECIAL_BREAK)
-            ChartLegend("Class summary", summaryTotal, PhaseKind.SUMMARY)
+            if (runtimeTimeline == null) {
+                Text("Time by activity", style = MaterialTheme.typography.titleSmall)
+                ChartLegend("Sessions", poseTotal, PhaseKind.POSE)
+                ChartLegend("Break · regular", normalTotal, PhaseKind.SHORT_BREAK)
+                ChartLegend("Break · special", specialTotal, PhaseKind.SPECIAL_BREAK)
+                ChartLegend("Class summary", summaryTotal, PhaseKind.SUMMARY)
+            } else if (pausedTotal > 0) {
+                Text("Paused · " + chartTime(pausedTotal),
+                    style = MaterialTheme.typography.labelSmall)
+            }
         }
     }
 }

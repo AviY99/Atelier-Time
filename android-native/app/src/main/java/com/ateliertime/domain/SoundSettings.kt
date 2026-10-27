@@ -10,7 +10,7 @@ enum class SoundSource(val title: String) {
     FILE("Audio file"),
 }
 
-/** Shared mode has one sound and one 5/10s duration; separate settings are retained. */
+/** Shared mode selects one sound for ALL four cues; lengths remain cue-specific. */
 enum class SoundAssignmentMode { SEPARATE, SHARED }
 
 /** A single sound used for one cue; source options are enabled independently. */
@@ -38,7 +38,7 @@ data class SoundSettings(
     val poseEnd: CueSound = CueSound(melody = MelodyPattern.SOFT_CHIMES),
     val breakEnd: CueSound = CueSound(melody = MelodyPattern.RISING_STEPS),
     val classEnd: CueSound = CueSound(melody = MelodyPattern.CELEBRATION),
-    /** Always independent of Shared/Separate Class A/B/C preferences. */
+    /** Separate-mode choice retained while one shared sound covers all cues. */
     val freeTimer: CueSound = CueSound(melody = MelodyPattern.SOFT_CHIMES),
     // The migration-safe default preserves D-100's independent A/B/C choices.
     val assignmentMode: SoundAssignmentMode = SoundAssignmentMode.SEPARATE,
@@ -54,7 +54,6 @@ data class SoundSettings(
     val classAlertsUseAlarmVolume: Boolean = false,
 ) {
     fun soundFor(cue: TimerCue): CueSound {
-        if (cue == TimerCue.FREE_TIMER_FINISHED) return freeTimer
         if (assignmentMode == SoundAssignmentMode.SHARED) {
             return sharedSound ?: poseEnd
         }
@@ -78,7 +77,7 @@ data class SoundSettings(
     }
 
     /** Only the sounds currently in use by the picker and timer matter. */
-    fun activeSounds(): List<CueSound> = listOf(freeTimer) + when (assignmentMode) {
+    fun activeSounds(): List<CueSound> = when (assignmentMode) {
         SoundAssignmentMode.SHARED -> listOf(sharedSound ?: poseEnd)
         SoundAssignmentMode.SEPARATE -> listOf(poseEnd, breakEnd, classEnd)
     }
@@ -92,8 +91,7 @@ data class SoundSettings(
     fun chooseForVisibleMode(cue: TimerCue, choice: CueSound): SoundSettings {
         require(choice.source in enabledSources) { "Enable the sound source first." }
         require(choice.isPlayable) { "Choose an available sound or audio file." }
-        return if (cue == TimerCue.FREE_TIMER_FINISHED) copy(freeTimer = choice)
-        else if (assignmentMode == SoundAssignmentMode.SHARED) {
+        return if (assignmentMode == SoundAssignmentMode.SHARED) {
             copy(sharedSound = choice)
         } else {
             choose(cue, choice)

@@ -1,3 +1,10 @@
+## 2026-10-27 — D-116 verification plan (not yet phone verified)
+
+- Actual local pure Kotlin/JUnit **205/205 PASS** across 21 classes; includes strict Next insertion threshold equality/above, multiple blocks, no insertion at initial approval, completed Next/Restart fragment lengths, paused/automatic phase history, newly inserted Session/Break interaction, Shared melody with independent Free duration. This is **not Android Compose compilation**.
+- CoGo gate (build only): from `/storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native`, on dev branch after `git pull --ff-only`, run `bash tools/build_d116_candidate_on_phone.sh`; retain actual JUnit XML, Android compilation and APK manifest/hash evidence. Do not update-install app on phone until separately approved; verify saved Classes/Sounds before and after.
+- Manual QA: Next after one minute of a five-minute Session shows **1m historical slice**, future revised without visual phantom time; Restart shows used time plus fresh segment; multiple skips crossing exact `A+B > 2S+Bregular` adds a full regular Session+Break (equality does not); Class elapsed/remaining inside one layered timeline, no live activity breakdown; six accessible tabs; Free countdown ongoing across tabs; Shared sound plays same melody for Class and Free while Free duration remains separate. Audio/lock/Doze remains an independent unproven device gate.
+- Instrumentation: update isolated UI test to select Free tab and 4-cue preferences; build-only test APK, separate explicit authorization needed for test installation and actual AndroidJUnitRunner. D-115 user-confirmed install is not evidence for D-116.
+
 ## 2026-10-27 — D-115 CANDIDATE QA GATE (NOT STABLE)
 
 - **Local pure Kotlin compilation + JVM JUnit4: 196/196 PASS** (20 test classes, Kotlin 2.2.0 / Java 17, actual `OK (196 tests)` terminal output; includes 9 pure EditorInput tests). This is **not** an Android Gradle build and **not** on-device execution.

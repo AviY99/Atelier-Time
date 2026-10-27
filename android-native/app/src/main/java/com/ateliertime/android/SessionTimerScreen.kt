@@ -74,6 +74,12 @@ fun SessionTimerScreen(
         label = "solidTahiniPhaseProgress",
     )
     val restartTitle = if (isBreak) "Restart break" else "Restart session"
+    val trueClassLengthSeconds = run {
+        val start = classClockTimes.classStartEpochMs
+        val end = classClockTimes.classEndEpochMs
+        if (start != null && end != null) ((end - start) / 1_000L).toInt()
+        else view.totalSeconds
+    }
     val currentRemainingLabel = when (view.phase?.kind) {
         PhaseKind.POSE -> "Current session remaining"
         PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK ->
@@ -123,27 +129,15 @@ fun SessionTimerScreen(
                     )
                     WallClockRow(
                         "Class length",
-                        formatClassLength(view.totalSeconds),
+                        formatClassLength(trueClassLengthSeconds),
                         enlargeLabel = true, compact = true,
                     )
                 }
-                Spacer(modifier = Modifier.height(6.dp))
-                Text("Class remaining  " + formatTime(classClockTimes.classRemainingSeconds ?: session.rules.totalSeconds),
-                    style = MaterialTheme.typography.labelSmall)
-                SolidProgressBar(
-                    progressFraction = (
-                        (classClockTimes.classElapsedSeconds ?: 0).toFloat() /
-                            view.totalSeconds.coerceAtLeast(1).toFloat()
-                    ).coerceIn(0f, 1f),
-                    fillColor = tahini,
-                    modifier = Modifier.width(178.dp).height(4.dp),
-                )
-                Text("Class elapsed  " + formatTime(classClockTimes.classElapsedSeconds ?: 0),
-                    style = MaterialTheme.typography.labelSmall)
             }
         }
         TimelinePhaseChart(
             phases = timer.activePhasesSnapshot(),
+            runtimeTimeline = timer.runtimeTimeline(),
             classRemainingSeconds = classClockTimes.classRemainingSeconds
                 ?: view.totalRemainingSeconds,
             classElapsedSeconds = classClockTimes.classElapsedSeconds ?: 0,
@@ -237,8 +231,8 @@ fun SessionTimerScreen(
         }
         if (view.recoveredSeconds != 0) {
             Text(
-                (if (view.recoveredSeconds > 0) "Time deducted from final two sessions: "
-                else "Time added to final two sessions: ") +
+                (if (view.recoveredSeconds > 0) "Time recovered from ending: "
+                else "Time added to ending: ") +
                     formatTime(kotlin.math.abs(view.recoveredSeconds)),
                 color = if (atelierNightActive()) Color.White
                     else MaterialTheme.colorScheme.primary,
@@ -249,6 +243,11 @@ fun SessionTimerScreen(
                 else if (lengths.size == 2) Text("Adjusted final two sessions: " +
                     formatTime(lengths.first()) + " + " + formatTime(lengths.last()))
             }
+            val addedRegular = timer.activePhasesSnapshot().count {
+                it.id.startsWith("runtime-added-pose-")
+            }
+            if (addedRegular > 0) Text("Added full regular Sessions + Breaks: " +
+                addedRegular)
             val endingLabel = when (session.selectedChoice?.mode) {
                 FinalPoseMode.EVEN_SPLIT -> "Even split"
                 FinalPoseMode.CUSTOM_SPLIT -> "Custom split"
@@ -256,7 +255,9 @@ fun SessionTimerScreen(
             }
             Text("Ending choice: " + endingLabel +
                 ". Short final pairs merge with their break when they fit " +
-                "within one regular Session. Class finish and saved preset remain unchanged.")
+                "within one regular Session. Sufficient Next credit adds full " +
+                "Session+Break blocks, then re-splits the final pair. " +
+                "Class finish and saved preset remain unchanged.")
         }
         timerError?.let { Text(it, color = atelierErrorTextColor()) }
 
@@ -426,7 +427,9 @@ fun SessionTimerScreen(
             else ->
                 "Next advances to the next phase of this Class, not another saved Class. " +
                     "Use it even during the final two Sessions: earlier completed work is " +
-                    "never rewritten. Next on the final work Session enters the " +
+                    "never rewritten. The live timeline keeps actual past duration; " +
+                    "sufficient recovered time inserts a full regular Session and Break " +
+                    "before the re-split final two. Next on the final work Session enters the " +
                     "Summary when one exists and plays melody C BEFORE it; Next " +
                     "from Summary finishes without a second C. Without Summary, " +
                     "the final Session finishes with C. On other phase skips, " +

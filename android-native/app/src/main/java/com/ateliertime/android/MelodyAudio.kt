@@ -109,9 +109,9 @@ class MelodyPreferences(
         return SoundSettings(
             // A dormant mode may retain sounds from a disabled library.
             // Restore only libraries required by the CURRENT mode on load.
-            enabledSources = (enabled + free.source + (if (mode == SoundAssignmentMode.SHARED)
+            enabledSources = (enabled + (if (mode == SoundAssignmentMode.SHARED)
                 listOf((shared ?: a).source)
-            else listOf(a.source, b.source, c.source)))
+            else listOf(a.source, b.source, c.source, free.source)))
                 .ifEmpty { defaults.enabledSources },
             poseEnd = a, breakEnd = b, classEnd = c, freeTimer = free,
             assignmentMode = mode, sharedSound = shared,

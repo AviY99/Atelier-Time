@@ -39,7 +39,8 @@ object FinalPairCompensation {
         active: List<SchedulePhase>,
         newCorrectionSeconds: Int,
     ): CompensatedTimeline {
-        require(active.size == session.phases.size) { "Active class phases do not match approval." }
+        // Next may have inserted whole regular Session+Break blocks before
+        // this tail. Only the not-yet-started LAST Session is rewritten here.
         val pair = active.indices.filter {
             active[it].kind == PhaseKind.POSE &&
                 active[it].poseSource == PoseSource.REGULAR
@@ -80,7 +81,11 @@ object FinalPairCompensation {
             lastFinalPoseSeconds = newLastLength.toInt(),
         )
     }
-    fun adjust(session: ApprovedSession, lostSeconds: Int): CompensatedTimeline {
+    fun adjust(
+        session: ApprovedSession,
+        lostSeconds: Int,
+        allowExtraRegular: Boolean = false,
+    ): CompensatedTimeline {
         // A negative correction means a phase was intentionally skipped.
         // Preserve its saved approval; expand only the end pair at runtime.
         val originals = session.phases
@@ -126,19 +131,74 @@ object FinalPairCompensation {
             return CompensatedTimeline(revised, cursor, lostSeconds,
                 mergedLength.toInt(), 0)
         }
+        // One compact rule for new work gained by Next: only when the combined
+        // two work Sessions STRICTLY exceed two regular Sessions + one regular
+        // Break, consume one whole Session+Break block from the credit and
+        // apply the usual chosen split to the remaining final two. Repeat if
+        // more than one complete block fits. Past phases are never touched.
+        // This does not apply to initial end approval or to positive delay.
+        if (allowExtraRegular && lostSeconds < 0) {
+            val regular = session.rules.poseSeconds.toLong()
+            val regularBreak = session.rules.shortBreakSeconds.toLong()
+            val threshold = 2L * regular + regularBreak
+            var tailWork = availableLong
+            var additional = 0
+            while (tailWork > threshold &&
+                tailWork - (regular + regularBreak) >=
+                    rest.durationSeconds.toLong() + 2L * SECONDS_PER_MINUTE) {
+                additional++
+                require(additional <= 1_000) { "Too many additional Sessions." }
+                tailWork -= regular + regularBreak
+            }
+            if (additional > 0) {
+                val firstFinal = distributeFirst(session, first, last, tailWork.toInt())
+                val lastFinal = tailWork.toInt() - firstFinal
+                val revised = originals.take(firstIndex).toMutableList()
+                var cursor = first.startSeconds.toLong()
+                for (number in 1..additional) {
+                    val finish = cursor + regular
+                    require(finish <= Int.MAX_VALUE.toLong())
+                    revised.add(SchedulePhase(
+                        id = "runtime-added-pose-$number", kind = PhaseKind.POSE,
+                        startSeconds = cursor.toInt(), endSeconds = finish.toInt(),
+                        poseNumber = (first.poseNumber ?: 0) + number - 1,
+                        poseSource = PoseSource.REGULAR))
+                    cursor = finish
+                    val endBreak = cursor + regularBreak
+                    require(endBreak <= Int.MAX_VALUE.toLong())
+                    revised.add(SchedulePhase(
+                        id = "runtime-added-break-$number", kind = PhaseKind.SHORT_BREAK,
+                        startSeconds = cursor.toInt(), endSeconds = endBreak.toInt(),
+                        breakOrdinal = (rest.breakOrdinal ?: 0) + number - 1))
+                    cursor = endBreak
+                }
+                val firstEnd = cursor + firstFinal
+                val breakEnd = firstEnd + rest.durationSeconds
+                val lastEnd = breakEnd + lastFinal
+                require(lastEnd <= Int.MAX_VALUE.toLong())
+                revised.add(first.shifted(cursor.toInt(), firstEnd.toInt()).copy(
+                    poseNumber = (first.poseNumber ?: 0) + additional))
+                revised.add(rest.shifted(firstEnd.toInt(), breakEnd.toInt()))
+                revised.add(last.shifted(breakEnd.toInt(), lastEnd.toInt()).copy(
+                    poseNumber = (first.poseNumber ?: 0) + additional + 1))
+                cursor = lastEnd
+                for (summary in originals.drop(lastIndex + 1)) {
+                    val next = cursor + summary.durationSeconds
+                    require(next <= Int.MAX_VALUE.toLong())
+                    revised.add(summary.shifted(cursor.toInt(), next.toInt()))
+                    cursor = next
+                }
+                check(cursor == session.rules.totalSeconds.toLong() - lostSeconds)
+                return CompensatedTimeline(revised, cursor.toInt(), lostSeconds,
+                    firstFinal, lastFinal)
+            }
+        }
         require(availableLong in (2L * SECONDS_PER_MINUTE)..Int.MAX_VALUE.toLong()) {
             "Final two Sessions cannot absorb this time change while keeping both " +
                 "at least one minute. Approve a revised end time instead."
         }
         val available = availableLong.toInt()
-        val firstNew = when (session.selectedChoice?.mode ?: FinalPoseMode.REMAINDER) {
-            FinalPoseMode.REMAINDER ->
-                minOf(first.durationSeconds, available - SECONDS_PER_MINUTE)
-            FinalPoseMode.EVEN_SPLIT ->
-                available / 2
-            FinalPoseMode.CUSTOM_SPLIT ->
-                ((available.toDouble() * first.durationSeconds) / combined).roundToInt()
-        }.coerceIn(SECONDS_PER_MINUTE, available - SECONDS_PER_MINUTE)
+        val firstNew = distributeFirst(session, first, last, available)
         val lastNew = available - firstNew
 
         val revised = originals.toMutableList()
@@ -159,5 +219,21 @@ object FinalPairCompensation {
         return CompensatedTimeline(
             revised, cursor, lostSeconds, firstNew, lastNew,
         )
+    }
+
+    private fun distributeFirst(
+        session: ApprovedSession, first: SchedulePhase, last: SchedulePhase,
+        available: Int,
+    ): Int {
+        require(available >= 2 * SECONDS_PER_MINUTE)
+        val combined = first.durationSeconds.toLong() + last.durationSeconds
+        return when (session.selectedChoice?.mode ?: FinalPoseMode.REMAINDER) {
+            FinalPoseMode.REMAINDER ->
+                minOf(first.durationSeconds, available - SECONDS_PER_MINUTE)
+            FinalPoseMode.EVEN_SPLIT ->
+                available / 2
+            FinalPoseMode.CUSTOM_SPLIT ->
+                ((available.toDouble() * first.durationSeconds) / combined).roundToInt()
+        }.coerceIn(SECONDS_PER_MINUTE, available - SECONDS_PER_MINUTE)
     }
 }

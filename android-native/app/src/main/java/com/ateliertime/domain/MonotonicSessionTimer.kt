@@ -43,6 +43,62 @@ class MonotonicSessionTimer(
     private var activeTotalMs = session.rules.totalSeconds.toLong() * 1000L
     private var lastPhaseIndex: Int? = null
     private var classFinishCueIssued = false
+    private var nextHasOccurred = false
+    private val observedFragments = mutableListOf<RuntimeTimelineSegment>()
+    /** Virtual position where this visible attempt started (after Next/Restart/Pause). */
+    private var fragmentStartMs = 0L
+
+    private fun appendFragment(phase: SchedulePhase, untilMs: Long) {
+        val seconds = ((untilMs - fragmentStartMs).coerceAtLeast(0L) / 1_000L)
+            .coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+        if (seconds > 0) observedFragments.add(
+            RuntimeTimelineSegment(phase.id, phase.kind, seconds, observed = true))
+        fragmentStartMs = untilMs
+    }
+
+    private fun appendPause(durationMs: Long) {
+        val seconds = ((durationMs.coerceAtLeast(0L) + 999L) / 1_000L)
+            .coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+        if (seconds > 0) observedFragments.add(
+            RuntimeTimelineSegment("paused-${observedFragments.size}", null,
+                seconds, observed = true))
+    }
+
+    /** Never mistake the virtual jump of Next for minutes of work performed. */
+    fun runtimeTimeline(): RuntimeTimeline {
+        val fragments = observedFragments.toMutableList()
+        val phase = view().phase
+        val virtualNow = elapsedMs()
+        if (phase != null) {
+            val performed = ((virtualNow - fragmentStartMs).coerceAtLeast(0L) / 1_000L)
+                .toInt()
+            if (performed > 0) fragments.add(RuntimeTimelineSegment(
+                phase.id, phase.kind, performed, observed = true))
+        }
+        if (status == TimerStatus.PAUSED || status == TimerStatus.STOPPED) {
+            val pausedMs = (nowMillis() - (suspendedFromMs ?: nowMillis()))
+                .coerceAtLeast(0L)
+            val pausedSeconds = ((pausedMs + 999L) / 1_000L).toInt()
+            if (pausedSeconds > 0) fragments.add(RuntimeTimelineSegment(
+                "paused-live", null, pausedSeconds, observed = true))
+        }
+        val completed = fragments.sumOf { it.durationSeconds }
+        val start = phase?.let { activePhases.indexOfFirst { current -> current.id == it.id } }
+        if (phase != null && start != null && start >= 0) {
+            val remaining = ((phase.endSeconds.toLong() * 1_000L - virtualNow)
+                .coerceAtLeast(0L) / 1_000L).toInt()
+            if (remaining > 0) fragments.add(RuntimeTimelineSegment(
+                phase.id, phase.kind, remaining, observed = false))
+            activePhases.drop(start + 1).forEach { future ->
+                fragments.add(RuntimeTimelineSegment(future.id, future.kind,
+                    future.durationSeconds, observed = false))
+            }
+        } else if (status == TimerStatus.READY) {
+            activePhases.forEach { future -> fragments.add(RuntimeTimelineSegment(
+                future.id, future.kind, future.durationSeconds, observed = false)) }
+        }
+        return RuntimeTimeline(fragments, completed)
+    }
 
     fun start(initialCorrectionSeconds: Int = 0): TimerView {
         if (status == TimerStatus.STOPPED) {
@@ -67,6 +123,9 @@ class MonotonicSessionTimer(
         suspendedFromMs = null
         lastPhaseIndex = 0
         classFinishCueIssued = false
+        nextHasOccurred = false
+        observedFragments.clear()
+        fragmentStartMs = 0L
         status = TimerStatus.RUNNING
         return view()
     }
@@ -97,7 +156,13 @@ class MonotonicSessionTimer(
         require(combinedCorrection in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
             "The time change exceeds the supported finish-time adjustment range."
         }
-        val adjusted = FinalPairCompensation.adjust(session, combinedCorrection.toInt())
+        val adjusted = FinalPairCompensation.adjust(session, combinedCorrection.toInt(),
+            allowExtraRegular = nextHasOccurred)
+        // Seal the old attempt only AFTER successful feasibility validation.
+        view().phase?.let { appendFragment(it, elapsedMs()) }
+        if (status == TimerStatus.PAUSED || status == TimerStatus.STOPPED) {
+            appendPause((now - (suspendedFromMs ?: now)).coerceAtLeast(0L))
+        }
         activePhases = adjusted.phases
         activeTotalMs = adjusted.totalSeconds.toLong() * 1000L
         lostSeconds = adjusted.recoveredSeconds
@@ -106,6 +171,7 @@ class MonotonicSessionTimer(
         suspendedFromMs = null
         lastPhaseIndex = 0
         classFinishCueIssued = false
+        fragmentStartMs = 0L
         status = TimerStatus.RUNNING
         return view()
     }
@@ -142,7 +208,8 @@ class MonotonicSessionTimer(
         }.takeLast(2)
         val lastOriginalId = session.phases.getOrNull(regularIndices.lastOrNull() ?: -1)?.id
         val finalIsMerged = lastOriginalId != null && activePhases.none { it.id == lastOriginalId }
-        check(regularIndices.size == 2 && index < regularIndices.last() &&
+        val activeLastIndex = activePhases.indexOfFirst { it.id == lastOriginalId }
+        check(regularIndices.size == 2 && (finalIsMerged || index < activeLastIndex) &&
             !(finalIsMerged && current.id == session.phases[regularIndices.first()].id)) {
             "The final regular Session has already started. Cannot rewrite " +
                 "a previously completed final Session."
@@ -158,18 +225,21 @@ class MonotonicSessionTimer(
         require(correction in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
             "The time change is too large to adjust the final two Sessions."
         }
-        val revised = if (index == regularIndices[0] + 1) {
-            FinalPairCompensation.adjustLastOnly(
-                session, activePhases, correction.toInt(),
-            )
-        } else {
-            FinalPairCompensation.adjust(session, correction.toInt())
-        }
+        val fullReflow = runCatching {
+            FinalPairCompensation.adjust(session, correction.toInt(),
+                allowExtraRegular = nextHasOccurred)
+        }.getOrNull()
+        val revised = if (fullReflow != null &&
+            fullReflow.phases.take(index + 1) == activePhases.take(index + 1))
+            fullReflow else FinalPairCompensation.adjustLastOnly(
+                session, activePhases, correction.toInt())
         val target = revised.phases[index]
         check(target.id == current.id && target.startSeconds == current.startSeconds) {
             "The current phase start would change. No restart was performed."
         }
         // Atomic commit: every feasibility check has passed.
+        appendFragment(current, elapsedMs())
+        if (status == TimerStatus.PAUSED) appendPause(pausedMs)
         activePhases = revised.phases
         activeTotalMs = revised.totalSeconds.toLong() * 1_000L
         lostSeconds = revised.recoveredSeconds
@@ -177,6 +247,7 @@ class MonotonicSessionTimer(
         runningFromMs = now
         suspendedFromMs = null
         lastPhaseIndex = index
+        fragmentStartMs = target.startSeconds.toLong() * 1_000L
         status = TimerStatus.RUNNING
         return view()
     }
@@ -192,6 +263,8 @@ class MonotonicSessionTimer(
 
     fun pause(): TimerView {
         if (status == TimerStatus.RUNNING) {
+            val current = view().phase
+            if (current != null) appendFragment(current, elapsedMs())
             elapsedBeforeRunMs = elapsedMs()
             runningFromMs = null
             suspendedFromMs = nowMillis()
@@ -226,8 +299,12 @@ class MonotonicSessionTimer(
             }.takeLast(2)
             val firstFinal = activePhases.firstOrNull { it.id == originalFinal.firstOrNull()?.id }
             val lastFinal = activePhases.firstOrNull { it.id == originalFinal.lastOrNull()?.id }
-            val revised = if (firstFinal != null &&
-                elapsedBeforeRunMs >= firstFinal.startSeconds.toLong() * 1_000L) {
+            val insertedAlreadyStarted = activePhases.any { phase ->
+                phase.id.startsWith("runtime-added-") &&
+                    elapsedBeforeRunMs >= phase.startSeconds.toLong() * 1_000L
+            }
+            val revised = if (insertedAlreadyStarted || (firstFinal != null &&
+                elapsedBeforeRunMs >= firstFinal.startSeconds.toLong() * 1_000L)) {
                 // Once the penultimate Session begins it is an observed
                 // phase. Keep it (and its intervening Break) unchanged; only
                 // the not-yet-started final Session may absorb interruption.
@@ -238,7 +315,8 @@ class MonotonicSessionTimer(
                 }
                 FinalPairCompensation.adjustLastOnly(session, activePhases, nextLost.toInt())
             } else {
-                FinalPairCompensation.adjust(session, nextLost.toInt())
+                FinalPairCompensation.adjust(session, nextLost.toInt(),
+                    allowExtraRegular = nextHasOccurred)
             }
             // An interruption cannot silently rewrite a completed phase.
             check(activePhases.indices.all { index ->
@@ -249,6 +327,7 @@ class MonotonicSessionTimer(
             activeTotalMs = revised.totalSeconds.toLong() * 1_000L
             lostSeconds = revised.recoveredSeconds
         }
+        appendPause(interruptionMs)
         suspendedFromMs = null
         runningFromMs = now
         status = TimerStatus.RUNNING
@@ -321,13 +400,10 @@ class MonotonicSessionTimer(
         val currentIndex = activePhases.indexOfFirst { it.id == current.id }
         check(currentIndex >= 0) { "Active phase no longer exists." }
         val nextIndex = currentIndex + 1
-        val finalPair = session.phases.indices.filter {
-            session.phases[it].kind == PhaseKind.POSE &&
-                session.phases[it].poseSource == PoseSource.REGULAR
-        }.takeLast(2)
         // An optional Summary must never be skipped by Next on the final
         // regular Session. C is played ON ENTERING Summary, never twice.
         if (nextIndex >= activePhases.size) {
+            appendFragment(current, elapsedMs())
             status = TimerStatus.FINISHED
             runningFromMs = null
             suspendedFromMs = null
@@ -355,21 +431,18 @@ class MonotonicSessionTimer(
         val revision = if (!enteringSummary &&
             corrected in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
             try {
-                val activeLastFinal = activePhases.indexOfFirst {
-                    it.id == session.phases.getOrNull(finalPair.lastOrNull() ?: -1)?.id
-                }
-                val adjusted = if (finalPair.size == 2 && activeLastFinal >= 0 &&
-                    currentIndex >= activeLastFinal - 2) {
-                    FinalPairCompensation.adjustLastOnly(
-                        session, activePhases, corrected.toInt(),
-                    )
-                } else {
-                    FinalPairCompensation.adjust(session, corrected.toInt())
-                }
+                val fullReflow = runCatching {
+                    FinalPairCompensation.adjust(session, corrected.toInt(),
+                        allowExtraRegular = true)
+                }.getOrNull()
+                val adjusted = if (fullReflow != null &&
+                    fullReflow.phases.take(nextIndex) == activePhases.take(nextIndex) &&
+                    fullReflow.phases.getOrNull(nextIndex)?.let { next ->
+                        next.startSeconds == activePhases[nextIndex].startSeconds
+                    } == true) fullReflow else FinalPairCompensation.adjustLastOnly(
+                    session, activePhases, corrected.toInt())
                 check(adjusted.phases[nextIndex].startSeconds ==
-                    activePhases[nextIndex].startSeconds) {
-                    "A previously reached phase cannot move."
-                }
+                        activePhases[nextIndex].startSeconds)
                 adjusted
             } catch (_: IllegalArgumentException) {
                 null // Advance without compensation; Class finish will update.
@@ -378,6 +451,8 @@ class MonotonicSessionTimer(
             }
         } else null
         val target = revision?.phases?.get(nextIndex) ?: activePhases[nextIndex]
+        appendFragment(current, elapsedMs())
+        if (status == TimerStatus.PAUSED) appendPause(pausedMs)
         if (revision != null) {
             activePhases = revision.phases
             activeTotalMs = revision.totalSeconds.toLong() * 1000L
@@ -388,6 +463,8 @@ class MonotonicSessionTimer(
         suspendedFromMs = null
         status = TimerStatus.RUNNING
         lastPhaseIndex = nextIndex
+        fragmentStartMs = target.startSeconds.toLong() * 1_000L
+        nextHasOccurred = true
         val cue = when {
             enteringSummary -> {
                 classFinishCueIssued = true
@@ -406,6 +483,7 @@ class MonotonicSessionTimer(
         if (status != TimerStatus.RUNNING && status != TimerStatus.PAUSED) {
             return TimerTick(view())
         }
+        view().phase?.let { appendFragment(it, elapsedMs()) }
         status = TimerStatus.FINISHED
         runningFromMs = null
         suspendedFromMs = null
@@ -423,6 +501,9 @@ class MonotonicSessionTimer(
         val newIndex = phaseIndex(current.elapsedSeconds)
         val oldIndex = lastPhaseIndex
         if (current.totalRemainingSeconds == 0) {
+            if (oldIndex != null && oldIndex in activePhases.indices) {
+                appendFragment(activePhases[oldIndex], activePhases[oldIndex].endSeconds.toLong() * 1_000L)
+            }
             status = TimerStatus.FINISHED
             runningFromMs = null
             elapsedBeforeRunMs = activeTotalMs
@@ -444,6 +525,16 @@ class MonotonicSessionTimer(
                 PhaseKind.SUMMARY -> null
             }
         } else null
+        if (oldIndex != null && oldIndex != newIndex) {
+            val endIndex = (newIndex ?: activePhases.size).coerceAtMost(activePhases.size)
+            for (i in oldIndex until endIndex) {
+                val completed = activePhases[i]
+                appendFragment(completed, completed.endSeconds.toLong() * 1_000L)
+            }
+            fragmentStartMs = newIndex?.let {
+                activePhases[it].startSeconds.toLong() * 1_000L
+            } ?: activeTotalMs
+        }
         lastPhaseIndex = newIndex
         return TimerTick(current, cue)
     }
