@@ -36,3 +36,16 @@ The prior D-119 Samsung evidence (211 JVM tests, Gradle build, user working repo
 **Source-only implementation checkpoint:** `D-120`, Android `versionCode=15` on `android-native-kotlin-compose`. On 2026-10-27, a local Kotlin 2.2.0/JDK17 compilation and JUnit4 run of all pure domain + EditorInput tests returned **221 tests / 0 failures**, including 10 new D-120 deterministic regressions. The prior unmodified D-119 baseline independently returned 211/211 in the same local environment. `git diff --check` and new D-120 build-script syntax are separate source checks. These results are **not Android Gradle/Compose compilation, connected instrumentation, Samsung build or user acceptance**.
 
 Product contract approved; implementation and automated regressions remain a **development candidate, not Stable**. The new `tools/build_d120_candidate_on_phone.sh` is prepared for a later separately authorized build-only gate. Stable 7 stays the rollback checkpoint.
+
+## QA-D120-01 — actual Samsung Android build-only evidence (2026-10-27)
+
+**PASS — build-only, user-provided real phone terminal screenshot.** The user ran the D-120 build-only gate in Code on the Go; the visible terminal output explicitly shows:
+
+- `BUILD SUCCESSFUL in 1m 26s`; `72 actionable tasks: 72 executed`.
+- `D-120 JVM ACTUAL: tests=221 failures=0 errors=0 skipped=0`.
+- `BUILD ONLY PASS`, with three generated files in `/storage/emulated/0/Download`: `Atelier-Time-D120-Candidate.apk`, `Atelier-Time-D120-Tests.apk`, and `Atelier-Time-D120-QA-manifest.txt`.
+- The output explicitly states `NO regular/test APK installed`.
+
+**Evidence scope:** Actual on-phone Gradle build/test run and assembly of both APKs. The screenshot does not show the manifest's commit hash and does not prove Android connected instrumentation execution, installed-app manual acceptance, persistence across an update, background/Doze/endurance tests or user acceptance of D-120 as Stable. The earlier *source-only* gate paragraph is retained as historical status before this phone build.
+
+**Next approval gate:** Seek separate explicit permission before installing/updating the regular D-120 candidate APK; protect the user's two saved Classes and Sound selections and never install the Tests APK as the application. D-119 Stable 7 remains closed, installed, and recoverable until an separately authorized update.
