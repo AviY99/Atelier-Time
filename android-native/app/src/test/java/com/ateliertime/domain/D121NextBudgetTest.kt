@@ -44,4 +44,27 @@ class D121NextBudgetTest {
         now += 1L
         assertEquals(TimerStatus.FINISHED, timer.update().view.status)
     }
+
+    @Test fun mixedNextPauseAndRestartPreserveSameDeadline() {
+        val engine = ScheduleEngine()
+        val session = engine.approve(engine.generate(
+            SessionRules("mixed", "Class", 10800, 900, poseSeconds = 1500,
+                specialBreakCount = 1), FinalPoseChoice.remainder()))
+        var now = 0L
+        val timer = MonotonicSessionTimer(session) { now }
+        timer.start()
+        now = 60123L
+        assertEquals(PhaseKind.SHORT_BREAK, timer.nextPhase().view.phase?.kind)
+        timer.pause()
+        now += 222L
+        timer.resume()
+        now += 1001L
+        val beforeRestart = timer.view()
+        val restarted = runCatching { timer.restartCurrentSegmentKeepingEndTime() }
+        if (restarted.isFailure) assertEquals(beforeRestart, timer.view())
+        val v = timer.view()
+        val remaining = (v.totalSeconds - v.elapsedSeconds) * 1000L
+        assertTrue("Pause/Restart/Next moved physical deadline",
+            kotlin.math.abs(remaining - (10800000L - now)) < 3000L)
+    }
 }
