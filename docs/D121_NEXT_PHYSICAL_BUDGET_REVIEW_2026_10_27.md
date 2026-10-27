@@ -33,3 +33,10 @@ The observed `Class start 22:52 / Class end 01:52` was still exactly three hours
 ## QA gate
 
 New D-121 JVM regressions cover rapid consecutive Next actions, physical-vs-virtual remaining-time checks, Next/Pause/Resume/Break Restart and at-deadline finish. Tests have been **authored but not executed**. No Android/Compose build, instrumentation, app install or user acceptance has been performed for D-121. Run `tools/build_d121_candidate_on_phone.sh` only as a separately authorized build-only gate; report exact XML counts (do not assume a passing count). Never install a Tests APK. Preserve saved Classes and Sound preferences.
+
+
+## Non-Android verification performed in this review
+
+The source files were fetched again from the development branch and checked for all of the following: one `correctionAtCursor` identity referenced from Next/Resume/Restart; D-119's original candidate order; the new <2s budget gate and work-session minimum; physical-duration graph label; four new regression methods; D-121/code16 and build-only script identifiers. These checks all passed as **static inspections**, not Kotlin compilation.
+
+The budget identity was also checked independently over 100,000 deterministic randomized mathematical inputs (physical elapsed, virtual cursor, initial correction and <1s approved-end fraction). Zero mathematical counterexamples were found; maximum observed quantization difference was 1,995ms. This verifies the stated algebra but **does not prove that every Kotlin branch calls the identity correctly**. Only a real JVM/Android regression run and user QA can provide that evidence. Do not convert these source/mathematical checks into a test PASS claim.
