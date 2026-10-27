@@ -65,6 +65,41 @@ class MonotonicSessionTimer(
         return rounded.toInt()
     }
 
+    /**
+     * One signed correction identity for EVERY runtime action:
+     *
+     * correctionMs = initialCorrectionMs + realElapsedMs - virtualCursorMs
+     * virtualTotalMs = originalTotalMs - correctionMs (quantized once)
+     * virtualTotalMs - virtualCursorMs ~= approvedDeadlineMs - nowMs
+     *
+     * Never accumulate a second independent sum of skipped phases; doing so
+     * can diverge after repeated Next, Restart and Pause/Resume combinations.
+     */
+    private fun correctionAtCursor(nowMs: Long, virtualCursorMs: Long): Long {
+        val started = originalStartMs ?: error("Class start clock is unavailable.")
+        val physicalElapsed = (nowMs - started).coerceAtLeast(0L)
+        return Math.subtractExact(
+            Math.addExact(initialEndCorrectionSeconds.toLong() * 1_000L,
+                physicalElapsed),
+            virtualCursorMs,
+        )
+    }
+
+    private fun budgetBoundary(
+        nowMs: Long,
+        cursorMs: Long,
+        locked: Int,
+        next: Int? = null,
+        lastOnly: Boolean = false,
+    ) = ReflowBoundary(
+        protectedThroughIndex = locked,
+        nextIndex = next,
+        preferActiveFuture = nextHasOccurred,
+        lastOnly = lastOnly,
+        physicalRemainingMillis = physicalDeadlineMs?.minus(nowMs),
+        virtualCursorMillis = cursorMs,
+    )
+
     private fun appendFragment(phase: SchedulePhase, untilMs: Long) {
         val seconds = ((untilMs - fragmentStartMs).coerceAtLeast(0L) / 1_000L)
             .coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
@@ -183,11 +218,13 @@ class MonotonicSessionTimer(
         require(secondsToRecover <= Int.MAX_VALUE.toLong()) {
             "Too much time has elapsed to restart this session."
         }
-        val correctionMs = initialEndCorrectionSeconds.toLong() * 1_000L + goneMs
+        val correctionMs = correctionAtCursor(now, 0L)
         val combinedCorrection = correctionSeconds(correctionMs)
         val adjusted = FinalPairCompensation.reflow(session, session.phases,
             combinedCorrection,
-            allowExtraRegular = nextHasOccurred)
+            allowExtraRegular = nextHasOccurred,
+            boundary = budgetBoundary(now, 0L, locked = -1),
+        )
         // Seal the old attempt only AFTER successful feasibility validation.
         view().phase?.let { appendFragment(it, elapsedMs()) }
         if (status == TimerStatus.PAUSED || status == TimerStatus.STOPPED) {
@@ -251,12 +288,12 @@ class MonotonicSessionTimer(
         val pausedMs = if (status == TimerStatus.PAUSED) {
             (now - (suspendedFromMs ?: now)).coerceAtLeast(0L)
         } else 0L
-        val correctionMs = Math.addExact(lostMillis, elapsedWithinMs + pausedMs)
+        val targetCursor = current.startSeconds.toLong() * 1_000L
+        val correctionMs = correctionAtCursor(now, targetCursor)
         val correction = correctionSeconds(correctionMs)
         val revised = FinalPairCompensation.reflow(
             session, activePhases, correction, allowExtraRegular = nextHasOccurred,
-            boundary = ReflowBoundary(protectedThroughIndex = index,
-                preferActiveFuture = nextHasOccurred),
+            boundary = budgetBoundary(now, targetCursor, locked = index),
         )
         val target = revised.phases[index]
         check(target.id == current.id && target.startSeconds == current.startSeconds) {
@@ -314,7 +351,7 @@ class MonotonicSessionTimer(
         if (status != TimerStatus.PAUSED && status != TimerStatus.STOPPED) return view()
         val now = nowMillis()
         val interruptionMs = (now - (suspendedFromMs ?: now)).coerceAtLeast(0L)
-        val nextLostMillis = Math.addExact(lostMillis, interruptionMs)
+        val nextLostMillis = correctionAtCursor(now, elapsedBeforeRunMs)
         val nextLost = correctionSeconds(nextLostMillis)
         if (nextLost != lostSeconds) {
             val originalFinal = session.phases.filter {
@@ -338,11 +375,9 @@ class MonotonicSessionTimer(
             }
             val revised = FinalPairCompensation.reflow(
                 session, activePhases, nextLost, allowExtraRegular = nextHasOccurred,
-                boundary = ReflowBoundary(
-                    protectedThroughIndex = activeIndex,
-                    preferActiveFuture = nextHasOccurred,
-                    lastOnly = late,
-                ),
+                boundary = budgetBoundary(now, elapsedBeforeRunMs,
+                    locked = activeIndex, lastOnly = late),
+
             )
             // An interruption cannot silently rewrite a completed phase.
             check(activePhases.indices.all { index ->
@@ -464,7 +499,8 @@ class MonotonicSessionTimer(
         } else 0L
         val skippedMs = previous.phaseRemainingMillis ?:
             previous.phaseRemainingSeconds.toLong() * 1_000L
-        val correctedMs = Math.addExact(lostMillis, pausedMs - skippedMs)
+        val targetCursor = activePhases[nextIndex].startSeconds.toLong() * 1_000L
+        val correctedMs = correctionAtCursor(now, targetCursor)
         val corrected = correctionSeconds(correctedMs)
         // A Next request is atomic: reject compensation beyond the remaining
         // capacity instead of silently moving the approved Class deadline.
@@ -472,11 +508,9 @@ class MonotonicSessionTimer(
         val revision = if (!enteringSummary) runCatching {
             FinalPairCompensation.reflow(
                 session, activePhases, corrected, allowExtraRegular = true,
-                boundary = ReflowBoundary(
-                    protectedThroughIndex = nextIndex - 1,
-                    nextIndex = nextIndex,
-                    preferActiveFuture = nextHasOccurred,
-                ),
+                boundary = budgetBoundary(now, targetCursor,
+                    locked = nextIndex - 1, next = nextIndex),
+
             )
         }.getOrNull() else null
         check(revision != null || enteringSummary) {
@@ -494,6 +528,10 @@ class MonotonicSessionTimer(
                 session.rules.shortBreakSeconds,
         )
         val target = updatedFuture[nextIndex]
+        check(updatedFuture.last().endSeconds.toLong() * 1_000L -
+                target.startSeconds.toLong() * 1_000L >= 0L) {
+            "The proposed Next has a negative remaining time budget."
+        }
         check(target.startSeconds == activePhases[nextIndex].startSeconds) {
             "Rebalancing cannot move the next phase start."
         }
