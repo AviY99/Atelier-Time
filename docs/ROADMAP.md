@@ -1,3 +1,7 @@
+## 2026-10-27 — D-119 compact fixes (source; local 211/211 JUnit PASS)
+
+Four combined fixes to installed D-118: full adaptive tab labels, a one-line Class timeline legend, read-only Free wheels with hidden presets during RUNNING/PAUSED, and thinner (not shorter) Sound/Editor sliders. D-119/code14 development only; Compose/device QA and update-install still pending separate gates. [Details](D119_COMPACT_CONTROLS_AND_WHEELS_2026_10_27.md).
+
 ## 2026-10-27 — D-118 quick Free presets / descriptive timer tabs
 
 After D-117 user-reported phone acceptance, source D-118 renames the two timer tabs to **Programed Timer** and **Free Timer** and adds 8 quick durations (1/4/5/10/15/25/30m/1h) above the Free action controls. Quick selection only fills editable HH:MM:SS; never auto-starts or overrides active countdown. 211/211 local Kotlin JUnit PASS; Android Gradle and device QA pending. [D118 QA handoff](D118_FREE_PRESETS_AND_TAB_LABELS_2026_10_27.md); Stable 5/6 untouched.

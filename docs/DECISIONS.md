@@ -1,3 +1,7 @@
+## 2026-10-27 — D-119: slim Sound/Editor selectors, free running wheels
+
+User clarified slider bars should be **thinner**, not narrower: 5dp track and compact thumb, preserved values/steps/accessibility. Free Timer retains read-only live HH:MM:SS wheels with presets hidden Running/Paused; Class timeline gains a one-row color legend; six tabs auto-size labels. D-118 remainder user-reported working. [Decision and gates](D119_COMPACT_CONTROLS_AND_WHEELS_2026_10_27.md).
+
 ## 2026-10-27 — D-118 Free shortcuts (explicit Start retained)
 
 Following the user's D-117 functioning report, the user requested exact tab labels `Programed Timer`, `Free Timer`, plus eight Free duration shortcuts. D-118 uses two-line full labels and eight preset-to-HH:MM:SS buttons, requiring an explicit Start and refusing changes during Running/Paused. Class/Free timing and saved presets remain protected. Local 211/211 Kotlin tests PASS; phone gate pending. [Full details](D118_FREE_PRESETS_AND_TAB_LABELS_2026_10_27.md).

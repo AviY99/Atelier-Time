@@ -1,3 +1,7 @@
+## 2026-10-27 — D-119 phone acceptance (build-only first)
+
+Local JUnit 211/211 PASS. After approved GitHub dev publication, run `bash tools/build_d119_candidate_on_phone.sh` from the correct `android-native` directory on Samsung; no APK is installed. With separate user update permission, verify six unclipped tabs in Day/Night; compact color legend in one line; live Free wheels remain while presets disappear Running/Paused and return after Exit; slender Editor/Sound sliders keep prior choices; both Classes/Sounds saved intact. Additional explicit approval for Android instrumentation. [D119 checklist](D119_COMPACT_CONTROLS_AND_WHEELS_2026_10_27.md).
+
 ## 2026-10-27 — D-118 quick preset / renamed tabs QA
 
 - Local actual Kotlin/JUnit **211/211 PASS**, 22 suites (2 new cases: exact ordered durations and HH:MM:SS mapping). Shell syntax and diff checks pass. No Compose build in local runtime.

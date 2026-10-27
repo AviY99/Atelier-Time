@@ -37,6 +37,7 @@ internal fun EndClockWheel(
     canSelect: (Int) -> Boolean,
     onBlocked: (Int) -> Unit,
     onChange: (Int) -> Unit,
+    readOnly: Boolean = false,
 ) {
     val currentValue = rememberUpdatedState(value)
     val currentCanSelect = rememberUpdatedState(canSelect)
@@ -48,11 +49,12 @@ internal fun EndClockWheel(
         else Color(0xFFB32631)
     val previous = (value + limit - 1) % limit
     val next = (value + 1) % limit
-    val previousIsValid = canSelect(previous)
-    val nextIsValid = canSelect(next)
+    val previousIsValid = !readOnly && canSelect(previous)
+    val nextIsValid = !readOnly && canSelect(next)
+    val neighborColor = MaterialTheme.colorScheme.onSurfaceVariant
     Column(
         modifier = Modifier.width(94.dp).testTag(tag)
-            .pointerInput(limit) {
+            .then(if (readOnly) Modifier else Modifier.pointerInput(limit) {
                 var travel = 0f
                 var chosenValue = currentValue.value
                 val stepPx = 28.dp.toPx()
@@ -81,19 +83,21 @@ internal fun EndClockWheel(
                         }
                     },
                 )
-            },
+            }),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(label, style = MaterialTheme.typography.labelMedium)
         TextButton(
             modifier = Modifier.testTag(tag + "_previous"),
+            enabled = !readOnly,
             onClick = {
                 if (previousIsValid) onChange(previous)
                 else onBlocked(previous)
             },
         ) {
             Text("%02d".format(Locale.US, previous),
-                color = if (previousIsValid) validColor else invalidColor,
+                color = if (readOnly) neighborColor
+                    else if (previousIsValid) validColor else invalidColor,
                 style = MaterialTheme.typography.bodyMedium)
         }
         Text("%02d".format(Locale.US, value),
@@ -102,13 +106,15 @@ internal fun EndClockWheel(
             modifier = Modifier.testTag(tag + "_value"))
         TextButton(
             modifier = Modifier.testTag(tag + "_next"),
+            enabled = !readOnly,
             onClick = {
                 if (nextIsValid) onChange(next)
                 else onBlocked(next)
             },
         ) {
             Text("%02d".format(Locale.US, next),
-                color = if (nextIsValid) validColor else invalidColor,
+                color = if (readOnly) neighborColor
+                    else if (nextIsValid) validColor else invalidColor,
                 style = MaterialTheme.typography.bodyMedium)
         }
     }

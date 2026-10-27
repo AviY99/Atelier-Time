@@ -32,23 +32,24 @@ fun FreeCountdownSection(
             Text("Free countdown", style = MaterialTheme.typography.titleMedium)
             Text("Independent timer · hours / minutes / seconds",
                 style = MaterialTheme.typography.bodySmall)
-            if (editable) {
-                Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically) {
-                    EndClockWheel("Hours", hours, 100, "free_hours",
-                        canSelect = { true }, onBlocked = {}, onChange = { hours = it })
-                    EndClockWheel("Minutes", minutes, 60, "free_minutes",
-                        canSelect = { true }, onBlocked = {}, onChange = { minutes = it })
-                    EndClockWheel("Seconds", seconds, 60, "free_seconds",
-                        canSelect = { true }, onBlocked = {}, onChange = { seconds = it })
-                }
-            }
-            if (!editable) {
-                Text("%02d:%02d:%02d".format(view.remainingSeconds / 3600,
-                    (view.remainingSeconds / 60) % 60, view.remainingSeconds % 60),
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier.testTag("free_timer_remaining"))
+            // Preserve the HH:MM:SS wheel clock both before and during the run.
+            // While running/paused its displayed values follow the remaining
+            // monotonic time; gestures and neighbor buttons cannot edit it.
+            val displayHours = if (editable) hours else view.remainingSeconds / 3600
+            val displayMinutes = if (editable) minutes else (view.remainingSeconds / 60) % 60
+            val displaySeconds = if (editable) seconds else view.remainingSeconds % 60
+            Row(modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically) {
+                EndClockWheel("Hours", displayHours, 100, "free_hours",
+                    canSelect = { true }, onBlocked = {}, onChange = { hours = it },
+                    readOnly = !editable)
+                EndClockWheel("Minutes", displayMinutes, 60, "free_minutes",
+                    canSelect = { true }, onBlocked = {}, onChange = { minutes = it },
+                    readOnly = !editable)
+                EndClockWheel("Seconds", displaySeconds, 60, "free_seconds",
+                    canSelect = { true }, onBlocked = {}, onChange = { seconds = it },
+                    readOnly = !editable)
             }
             val statusText = when (view.status) {
                 FreeTimerStatus.READY -> "Ready"
@@ -58,31 +59,32 @@ fun FreeCountdownSection(
             }
             Text(statusText, style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.testTag("free_timer_status"))
-            Text("Quick presets · select a duration, then press Start",
-                style = MaterialTheme.typography.labelMedium)
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                FreeQuickPresets.entries.chunked(4).forEach { choices ->
-                    Row(modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        choices.forEach { preset ->
-                            val selected = hours == preset.hours &&
-                                minutes == preset.minutes && seconds == preset.seconds
-                            OutlinedButton(
-                                onClick = {
-                                    hours = preset.hours
-                                    minutes = preset.minutes
-                                    seconds = preset.seconds
-                                },
-                                enabled = editable,
-                                modifier = Modifier.weight(1f).height(40.dp)
-                                    .testTag("free_preset_${preset.durationSeconds}"),
-                                contentPadding = PaddingValues(horizontal = 0.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    containerColor = if (selected)
-                                        MaterialTheme.colorScheme.secondaryContainer
-                                    else MaterialTheme.colorScheme.surface,
-                                ),
-                            ) { Text(preset.label, fontSize = 11.sp, maxLines = 1) }
+            if (editable) {
+                Text("Quick presets · select a duration, then press Start",
+                    style = MaterialTheme.typography.labelMedium)
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    FreeQuickPresets.entries.chunked(4).forEach { choices ->
+                        Row(modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            choices.forEach { preset ->
+                                val selected = hours == preset.hours &&
+                                    minutes == preset.minutes && seconds == preset.seconds
+                                OutlinedButton(
+                                    onClick = {
+                                        hours = preset.hours
+                                        minutes = preset.minutes
+                                        seconds = preset.seconds
+                                    },
+                                    modifier = Modifier.weight(1f).height(40.dp)
+                                        .testTag("free_preset_${preset.durationSeconds}"),
+                                    contentPadding = PaddingValues(horizontal = 0.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        containerColor = if (selected)
+                                            MaterialTheme.colorScheme.secondaryContainer
+                                        else MaterialTheme.colorScheme.surface,
+                                    ),
+                                ) { Text(preset.label, fontSize = 11.sp, maxLines = 1) }
+                            }
                         }
                     }
                 }

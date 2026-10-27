@@ -1,3 +1,7 @@
+## 2026-10-27 — D-119 compact fixes — local JVM 211/211 PASS
+
+Installed D-118 works except user-observed tab clipping, lack of Class-bar legend, running Free preset menu/wheel replacement and thick Sound/Editor slider tracks. D-119 combines all changes without touching scheduling, sounds or persistence. Local JUnit 211/211 PASS; actual Android build/visual QA pending, publish approval required. Stable 5/6 frozen. [Details](D119_COMPACT_CONTROLS_AND_WHEELS_2026_10_27.md).
+
 ## 2026-10-27 — D-118 two timer tabs + eight Free quick durations
 
 User reports D-117 working on phone. Requested longer tab titles and eight Free presets; implemented two-line `Programed Timer` / `Free Timer` labels, quick durations 1/4/5/10/15/25/30m and 1h above Free Start/Pause controls, only editable in READY/FINISHED, no auto-start or persistence changes. Compose test selectors updated; 2 JVM mapping regressions added. **Actual local 211/211 Kotlin tests PASS, 22 suites**; on-phone D-118 Gradle build, installation, instrumentation and visual check pending. Frozen Stable 5/6 untouched; [D118 record](D118_FREE_PRESETS_AND_TAB_LABELS_2026_10_27.md).

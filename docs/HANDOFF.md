@@ -1,4 +1,8 @@
-## 2026-10-27 — CURRENT DEVELOPMENT D-118 (SOURCE; D-117 USER ACCEPTED)
+## 2026-10-27 — CURRENT DEVELOPMENT D-119 (USER-REPORTED D-118 FIXES)
+
+D-118 installed on Samsung after successful Gradle build/211 JVM PASS and separate approval; user says all other features work. Four D-119/code14 repairs: readable six-tab labels, single-row color legend, Free read-only running/paused wheels with hidden quick presets, and **thinner (not narrower)** Sound/Editor sliders. Local JUnit 211/211 PASS. D-119 Compose/Gradle build, phone installation and instrumentation untested; dev GitHub publication needs explicit approval. Existing Stable 5/6 and two saved Classes/Sounds preserved. [Detailed D119 phone handoff](D119_COMPACT_CONTROLS_AND_WHEELS_2026_10_27.md).
+
+## 2026-10-27 — HISTORICAL DEVELOPMENT D-118 (SOURCE; D-117 USER ACCEPTED)
 
 User reported **"הכל עובד כעת"** after D-117 CoGo Android `BUILD SUCCESSFUL in 1m20s`, 72/72 Gradle tasks and **209/209 actual JVM tests PASS**; treat this as D-117 manual acceptance, not Android instrumentation or a new Stable release. New D-118/versionCode 13 requested: rename `Timer`→`Programed Timer` and `Free`→`Free Timer` with two-line visible labels in six equal-width tabs; inside Free add eight quick preset buttons `1m, 4m, 5m, 10m, 15m, 25m, 30m, 1h` directly above Start/Pause/Resume/Exit. Presets set wheels but do NOT auto-run and are disabled during an active/paused countdown. Existing Class, Free sound, physical end and saved data unchanged. Implemented in dev source and guarded D-118 build/test-only scripts. **Actual local Kotlin JUnit 211/211 PASS (22 classes); Android Gradle/Compose build, APK publication, device install, manual QA and instrumentation PENDING.** Do not touch Stable 5/6. [D118 detailed implementation, path and QA gates](D118_FREE_PRESETS_AND_TAB_LABELS_2026_10_27.md).
 

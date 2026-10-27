@@ -143,7 +143,7 @@ fun MelodySettingsSection(
         Row(modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically) {
             Text("5s", style = MaterialTheme.typography.labelSmall)
-            Slider(
+            AtelierSlimSlider(
                 value = sliderSeconds,
                 onValueChange = {
                     sliderSeconds = it.roundToInt().coerceIn(5, 60).toFloat()
@@ -181,7 +181,7 @@ fun MelodySettingsSection(
         Text("Free timer sound length", style = MaterialTheme.typography.labelMedium)
         Text("${settings.freeTimerSeconds}s")
     }
-    Slider(
+    AtelierSlimSlider(
         value = settings.freeTimerSeconds.toFloat(),
         onValueChange = {
             onSettingsChange(settings.setDuration(TimerCue.FREE_TIMER_FINISHED,

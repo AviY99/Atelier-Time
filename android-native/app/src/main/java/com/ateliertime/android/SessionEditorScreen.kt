@@ -8,6 +8,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -534,9 +535,10 @@ fun SessionEditorScreen(
         contentColor = MaterialTheme.colorScheme.onBackground,
     ) {
     Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
-        // Six compact, equal-width destinations. Material Tab reserves side
-        // padding inside each 1/6 cell and clipped Editor/Sound/Design on the
-        // actual phone. These selectable cells have NO hidden label padding.
+        // All six destinations remain visible. Longer labels get enough of the
+        // available width; a fixed 46dp box with inherited bodyLarge lineHeight
+        // clipped two-line titles on the actual Samsung phone. Supply an
+        // explicit lineHeight and breathing room for font scaling.
         // LTR is intentional even when the device uses a Hebrew locale.
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -555,14 +557,21 @@ fun SessionEditorScreen(
                     val contentColor = if (selected) selectedColor
                         else if (atelierNightActive()) Color.White
                         else MaterialTheme.colorScheme.onSurfaceVariant
+                    val tabWeight = when (tab) {
+                        MainTab.TIMER -> 1.60f
+                        MainTab.FREE_TIMER -> 1.10f
+                        MainTab.EDITOR, MainTab.DESIGN -> 0.85f
+                        MainTab.SOUNDS, MainTab.ABOUT -> 0.80f
+                    }
                     Column(
-                        modifier = Modifier.weight(1f).testTag("top-tab-$label").selectable(
+                        modifier = Modifier.weight(tabWeight).testTag("top-tab-$label").selectable(
                             selected = selected, onClick = { activeTab = tab },
                             role = Role.Tab,
                         ),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Box(modifier = Modifier.fillMaxWidth().height(46.dp),
+                        Box(modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                            .padding(vertical = 6.dp),
                             contentAlignment = Alignment.Center) {
                             val displayLabel = when (tab) {
                                 MainTab.TIMER -> "Programed\nTimer"
@@ -570,10 +579,15 @@ fun SessionEditorScreen(
                                 else -> label
                             }
                             Text(displayLabel, color = contentColor,
-                                fontSize = if (tab == MainTab.TIMER) 9.sp else 10.sp,
+                                modifier = Modifier.fillMaxWidth(),
+                                lineHeight = 14.sp,
+                                autoSize = TextAutoSize.StepBased(
+                                    minFontSize = 8.sp, maxFontSize = 11.sp,
+                                    stepSize = 0.5.sp,
+                                ),
                                 maxLines = 2, softWrap = false,
                                 textAlign = TextAlign.Center,
-                                overflow = TextOverflow.Ellipsis)
+                                overflow = TextOverflow.Visible)
                         }
                         Box(modifier = Modifier.fillMaxWidth().height(2.dp).background(
                             if (selected) selectedColor else Color.Transparent))
@@ -878,7 +892,7 @@ fun SessionEditorScreen(
                             .coerceIn(1, available - 1)
                         Text("First session: " + first + " min; last: " +
                             (available - first) + " min")
-                        Slider(
+                        AtelierSlimSlider(
                             value = first.toFloat(),
                             onValueChange = {
                                 ending = FinalPoseChoice.custom(

@@ -1,5 +1,7 @@
 # D-118 — descriptive timer tabs and Free countdown quick presets
 
+> **Observed phone addendum, 2026-10-27:** Samsung `BUILD SUCCESSFUL in 1m25s`, 72/72 tasks, **211/211 JVM PASS**, regular + AndroidTest APKs assembled. The user separately approved regular update-install and reports the other functions work, but tabs still clip, color legend is missing, Free running mode should hide presets and keep countdown wheels, and Sound/Editor selection tracks are too thick. **D-119** is the new development fix; the old source-only status below is historical. [Current D119 handoff](D119_COMPACT_CONTROLS_AND_WHEELS_2026_10_27.md).
+
 **Date:** 2026-10-27
 **Branch:** `android-native-kotlin-compose` (development only)
 **App version:** `D-118`, Android `versionCode=13`

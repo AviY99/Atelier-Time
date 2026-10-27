@@ -2,6 +2,8 @@ package com.ateliertime.android
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -9,7 +11,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.ateliertime.domain.*
 
 /**
@@ -116,6 +121,24 @@ fun TimelinePhaseChart(
                 }
             }
             }
+            // Compact, always single-line color key immediately below the
+            // bars. Horizontal scroll is a font-accessibility fallback only;
+            // the standard Samsung layout fits all visible swatches at once.
+            Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+                    .testTag("class_timeline_color_legend"),
+                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                if (runtimeTimeline != null) {
+                    TimelineColorKey("Elapsed", Color(0xFFD1A34C))
+                }
+                TimelineColorKey("Session", phaseColor(PhaseKind.POSE))
+                TimelineColorKey("Reg. break", phaseColor(PhaseKind.SHORT_BREAK))
+                TimelineColorKey("Special", phaseColor(PhaseKind.SPECIAL_BREAK))
+                TimelineColorKey("Summary", phaseColor(PhaseKind.SUMMARY))
+                if (pausedTotal > 0) {
+                    TimelineColorKey("Pause", Color(0xFF7C7C7C))
+                }
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Start  00:00", style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.weight(1f))
@@ -133,6 +156,16 @@ fun TimelinePhaseChart(
                     style = MaterialTheme.typography.labelSmall)
             }
         }
+    }
+}
+
+@Composable
+private fun TimelineColorKey(label: String, color: Color) {
+    Row(horizontalArrangement = Arrangement.spacedBy(3.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        Canvas(modifier = Modifier.size(7.dp)) { drawRect(color) }
+        Text(label, fontSize = 9.sp, lineHeight = 11.sp,
+            maxLines = 1, softWrap = false)
     }
 }
 
