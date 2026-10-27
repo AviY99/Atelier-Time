@@ -1,3 +1,7 @@
+## 2026-10-27 — STABLE 7 APPROVED: INSTALLED D-119 / 211 ACTUAL PHONE JVM PASS
+
+**Latest accepted checkpoint.** After screenshot-verified Samsung `BUILD SUCCESSFUL in 1m16s`, all 72 Gradle tasks executed, and **211/211 actual phone JVM tests PASS**, the user confirmed **"הכל עובד"** and declared **"מדובר בגרסה יציבה 7"**. Fixed initial D-119 experimental Slider API compile error, retained code14/versionName D-119, and froze exact accepted code/documentation in `stable/android-d119-qa7`. Stable 5 `stable/android-d114` and Stable 6 `stable/android-d114-qa6` must remain unchanged. Development continues on `android-native-kotlin-compose`. AndroidTest APK was built but **instrumentation was not run**; signed production, Doze/audio endurance and separate persistence proof remain outside this acceptance. [Stable 7 release checkpoint](STABLE7_D119_QA_ACCEPTANCE_2026_10_27.md). Older D-119 source/pending-gate paragraphs below are superseded.
+
 ## 2026-10-27 — D-119 compact fixes (source; local 211/211 JUnit PASS)
 
 Four combined fixes to installed D-118: full adaptive tab labels, a one-line Class timeline legend, read-only Free wheels with hidden presets during RUNNING/PAUSED, and thinner (not shorter) Sound/Editor sliders. D-119/code14 development only; Compose/device QA and update-install still pending separate gates. [Details](D119_COMPACT_CONTROLS_AND_WHEELS_2026_10_27.md).

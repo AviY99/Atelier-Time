@@ -1,3 +1,7 @@
+## 2026-10-27 — User designates D-119 as Stable 7
+
+After real Samsung `BUILD SUCCESSFUL`, 72 Gradle tasks and 211/211 JVM tests PASS, and the separate report **"הכל עובד"**, user explicitly decided **"מדובר בגרסה יציבה 7"**. Freeze `stable/android-d119-qa7` as the exact D-119/versionCode14 app checkpoint. Do not rename About/Android app version to “7” or rebuild; this is a QA stability ordinal, not a new APK. Keep Stable 5/6 and saved Classes/Sounds unchanged. [Evidence and boundaries](STABLE7_D119_QA_ACCEPTANCE_2026_10_27.md).
+
 ## 2026-10-27 — D-119: slim Sound/Editor selectors, free running wheels
 
 User clarified slider bars should be **thinner**, not narrower: 5dp track and compact thumb, preserved values/steps/accessibility. Free Timer retains read-only live HH:MM:SS wheels with presets hidden Running/Paused; Class timeline gains a one-row color legend; six tabs auto-size labels. D-118 remainder user-reported working. [Decision and gates](D119_COMPACT_CONTROLS_AND_WHEELS_2026_10_27.md).

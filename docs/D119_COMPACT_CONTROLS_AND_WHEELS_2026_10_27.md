@@ -3,7 +3,7 @@
 **Date:** 2026-10-27
 **Branch:** `android-native-kotlin-compose` only
 **Android version:** `D-119`, `versionCode=14`
-**Gate:** local source/tests → publish approved dev branch → Samsung build-only → separately approved regular update → manual acceptance. Do not call D-119 Stable.
+**Original gate:** local source/tests → publish approved dev branch → Samsung build-only → separately approved regular update → manual acceptance. **Gate now complete:** after successful corrected D-119 phone build, the user reported "הכל עובד" and explicitly designated it **Stable 7**. [Accepted checkpoint](STABLE7_D119_QA_ACCEPTANCE_2026_10_27.md).
 
 ## Phone feedback on installed D-118
 
