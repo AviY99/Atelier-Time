@@ -1,3 +1,7 @@
+## 2026-10-28 — D-122 pending QA after Restart-after-Next user regression
+
+D-121 is rejected in user acceptance: Restart after many Next operations moved the automatic special Break and redistributed ending time differently from Stable 7. D-122/code17 development-only source restores legacy restart candidate priority, forbids rebuilding the existing future on Restart and Resume, and adds three new structure-preservation tests. Source-level checks passed; **Kotlin tests/Android build and installation NOT done for D-122**. Exact evidence/formulas: [D-122](D122_RESTART_AFTER_NEXT_PLACEMENT_REVIEW_2026_10_28.md). D-119 Stable 7 remains untouched.
+
 ## 2026-10-27 — D-121 source correction after user rejected D-120 Next behavior
 
 The user reports D-120 broken under Next despite 221/221 passing tests. **Do not call D-120 stable or accepted.** Stable 7/D-119 is frozen and was working. D-121/code16 development source now derives one correction identity from exact monotonic physical elapsed minus virtual phase cursor, restores D-119 candidate selection order, checks the real physical remaining-time budget on candidate reflows and clarifies the UI credit/chart end labels. Exact formulas, boundaries and QA status: [D-121 investigation](D121_NEXT_PHYSICAL_BUDGET_REVIEW_2026_10_27.md). **Unverified source only; do not install APK or claim a green test run.**
