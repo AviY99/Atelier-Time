@@ -34,6 +34,11 @@ data class ReflowBoundary(
     val preferActiveFuture: Boolean = false,
     /** First final work Session is already observed: adjust the last only. */
     val lastOnly: Boolean = false,
+    /** Stable-7 policy: only Next may rebuild a relocated/inserted future.
+     * Pause/Resume and Restart MUST preserve the existing future layout and
+     * try source reflow, then last-only recovery (never adjustFutureTail).
+     */
+    val preserveExistingTail: Boolean = false,
     /** Physical time remaining until the immutable approved Class deadline. */
     val physicalRemainingMillis: Long? = null,
     /** Virtual cursor immediately after the proposed transition. */
@@ -113,7 +118,8 @@ object FinalPairCompensation {
         // Preserve D-119's tested preference: rebuild from approved source
         // first, then use the already-relocated future only if history forbids
         // a fresh source plan. D-120 reversed this order after the first Next.
-        val ordered = listOf(base, activeTail)
+        val ordered = if (boundary.preserveExistingTail) listOf(base)
+        else listOf(base, activeTail)
         for (attempt in ordered) {
             val proposed = runCatching(attempt).getOrNull() ?: continue
             if (valid(proposed)) return proposed
