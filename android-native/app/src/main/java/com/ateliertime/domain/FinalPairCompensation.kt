@@ -76,7 +76,8 @@ object FinalPairCompensation {
             }
             if (phases.isEmpty() || phases.first().startSeconds != 0 ||
                 phases.last().endSeconds != candidate.totalSeconds ||
-                phases.any { it.durationSeconds <= 0 } ||
+                phases.any { it.durationSeconds <= 0 ||
+                    (it.kind == PhaseKind.POSE && it.durationSeconds < SECONDS_PER_MINUTE) } ||
                 phases.zipWithNext().any { (a, b) -> a.endSeconds != b.startSeconds } ||
                 phases.filter { it.kind == PhaseKind.SUMMARY }
                     .sumOf { it.durationSeconds } != session.rules.summarySeconds) return false
