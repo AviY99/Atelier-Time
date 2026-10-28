@@ -1,10 +1,11 @@
 # Stage 1 Step 1.3 — Scheduling and edge-case policies
 
-**Superseding 2026-10-27 runtime decision:** The historical D-038 comparison labeled *open* below was resolved after Stable 7 in [D-120 approved contract](D120_TIMER_LOGIC_UNIFICATION_DECISIONS_2026_10_27.md): any positive `L<=B` retains the approved Editor placement and duration but behaves as ordinary Break during **runtime** changes; only `L>B` has special-runtime privileges. This does not alter the Editor-only 25/5 warning. The older sections remain the historical Step 1.3 record.
+> **ARCHIVAL EDGE-POLICY CONTEXT — 2026-10-28:** The Step 1.3 approvals below are historical input, **not** the entire current runtime contract. The authoritative live Android constraint policy is [D-124 unified planner](D124_UNIFIED_CONSTRAINT_FUTURE_PLANNER_2026_10_28.md), accepted under Stable 9/D-126. Do not re-introduce rejected D-125 Summary extension. [Current status](CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md).
+
 
 **Updated:** 2026-10-22  
-**Status:** **Stage 1 Step 1.3 APPROVED / COMPLETE (2026-10-22)**. User approved placement and edge policies P-01–P-06 as documented in [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md), with **D-036 prohibiting 0-minute sessions and actual breaks**. D-031 retains the advisory 25/5 warning and explicit override for otherwise valid schedules. The one explicitly unresolved case (whether a positive special break may be <= normal break length) stays open.  
-**Scope:** Approved documentation ONLY. **Step 1.4 programming is NOT authorized.**
+**Status:** Step 1.3 P-01–P-06 approved (D-037), with D-036 prohibiting zero-minute sessions/breaks and D-031 retaining the advisory 25/5 warning. **Later D-044 expressly APPROVED any positive special replacement duration**, even shorter/equal than the normal break. The former D-038 question is resolved; Step 1.4 implements this on an isolated branch but is still unverified.  
+**Scope:** Step 1.3 approval record. **Later status:** user separately authorized Step 1.4 (D-040) on [isolated pure-Dart branch](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core); engine/test source exists but is uncompiled and unexecuted. No budget-consuming Actions, no Step 1.4 completion and no later stages.
 
 The latest decision **D-036 supersedes only D-031's earlier allowance of a 0-minute break**. Earlier discussion of 0-minute *logical break slots* was explicitly withdrawn, not approved. A 0-minute **full session** or **configured normal/special break** is an **error**, never an acknowledged safety-warning exception. No numeric duration is hardcoded as the only permissible positive value: the new-session defaults are 5m normal and 15m special.
 
@@ -78,7 +79,7 @@ These policies were **approved for Step 1.3**. The special-break-duration-versus
 | Repeating regular pose duration `<=0` | Error |
 | `N=0` special replacements | **Approved valid**; no special break emitted |
 | `N<0` or `N` exceeds eligible ordinary breaks | Error; no silent adjustment |
-| Special break positive but not longer than normal break | **STILL OPEN:** prior approval sheet explicitly stated this comparison was unresolved. Do not assume <= is permitted or forbidden; seek user decision before implementing this case. |
+| Special break positive but not longer than normal break | **APPROVED D-044:** any positive special duration is allowed, even when shorter/equal than ordinary duration. Recalculate the timeline and apply 25/5 warnings if relevant; user must acknowledge. 0-minute actual breaks remain invalid. |
 | Break-first but no room for following positive pose | Proposed error; never end with trailing break |
 | No valid positive last repeating pose remains | Proposed error; no invented poses |
 | Exactly fitted last pose | No final-pose-shortening choice necessary |
@@ -105,6 +106,6 @@ If no preceding eligible pose or positive intervening break exists, do not inven
 
 ## 9. Next gate
 
-**APPROVED:** P-01–P-06 as set out above; exactly-25-minute endpoint behavior; one-complete-session warning scope (without cross-preset carryover); D-036 invalidates all zero-duration break/session designs. **STILL OPEN as explicitly labeled in the approved review:** whether a positive special break can be shorter than or equal to an ordinary break. Do not invent a rule without asking for approval. **WITHDRAWN:** all zero-minute logical break-slot proposals.
+**APPROVED:** P-01–P-06, 25-minute endpoint behavior and per-full-session warning scope (D-037); zero-minute session/break prohibition (D-036); **D-044** allows any **positive** replacement break, including shorter/equal to the regular break, subject to D-031 rest warnings and explicit acknowledgment. The prior D-038 comparison is now RESOLVED. **WITHDRAWN:** all zero-minute logical break-slot proposals.
 
 Read the [approved Step 1.3 record](STEP_1_3_REVIEW.md) for the consolidated signed-off rules. **Step 1.3 is COMPLETE. Step 1.4 code, tests, Flutter scaffolding and UI remain unapproved.**

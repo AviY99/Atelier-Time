@@ -1,5 +1,10 @@
 # Changelog — Atelier Time
 
+## 2026-10-28 — Stable 9 D-126: completed 285/285 tests and user-data preservation
+
+The user promoted already-installed D-126/code20 to Stable 9 after the Samsung confirmed all planned automated testing: 243 JVM unit tests PASS, 42 physical-device Android instrumentation PASS, Gradle 72 tasks succeeded and both APK SHA-256 checks passed. The first connected test run reported four test-only failures corrected in the AndroidTest directory; the second run returned `OK (42 tests)` in 21.697s. User explicitly verified Saved Classes/Sounds retained unchanged. No production source changes, main-app APK update or reset. Stable 9 source/QA checkpoint `stable/android-d126-qa9-tests-complete` frozen. [Current status](docs/CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md), [QA certificate](docs/STABLE9_D126_285_AUTOMATED_QA_ACCEPTANCE_2026_10_28.md).
+
+
 ## 2026-10-25 — D-111: confirmed-finish Run and full automated QA prepared (DEVICE GATES PENDING)
 
 - **Feature-first user direction:** on Run show calculated finish, require explicit approval or HH:mm override (earlier/later), and use signed changes to only the final two work Sessions. Block infeasible early targets (each final Session must retain >=1 minute), unrealistic late targets (2× original Class maximum) and invalid clock inputs with corrective feedback. The selected Class finish is a physical monotonic deadline. During pauses after the first final Session begins, only the unstarted last Session can be changed; completed phases remain immutable. Legacy one-Session default Run tolerates UI confirmation/start latency without enabling arbitrary custom adjustments.

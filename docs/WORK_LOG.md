@@ -1,5 +1,10 @@
 ## 2026-10-27 — STABLE 7 USER DESIGNATION / REAL D-119 PHONE PASS
 
+## 2026-10-28 — Stable 9 D-126 documentation synchronized across main and development
+
+User explicitly accepted current Stable 9 after completed D-126 tests and confirmation that Saved Classes and Sounds were preserved. Samsung evidence: `BUILD SUCCESSFUL` with 72 Gradle tasks, 243/243 JVM PASS, both APK SHA-256 PASS, 42/42 physical Android instrumentation PASS after AndroidTest-only fixes, total 285/285 automated tests. The installed app remains D-126/code20 unchanged; frozen checkpoint `stable/android-d126-qa9-tests-complete` and older Stable 8 checkpoints intact. Default-branch `main` documentation and canonical development docs have now been aligned, while preserving historical notes. [Current status](CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md), [certification](STABLE9_D126_285_AUTOMATED_QA_ACCEPTANCE_2026_10_28.md).
+
+
 After the previously logged D-119 Kotlin failure and corrective `AtelierSlimSlider` fix (dev commit `6fb06f361c4522b677cbad0804e89a835dc1ee30`), the user supplied CoGo screenshot showing **`BUILD SUCCESSFUL in 1m 16s`**, **72/72 Gradle tasks executed**, and **`D-119 JVM ACTUAL: tests=211 failures=0 errors=0 skipped=0`**. The script generated `Atelier-Time-D119-Candidate.apk`, `Atelier-Time-D119-Tests.apk`, QA manifest; no auto-install. User then explicitly said **"הכל עובד"** and **"מדובר בגרסה יציבה 7"**. This closes D-119 build gate and user functional acceptance, not Android instrumentation or production signing. Freeze `stable/android-d119-qa7` as latest accepted **Stable 7 = D-119/code14** without software changes or phone operations. Stable 5/6 and user-saved Classes/Sounds remain protected. [Stable 7 record](STABLE7_D119_QA_ACCEPTANCE_2026_10_27.md).
 
 ## 2026-10-27 — D-119 REAL SAMSUNG COMPILE FAILURE / CORRECTIVE SOURCE PATCH
