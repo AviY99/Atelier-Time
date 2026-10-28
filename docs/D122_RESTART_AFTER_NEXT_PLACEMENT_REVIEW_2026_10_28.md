@@ -177,3 +177,11 @@ Reconstructed editor values from screenshot:
 5. Repeat with rapid subsecond Next and inspect observed-vs-unstarted timeline, cue count, error messages; ensure no past segment rewrite, no jump of any genuinely protected special, and no data modification.
 
 **No source changes performed** in response to these screenshots. Before any fix, capture the *exact actions*, timestamps (rough seconds from Start), chart before/after, rejection text, actual versus expected behavior. Preserve user data and D-119 Stable 7; do not infer that 228 passing tests prove this untested edge case. Label `QA-D122-06 OPEN / exact reproduction pending`.
+
+## QA-D122-06 clarified — structural Next-tail defect isolated to D-123 (2026-10-28)
+
+**User corrected the interpretation:** There is **NO error in calculations or the unchanged Class finish**. During successive early Next actions, work time accumulates into an oversized final Session, especially after the final planned Break is skipped, rather than being divided into regular Sessions plus Breaks. The issue becomes more visible as work Sessions get short and Breaks get longer. Do not mislabel this as an expected Restart block or a physical-deadline bug.
+
+Source review confirms a structural normalization gap: the last-only reflow fallback can grow the unstarted final work Session without inserting a regular work/rest cycle. Early Next events can trigger the same gap. A narrow source change and **five new deterministic JVM tests** are committed in development candidate **D-123 / versionCode 18**, with dedicated review document `docs/D123_TINY_CLASS_NEXT_TAIL_NORMALIZATION_2026_10_28.md`.
+
+**Important:** D-123 has **not been built, tested on the phone, or installed**. The current D-122 binary and frozen Stable 7 branch are unchanged. Build only with `tools/build_d123_candidate_on_phone.sh`, verify actual 233/233 test results before seeking separate installation approval. Recovered time smaller than `P + B + 60s` cannot legally create another complete session/break/final-session group; some temporary extension is therefore mathematically necessary.
