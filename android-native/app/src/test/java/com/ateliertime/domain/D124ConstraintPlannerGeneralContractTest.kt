@@ -219,4 +219,35 @@ class D124ConstraintPlannerGeneralContractTest {
             it.kind == PhaseKind.SPECIAL_BREAK
         }.durationSeconds)
     }
+    @Test fun aNewlyEnteredUnobservedFinalSessionMayUseLegalPairMerge() {
+        val rules = SessionRules(
+            id = "merge-target", name = "target boundary",
+            totalSeconds = 65 * 60, poseSeconds = 25 * 60,
+            shortBreakSeconds = 5 * 60,
+            specialBreakSeconds = 5 * 60, specialBreakCount = 1,
+            placement = SpecialBreakPlacement.manual(listOf(2)),
+        )
+        val session = engine.approve(engine.generate(rules),
+            acknowledgeWarnings = true)
+        val first = session.phases.indexOfLast {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        } - 2
+        assertTrue(first > 0)
+        val revised = FinalPairCompensation.reflow(
+            session, session.phases, correctionSeconds = 10 * 60,
+            boundary = ReflowBoundary(
+                protectedThroughIndex = first - 1,
+                nextIndex = first,
+            ),
+        )
+        assertEquals(session.phases[first].id, revised.phases[first].id)
+        assertEquals(session.phases[first].startSeconds,
+            revised.phases[first].startSeconds)
+        assertEquals(25 * 60, revised.phases[first].durationSeconds)
+        assertEquals(0, revised.phases.count {
+            it.kind == PhaseKind.SPECIAL_BREAK
+        })
+        assertEquals(55 * 60, revised.totalSeconds)
+    }
+
 }
