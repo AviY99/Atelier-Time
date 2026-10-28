@@ -1,3 +1,9 @@
+## QA-D122-01 — FAILED on Samsung (2026-10-28)
+
+User-supplied Code on the Go screenshot shows `228 tests completed, 2 failed`, `:app:testDebugUnitTest FAILED`, `BUILD FAILED in 1m 18s` with 64 actionable tasks executed. The build-only gate did not pass; no D-122 candidate should be installed or called stable.
+
+**Unknown until JUnit XML is reviewed:** exact failing test names, assertions, and exception stack traces. Do not guess that both failures are from the three newly added tests, do not weaken tests to force green. Retrieve `app/build/test-results/testDebugUnitTest/TEST-*.xml` errors from the phone and diagnose before code changes. D-121 remains installed development; frozen Stable 7 remains unchanged.
+
 # D-122 — Restart-after-Next regression: forensic comparison and repair
 
 **Date:** 2026-10-28. **Status:** development SOURCE FIX, NOT YET BUILT/TESTED; not Stable. `versionCode=17`, `versionName=D-122`.
