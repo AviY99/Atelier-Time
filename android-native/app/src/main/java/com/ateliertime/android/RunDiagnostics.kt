@@ -97,8 +97,8 @@ internal class RunDiagnosticsRecorder(
     private var closed = false
 
     @Synchronized
-    fun append(entry: JSONObject) {
-        check(!closed) { "Diagnostic report is already closed." }
+    fun append(entry: JSONObject, allowAfterFinish: Boolean = false) {
+        check(!closed || allowAfterFinish) { "Diagnostic report is already closed." }
         entry.put("sequence", ++sequence)
         // Each event is terminated and flushed immediately; interrupted runs
         // remain diagnosable and are NOT falsely marked as completed.
@@ -158,7 +158,8 @@ internal class RunDiagnosticsRecorder(
         append(JSONObject().put("type", "diagnostic")
             .put("category", category).put("message", message)
             .put("epochMs", System.currentTimeMillis())
-            .put("monotonicMs", SystemClock.elapsedRealtime()))
+            .put("monotonicMs", SystemClock.elapsedRealtime()),
+            allowAfterFinish = true)
     }
 
     @Synchronized
