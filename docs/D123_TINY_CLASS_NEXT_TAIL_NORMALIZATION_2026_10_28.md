@@ -1,6 +1,6 @@
 # D-123 — Normalize saved Class `test` after early and late Next (development candidate)
 
-**Status: ARCHITECTURAL HOLD — TARGETED D-123 PATCH NOT ACCEPTED AS A GENERAL SOLUTION. DO NOT BUILD OR INSTALL.**
+**Status: SUPERSEDED / ARCHITECTURAL HOLD. The targeted D-123 approach is NOT ACCEPTED. Do not build or install D-123. The general D-124 source is documented in [D-124 unified planner](D124_UNIFIED_CONSTRAINT_FUTURE_PLANNER_2026_10_28.md); D-124 still requires build and device QA.**
 
 ## User's precise observation
 
