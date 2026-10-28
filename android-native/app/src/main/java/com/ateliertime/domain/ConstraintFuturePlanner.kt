@@ -49,8 +49,18 @@ internal object ConstraintFuturePlanner {
         val mayRebuild = entering != null && correctionSeconds < 0 &&
             !boundary.noActiveTailRebuild &&
             !boundary.preserveExistingTail && allowExtraRegular
+        // A Resume/Restart after Next must not redistribute an existing
+        // inserted or relocated future. The previously accepted first final
+        // Session is already a structural commitment: only the actual last
+        // unstarted Session may absorb subsequent time loss.
+        val sourceTopologyUnchanged = active.size == session.phases.size &&
+            active.indices.all { i ->
+                active[i].id == session.phases[i].id &&
+                    active[i].kind == session.phases[i].kind
+            }
         val pairFlexible = pairAvailable && first!! > lock &&
-            (entering == null || entering < first)
+            (entering == null || entering < first) &&
+            !(boundary.preserveExistingTail && !sourceTopologyUnchanged)
         val proposed = when {
             pairFlexible -> allocatePair(session, active, first!!, last, rest!!,
                 delta, correctionSeconds, mayRebuild)
