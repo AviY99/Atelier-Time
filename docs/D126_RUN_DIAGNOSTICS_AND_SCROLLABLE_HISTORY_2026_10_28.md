@@ -1,5 +1,8 @@
 # D-126 — Run diagnostics, full scrollable actions and focused Timer view
 
+**FINAL ACCEPTANCE UPDATE (2026-10-28): User confirmed "הכל עובד כנדרש" and designated installed D-126/code20 as the consolidated **Stable 8** with unified Timer logic plus diagnostics. Real Samsung **72/72 Gradle PASS**, **243/243 JVM PASS**, main and test APK SHA-256 `OK`; no on-device instrumentation (ADB not in use). Current frozen checkpoint `stable/android-d126-qa8-logic-diagnostics`, while historical `stable/android-d124-qa8` remains frozen. Earlier status/QA gate sections below are chronology, superseded by this update. [Certificate](STABLE8_D126_UNIFIED_TIMER_AND_RUN_DIAGNOSTICS_QA_ACCEPTANCE_2026_10_28.md).**
+
+
 **Date:** 2026-10-28. **Status: SOURCE IMPLEMENTED ON DEVELOPMENT BRANCH; SAMSUNG GRADLE/APK QA NOT YET RUN.** Stable 8 `stable/android-d124-qa8` is frozen; no APK installation or real user-data changes occurred.
 
 ## User-approved product policy
