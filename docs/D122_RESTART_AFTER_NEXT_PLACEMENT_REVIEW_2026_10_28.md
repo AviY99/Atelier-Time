@@ -53,3 +53,24 @@ D-121's `reflow()` chose `adjust(original)` then **`adjustFutureTail(active)`** 
 ## Release gate (pending)
 
 Neither the new regression tests nor the Android app have been executed in this D-122 change set. **Do not treat source code or mathematical arguments as a PASS.** First run `bash tools/build_d122_candidate_on_phone.sh` from the development branch using the user-authorized build-only procedure and obtain actual JUnit XML totals. Installation requires separate approval. D-121 remains the installed development candidate until user action; D-119 Stable 7 remains unchanged and closed in GitHub.
+
+## QA-D122-01 diagnosis from exact failing JUnit XML and corrective change (2026-10-28)
+
+The user supplied the XML `<failure>` output. Exactly two **pre-existing** JUnit tests failed, not the three new D-122 regression methods:
+
+1. `ClassClockTrackerTest.restartingCurrentSessionResetsOnlyItsClockNotClassBoundary` (at the invocation of Restart, test line 158).
+2. `MonotonicSessionTimerTest.restartCurrentSessionKeepsEarlierPhasesAndOriginalClassDeadline` (at Restart, test line 113).
+
+Both ended with `IllegalArgumentException: The approved finish cannot fit the unstarted future without rewriting completed Sessions or protected Breaks.` from `FinalPairCompensation.reflow`. These scenarios restart an ordinary **Session 2 at physical 40m, virtual start 30m, with NO prior Next**. Stable 7 succeeds with signed correction +10m, virtual reset to 30m, virtual total 170m and fixed physical finish 180m.
+
+**Precise root cause:** D-122 accidentally set `preserveExistingTail=true` unconditionally for Restart/Resume. Its structural validator forbids lawful changes to the untouched final pair layout (including merge and phase-count changes) **even when no Next had ever altered the future**. This caused both old tests to fail.
+
+**Corrective source change, still pending actual Kotlin run:**
+
+- `preserveExistingTail = nextHasOccurred` in Restart and Resume; only post-Next restarts require strong identity/order/placement preservation.
+- A separate `noActiveTailRebuild = true` applies to Restart and Resume **both before and after Next**. It preserves Stable-7 candidate priority: `adjust(original)` first, then `adjustLastOnly(active)`, but **never `adjustFutureTail`** for these actions.
+- Next remains permitted to use `adjustFutureTail` with its existing real-remaining-time gate.
+- The mandatory physical budget `abs(virtualRemaining - physicalRemaining) < 2000ms` is unchanged.
+- No tests were deleted, renamed, ignored or weakened. Both pre-existing failures must pass alongside all three D-122 special-placement tests.
+
+**Next QA step:** rerun `tools/build_d122_candidate_on_phone.sh` on development branch with full JVM suite and Android APK assembly, then provide actual JUnit totals. Expected test count is 228 from the failed run, but a pass has **not yet** been observed. D-122 is blocked from installation pending results. Stable 7 remains frozen and D-121 remains the installed development candidate.
