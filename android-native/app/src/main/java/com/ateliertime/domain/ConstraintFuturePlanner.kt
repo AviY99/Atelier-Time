@@ -58,8 +58,16 @@ internal object ConstraintFuturePlanner {
                 active[i].id == session.phases[i].id &&
                     active[i].kind == session.phases[i].kind
             }
-        val pairFlexible = pairAvailable && !boundary.lastOnly &&
-            first != null && first > lock &&
+        // After a legal merge the original last Session ID disappears.
+        // The previous regular Session must NOT become a new editable ending
+        // partner merely because the merged tail now follows its Break.
+        val originalFinalId = session.phases.lastOrNull {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }?.id
+        val endingWasMerged = originalFinalId != null &&
+            active.none { it.id == originalFinalId }
+        val pairFlexible = pairAvailable && !endingWasMerged &&
+            !boundary.lastOnly && first != null && first > lock &&
             (entering == null || entering < first ||
                 // At the exact Next-entry boundary, the first final Session
                 // has not yet been observed. A positive time loss may still
