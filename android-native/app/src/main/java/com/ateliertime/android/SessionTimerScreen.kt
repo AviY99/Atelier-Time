@@ -332,7 +332,8 @@ fun SessionTimerScreen(
                             .testTag("class_action_history_scroll"),
                         verticalArrangement = Arrangement.spacedBy(3.dp),
                     ) {
-                        items(eventHistory.size) { offset ->
+                        items(eventHistory.size,
+                            key = { offset -> eventHistory.lastIndex - offset }) { offset ->
                             Text(
                                 eventHistory[eventHistory.lastIndex - offset],
                                 style = MaterialTheme.typography.labelSmall,
