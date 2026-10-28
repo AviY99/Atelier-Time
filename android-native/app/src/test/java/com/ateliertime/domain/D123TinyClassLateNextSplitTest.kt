@@ -122,6 +122,66 @@ class D123TinyClassLateNextSplitTest {
         assertTimelineSafe(timer, now)
     }
 
+    @Test fun minuteSessionsWithThreeMinuteBreaksSplitAsSoonAsBudgetAllows() {
+        // Same break-first topology as saved "test", but Breaks are 3x longer
+        // than work Sessions. Do not wait until ALL planned Breaks are consumed
+        // to convert an oversized final Session into regular cycles.
+        val rules = SessionRules(
+            id = "qa-long-break", name = "long break tiny sessions",
+            totalSeconds = 10 * SECONDS_PER_MINUTE,
+            summarySeconds = SECONDS_PER_MINUTE,
+            openingGroups = listOf(OpeningPoseGroup(
+                "opening-1", 1, SECONDS_PER_MINUTE, 3 * SECONDS_PER_MINUTE)),
+            poseSeconds = SECONDS_PER_MINUTE,
+            shortBreakSeconds = 3 * SECONDS_PER_MINUTE,
+            specialBreakSeconds = 3 * SECONDS_PER_MINUTE,
+            specialBreakCount = 1,
+            cycleStart = CycleStart.BREAK_FIRST,
+        )
+        val session = ScheduleEngine().approve(ScheduleEngine().generate(rules),
+            acknowledgeWarnings = true)
+        assertEquals(
+            listOf(PhaseKind.POSE, PhaseKind.SPECIAL_BREAK, PhaseKind.POSE,
+                PhaseKind.SHORT_BREAK, PhaseKind.POSE, PhaseKind.SUMMARY),
+            session.phases.map { it.kind })
+        var now = 0L
+        val timer = MonotonicSessionTimer(session) { now }
+        timer.start()
+        now += 2_000L
+        assertEquals(PhaseKind.SPECIAL_BREAK, timer.nextPhase().view.phase?.kind)
+        now += 2_000L
+        assertEquals(PhaseKind.POSE, timer.nextPhase().view.phase?.kind)
+        now += 2_000L
+        assertEquals(PhaseKind.SHORT_BREAK, timer.nextPhase().view.phase?.kind)
+        // This is BEFORE the final programmed Break was skipped. Skipping the
+        // 3-minute Special Break already banked enough for a new work/rest
+        // cycle; keeping all time in the last work Session is incorrect.
+        val phases = timer.activePhasesSnapshot()
+        val lastPlanned = session.phases[4]
+        val lastIndex = phases.indexOfFirst { it.id == lastPlanned.id }
+        assertEquals(SECONDS_PER_MINUTE, phases[lastIndex].durationSeconds)
+        assertEquals(PhaseKind.SHORT_BREAK, phases[lastIndex + 1].kind)
+        assertEquals(3 * SECONDS_PER_MINUTE,
+            phases[lastIndex + 1].durationSeconds)
+        assertEquals(PhaseKind.POSE, phases[lastIndex + 2].kind)
+        assertEquals(session.phases.take(4), phases.take(4))
+        val virtualRemaining = timer.view().totalRemainingSeconds * 1000L
+        val physicalRemaining = 10 * 60_000L - now
+        assertTrue(kotlin.math.abs(virtualRemaining - physicalRemaining) < 2_000L)
+        assertEquals(PhaseKind.SUMMARY, phases.last().kind)
+        assertEquals(SECONDS_PER_MINUTE, phases.last().durationSeconds)
+
+        now += 2_000L
+        assertEquals(PhaseKind.POSE, timer.nextPhase().view.phase?.kind)
+        assertTrue(timer.activePhasesSnapshot().take(4) == phases.take(4))
+        now += 2_000L
+        assertEquals(PhaseKind.SHORT_BREAK, timer.nextPhase().view.phase?.kind)
+        assertTrue("A long tail must keep splitting during later Next actions",
+            timer.activePhasesSnapshot().count {
+                it.id.startsWith("runtime-tail-break-")
+            } >= 2)
+    }
+
     @Test fun withoutNextTinyClassRestartMustNotRewriteMinimumLengthPair() {
         var now = 0L
         val timer = MonotonicSessionTimer(tiny()) { now }
