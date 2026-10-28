@@ -75,3 +75,19 @@ User supplied Samsung / Code on the Go terminal screenshot of **local artifact m
 - `/storage/emulated/0/Download/Atelier-Time-D126-Tests.apk: OK` — SHA-256 compared to the recorded manifest.
 
 **Status:** Artifact integrity PASS for both APKs; 72 Gradle tasks PASS; 243/243 JVM unit tests PASS. **Connected AndroidTest execution and real-world acceptance remain pending.** No user permission for app/test APK installation has yet been recorded in this gate; never uninstall, reset app data, or claim these apps were installed. If user explicitly approves in-place upgrade and test-only APK, verify data preservation, full history scroll, and exported diagnostic file on device.
+
+## Authorized Samsung in-place update and Android instrumentation gate (2026-10-28)
+
+The user explicitly approved BOTH **updating their installed D-124 Stable 8 app to D-126 in place** and **installing/running the D-126 AndroidTest APK**, conditional on preserving existing Saved Classes and Sound settings. At the time of this note, permission is recorded, **execution on the phone is not yet recorded**.
+
+A new `android-native/tools/termux_install_and_test_d126.sh` automates the bounded device QA sequence under `--run`:
+1. Validates the tested D-126 manifest (build SHA `b2d47ca32c2f470d38e556ea7a571afaa89400e3`, versionCode=20, both SHA-256 hashes, source AndroidTest method count >=40).
+2. Requires exactly one authorized ADB device; accepts only installed D-124/code19 or D-126/code20; asks for explicit **IDLE** confirmation that no real Class runs.
+3. Uses `adb install -r` for a same-package in-place regular app update (unless already D-126), **never uninstall, pm clear or force-stop**. Verifies installed D-126/code20.
+4. Stops for user-visible verification of preserved saved Classes/Sounds. Tests are blocked unless the user enters **PRESERVED**.
+5. Installs test APK with `adb install -t -r`, verifies runner, executes `adb shell am instrument -w`, retains full log in `Atelier-Time-D126-Instrumentation.log`; only reports PASS after an actual `OK (N tests)` equal to the manifest's method count.
+6. Requests rechecking saved data after tests and manual QA for >30-event scrolling and exporting an actual Run report.
+
+Use the latest tool script from GitHub via CoGo `git pull --ff-only`, copy into public Downloads and execute in the **Termux** environment with working paired wireless ADB. The Build Candidate APKs remain those already SHA-256 verified by the user. The script does **not** rebuild or silently install a newer binary; changes after the recorded build commit are only docs/QA test-driver scripts.
+
+**Honest status: device update, instrumentation, saved-data follow-up and manual acceptance all PENDING actual terminal/user evidence.**
