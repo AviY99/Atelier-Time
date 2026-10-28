@@ -1,5 +1,8 @@
 # Atelier Time — Android native Kotlin / Jetpack Compose
 
+> **D-126 SOURCE CANDIDATE — USER-APPROVED RUN DIAGNOSTICS (2026-10-28):** Android development only, `versionName D-126` / `versionCode 20`. All Class action history is available by scrolling a bottom window of roughly five rows back to Start. Per-Run app-private JSONL captures Editor/schedule snapshot, action outcomes, cue requests, reflow plans, and end reasons; manual export/delete available in Timer HOME. Timer domain and chart remain unchanged from frozen Stable 8 D-124. **NOT PHONE-BUILT/TESTED/INSTALLED.** See [D-126 gates](../docs/D126_RUN_DIAGNOSTICS_AND_SCROLLABLE_HISTORY_2026_10_28.md).
+
+
 > **LATEST USER-ACCEPTED STABLE 8 — D-124 (2026-10-28):** Runtime Timer reflow is unified in `ConstraintFuturePlanner`. The user explicitly declared installed `D-124` / Android `versionCode 19` to be **Stable 8** after real Samsung **243/243 JVM PASS**, Android build 72 tasks PASS, APK hash verification, and manual `test` edge-case Next/Restart acceptance. Frozen checkpoint `stable/android-d124-qa8`; further development continues on `android-native-kotlin-compose`. Stable 7 `stable/android-d119-qa7` and earlier freezes remain untouched. D-125 subminute Summary extension was rejected, so fixed Summary and >=1-minute Sessions remain mandatory. No new Android install/version bump for this checkpoint, and Android device instrumentation has not been claimed. [Stable 8 evidence](../docs/STABLE8_D124_QA_ACCEPTANCE_2026_10_28.md). Older release-status paragraphs below are historical.
 
 
