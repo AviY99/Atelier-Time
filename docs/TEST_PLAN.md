@@ -1,3 +1,9 @@
+## D-127 Stage 7 QA plan — NOT EXECUTED (2026-10-28)
+
+2026-10-28 — D-127 Stage 7 accessibility **SOURCE COMMITTED / QA PENDING**. Development-only `D-127/versionCode21` implemented large-font tab navigation, wrapping Timer controls, accessible wheel and timeline descriptions, 48dp Free presets, and 3 new **UNRUN** Android UI tests. Source commit `b9d7064`; **not built, tested, installed, or accepted**. Installed Stable 9 stays D-126/code20 with prior 285/285 PASS; Saved Classes/Sounds and frozen stable refs untouched. Details: [D-127 Stage 7 record](D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
+
+Authored 3 tests in `AccessibilityStage7UiTest.kt`: wheel spoken semantics + feasibility boundary, non-color chart text, Free preset 48dp height. No tests have run for D-127. Pending targeted Gradle compilation and Android tests, 100%/130%/200% font-scale screen matrix including narrow screens, Day/Night/error/disabled contrast, actual TalkBack navigation, and Saved Classes/Sounds verification after any separately approved in-place update.
+
 ## 2026-10-28 — Stable 9 final completed D-126 test certification
 
 All planned current D-126 automated QA gates **CLOSED PASS**: actual Samsung **243/243 JVM**, actual physical-device **42/42 Android instrumentation** (`OK (42 tests)`, 21.697s), both APK SHA-256 OK, and 72 Gradle tasks PASS. **285/285 tests passed** across the two executed suites. Post-instrumentation saved Classes/Sounds manual preservation **PASS** per user's "הכל נשמר". User explicitly designates current **Stable 9** because testing is complete; actual application stays D-126/code20. Future accessibility, device matrix, release and prolonged environmental tests are separate work, not falsely claimed as part of these 285. First-run 4 AndroidTest errors were diagnosed and repaired without changing production. No new APK rebuild/installation. [Stable 9 certificate](STABLE9_D126_285_AUTOMATED_QA_ACCEPTANCE_2026_10_28.md).
