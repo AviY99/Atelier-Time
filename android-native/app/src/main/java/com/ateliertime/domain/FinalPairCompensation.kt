@@ -466,8 +466,11 @@ object FinalPairCompensation {
             var tailWork = availableLong
             var additional = 0
             while (tailWork > threshold &&
+                // availableLong already excludes the existing final Break.
+                // Reserve two >=1-minute end Sessions AFTER paying for
+                // the new full Session+Break; do not charge that Break twice.
                 tailWork - (regular + regularBreak) >=
-                    rest.durationSeconds.toLong() + 2L * SECONDS_PER_MINUTE) {
+                    2L * SECONDS_PER_MINUTE) {
                 additional++
                 require(additional <= 1_000) { "Too many additional Sessions." }
                 tailWork -= regular + regularBreak
