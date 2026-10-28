@@ -482,12 +482,20 @@ fun SessionEditorScreen(
                     nowEpochMs,
                 )
                 if (soundEnabled && tick.cue != null) {
+                    // Capture the recorder for an asynchronous audio error:
+                    // the Run may have finished by the time playback fails.
+                    val cueReport = currentReport
                     melodyPlayer.play(soundSettings.soundFor(tick.cue),
                         soundSettings.secondsFor(tick.cue),
                         useAlarmVolume = soundSettings.classAlertsUseAlarmVolume) { message ->
                         melodyError = message
-                        recordClassEvent("Audio error", tick.view, tick.view,
-                            rejectedReason = message)
+                        val stamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                            .format(Date(System.currentTimeMillis()))
+                        eventHistory.add("$stamp · Audio error · $message")
+                        try { cueReport?.note("audio_error", message) }
+                        catch (ignored: Exception) {
+                            diagnosticError = "Could not persist audio error."
+                        }
                     }
                 }
                 if (tick.view.status == TimerStatus.FINISHED) {
@@ -555,11 +563,15 @@ fun SessionEditorScreen(
             }
             timerError = null
             if (soundEnabled && event.cue != null) {
+                val cueReport = currentReport
                 melodyPlayer.play(soundSettings.soundFor(event.cue),
                     soundSettings.secondsFor(event.cue),
                     useAlarmVolume = soundSettings.classAlertsUseAlarmVolume) { error ->
                     melodyError = error
-                    try { currentReport?.note("audio_error", error) }
+                    val stamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                        .format(Date(System.currentTimeMillis()))
+                    eventHistory.add("$stamp · Audio error · $error")
+                    try { cueReport?.note("audio_error", error) }
                     catch (ignored: Exception) { diagnosticError = "Audio error not logged." }
                 }
             }
