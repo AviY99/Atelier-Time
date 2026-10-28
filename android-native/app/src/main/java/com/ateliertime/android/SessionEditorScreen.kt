@@ -207,24 +207,71 @@ fun SessionEditorScreen(
     val freeTimer = remember { FreeCountdownTimer { SystemClock.elapsedRealtime() } }
     var freeTimerView by remember { mutableStateOf(freeTimer.view()) }
     var freeTimerError by remember { mutableStateOf<String?>(null) }
+    // A complete scrollable human history and a private append-only diagnostic
+    // report are derived from the SAME event, not separate sets of callbacks.
     val eventHistory = remember { mutableStateListOf<String>() }
-    fun recordClassEvent(source: String, before: TimerView?, after: TimerView,
-                         cue: TimerCue? = null) {
-        val stamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-            .format(Date(System.currentTimeMillis()))
-        val from = before?.phase?.id ?: "—"
-        val to = after.phase?.id ?: "end"
-        val cueNote = cue?.let {
-            " · ${it.name} " + (if (soundEnabled) "play requested" else "alerts disabled")
-        } ?: ""
-        eventHistory.add("$stamp · ${SystemClock.elapsedRealtime()}ms · $source: " +
-            "$from → $to$cueNote")
-        while (eventHistory.size > 30) eventHistory.removeAt(0)
+    val diagnosticArchive = remember(context, presetStoreOverride) {
+        if (presetStoreOverride == null) RunDiagnosticsArchive(context) else null
     }
+    var currentReport by remember { mutableStateOf<RunDiagnosticsRecorder?>(null) }
+    var diagnosticError by remember { mutableStateOf<String?>(null) }
     val liveTimer = remember(playingSession) {
         playingSession?.let { session ->
             MonotonicSessionTimer(session) { SystemClock.elapsedRealtime() }
         }
+    }
+    fun humanPhase(phase: SchedulePhase?): String = when (phase?.kind) {
+        PhaseKind.POSE -> "Session" + (phase.poseNumber?.let { " $it" } ?: "")
+        PhaseKind.SHORT_BREAK -> "Regular Break"
+        PhaseKind.SPECIAL_BREAK -> "Special Break"
+        PhaseKind.SUMMARY -> "Summary"
+        null -> "Class end"
+    }
+    fun recordClassEvent(
+        source: String,
+        before: TimerView?,
+        after: TimerView?,
+        cue: TimerCue? = null,
+        beforePhases: List<SchedulePhase>? = null,
+        rejectedReason: String? = null,
+    ) {
+        val stamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+            .format(Date(System.currentTimeMillis()))
+        val transition = if (before?.phase != after?.phase ||
+            before?.status != after?.status)
+            " · ${humanPhase(before?.phase)} → ${humanPhase(after?.phase)}"
+        else " · ${humanPhase(after?.phase)}"
+        val cueNote = cue?.let {
+            val label = when (it) {
+                TimerCue.POSE_FINISHED -> "A"
+                TimerCue.BREAK_FINISHED -> "B"
+                TimerCue.SESSION_FINISHED -> "C"
+                TimerCue.FREE_TIMER_FINISHED -> "Free"
+            }
+            " · Cue $label " + (if (soundEnabled) "requested" else "disabled")
+        } ?: ""
+        val result = rejectedReason?.let { " · Rejected: $it" } ?: ""
+        eventHistory.add("$stamp · $source$transition$cueNote$result")
+        try {
+            currentReport?.event(
+                action = source, before = before, after = after,
+                phasesBefore = beforePhases,
+                phasesAfter = liveTimer?.activePhasesSnapshot(),
+                cue = cue, alertsEnabled = soundEnabled,
+                sounds = soundSettings, rejectedReason = rejectedReason,
+            )
+        } catch (failure: Exception) {
+            diagnosticError = "Diagnostic report cannot be saved: " +
+                (failure.message ?: "storage error")
+        }
+    }
+    fun closeRunReport(reason: String) {
+        try { currentReport?.finish(reason) }
+        catch (failure: Exception) {
+            diagnosticError = "Diagnostic report cannot be completed: " +
+                (failure.message ?: "storage error")
+        }
+        currentReport = null
     }
     var timerView by remember(liveTimer) { mutableStateOf(liveTimer?.view()) }
     var wallClockMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -367,9 +414,18 @@ fun SessionEditorScreen(
                 val view = clock.start(correction,
                     physicalDurationMillis = target - startEpochMs)
                 eventHistory.clear()
+                diagnosticError = null
+                classClockTimes = classClockTracker.newClass(view, startEpochMs, target)
+                currentReport = try {
+                    diagnosticArchive?.begin(session, startEpochMs, target,
+                        soundSettings, soundEnabled)
+                } catch (failure: Exception) {
+                    diagnosticError = "Could not create Run diagnostic report: " +
+                        (failure.message ?: "storage error")
+                    null
+                }
                 recordClassEvent("Start", null, view)
                 timerView = view
-                classClockTimes = classClockTracker.newClass(view, startEpochMs, target)
                 timerError = null
             } catch (error: IllegalArgumentException) {
                 val session = playingSession
@@ -397,6 +453,7 @@ fun SessionEditorScreen(
                 // uncompensated Next leaves virtual phases, finish exactly
                 // when the originally approved wall-time deadline is reached.
                 val before = clock.view()
+                val phasesBefore = clock.activePhasesSnapshot()
                 val deadlineReached = classClockTracker.hasReachedClassDeadline(nowEpochMs) &&
                     (before.status == TimerStatus.RUNNING ||
                         before.status == TimerStatus.PAUSED)
@@ -405,7 +462,7 @@ fun SessionEditorScreen(
                 if (before.phase?.id != tick.view.phase?.id ||
                     before.status != tick.view.status || tick.cue != null) {
                     recordClassEvent(if (deadlineReached) "Deadline" else "Automatic",
-                        before, tick.view, tick.cue)
+                        before, tick.view, tick.cue, beforePhases = phasesBefore)
                 }
                 timerView = tick.view
                 classClockTimes = classClockTracker.observe(tick.view, nowEpochMs)
@@ -423,6 +480,7 @@ fun SessionEditorScreen(
                     }
                 }
                 if (tick.view.status == TimerStatus.FINISHED) {
+                    closeRunReport(if (deadlineReached) "deadline" else "natural_finish")
                     classStatusNotification.clear()
                     // Return to Timer's saved-class HOME once the class ends.
                     playingSession = null
@@ -442,31 +500,39 @@ fun SessionEditorScreen(
     }
 
     fun timerAction(block: () -> TimerView) {
+        val before = liveTimer?.view()
+        val phasesBefore = liveTimer?.activePhasesSnapshot()
+        val source = if (before?.status == TimerStatus.RUNNING) "Pause" else "Resume"
         try {
-            val before = liveTimer?.view()
             val updated = block()
-            recordClassEvent("Pause/Resume", before, updated)
+            recordClassEvent(source, before, updated, beforePhases = phasesBefore)
             timerView = updated
             classClockTimes = classClockTracker.observe(updated, System.currentTimeMillis())
             timerError = null
         } catch (error: IllegalArgumentException) {
-            timerError = error.message ?: "Cannot fit the interruption into the final two sessions."
+            timerError = error.message ?: "Cannot fit the interruption into the final Sessions."
+            recordClassEvent(source, before, liveTimer?.view(), beforePhases = phasesBefore,
+                rejectedReason = timerError)
         } catch (error: IllegalStateException) {
-            timerError = error.message ?: "Cannot change a session that has already started."
+            timerError = error.message ?: "Cannot change a Session that has already started."
+            recordClassEvent(source, before, liveTimer?.view(), beforePhases = phasesBefore,
+                rejectedReason = timerError)
         }
     }
 
-    /** Play only an actually committed timer transition, never a failed action. */
+    /** The diagnostic report must never turn an otherwise legal Timer action into a failure. */
     fun runTimedCue(
         restartCurrentSegment: Boolean = false,
         advancedByNext: Boolean = false,
         action: () -> TimerTick,
     ) {
+        val source = if (restartCurrentSegment) "Restart" else "Next"
+        val before = liveTimer?.view()
+        val phasesBefore = liveTimer?.activePhasesSnapshot()
         try {
-            val before = liveTimer?.view()
             val event = action()
-            recordClassEvent(if (restartCurrentSegment) "Restart" else "Next",
-                before, event.view, event.cue)
+            recordClassEvent(source, before, event.view, event.cue,
+                beforePhases = phasesBefore)
             timerView = event.view
             val nowEpochMs = System.currentTimeMillis()
             classClockTimes = if (restartCurrentSegment) {
@@ -482,17 +548,24 @@ fun SessionEditorScreen(
                     soundSettings.secondsFor(event.cue),
                     useAlarmVolume = soundSettings.classAlertsUseAlarmVolume) { error ->
                     melodyError = error
+                    try { currentReport?.note("audio_error", error) }
+                    catch (ignored: Exception) { diagnosticError = "Audio error not logged." }
                 }
             }
             if (event.view.status == TimerStatus.FINISHED) {
+                closeRunReport("natural_finish")
                 classStatusNotification.clear()
                 playingSession = null
                 activeTab = MainTab.TIMER
             }
         } catch (error: IllegalArgumentException) {
-            timerError = error.message ?: "The final sessions cannot absorb this time change."
+            timerError = error.message ?: "The final Sessions cannot absorb this change."
+            recordClassEvent(source, before, liveTimer?.view(), beforePhases = phasesBefore,
+                rejectedReason = timerError)
         } catch (error: IllegalStateException) {
             timerError = error.message ?: "This phase cannot be skipped safely."
+            recordClassEvent(source, before, liveTimer?.view(), beforePhases = phasesBefore,
+                rejectedReason = timerError)
         }
     }
 
@@ -1102,7 +1175,7 @@ fun SessionEditorScreen(
                         view = view,
                         wallClockMillis = wallClockMillis,
                         classClockTimes = classClockTimes,
-                        timerError = timerError,
+                        timerError = timerError ?: diagnosticError,
                         designPalette = designPalette,
                         eventHistory = eventHistory.toList(),
                         onPauseResume = {
@@ -1131,6 +1204,7 @@ fun SessionEditorScreen(
                         },
                         onExit = {
                             recordClassEvent("Exit", timer.view(), timer.view())
+                            closeRunReport("user_exit")
                             classStatusNotification.clear()
                             playingSession = null
                             launchRunRequested = false
