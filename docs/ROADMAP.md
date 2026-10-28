@@ -1,3 +1,7 @@
+## 2026-10-28 — AFTER STABLE 8: D-126 Run diagnostics UI source ready, QA pending
+
+Latest user-approved stable is **Stable 8 = D-124/code19**, immutable checkpoint `stable/android-d124-qa8`, unified Timer planner, 243/243 real Samsung JVM tests, actual APK hash verified and accepted on phone. User now accepts D-126/code20 **development-only** clearer Timer UI and full forensic reporting; scroll all events in a small five-visible-rows bottom history, export per-Run JSONL containing Editor snapshot/observed events/schedule mutations. `docs/D125_...` Summary-residue proposal remains rejected. **Do not repeat already-accepted general QA from prior Stable versions by default**; focus next QA on the new D-126 UI, persistence/SAF export and log consistency plus regression checks of unchanged Timer constraints. D-126 has not undergone Android compilation, JUnit or installation. [D-126 gate](D126_RUN_DIAGNOSTICS_AND_SCROLLABLE_HISTORY_2026_10_28.md).
+
 ## 2026-10-27 — D-120 next development gate: unified timer reflow
 
 Product decisions are approved and documented in [D-120 timer logic contract](D120_TIMER_LOGIC_UNIFICATION_DECISIONS_2026_10_27.md). Stage on `android-native-kotlin-compose`: exact monotonic-millisecond accounting, one suffix-reflow mechanism, physical-deadline guard for Next, genuine-versus-ordinary special Break behavior, invariant/property regressions, and only then a new versioned Android build-only candidate. **Stable 7/D-119 is frozen.** No phone install/instrumentation without separate approval.
