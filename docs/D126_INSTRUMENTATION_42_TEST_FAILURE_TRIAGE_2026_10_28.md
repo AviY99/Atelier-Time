@@ -1,5 +1,8 @@
 # D-126 — actual Samsung 42-method instrumentation run: four failures, test-only corrections
 
+**RESOLVED 2026-10-28:** Real Samsung retest: `OK (42 tests)`, 42/42 PASS in 21.697 seconds. Original four failures are historical; fixes affected AndroidTest only. No main-app update or data clear. Saved Classes/Sounds post-test confirmation remains pending. [QA pass certificate](STABLE8_D126_ANDROID_INSTRUMENTATION_QA_PASS_2026_10_28.md).
+
+
 **Date:** 2026-10-28.
 **Source:** User-uploaded, unabridged `Atelier-Time-D126-Instrumentation.log`, produced by the D-126 AndroidJUnitRunner via Termux ADB. **Do not treat this as a passing instrumentation run.**
 **Tested installed binary / accepted Stable 8 app:** D-126/versionCode 20, from `b2d47ca32c2f470d38e556ea7a571afaa89400e3`. Freeze `stable/android-d126-qa8-logic-diagnostics` intact. D-124 historical checkpoint `stable/android-d124-qa8` intact.
