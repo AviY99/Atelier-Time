@@ -30,3 +30,10 @@ Development branch `android-native-kotlin-compose`, Android versionName `D-124`,
 After a passing build, review SHA, request separate device installation approval, and manually test six-minute `test`, 1-minute Session/3-minute Break, 25-minute and three-hour Classes, repeated Next/Restart/Resume, genuine Special placement, end deadline, Summary and saved data. Passing a finite test suite cannot guarantee every possible future action combination.
 
 Frozen Stable 7 branch `stable/android-d119-qa7` is unchanged.
+
+
+## Source review clarification
+
+The planner evaluates the legally editable whole ending-pair allocation first and, when an invariant prevents it, the editable single-final-Session allocation under **the same validator**. This is constrained candidate enumeration, not the old split between source, future-tail and last-only correction mechanisms. The old functions remain audit/test helpers only. The actual terminal Session is also used for duration reporting after an allowed pair merge, rather than treating an unrelated earlier Session as part of the final ending.
+
+**Evidence limitation:** inspected source and static GitHub file identities only. The 243 expected JVM regressions and Android APK have not yet been executed. Unexpected test failures must be investigated rather than changing acceptance criteria. No installed app changes.
