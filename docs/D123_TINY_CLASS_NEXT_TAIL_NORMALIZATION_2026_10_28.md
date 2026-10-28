@@ -1,6 +1,6 @@
 # D-123 — Normalize saved Class `test` after early and late Next (development candidate)
 
-**Status: SOURCE CHANGES COMMITTED; BUILD AND DEVICE QA NOT YET RUN. Do not install before a passing QA gate and explicit device approval.**
+**Status: ARCHITECTURAL HOLD — TARGETED D-123 PATCH NOT ACCEPTED AS A GENERAL SOLUTION. DO NOT BUILD OR INSTALL.**
 
 ## User's precise observation
 
@@ -71,3 +71,13 @@ The same development branch now has a single canonical implementation of termina
 - Exact expected JVM total now **236 = 228 previously passing + 8 D123**; **this count is a target, not an observed pass**. All JVM tests, Android APK assembly and instrumentation APK assembly are **pending a fresh on-phone build**. No installation or user-data change authorized/performed.
 
 Please run the non-installing `android-native/tools/build_d123_candidate_on_phone.sh` after a fast-forward pull. If it fails, inspect actual failing tests; do not relax expectations or claim completion. Only after a pass, verify hash, request separate installation permission, and manually test both `test` and the 3-hour Class. D-119 Stable 7 remains frozen.
+
+## ARCHITECTURAL HOLD — targeted patch is not a general reflow engine (2026-10-28)
+
+**Do not advance D-123 to build, device installation, or Stable status.** The user correctly challenged whether the implementation covers new Class shapes, not merely previously seen 6-minute / 1-minute Session cases. Source inspection confirms it does not: `FinalPairCompensation.reflow()` still selects among `adjust()`, `adjustFutureTail()`, `adjustLastOnly()`, and the action-specific `splitExtendedTerminalPoseAfterNext()` post-pass. These are structurally different compensation strategies with differing protected-prefix assumptions and thresholds. Adding more special-case predicates or assertions against a few Class shapes would not establish general correctness.
+
+**Required architectural gate before next candidate:** define a single, deterministic, constraint-driven future-reflow model independent of example Classes, with all actions (Next, Restart, Pause/Resume, initial approved end change) expressed as a proposed transition + immutable observed prefix/started phases + protected genuine specials + fixed summary/deadline. Rebuild only admissible unstarted future blocks from the exact remaining-time budget; keep session duration and regular Break length, minimum 60s work blocks, the user's final-two distribution where applicable, and L<=B ordinary-runtime treatment. Optimize for preserving existing future structure when equivalent, and distinguish legitimate infeasibility (atomic rejection with reason) from algorithm failure. Verify exact timeline coverage/identities/sums, signed correction, immutable real deadline, no retroactive changes, strict one-time cues and terminal Summary. Do not relax the D-122 Restart/Resume freeze of already present structural elements; explicitly define which part is mutable by each action.
+
+**Testing gate:** inspect all approved invariants and edge constraints; exhaustive small-duration classes / action sequences where feasible, property-based deterministic randomized sequences across P,B,L and arrangement choices, long Class controls, protected special breaks, subsecond clocks, multiple Next/Restart/Pause/Resume, and real Samsung `test` Class. Maintain all existing tests and add generalized tests; no deleting or weakening. Only build a new candidate after source-level architecture review and full test execution. **D-123's 8 added tests and existing source patches are exploratory and UNVALIDATED**; passing those would not prove general reflow coverage.
+
+No frozen Stable 7 changes, APK installation or phone data changes were made by this hold.
