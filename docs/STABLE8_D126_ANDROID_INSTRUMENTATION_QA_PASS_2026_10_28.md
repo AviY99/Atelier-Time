@@ -47,9 +47,9 @@ The first real D-126 instrumentation run executed **42 tests with 4 failures**. 
 | Combined executed automated tests | **285 passed across the JVM and device instrumentation gates** |
 | User's manual functional acceptance | PASS: user explicitly declared installed D-126 **Stable 8, unified Timer logic + diagnostic logging** |
 | Main app update or data deletion during retest | **None performed by the runner**; main D-126/code20 retained |
-| Manual post-instrumentation Saved Classes/Sounds verification | **PENDING user confirmation** (the runner explicitly requests this after tests) |
+| Manual post-instrumentation Saved Classes/Sounds verification | **PASS — user confirmed all saved Classes and Sounds remain intact** (manual observation, not byte-level storage comparison) |
 | Long-term physical Doze, process reclaim, all audible paths | Outside this instrumentation result; no newly claimed proof |
 
 **Immutable checkpoints:** `stable/android-d126-qa8-logic-diagnostics` (current consolidated Stable 8), plus historical `stable/android-d124-qa8` (original Stable 8 logic-only baseline), must **remain frozen**. Corrections to AndroidTest sources and these QA documentation updates are on **`android-native-kotlin-compose` only**. Do not change application production source, rebuild/reinstall the main app, or change version numbering as part of recording this test PASS.
 
-**Remaining immediate user-visible check:** verify existing Saved Classes and the A/B/C Sound selections still exist and are unchanged after instrumentation. Do not mark this manual persistence check PASS until user confirms.
+**Final device QA closure (2026-10-28):** The user explicitly confirmed **"הכל נשמר"** after the successful 42/42 Android instrumentation rerun: all existing Saved Classes and Sound settings were preserved. Mark manual post-test persistence **PASS based on the user's direct observation**, without claiming a byte-for-byte audit. Combined D-126 quality gates: Samsung Gradle 72/72 PASS, JVM 243/243 PASS, SHA-256 for both APKs OK, Android instrumentation 42/42 PASS, manual post-test preservation PASS. **Stable 8 stays frozen; no application rebuild/update is required.**
