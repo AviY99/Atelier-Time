@@ -58,7 +58,8 @@ internal object ConstraintFuturePlanner {
                 active[i].id == session.phases[i].id &&
                     active[i].kind == session.phases[i].kind
             }
-        val pairFlexible = pairAvailable && first!! > lock &&
+        val pairFlexible = pairAvailable && !boundary.lastOnly &&
+            first!! > lock &&
             (entering == null || entering < first) &&
             !(boundary.preserveExistingTail && !sourceTopologyUnchanged)
         val proposed = when {
@@ -196,6 +197,7 @@ internal object ConstraintFuturePlanner {
         // All cycles are produced by this same allocator, not by a late-Next
         // repair pass. Preserve the entered phase's ID and original start.
         var firstPiece = true
+        var generatedPoseCount = 0
         while (mayRebuild && remaining >= p + b + min && p >= min && b > 0) {
             require(serial <= 1_000) { "Too many additional Sessions." }
             while ("runtime-tail-pose-$serial" in used ||
@@ -203,7 +205,9 @@ internal object ConstraintFuturePlanner {
             val id = if (firstPiece) last.id else "runtime-tail-pose-$serial"
             result += last.copy(
                 id = id, startSeconds = cursor.toInt(),
-                endSeconds = (cursor + p).toInt())
+                endSeconds = (cursor + p).toInt(),
+                poseNumber = last.poseNumber?.plus(generatedPoseCount))
+            generatedPoseCount++
             cursor += p
             remaining -= p
             result += SchedulePhase(
@@ -222,7 +226,8 @@ internal object ConstraintFuturePlanner {
             "runtime-tail-pose-$serial"
         }
         result += last.copy(id = endId, startSeconds = cursor.toInt(),
-            endSeconds = (cursor + remaining).toInt())
+            endSeconds = (cursor + remaining).toInt(),
+            poseNumber = last.poseNumber?.plus(generatedPoseCount))
         result += active.drop(index + 1)
         return retime(result, index)
     }
