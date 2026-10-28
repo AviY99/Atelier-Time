@@ -32,7 +32,8 @@ internal class RunDiagnosticsArchive(private val context: Context) {
         }
         val runId = UUID.randomUUID().toString()
         val file = File(directory, "run-${startEpochMs}-$runId.jsonl")
-        val recorder = RunDiagnosticsRecorder(file, runId, startEpochMs, endEpochMs)
+        val recorder = RunDiagnosticsRecorder(file, runId, startEpochMs, endEpochMs,
+            session.rules)
         val version = runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName
         }.getOrNull() ?: "unknown"
@@ -92,6 +93,7 @@ internal class RunDiagnosticsRecorder(
     val runId: String,
     val startedEpochMs: Long,
     val approvedEndEpochMs: Long,
+    private val rules: SessionRules,
 ) {
     private var sequence = 0
     private var closed = false
@@ -140,6 +142,24 @@ internal class RunDiagnosticsRecorder(
             .put("soundSettings", if (cue != null)
                 sounds.toDiagnosticJson() else JSONObject.NULL)
             .put("structureChanged", changed)
+            .put("plannerConstraints", JSONObject()
+                .put("regularSessionSeconds", rules.poseSeconds)
+                .put("regularBreakSeconds", rules.shortBreakSeconds)
+                .put("minimumWorkSessionSeconds", SECONDS_PER_MINUTE)
+                .put("singleTailSplitThresholdSeconds",
+                    rules.poseSeconds.toLong() + rules.shortBreakSeconds + SECONDS_PER_MINUTE)
+                .put("pairInsertionStrictThresholdSeconds",
+                    2L * rules.poseSeconds + rules.shortBreakSeconds)
+                .put("summaryMustStaySeconds", rules.summarySeconds)
+                .put("approvedPhysicalFinishEpochMs", approvedEndEpochMs))
+            .put("addedPhaseIds", JSONArray(
+                phasesAfter.orEmpty().filter { candidate ->
+                    phasesBefore.orEmpty().none { it.id == candidate.id }
+                }.map { it.id }))
+            .put("removedPhaseIds", JSONArray(
+                phasesBefore.orEmpty().filter { old ->
+                    phasesAfter.orEmpty().none { it.id == old.id }
+                }.map { it.id }))
             .put("scheduleBefore", if (changed) phasesBefore!!.toDiagnosticJson()
                 else JSONObject.NULL)
             .put("scheduleAfter", if (changed) phasesAfter!!.toDiagnosticJson()
