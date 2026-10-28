@@ -1,3 +1,5 @@
+> **Active development update (2026-10-28):** Stage 7 D-127/code21 accessibility changes are **SOURCE COMMITTED / QA PENDING** on `android-native-kotlin-compose`: responsive tabs/controls, semantic wheels/chart, 48dp Free presets, 3 newly authored **UNRUN** Android UI tests. **No D-127 build/device QA/APK install**; accepted installed Stable 9 is **still D-126/code20**, with its prior 285/285 PASS. [Stage 7 record](D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
+
 # Atelier Time — authoritative current project status and handoff
 
 **תיעוד רשמי / Start here:** [מפת מסמכים, תפקידי הענפים ונוהל Handoff](DOCUMENTATION_INDEX_AND_BRANCH_POLICY.md). זהו ההנדאוף המקוצר והקנוני; המסמך `HANDOFF.md` הוא יומן מצטבר והיסטורי.
