@@ -43,3 +43,16 @@ The planner evaluates the legally editable whole ending-pair allocation first an
 **User-provided on-phone screenshot:** Gradle `:app:testDebugUnitTest FAILED`; `Execution failed for task ':app:testDebugUnitTest'`; `There were failing tests`. The run terminated `BUILD FAILED in 1m 22s` with `66 actionable tasks: 66 executed`. Some APK packaging tasks ran but the entire build-only QA gate is **FAIL**. **Do not use or install any D-124 APK**, do not mark D-124 accepted, and do not modify Stable 7.
 
 The screenshot shows only the Gradle summary, not which JUnit cases failed, test counts, assertion messages or stack traces. Next step is a read-only diagnostic of `android-native/app/build/test-results/testDebugUnitTest/TEST-*.xml` on the phone, printing failing test names and exceptions. Make no speculative code changes and do not weaken or skip tests. Repair the unified constraint model based on evidence, rerun the full gate, and require a clean result before considering installation.
+
+## QA-D124-01 — Samsung 243/4 failures traced to test-fixture construction (2026-10-28)
+
+**Device evidence:** 243 JVM tests ran; exactly four failures, all within the newly created `D124ConstraintPlannerGeneralContractTest`. The APK build gate failed and **no D-124 installation is authorized**.
+
+1. `aNewlyEnteredUnobservedFinalSessionMayUseLegalPairMerge`: incorrect fixture failed `ScheduleEngine.approve` with `Cannot approve invalid or unresolved schedule`. It specifies a 65-minute Class with 25-minute regular Sessions, creating a shortened 5-minute ending without a required `FinalPoseChoice.remainder()`.
+2. `equalLengthSpecialRetainsItsConfiguredDurationEvenWithNextCredit`: NPE at the helper `plan(... )!!`, because the helper incorrectly computed total time as `6*pose+4*max(rest,special)+summary` and generated an unapprovable Class.
+3. `crossProductNextReflowsProtectThePastAndPhysicalDeadline`: assertion at test line 158 that `cases>80`, not a failing physical-end/observed-prefix check; too many invalid fixture combinations were silently skipped.
+4. `randomizedMixedNextRestartResumeRejectionsAreAtomic`: assertion at line 199 that `operations>=200`, likewise insufficient generated cases, not a reported atomicity violation.
+
+**Correction:** Test helper now constructs EXACTLY six work Sessions and five Breaks for POSE_FIRST or six Breaks for BREAK_FIRST, replaces one standard Break's duration by the configured special duration, and uses the valid approved final-choice flow. Rather than silently skip illegal fixtures, it fails with a descriptive explanation. The direct 65-minute fixture now expressly selects Remainder. The engine, production logic, existing test assertions and count requirement **were not changed for this diagnostic fix**.
+
+**QA status:** a new full Samsung JVM run is REQUIRED. This patch fixes preconditions of four tests but may expose previously untested genuine engine problems; it is **not** a PASS claim. Preserve D-122, Stable 7 and user data; do not install until green results and approval.
