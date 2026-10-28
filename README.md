@@ -1,5 +1,8 @@
 # Atelier Time
 
+> **DOCUMENTATION MAP:** [Branch roles, documentation structure and current handoff](docs/DOCUMENTATION_INDEX_AND_BRANCH_POLICY.md). `main` is the documentation/historical entrypoint. Android production code is in `android-native-kotlin-compose`; Stable 9 is frozen. Read the compact [current status](docs/CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md) before older dated records.
+
+
 > **CURRENT STATUS — 2026-10-28: Stable 9 / D-126 (verified).** User-accepted native Android Kotlin/Compose Timer with unified scheduling and per-Run JSONL diagnostics. Samsung: **243/243 JVM + 42/42 Android instrumentation = 285/285 automated PASS**, 72 Gradle tasks PASS, both APK SHA-256 checks OK; user confirmed all Saved Classes and Sounds survived testing. The installed app is still D-126/versionCode20 (no rebuild for QA9). Current stable checkpoint: [stable/android-d126-qa9-tests-complete](https://github.com/AviY99/Atelier-Time/tree/stable/android-d126-qa9-tests-complete); production source remains on [android-native-kotlin-compose](https://github.com/AviY99/Atelier-Time/tree/android-native-kotlin-compose), **not merged into main**. See [authoritative status and handoff](docs/CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md), [main handoff](docs/HANDOFF.md), [release QA certificate](docs/STABLE9_D126_285_AUTOMATED_QA_ACCEPTANCE_2026_10_28.md). All older “current” paragraphs below are historical.
 
 
