@@ -68,94 +68,13 @@ object FinalPairCompensation {
         correctionSeconds: Int,
         allowExtraRegular: Boolean = false,
         boundary: ReflowBoundary = ReflowBoundary(),
-    ): CompensatedTimeline {
-        fun valid(candidate: CompensatedTimeline): Boolean {
-            val phases = candidate.phases
-            if (candidate.totalSeconds.toLong() !=
-                session.rules.totalSeconds.toLong() - correctionSeconds.toLong()) return false
-            val remaining = boundary.physicalRemainingMillis
-            val cursor = boundary.virtualCursorMillis
-            if (remaining != null || cursor != null) {
-                if (remaining == null || cursor == null || remaining < 0L) return false
-                val virtualRemaining = candidate.totalSeconds.toLong() * 1_000L - cursor
-                // The phase engine has whole-second granularity; the approved
-                // deadline and exact cumulative correction retain milliseconds.
-                // Together their truncations may differ by less than 2 seconds.
-                if (virtualRemaining < 0L ||
-                    kotlin.math.abs(virtualRemaining - remaining) >= 2_000L) return false
-            }
-            if (phases.isEmpty() || phases.first().startSeconds != 0 ||
-                phases.last().endSeconds != candidate.totalSeconds ||
-                phases.any { it.durationSeconds <= 0 ||
-                    (it.kind == PhaseKind.POSE && it.durationSeconds < SECONDS_PER_MINUTE) } ||
-                phases.zipWithNext().any { (a, b) -> a.endSeconds != b.startSeconds } ||
-                phases.filter { it.kind == PhaseKind.SUMMARY }
-                    .sumOf { it.durationSeconds } != session.rules.summarySeconds) return false
-            if (boundary.preserveExistingTail) {
-                // Restart/Resume may compensate the final pair, but must not
-                // rebuild any earlier Next-added Session, Break or special
-                // placement. This is the Stable-7 late-restart contract.
-                val tailPair = active.indices.filter {
-                    active[it].kind == PhaseKind.POSE &&
-                        active[it].poseSource == PoseSource.REGULAR
-                }.takeLast(2)
-                if (tailPair.size != 2 || phases.size != active.size) return false
-                val first = tailPair.first()
-                if (phases.take(first) != active.take(first)) return false
-                if (phases.indices.any { i ->
-                    phases[i].id != active[i].id ||
-                    phases[i].kind != active[i].kind ||
-                    (i !in tailPair &&
-                        phases[i].durationSeconds != active[i].durationSeconds)
-                }) return false
-            }
-            if (session.rules.specialBreakSeconds > session.rules.shortBreakSeconds) {
-                val existing = active.filter { it.kind == PhaseKind.SPECIAL_BREAK &&
-                    it.durationSeconds > session.rules.shortBreakSeconds }
-                val proposed = phases.filter { it.kind == PhaseKind.SPECIAL_BREAK &&
-                    it.durationSeconds > session.rules.shortBreakSeconds }
-                if (existing.size != proposed.size) return false
-                if (!session.rules.placement.automatic &&
-                    existing.map { it.id } != proposed.map { it.id }) return false
-            }
-            val index = boundary.protectedThroughIndex
-            if (index >= 0 && (index !in active.indices ||
-                    candidate.phases.take(index + 1) != active.take(index + 1))) return false
-            val target = boundary.nextIndex ?: return true
-            val before = active.getOrNull(target) ?: return false
-            val after = candidate.phases.getOrNull(target) ?: return false
-            return before.id == after.id && before.kind == after.kind &&
-                before.startSeconds == after.startSeconds
-        }
-        if (boundary.lastOnly) {
-            return adjustLastOnly(session, active, correctionSeconds).also {
-                require(valid(it)) { "The completed Class history cannot be changed." }
-            }
-        }
-        val base = { adjust(session, correctionSeconds, allowExtraRegular) }
-        val activeTail = {
-            adjustFutureTail(session, active,
-                boundary.nextIndex ?: boundary.protectedThroughIndex,
-                correctionSeconds)
-        }
-        // Preserve D-119's tested preference: rebuild from approved source
-        // first, then use the already-relocated future only if history forbids
-        // a fresh source plan. D-120 reversed this order after the first Next.
-        val ordered = if (boundary.noActiveTailRebuild || boundary.preserveExistingTail) listOf(base)
-        else listOf(base, activeTail)
-        for (attempt in ordered) {
-            val proposed = runCatching(attempt).getOrNull() ?: continue
-            if (valid(proposed)) return proposed
-        }
-        val finalOnly = runCatching {
-            adjustLastOnly(session, active, correctionSeconds)
-        }.getOrNull()
-        if (finalOnly != null && valid(finalOnly)) return finalOnly
-        throw IllegalArgumentException(
-            "The approved finish cannot fit the unstarted future without " +
-                "rewriting completed Sessions or protected Breaks."
-        )
-    }
+    ): CompensatedTimeline = ConstraintFuturePlanner.plan(
+        session = session,
+        active = active,
+        correctionSeconds = correctionSeconds,
+        allowExtraRegular = allowExtraRegular,
+        boundary = boundary,
+    )
 
     /**
      * After Next enters (or skips toward) the terminal regular work Session,
