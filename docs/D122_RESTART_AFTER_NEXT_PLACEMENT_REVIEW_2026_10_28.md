@@ -137,3 +137,11 @@ Source inspection: the APP cue is generated mathematically as PCM with `AudioTra
 **Recommended next diagnostic without code or data changes**: Compare preview of APP A with (1) Poweramp simply exited/paused in UI, (2) Poweramp explicitly STOPPED using its own playback/notification control, and (3) Poweramp force-stopped in Android App Info (no clear data). During any recurrence inspect whether the media notification, Quick Settings or Poweramp 'Last Processed Commands' shows an unsolicited Play/Resume event. Do not assume that changing to `AUDIOFOCUS_GAIN_TRANSIENT` alone will resolve the issue; it can lead to a paused player's resumption when temporary focus is released. A future narrow audio-only code proposal could add non-sensitive audio event/source diagnostics, obey focus-grant result and choose playback-focus semantics based on the intended behavior. Require authorization and reproducible QA; never alter timer timing logic or frozen Stable 7 for this issue.
 
 **Status:** QA-D122-05 OPEN. D-122 user-reported timer functionality working; sound anomaly unresolved. No code changes for this report.
+
+## QA-D122-05 Force-stop diagnostic result (2026-10-28)
+
+**User-observed PASS:** After Android Settings > Apps > Poweramp > Force stop (as requested in the diagnostic procedure), the user reports that the built-in Atelier Time Session A sound plays correctly.
+
+**Interpretation:** A clean Poweramp-stopped condition produces expected audio; this supports—but does **not prove**—an external playback-session or audio-focus interaction as the cause of the earlier incident. It neither isolates the exact mechanism nor demonstrates that all ordinary App A cues work across device lifecycle states. It does not justify changing the cue source or timer logic.
+
+**Next controlled reproduction:** Play a song briefly in Poweramp, close/exit it **using the same method as the previous evening** (without Force stop), leave Atelier Time's source/mode unchanged (SEPARATE, A=APP), then use Sounds > Preview A. Record whether the result is built-in A, last Poweramp track, or both, and whether Poweramp's media notification or playback indicator is visible. No app code changes; sound QA remains open. D-119 Stable 7 frozen; D-122 timer user acceptance not affected.
