@@ -146,6 +146,14 @@ internal class RunDiagnosticsRecorder(
                 else JSONObject.NULL))
     }
 
+    fun soundChange(sounds: SoundSettings, alertsEnabled: Boolean) {
+        append(JSONObject().put("type", "sound_settings_change")
+            .put("epochMs", System.currentTimeMillis())
+            .put("monotonicMs", SystemClock.elapsedRealtime())
+            .put("soundSettings", sounds.toDiagnosticJson())
+            .put("alertsEnabled", alertsEnabled))
+    }
+
     fun note(category: String, message: String) {
         append(JSONObject().put("type", "diagnostic")
             .put("category", category).put("message", message)
@@ -206,8 +214,11 @@ private fun SchedulePhase.toDiagnosticJson(): JSONObject = JSONObject()
     .put("openingGroupId", openingGroupId ?: JSONObject.NULL)
     .put("breakOrdinal", breakOrdinal ?: JSONObject.NULL)
 
-private fun List<SchedulePhase>.toDiagnosticJson(): JSONArray =
-    JSONArray().apply { forEach { put(it.toDiagnosticJson()) } }
+private fun List<SchedulePhase>.toDiagnosticJson(): JSONArray {
+    val result = JSONArray()
+    forEach { result.put(it.toDiagnosticJson()) }
+    return result
+}
 
 private fun SoundSettings.toDiagnosticJson(): JSONObject {
     fun cue(c: TimerCue): JSONObject {
