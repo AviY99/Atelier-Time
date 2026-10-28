@@ -1,5 +1,8 @@
 # Atelier Time — authoritative current project status and handoff
 
+**תיעוד רשמי / Start here:** [מפת מסמכים, תפקידי הענפים ונוהל Handoff](DOCUMENTATION_INDEX_AND_BRANCH_POLICY.md). זהו ההנדאוף המקוצר והקנוני; המסמך `HANDOFF.md` הוא יומן מצטבר והיסטורי.
+
+
 **Last confirmed:** 2026-10-28. **Authoritative release:** **Stable 9 = D-126 / versionCode 20**. All older “current/pending” headings in dated historical documents are superseded by this entry. **Primary development** lives on the Android Kotlin/Compose branch `android-native-kotlin-compose`; the default `main` branch remains a project documentation and historical-reference surface, **not** a claim that Android code was merged into `main`.
 
 ## Approved current product
