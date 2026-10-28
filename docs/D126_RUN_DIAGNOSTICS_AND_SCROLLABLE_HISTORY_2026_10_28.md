@@ -53,3 +53,15 @@ The user accepts a permanent separation of three views into the same Run data:
 The three newly authored RunDiagnostics AndroidTest fixtures initially used 600-second Class / 60-second Summary, P=120s, B=60s. With 540 seconds of work, the Editor schedule would end with an illegal Break lacking the minimum one-minute following Session; `engine.generate(... FinalPoseChoice.remainder())` would therefore fail before diagnostics assertions. **Corrected all three fixtures** to a 660-second Class (600-second work): `120 + 60 + 120 + 60 + 120 + 60 + 60 = 600s`, with the final 60-second Session legal and shortened, so the explicit `REMAINDER` approval is required and valid. Corresponding class-end epochs were updated. The 50-event test additionally applies -60s initial correction to represent a 720-second Run and verifies the planned runtime timeline differs from the Editor snapshot. Source-level arithmetic and APIs checked; actual Samsung Gradle compilation and instrumentation **remain pending**, never claim PASS without logs.
 
 Build-only next command from the Android project directory after fast-forward pull: `bash tools/build_d126_candidate_on_phone.sh`. The script cannot install either APK or erase Saved Classes/Sounds; keep the installed Stable 8 unchanged. Capture full `D-126 JVM ACTUAL`, `BUILD SUCCESSFUL` and the generated manifest before discussing installation.
+
+## Samsung build-only QA evidence — PASS (2026-10-28)
+
+The user ran the documented `git pull --ff-only && bash tools/build_d126_candidate_on_phone.sh` build-only gate in Code on the Go and supplied a terminal screenshot. **Observed actual terminal evidence**:
+- `BUILD SUCCESSFUL in 1m 21s`, **72 actionable tasks: 72 executed**.
+- `D-126 JVM ACTUAL: tests=243 failures=0 errors=0 skipped=0`.
+- `BUILD ONLY PASS`: regular candidate `/storage/emulated/0/Download/Atelier-Time-D126-Candidate.apk`; AndroidTest APK `/storage/emulated/0/Download/Atelier-Time-D126-Tests.apk`; QA manifest `/storage/emulated/0/Download/Atelier-Time-D126-QA-manifest.txt`.
+- Build script explicitly reports **no APK installed**. Assembled AndroidTest APK does **not** mean tests have executed on a real Android device.
+
+**Next quality gate:** read the QA manifest and compare the SHA-256 of the two local APKs with the manifest, verify the recorded source commit is approved, then arrange real-device instrumentation and manual UI/diagnostics checks **only after separate authorization** for a controlled in-place D-126 app upgrade and test APK installation. **Do not** uninstall the installed Stable 8, clear app data, or run an instrumentation install without separate permission. The new AndroidTest targets D-126 code and cannot be meaningfully executed against an unchanged D-124 app. Saved Classes/Sounds preservation must be verified after any user-authorized update. Stable 8 checkpoint remains frozen.
+
+**QA status:** D-126 Gradle/JVM/AndroidTest-package assembly PASS; physical Android instrumentation, full scroll-to-Start, 50+ events and export/deletion in real app remain PENDING.
