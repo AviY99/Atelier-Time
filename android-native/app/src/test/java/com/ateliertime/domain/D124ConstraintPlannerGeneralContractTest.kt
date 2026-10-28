@@ -17,7 +17,12 @@ class D124ConstraintPlannerGeneralContractTest {
         pose: Int, rest: Int, special: Int, summary: Int,
         start: CycleStart, count: Int = 1,
     ): ApprovedSession? {
-        val time = 6 * pose + 4 * maxOf(rest, special) + summary
+        // Construct a valid 6-Session cycle: POSE_FIRST uses five Breaks,
+        // BREAK_FIRST uses six. Replace exactly one ordinary Break with the
+        // configured Special duration; do not leave a sub-minute final Session.
+        val regularBreakSlots = if (start == CycleStart.BREAK_FIRST) 6 else 5
+        val time = 6 * pose + regularBreakSlots * rest +
+            count * (special - rest) + summary
         val rules = SessionRules(
             id = "matrix-$pose-$rest-$special-$summary-$start",
             name = "matrix", totalSeconds = time,
@@ -25,9 +30,18 @@ class D124ConstraintPlannerGeneralContractTest {
             shortBreakSeconds = rest, specialBreakSeconds = special,
             specialBreakCount = count, cycleStart = start,
         )
-        val candidate = engine.generate(rules)
-        return if (candidate.canApprove) engine.approve(candidate,
-            acknowledgeWarnings = true) else null
+        val generated = engine.generate(rules)
+        // Some valid patterns have a shortened last work Session and must
+        // explicitly approve the final distribution, rather than silently
+        // dropping the scenario from the matrix.
+        val candidate = if (generated.needsFinalPoseChoice)
+            engine.generate(rules, FinalPoseChoice.remainder()) else generated
+        check(candidate.canApprove) {
+            "Fixture generator produced an invalid Class: p=$pose b=$rest " +
+                "L=$special summary=$summary start=$start; " +
+                candidate.issues.joinToString { it.code + ":" + it.message }
+        }
+        return engine.approve(candidate, acknowledgeWarnings = true)
     }
 
     private fun verify(
@@ -227,8 +241,10 @@ class D124ConstraintPlannerGeneralContractTest {
             specialBreakSeconds = 5 * 60, specialBreakCount = 1,
             placement = SpecialBreakPlacement.manual(listOf(2)),
         )
-        val session = engine.approve(engine.generate(rules),
-            acknowledgeWarnings = true)
+        // 65m with 25m regular work ends in a 5m final Session:
+        // an explicit Remainder choice is required for editor approval.
+        val session = engine.approve(engine.generate(
+            rules, FinalPoseChoice.remainder()), acknowledgeWarnings = true)
         val first = session.phases.indexOfLast {
             it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
         } - 2
