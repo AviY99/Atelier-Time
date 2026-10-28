@@ -1,6 +1,6 @@
 # D-124 — Unified constraint-based future planner
 
-**Development only. Source committed; automated build and phone QA not yet executed. Not Stable.**
+**FINAL STATUS — USER-APPROVED STABLE 8 (2026-10-28).** Android identity **D-124 / versionCode 19**; **243/243 Samsung JVM tests passed**, 72 Gradle tasks succeeded, APK SHA-256 matched manifest, and user approved and exercised installed D-124 before explicitly declaring it **Stable 8**. Freeze checkpoint `stable/android-d124-qa8` (documented in [Stable 8 certificate](STABLE8_D124_QA_ACCEPTANCE_2026_10_28.md)). Earlier provisional, build-pending or failed-gate paragraphs below are historical, superseded by QA-D124-02/03/05 and user acceptance. No connected Android instrumentation run is claimed. D-125 subminute Summary rule is rejected, with unchanged fixed Summary.
 
 ## Why D-120 and D-121 failed
 
