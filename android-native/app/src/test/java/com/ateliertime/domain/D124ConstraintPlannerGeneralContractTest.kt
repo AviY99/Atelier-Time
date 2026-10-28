@@ -250,4 +250,26 @@ class D124ConstraintPlannerGeneralContractTest {
         assertEquals(55 * 60, revised.totalSeconds)
     }
 
+    @Test fun furtherCompensationAfterLegalMergeNeverRewritesEarlierWork() {
+        val rules = SessionRules(
+            id = "merge-continuation", name = "merged",
+            totalSeconds = 90 * 60, summarySeconds = 5 * 60,
+            poseSeconds = 25 * 60, shortBreakSeconds = 5 * 60,
+            specialBreakSeconds = 5 * 60, specialBreakCount = 0,
+        )
+        val session = engine.approve(engine.generate(rules),
+            acknowledgeWarnings = true)
+        val merged = FinalPairCompensation.reflow(
+            session, session.phases, correctionSeconds = 30 * 60)
+        assertEquals(session.phases.size - 2, merged.phases.size)
+        val prior = merged.phases.dropLast(2)
+        val more = FinalPairCompensation.reflow(
+            session, merged.phases, correctionSeconds = 31 * 60)
+        assertEquals(prior, more.phases.take(prior.size))
+        assertEquals(merged.phases.size, more.phases.size)
+        assertEquals(merged.phases[prior.size].durationSeconds - 60,
+            more.phases[prior.size].durationSeconds)
+        assertEquals(59 * 60, more.totalSeconds)
+    }
+
 }
