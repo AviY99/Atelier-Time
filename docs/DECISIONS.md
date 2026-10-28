@@ -1,3 +1,9 @@
+## 2026-10-28 — Stage 7 accessibility: full-stage approval, source-only D-127 candidate
+
+2026-10-28 — D-127 Stage 7 accessibility **SOURCE COMMITTED / QA PENDING**. Development-only `D-127/versionCode21` implemented large-font tab navigation, wrapping Timer controls, accessible wheel and timeline descriptions, 48dp Free presets, and 3 new **UNRUN** Android UI tests. Source commit `b9d7064`; **not built, tested, installed, or accepted**. Installed Stable 9 stays D-126/code20 with prior 285/285 PASS; Saved Classes/Sounds and frozen stable refs untouched. Details: [D-127 Stage 7 record](D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
+
+Decision: preserve normal display, expose scaled labels through scroll/wrapping, add contextual wheel and chart TalkBack semantics without changing timer logic, increase Free preset target height to >=48dp. Stage 7 source implementation is authorized; installation and final acceptance are separate gates.
+
 ## 2026-10-28 — Stable 9 designated after completion of all planned D-126 automated tests
 
 The user explicitly states **"זאת גרסה 9 יציבה בה הושלמו בדיקות"**. Update the stable **checkpoint ordinal** to **Stable 9**, not the Android package identity: installed application stays `D-126/versionCode20` with unified Timer logic and complete Run diagnostics. 243/243 JVM + 42/42 real Samsung Android Instrumentation = **285/285 PASS**; 72 Gradle tasks PASS; APK SHA-256 OK; post-test Saved Classes/Sounds user-confirmed preserved. The previously failing four AndroidTest cases were repaired in test-only code; no production code changes, no new install. Freeze new `stable/android-d126-qa9-tests-complete`; retain `stable/android-d126-qa8-logic-diagnostics` and `stable/android-d124-qa8`. [QA9 acceptance](STABLE9_D126_285_AUTOMATED_QA_ACCEPTANCE_2026_10_28.md).
