@@ -280,7 +280,11 @@ class MonotonicSessionTimer(
         }.takeLast(2)
         val lastOriginalId = session.phases.getOrNull(regularIndices.lastOrNull() ?: -1)?.id
         val finalIsMerged = lastOriginalId != null && activePhases.none { it.id == lastOriginalId }
-        val activeLastIndex = activePhases.indexOfFirst { it.id == lastOriginalId }
+        // A late Next may add future regular Sessions AFTER the original last
+        // one. Only the actual final future work phase is no longer restartable.
+        val activeLastIndex = activePhases.indexOfLast {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }
         check(regularIndices.size == 2 && (finalIsMerged || index < activeLastIndex) &&
             !(finalIsMerged && current.id == session.phases[regularIndices.first()].id)) {
             "The final regular Session has already started. Cannot rewrite " +
@@ -364,7 +368,10 @@ class MonotonicSessionTimer(
                 it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
             }.takeLast(2)
             val firstFinal = activePhases.firstOrNull { it.id == originalFinal.firstOrNull()?.id }
-            val lastFinal = activePhases.firstOrNull { it.id == originalFinal.lastOrNull()?.id }
+            // A split terminal tail can contain later runtime-added Sessions.
+            val lastFinal = activePhases.lastOrNull {
+                it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+            }
             val insertedAlreadyStarted = activePhases.any { phase ->
                 phase.id.startsWith("runtime-added-") &&
                     elapsedBeforeRunMs >= phase.startSeconds.toLong() * 1_000L
@@ -525,8 +532,16 @@ class MonotonicSessionTimer(
             "Next cannot preserve the approved Class finish with the remaining " +
                 "future Sessions. No phase was skipped."
         }
+        // The approved Class end and correction are already validated by
+        // reflow. If late Next consumed the final planned Break, divide excess
+        // future Session time into regular Session/Break cycles rather than
+        // leaving one giant terminal Session. A split never touches the past.
+        val splitFuture = if (revision != null) {
+            FinalPairCompensation.splitExtendedTerminalPoseAfterNext(
+                session, revision.phases, enteredIndex = nextIndex)
+        } else activePhases
         val updatedFuture = SpecialBreakRebalancer.rebalance(
-            revision?.phases ?: activePhases,
+            splitFuture,
             firstUnstartedIndex = nextIndex,
             actualElapsedSeconds = ((now - (originalStartMs ?: now)) / 1_000L)
                 .coerceIn(0L, Int.MAX_VALUE.toLong()).toInt(),
