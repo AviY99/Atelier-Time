@@ -40,3 +40,10 @@ The user accepts a permanent separation of three views into the same Run data:
 - Future engineering may enrich the reason for rejected candidate allocations at the pure-planner boundary; this change currently records the relevant numerical constraints, failures and before/after plans rather than claiming a trace of every internal alternative.
 
 **Source baseline:** Stable 8 D-124 user-accepted source commit `09c63d42d5b7ae3ddc13b8755a2262b7b0e5c9a7` and immutable checkpoint branch `stable/android-d124-qa8`. All modifications in D-126 are development-only.
+
+## Additional source audit and test hardening (2026-10-28)
+
+- Start-event recording now passes the immutable Editor-approved phase list as the **before** snapshot. When a separately approved Run end-time changes the initial runtime allocation, the event saves the actual adjusted schedule as the **after** snapshot; previously the report could contain only the editor-approved plan and omit the runtime start reflow.
+- Added a third isolated Android instrumentation test for a Run with **50 Next event records**, checking 53 JSONL records, ordered sequence IDs, the original Editor schedule and a different actual initial schedule. Test source is **WRITTEN, NOT EXECUTED**.
+- GitHub compare against frozen Stable 8 confirms **no changes** to any `domain/` scheduling or monotonic timer implementation or to `TimelinePhaseChart.kt`. Changes remain in UI, diagnostics, test sources, packaging identity, docs and build-only script.
+- **No Samsung build/JVM/instrumentation execution or APK update-install yet.** Do not claim this D-126 candidate is accepted or stable; preserve Stable 8.
