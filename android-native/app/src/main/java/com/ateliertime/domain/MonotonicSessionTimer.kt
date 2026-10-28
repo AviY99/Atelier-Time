@@ -278,15 +278,13 @@ class MonotonicSessionTimer(
             session.phases[it].kind == PhaseKind.POSE &&
                 session.phases[it].poseSource == PoseSource.REGULAR
         }.takeLast(2)
-        val lastOriginalId = session.phases.getOrNull(regularIndices.lastOrNull() ?: -1)?.id
-        val finalIsMerged = lastOriginalId != null && activePhases.none { it.id == lastOriginalId }
-        // A late Next may add future regular Sessions AFTER the original last
-        // one. Only the actual final future work phase is no longer restartable.
+        // A merged end can later become splittable after new Next credit.
+        // Decide from the ACTUAL unstarted future, not from a missing old
+        // "last original" ID or a particular merge/insert history.
         val activeLastIndex = activePhases.indexOfLast {
             it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
         }
-        check(regularIndices.size == 2 && (finalIsMerged || index < activeLastIndex) &&
-            !(finalIsMerged && current.id == session.phases[regularIndices.first()].id)) {
+        check(regularIndices.size == 2 && index < activeLastIndex) {
             "The final regular Session has already started. Cannot rewrite " +
                 "a previously completed final Session."
         }
