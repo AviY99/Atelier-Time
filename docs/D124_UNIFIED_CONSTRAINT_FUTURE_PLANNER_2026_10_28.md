@@ -73,3 +73,17 @@ The screenshot shows only the Gradle summary, not which JUnit cases failed, test
 **Static source audit:** `FinalPairCompensation.reflow` invokes `ConstraintFuturePlanner.plan`; legacy `adjust`, `adjustFutureTail`, `adjustLastOnly` remain callable for historical isolated tests, but no timer runtime transition dispatches directly to them. Constraint planner checks locked phase prefix, target, special identity/count, Summary, min-duration continuity, physical remaining-time coherence and unique IDs. These checks establish tested conditions, not a mathematical proof for all possible schedules. Preserve Stable 7 and installed D-122 until device acceptance.
 
 **Next non-installing gate:** compare candidate APK SHA-256 to `app_sha256` in the generated manifest and check `version=D-124`, `code=19`, `branch=android-native-kotlin-compose`, and source `commit`. No installation or clear-data action without explicit separate approval.
+
+## QA-D124-03 — APK hash verification PASS on Samsung (2026-10-28)
+
+User provided a phone-terminal screenshot of the exact SHA-256 comparison between `/storage/emulated/0/Download/Atelier-Time-D124-Candidate.apk` and the generated `Atelier-Time-D124-QA-manifest.txt`. The check explicitly printed **`D-124 APK VERIFIED - PASS`**.
+
+Manifest fields visible:
+- `version=D-124`
+- `code=19`
+- `branch=android-native-kotlin-compose`
+- `commit=09c63d42d5b7ae3ddc13b8755a2262b7b0e5c9a7`
+
+This is the commit represented by the built APK/manifest, distinct from subsequent documentation-only commits. The screenshot does not print the digest itself, but its shell equality check confirms the manifest's `app_sha256` equals the candidate APK's `sha256sum`. No APK was installed as part of verification. Earlier build-only QA: **243 tests, 0 failures, 0 errors, 0 skips**; application and androidTest APKs built successfully. Connected instrumentation and runtime acceptance are still pending.
+
+**Gate:** WAIT for the user's **explicit permission to update-install** the already verified application APK. On approval, install `Atelier-Time-D124-Candidate.apk` as an update only (no uninstall, no clear storage/data, no install of test APK). Immediately verify saved Classes including `test` and `Draw1425a`, Sound settings, repeated Next + Restart behavior with minimum 1-minute Sessions, long-break and 25/5 controls, fixed physical Class finish, and Summary. Frozen Stable 7 branch remains unchanged. Never claim stable D-124 solely from JVM/hash passes.
