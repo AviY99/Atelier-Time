@@ -74,25 +74,49 @@ internal object ConstraintFuturePlanner {
                 // need a legal end-pair merge instead of false rejection.
                 (entering == first && !mayRebuild)) &&
             !(boundary.preserveExistingTail && !sourceTopologyUnchanged)
-        val proposed = when {
-            pairFlexible -> allocatePair(session, active, first!!, last, rest!!,
+        // Enumerate the legal degrees of freedom under ONE set of
+        // constraints. A whole-ending allocation is preferred when the pair
+        // is still editable; if it would change a protected structure or be
+        // infeasible, the same validator can accept a last-only allocation.
+        // This is not a dispatch into three incompatible legacy reflows.
+        val allocations = mutableListOf<() -> List<SchedulePhase>>()
+        if (pairFlexible) allocations += {
+            allocatePair(session, active, first!!, last, rest!!,
                 delta, correctionSeconds, mayRebuild)
-            last > lock || entering == last -> allocateLast(session, active, last,
-                delta, mayRebuild)
-            delta == 0L -> active
-            else -> throw IllegalArgumentException(
-                "No unstarted Session remains to absorb the requested change.")
         }
-        validate(session, active, proposed, correctionSeconds, total, boundary)
-        val finalRegular = proposed.filter {
-            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
-        }.takeLast(2)
-        return CompensatedTimeline(
-            phases = proposed, totalSeconds = total.toInt(),
-            recoveredSeconds = correctionSeconds,
-            firstFinalPoseSeconds = finalRegular.firstOrNull()?.durationSeconds ?: 0,
-            lastFinalPoseSeconds = finalRegular.getOrNull(1)?.durationSeconds ?: 0,
-        )
+        if (last > lock || entering == last) allocations += {
+            allocateLast(session, active, last, delta, mayRebuild)
+        }
+        if (delta == 0L) allocations += { active }
+        var cause: Throwable? = null
+        for (allocate in allocations) {
+            val attempt = runCatching {
+                allocate().also { candidate ->
+                    validate(session, active, candidate, correctionSeconds,
+                        total, boundary)
+                }
+            }
+            if (attempt.isFailure) {
+                cause = attempt.exceptionOrNull()
+                continue
+            }
+            val proposed = attempt.getOrThrow()
+            val finalRegular = proposed.filter {
+                it.kind == PhaseKind.POSE &&
+                    it.poseSource == PoseSource.REGULAR
+            }.takeLast(2)
+            return CompensatedTimeline(
+                phases = proposed, totalSeconds = total.toInt(),
+                recoveredSeconds = correctionSeconds,
+                firstFinalPoseSeconds =
+                    finalRegular.firstOrNull()?.durationSeconds ?: 0,
+                lastFinalPoseSeconds =
+                    finalRegular.getOrNull(1)?.durationSeconds ?: 0,
+            )
+        }
+        throw IllegalArgumentException(
+            "No legal future layout preserves the approved Class boundary " +
+                "and protected Sessions/Breaks.", cause)
     }
 
     private fun allocatePair(
