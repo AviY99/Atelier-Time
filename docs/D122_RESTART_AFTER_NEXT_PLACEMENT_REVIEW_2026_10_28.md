@@ -153,3 +153,27 @@ User confirmed the second controlled test is **normal**: they played a song brie
 **Disposition: INTERMITTENT / NOT REPRODUCED — MONITORING.** Neither controlled reproduction triggers the problem; the precise source, interaction and persistence conditions remain unknown. Avoid assigning causality to Poweramp or Audio Focus without evidence. Do not claim the original bug has been fixed. No code modification warranted now, and no timer-logic modifications. If repeated, capture whether Poweramp is actually playing/paused in media controls, cue source and timing, and whether cue preview versus automatic A differs, before reselecting sound. Reassess Android audio focus changes only with reproducible evidence and independent acceptance tests.
 
 D-122 timer functioning reported sound by user; sound monitor does not assert full regression coverage or a new stable release. D-119 Stable 7 remains frozen.
+
+## QA-D122-06 — six-minute saved Class `test` as high-stress edge case (2026-10-28)
+
+User supplied Samsung screenshots showing an actual locally saved Class named **`test`** and reported it behaves strangely during repeated **Restart** and **Next**. The screenshots show the structure and saved-class listing, **NOT** a before/after execution trace or error message. Thus no actual incorrect outcome has yet been reproduced. Do not claim a specific on-device failure.
+
+Reconstructed editor values from screenshot:
+- Total Class **6 min** (=360s); summary **1 min** (=60s); work **5 min**.
+- One opening group with one **1-minute** Session, and a **1-minute** required break after group.
+- Standard regular Session **1 min**, regular Break **1 min**, **BREAK_FIRST** ordering after opening.
+- One automatic **Special Break 1 min**, equal to B. According to approved D-120 behavior, this is an ordinary runtime replacement (`L <= B`), while saved/Editor timeline may retain `SPECIAL_BREAK` label/kind.
+- Approved timeline: `00:00–01:00 opening Session 1`, `01:00–02:00 Special Break #1 (60s)`, `02:00–03:00 regular Session 2`, `03:00–04:00 regular Break #2 (60s)`, `04:00–05:00 regular Session 3`, `05:00–06:00 fixed Summary (60s)`.
+
+**Source-level boundary diagnosis:** `FinalPairCompensation.adjust` selects the last two `PoseSource.REGULAR` Sessions (Session 2 and Session 3). Both start at the **60-second minimum**, so `available = 120s - correction`. For any small positive correction (>0s), keeping BOTH sessions at least 60s is impossible, and the optional merge branch cannot save this arrangement unless its exact `mergedLength=120s - correction + 60s` is at most the regular `poseSeconds=60s`. Thus Restart before earning time credits through Next is normally rejected atomically, even for a few seconds' delay. After early Next, signed credit makes some restarts feasible; Restart can appear to switch from rejected to accepted depending on credit. These constraints are expected based on source, not independently run or user-confirmed.
+
+**Other expectations:** Next during the last regular Session cannot jump over it to the fixed Summary before the permitted boundary. A successful earlier Next can extend the future last Session while preserving Class physical end. An equal-length "Special" break can be treated as ordinary for compensation despite UI identity. There is a **test coverage gap**: existing JVM tests exercise L==B with 25-minute pose and other structures, but not the specific 6-minute 1/1/1 structure with repeated Next+Restart and minute-minimum edges.
+
+**Suggested deterministic QA matrix (source-predicted, not verified on phone):**
+1. Start `test`; after ~8 seconds in opening Session 1, Restart current Session. Expect rejection and unchanged chart/deadline because neither final regular Session can shrink below 60s.
+2. Start a **fresh run**; after ~5 seconds in opening Session 1 press Next to equal-length Special Break #1. Expect success, unchanged physical Class end, longer final regular Session absorbing approximately 55s credit. Repeated Next only succeeds while the unstarted tail can absorb credits with original history protected.
+3. After scenario 2, wait ~5 seconds and press Restart on Special Break #1. Expect success while remaining credit is sufficient, and final Session decreases approximately by the seconds elapsed since Next. Confirm fixed Class end.
+4. On the final regular Session, an early Next to Summary must be refused; at the natural boundary Summary remains 60s. A Restart of the last final Session must be refused.
+5. Repeat with rapid subsecond Next and inspect observed-vs-unstarted timeline, cue count, error messages; ensure no past segment rewrite, no jump of any genuinely protected special, and no data modification.
+
+**No source changes performed** in response to these screenshots. Before any fix, capture the *exact actions*, timestamps (rough seconds from Start), chart before/after, rejection text, actual versus expected behavior. Preserve user data and D-119 Stable 7; do not infer that 228 passing tests prove this untested edge case. Label `QA-D122-06 OPEN / exact reproduction pending`.
