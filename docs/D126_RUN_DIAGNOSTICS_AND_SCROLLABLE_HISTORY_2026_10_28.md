@@ -65,3 +65,13 @@ The user ran the documented `git pull --ff-only && bash tools/build_d126_candida
 **Next quality gate:** read the QA manifest and compare the SHA-256 of the two local APKs with the manifest, verify the recorded source commit is approved, then arrange real-device instrumentation and manual UI/diagnostics checks **only after separate authorization** for a controlled in-place D-126 app upgrade and test APK installation. **Do not** uninstall the installed Stable 8, clear app data, or run an instrumentation install without separate permission. The new AndroidTest targets D-126 code and cannot be meaningfully executed against an unchanged D-124 app. Saved Classes/Sounds preservation must be verified after any user-authorized update. Stable 8 checkpoint remains frozen.
 
 **QA status:** D-126 Gradle/JVM/AndroidTest-package assembly PASS; physical Android instrumentation, full scroll-to-Start, 50+ events and export/deletion in real app remain PENDING.
+
+## User phone SHA-256 verification — PASS (2026-10-28)
+
+User supplied Samsung / Code on the Go terminal screenshot of **local artifact manifest verification**:
+- `version=D-126`, `code=20`, `branch=android-native-kotlin-compose`.
+- Exact manifest build commit: `b2d47ca32c2f470d38e556ea7a571afaa89400e3`.
+- `/storage/emulated/0/Download/Atelier-Time-D126-Candidate.apk: OK` — SHA-256 compared to the recorded manifest.
+- `/storage/emulated/0/Download/Atelier-Time-D126-Tests.apk: OK` — SHA-256 compared to the recorded manifest.
+
+**Status:** Artifact integrity PASS for both APKs; 72 Gradle tasks PASS; 243/243 JVM unit tests PASS. **Connected AndroidTest execution and real-world acceptance remain pending.** No user permission for app/test APK installation has yet been recorded in this gate; never uninstall, reset app data, or claim these apps were installed. If user explicitly approves in-place upgrade and test-only APK, verify data preservation, full history scroll, and exported diagnostic file on device.
