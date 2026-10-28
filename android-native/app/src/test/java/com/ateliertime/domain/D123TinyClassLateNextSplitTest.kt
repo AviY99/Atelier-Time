@@ -195,4 +195,78 @@ class D123TinyClassLateNextSplitTest {
         assertEquals(before, timer.view())
         assertEquals(phases, timer.activePhasesSnapshot())
     }
+    @Test fun thresholdAtExactOneBlockBudgetDoesNotCountOldBreakTwice() {
+        val approved = tiny()
+        // The original two regular Sessions contain 120 seconds of work.
+        // A 120-second Next credit funds one 60s Session plus one 60s Break.
+        // The existing 60s final-pair Break is already outside that work sum.
+        val revised = FinalPairCompensation.adjust(
+            approved, lostSeconds = -120, allowExtraRegular = true)
+        assertEquals(480, revised.totalSeconds)
+        assertEquals(1, revised.phases.count {
+            it.id.startsWith("runtime-added-pose-")
+        })
+        assertEquals(1, revised.phases.count {
+            it.id.startsWith("runtime-added-break-")
+        })
+        assertEquals(2, revised.phases.count {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR &&
+                it.id in approved.phases.map { phase -> phase.id }
+        })
+        assertEquals(SECONDS_PER_MINUTE, revised.phases.last().durationSeconds)
+    }
+
+    @Test fun restartCurrentBreakAfterFirstSplitKeepsNewCyclesIntact() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(tiny()) { now }
+        timer.start()
+        repeat(3) {
+            now += 2_000L
+            timer.nextPhase()
+        }
+        assertEquals(PhaseKind.SHORT_BREAK, timer.view().phase?.kind)
+        val before = timer.activePhasesSnapshot()
+        assertTrue(before.any { it.id.startsWith("runtime-tail-break-") })
+        val oldLast = before.last {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }
+        now += 5_000L
+        val restarted = timer.restartCurrentSegmentKeepingEndTime()
+        assertEquals(PhaseKind.SHORT_BREAK, restarted.phase?.kind)
+        val after = timer.activePhasesSnapshot()
+        assertEquals(before.size, after.size)
+        assertEquals(before.dropLast(2).map { it.id },
+            after.dropLast(2).map { it.id })
+        assertEquals(before.dropLast(2).map { it.kind },
+            after.dropLast(2).map { it.kind })
+        assertEquals(oldLast.durationSeconds - 5,
+            after.last { it.kind == PhaseKind.POSE &&
+                it.poseSource == PoseSource.REGULAR }.durationSeconds)
+        assertTimelineSafe(timer, now)
+    }
+
+    @Test fun pauseResumeAfterFirstSplitPreservesFutureCycleAndDeadline() {
+        var now = 0L
+        val timer = MonotonicSessionTimer(tiny()) { now }
+        timer.start()
+        repeat(3) {
+            now += 2_000L
+            timer.nextPhase()
+        }
+        val before = timer.activePhasesSnapshot()
+        assertTrue(before.any { it.id.startsWith("runtime-tail-break-") })
+        timer.pause()
+        now += 5_000L
+        timer.resume()
+        val after = timer.activePhasesSnapshot()
+        assertEquals(before.map { it.id }, after.map { it.id })
+        assertEquals(before.map { it.kind }, after.map { it.kind })
+        assertEquals(before.last {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.durationSeconds - 5, after.last {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.durationSeconds)
+        assertTimelineSafe(timer, now)
+    }
+
 }
