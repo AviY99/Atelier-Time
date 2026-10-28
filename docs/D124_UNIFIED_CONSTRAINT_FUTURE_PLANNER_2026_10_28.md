@@ -58,3 +58,18 @@ The screenshot shows only the Gradle summary, not which JUnit cases failed, test
 **QA status:** a new full Samsung JVM run is REQUIRED. This patch fixes preconditions of four tests but may expose previously untested genuine engine problems; it is **not** a PASS claim. Preserve D-122, Stable 7 and user data; do not install until green results and approval.
 
 **Build-gate ergonomics:** D-124 build-only helper now writes D-124-labelled log, app APK, tests APK and hash manifest (formerly misnamed D-123). If Gradle/JVM tests fail, it prints failing JUnit test class/name/messages automatically from XML before exiting nonzero. This changes no app logic or data. The failing 243/4 result remains historical until a full fresh run is observed.
+
+## QA-D124-02 — Samsung build-only PASS, 243/243 JVM (2026-10-28)
+
+**Evidence supplied by user:** Samsung Code on the Go terminal screenshot after the test fixture repairs and the latest D-124 build helper:
+- `BUILD SUCCESSFUL in 1m 36s`; `72 actionable tasks: 72 executed`.
+- `D-124 JVM ACTUAL: tests=243 failures=0 errors=0 skipped=0`.
+- `BUILD ONLY PASS` with `Atelier-Time-D124-Candidate.apk`, `Atelier-Time-D124-Tests.apk`, `Atelier-Time-D124-QA-manifest.txt` written to `/storage/emulated/0/Download`.
+- Output explicitly states `NO regular/test APK installed`.
+- Deprecation warning for `createComposeRule` occurred during AndroidTest compile and did not fail the build.
+
+**Scope:** Full local JVM suite PASSED; Android app and instrumentation APK assembly PASSED. **Android connected instrumentation was not run**, installed-app lifecycle and background behavior not checked, and user acceptance of new general planning not given. This is NOT a Stable release. The prior D-124 243/4 test run remains in the history as a failed gate before fixture repair.
+
+**Static source audit:** `FinalPairCompensation.reflow` invokes `ConstraintFuturePlanner.plan`; legacy `adjust`, `adjustFutureTail`, `adjustLastOnly` remain callable for historical isolated tests, but no timer runtime transition dispatches directly to them. Constraint planner checks locked phase prefix, target, special identity/count, Summary, min-duration continuity, physical remaining-time coherence and unique IDs. These checks establish tested conditions, not a mathematical proof for all possible schedules. Preserve Stable 7 and installed D-122 until device acceptance.
+
+**Next non-installing gate:** compare candidate APK SHA-256 to `app_sha256` in the generated manifest and check `version=D-124`, `code=19`, `branch=android-native-kotlin-compose`, and source `commit`. No installation or clear-data action without explicit separate approval.
