@@ -1,3 +1,9 @@
+## QA-D122-03 — APK verification command failed due to manifest script typo (2026-10-28)
+
+User ran the version/code/branch/hash verifier following the 228/228 build; no `APK VERIFIED — PASS` appeared. Inspection of `tools/build_d122_candidate_on_phone.sh` confirmed a toolchain metadata defect: it correctly requires `versionCode=17` in Gradle, but wrote `code=16` into the generated `Atelier-Time-D122-QA-manifest.txt`. The previous verification therefore short-circuited on `grep -qx 'code=17'` **before** comparing hashes. This is not evidence of an invalid APK, but the APK must still be verified independently.
+
+Corrected the script in development branch so *future* D-122 builds report `code=17`. Existing on-phone manifest from the earlier build naturally still contains `code=16`; do NOT silently edit it or claim it matches. To validate existing build without rebuilding, compare the actual candidate APK's `sha256sum` with the unchanged stored `app_sha256`, and inspect the real embedded `package` version via Android `aapt2 dump badging`. Do not install until both match and separate approval is obtained. No application source, Stable 7 branch, or installed phone data were changed by this script-only fix.
+
 ## QA-D122-02 — Samsung build-only rerun PASS (2026-10-28)
 
 User-supplied real Samsung Code on the Go terminal screenshot confirms:
