@@ -237,9 +237,10 @@ fun SessionEditorScreen(
     ) {
         val stamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
             .format(Date(System.currentTimeMillis()))
-        val transition = if (before?.phase != after?.phase ||
-            before?.status != after?.status)
-            " · ${humanPhase(before?.phase)} → ${humanPhase(after?.phase)}"
+        val transition = if (before == null)
+            " · ${humanPhase(after?.phase)}"
+        else if (before.phase != after?.phase || before.status != after?.status)
+            " · ${humanPhase(before.phase)} → ${humanPhase(after?.phase)}"
         else " · ${humanPhase(after?.phase)}"
         val cueNote = cue?.let {
             val label = when (it) {
@@ -444,11 +445,16 @@ fun SessionEditorScreen(
     }
 
     LaunchedEffect(soundSettings, soundEnabled) {
-        // A settings change during an active Class belongs in that Run's
-        // private report even when no Class action occurs at that instant.
-        try { currentReport?.soundChange(soundSettings, soundEnabled) }
-        catch (failure: Exception) {
-            diagnosticError = "Could not save sound setting change."
+        // Settings changed DURING a Run belong in BOTH representations.
+        // The detailed file receives the full sanitized settings snapshot.
+        if (currentReport != null) {
+            val stamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                .format(Date(System.currentTimeMillis()))
+            eventHistory.add("$stamp · Sound settings changed")
+            try { currentReport?.soundChange(soundSettings, soundEnabled) }
+            catch (failure: Exception) {
+                diagnosticError = "Could not save sound setting change."
+            }
         }
     }
 
