@@ -1,3 +1,5 @@
+> **Current development candidate:** Stage 7 accessibility D-127/code21 source on Android dev, **QA/build/installation pending**, no new stable designation. See [Stage 7 QA record](D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md). Main remains documentation/history entrypoint; installed accepted Stable 9 remains D-126/code20.
+
 # Atelier Time — תיעוד קנוני, ענפים והעברת שיחה
 # Atelier Time — canonical documentation index and branch policy
 
