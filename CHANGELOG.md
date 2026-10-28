@@ -1,3 +1,7 @@
+## 2026-10-28 — D-127 Stage 7 accessibility development (NOT DEVICE QA)
+
+Development source commit `b9d7064` adds font-responsive tabs and controls, TalkBack descriptions for custom wheels and schedule chart, 48dp Free preset targets, and three authored but **UNRUN** Compose UI tests. Dev candidate D-127/code21 is **not built or installed**; Stable 9 D-126/code20, its 285/285 past PASS and preserved data remain unchanged. See [Stage 7](docs/D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
+
 # Changelog — Atelier Time
 
 ## 2026-10-28 — Stable 9 D-126: completed 285/285 tests and user-data preservation
