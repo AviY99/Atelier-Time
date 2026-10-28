@@ -57,3 +57,22 @@ Read [HANDOFF.md](HANDOFF.md) first for cumulative decisions and the specific ne
 12. Research future platform adaptations (iOS/desktop) without rewriting timer semantics prematurely.
 
 **Evidence policy:** Historical documents retain the facts of the time they were written; do not erase failed attempts or incorrectly promote unexecuted tests. This 2026-10-28 document supersedes old headings claiming a previous release is still “current”.
+
+## הנחיית פתיחה מחייבת לשיחה חדשה באותו פרויקט
+
+**השיחה הקודמת נסגרה בהוראת המשתמש; זהו מסמך ההעברה הרשמי.** בשיחה החדשה באותו פרויקט יש להתחיל מקריאת הקובץ הזה, ולא להסתמך על תקצירי שיחה חלקיים או על כותרות היסטוריות ב-`HANDOFF.md`.
+
+**טקסט פתיחה מוצע לשיחה החדשה:**
+
+> המשך את פרויקט Atelier Time מנקודת Stable 9 (D-126/code20). פתח קודם את `docs/DOCUMENTATION_INDEX_AND_BRANCH_POLICY.md` ואת `docs/CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md` בענף `main` או בענף הפיתוח. אמת את מצב GitHub בפועל. כל 285 הבדיקות הושלמו בהצלחה והמשתמש אישר שהמחלקות והצלילים נשמרו. הצג בקצרה את מצב הפרויקט, מבנה התיעוד וצעדי ההמשך, ואז המשך רק לפי בחירתי. אל תבנה, תתקין, תמחק נתונים או תשנה את Stable 9 ללא אישור מפורש.
+
+**משימות חובה לעוזר בתחילת השיחה החדשה:**
+
+1. **קריאת אמת:** קרא את `docs/DOCUMENTATION_INDEX_AND_BRANCH_POLICY.md` ואת המסמך הנוכחי; רק לפי הצורך פתח `HANDOFF.md`, `DECISIONS.md`, `ROADMAP.md`, `TEST_PLAN.md` ותעודת Stable 9. אל תציג מסמך היסטורי כסטטוס עדכני.
+2. **הסבר קצר על הענפים:** `main` הוא שער הכניסה ומרכז התיעוד העדכני וההיסטורי; `android-native-kotlin-compose` הוא מקור אמת לקוד Android ולתיעוד העבודה; `stable/android-d126-qa9-tests-complete` הוא צילום מצב קפוא. **לא כל ענף מקבל מחדש עותקים של מסמכים חדשים, ולא מבצעים merge של כל קוד הפיתוח ל-`main`.**
+3. **תאימות תיעוד:** המסמכים המשותפים המרכזיים ב-`main` ובענף הפיתוח כבר סונכרנו; לפני דיווח על סטטוס חדש אמת Git blob SHA בשני הענפים. אם נדרש סנכרון, העבר רק את קובצי התיעוד הרלוונטיים בשמירת מבנה הענפים.
+4. **נקודת עבודה:** שלבים 1–6 ומבחני D-126 **סגורים**; הצע להתחיל בשלב 7 (נגישות והתאמת תצוגה), עם סקירה ממוקדת ללא שינוי קוד לפני אישור. שלבים 8–12 נשארים בתוכנית. אין לפתוח מחדש את לוגיקת הטיימר המאוחדת או תחקור D-126 בלי ממצא חדש.
+5. **בטיחות ונוהל:** אין לגעת ב-APK המותקן, Saved Classes, Sounds או בנתוני האפליקציה; אין להסיר/לנקות נתונים; אין להתקין APK או להפעיל בדיקת מכשיר חדשה בלי צורך ואישור. שמור על ענפי Stable 8/9 קפואים.
+6. **סגירת שיחה עתידית:** עדכן קודם את התיעוד הקנוני בענף הפיתוח, אחר כך סנכרן ל-`main` את המסמכים המשותפים ובדוק זהות, ולבסוף קבע במסמך Handoff החדש מה בדיוק בוצע/נותר. **אל תבטיח עדכון GitHub שלא בוצע בפועל.**
+
+**הסטטוס המאושר בסיום שיחה זו:** Stable 9 = D-126/code20 מותקנת, 243/243 JVM + 42/42 Android Instrumentation = 285/285 PASS, 72 Gradle tasks PASS, שני APK SHA-256 תקינים, Saved Classes/Sounds נשמרו לפי אישור משתמש. לא נדרש APK חדש או מספר גרסה נוסף.
