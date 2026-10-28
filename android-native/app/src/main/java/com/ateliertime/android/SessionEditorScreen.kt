@@ -425,7 +425,11 @@ fun SessionEditorScreen(
                         (failure.message ?: "storage error")
                     null
                 }
-                recordClassEvent("Start", null, view)
+                // Capture an initial Run-end adjustment as a real plan revision.
+                // The approved Editor plan is already in run_start; the event
+                // records the actual runtime plan whenever those differ.
+                recordClassEvent("Start", null, view,
+                    beforePhases = session.phases)
                 timerView = view
                 timerError = null
             } catch (error: IllegalArgumentException) {
