@@ -15,7 +15,7 @@ if [[ -n "$(git status --porcelain --untracked-files=no)" ]] ||
     exit 2
 fi
 if ! grep -Eq 'versionName[[:space:]]*=[[:space:]]*"D-124"' app/build.gradle.kts ||
-   ! grep -Eq 'versionCode[[:space:]]*=[[:space:]]*18([[:space:]]|$)' app/build.gradle.kts; then
+   ! grep -Eq 'versionCode[[:space:]]*=[[:space:]]*19([[:space:]]|$)' app/build.gradle.kts; then
     echo "ERROR: D-124/versionCode 19 source required." >&2
     exit 2
 fi
