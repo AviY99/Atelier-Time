@@ -29,11 +29,39 @@ fi
 
 downloads="/storage/emulated/0/Download"
 mkdir -p "$downloads"
-log="$downloads/Atelier-Time-D123-JVM-build.log"
+log="$downloads/Atelier-Time-D124-JVM-build.log"
 echo "Building D-124 candidate + ALL JVM tests + AndroidTest APK; NO INSTALL."
-bash "$gradle" "-Pandroid.aapt2FromMavenOverride=$aapt2" \
+if bash "$gradle" "-Pandroid.aapt2FromMavenOverride=$aapt2" \
     :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest \
-    --rerun-tasks --console=plain --no-daemon 2>&1 | tee "$log"
+    --rerun-tasks --console=plain --no-daemon 2>&1 | tee "$log"; then
+    :
+else
+    echo "D-124 BUILD/TEST GATE FAILED; NO APK IS APPROVED."
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "app/build/test-results/testDebugUnitTest" <<'PY_FAILURES'
+import pathlib, sys, xml.etree.ElementTree as ET
+paths = sorted(pathlib.Path(sys.argv[1]).glob('TEST-*.xml'))
+if not paths:
+    print("No JUnit XML reports; inspect the Gradle log.")
+else:
+    count, failed = 0, []
+    for path in paths:
+        suite = ET.parse(path).getroot()
+        for case in suite.iter("testcase"):
+            count += 1
+            for tag in ("failure", "error"):
+                for issue in case.findall(tag):
+                    failed.append((case.get("classname", ""),
+                                   case.get("name", ""), issue))
+    print(f"D-124 JVM REPORT: tests={count} failures/errors={len(failed)}")
+    for i, (cls, name, issue) in enumerate(failed[:25], 1):
+        print(f"--- FAIL {i}: {cls}.{name}")
+        print("MESSAGE:", issue.get("message", ""))
+        print("\n".join((issue.text or "").splitlines()[:6]))
+PY_FAILURES
+    fi
+    exit 1
+fi
 
 report_dir="app/build/test-results/testDebugUnitTest"
 if command -v python3 >/dev/null 2>&1; then
@@ -80,8 +108,8 @@ if [[ "${#regular_apks[@]}" -ne 1 || "${#test_apks[@]}" -ne 1 ]]; then
     echo "ERROR: expected exactly one debug app APK and one test APK." >&2
     exit 3
 fi
-regular="$downloads/Atelier-Time-D123-Candidate.apk"
-tests="$downloads/Atelier-Time-D123-Tests.apk"
+regular="$downloads/Atelier-Time-D124-Candidate.apk"
+tests="$downloads/Atelier-Time-D124-Tests.apk"
 cp "${regular_apks[0]}" "$regular"
 cp "${test_apks[0]}" "$tests"
 test_count="$(grep -R -E '^[[:space:]]*@Test' app/src/androidTest/java | wc -l | tr -d ' ')"
@@ -89,7 +117,7 @@ if [[ "$test_count" -lt 1 ]]; then
     echo "ERROR: no instrumentation test methods found." >&2
     exit 3
 fi
-manifest="$downloads/Atelier-Time-D123-QA-manifest.txt"
+manifest="$downloads/Atelier-Time-D124-QA-manifest.txt"
 {
     printf 'version=D-124\ncode=19\nbranch=android-native-kotlin-compose\n'
     printf 'commit=%s\n' "$(git rev-parse HEAD)"
