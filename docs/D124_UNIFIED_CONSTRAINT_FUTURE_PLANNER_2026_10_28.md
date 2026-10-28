@@ -19,9 +19,9 @@ Those versions centralized the monotonic signed correction but still selected am
 
 ## Regression plan
 
-Added six `D124ConstraintPlannerGeneralContractTest` tests covering an independent finite pair-feasibility oracle, thousands of budget combinations, cross-product of work/rest/special/summary/cycle lengths and consecutive Next, mixed Restart/Pause/Resume with deterministic random seed and atomic rejection, equal-length special, Next-entered legal merge, and continuation after a merged final pair.
+Added seven `D124ConstraintPlannerGeneralContractTest` tests covering an independent finite pair-feasibility oracle, thousands of budget combinations, cross-product of work/rest/special/summary/cycle lengths and consecutive Next, mixed Restart/Pause/Resume with deterministic random seed and atomic rejection, equal-length special, Next-entered legal merge, continuation after a merged final pair, and UI final-pair reporting after a merge.
 
-All earlier 228 D-122 tests and eight D-123 tests remain. **Target: at least 242/242 JVM tests; actual result not yet observed.** Testing still required to validate code compilation and logic. No tests have been deleted, weakened, or skipped.
+All earlier 228 D-122 tests and eight D-123 tests remain. **Target: at least 243/243 JVM tests; actual result not yet observed.** Testing still required to validate code compilation and logic. No tests have been deleted, weakened, or skipped.
 
 ## Build-only gate
 
