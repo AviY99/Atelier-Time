@@ -1,6 +1,10 @@
 package com.ateliertime.android
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
@@ -228,36 +232,8 @@ fun SessionTimerScreen(
             }
             }
         }
-        if (view.recoveredSeconds != 0) {
-            Text(
-                (if (view.recoveredSeconds > 0) "Time recovered from ending: "
-                else "Next credit redistributed to future Sessions: ") +
-                    formatTime(kotlin.math.abs(view.recoveredSeconds)),
-                color = if (atelierNightActive()) Color.White
-                    else MaterialTheme.colorScheme.primary,
-            )
-            timer.finalEndingDurations().let { lengths ->
-                if (lengths.size == 1) Text("Final Sessions merged: " +
-                    formatTime(lengths.single()) + " (intervening break removed)")
-                else if (lengths.size == 2) Text("Adjusted final two sessions: " +
-                    formatTime(lengths.first()) + " + " + formatTime(lengths.last()))
-            }
-            val addedRegular = timer.activePhasesSnapshot().count {
-                it.id.startsWith("runtime-added-pose-")
-            }
-            if (addedRegular > 0) Text("Added full regular Sessions + Breaks: " +
-                addedRegular)
-            val endingLabel = when (session.selectedChoice?.mode) {
-                FinalPoseMode.EVEN_SPLIT -> "Even split"
-                FinalPoseMode.CUSTOM_SPLIT -> "Custom split"
-                FinalPoseMode.REMAINDER, null -> "Last gets remaining time"
-            }
-            Text("Ending choice: " + endingLabel +
-                ". Short final pairs merge with their break when they fit " +
-                "within one regular Session. Sufficient Next credit adds full " +
-                "Session+Break blocks, then re-splits the final pair. " +
-                "Class finish and saved preset remain unchanged.")
-        }
+        // The chart and current-phase clock already explain the plan.
+        // Keep scheduler internals in the Run diagnostic report only.
         timerError?.let { Text(it, color = atelierErrorTextColor()) }
 
         ElevatedCard(modifier = Modifier.fillMaxWidth()) {
@@ -335,14 +311,36 @@ fun SessionTimerScreen(
             }
         }
         if (eventHistory.isNotEmpty()) {
+            // Show about five recent actions without expanding the whole page.
+            // All events remain available: swipe UP within this list to browse
+            // backwards to the Run's Start. It does not discard old entries.
+            val actionScroll = rememberLazyListState()
+            LaunchedEffect(eventHistory.size) {
+                if (actionScroll.firstVisibleItemIndex == 0) {
+                    actionScroll.scrollToItem(0)
+                }
+            }
             ElevatedCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Text("Recent Class actions", style = MaterialTheme.typography.titleSmall)
-                    eventHistory.takeLast(6).asReversed().forEach { event ->
-                        Text(event, style = MaterialTheme.typography.labelSmall)
+                    verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("Recent Class actions · ${eventHistory.size}",
+                        style = MaterialTheme.typography.titleSmall)
+                    LazyColumn(
+                        state = actionScroll,
+                        modifier = Modifier.fillMaxWidth()
+                            .heightIn(max = 220.dp)
+                            .testTag("class_action_history_scroll"),
+                        verticalArrangement = Arrangement.spacedBy(3.dp),
+                    ) {
+                        items(eventHistory.size) { offset ->
+                            Text(
+                                eventHistory[eventHistory.lastIndex - offset],
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.fillMaxWidth().heightIn(min = 39.dp),
+                            )
+                        }
                     }
-                    Text("Run-local only · cleared on a new Class or app exit",
+                    Text("Newest first · Scroll for the complete Run history",
                         style = MaterialTheme.typography.labelSmall)
                 }
             }
