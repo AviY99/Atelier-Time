@@ -1,3 +1,9 @@
+## Stage 7 (2026-10-28) — source implemented, verification pending
+
+2026-10-28 — D-127 Stage 7 accessibility **SOURCE COMMITTED / QA PENDING**. Development-only `D-127/versionCode21` implemented large-font tab navigation, wrapping Timer controls, accessible wheel and timeline descriptions, 48dp Free presets, and 3 new **UNRUN** Android UI tests. Source commit `b9d7064`; **not built, tested, installed, or accepted**. Installed Stable 9 stays D-126/code20 with prior 285/285 PASS; Saved Classes/Sounds and frozen stable refs untouched. Details: [D-127 Stage 7 record](D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
+
+Stage 8–12 remain planned. Do not mark Stage 7 complete until focused tests and visual/TalkBack device acceptance.
+
 ## 2026-10-28 — CURRENT STABLE 9 / D-126: 285/285 automated tests complete
 
 The user has explicitly designated **Stable 9** after completing testing. Android remains **D-126/code20** (same installed app and unified Timer + full forensic Run diagnostics). Real Samsung gates: Gradle 72/72 PASS, JVM 243/243 PASS, Android instrumentation 42/42 PASS, APK SHA-256 OK; user confirmed all Saved Classes/Sounds unchanged after testing. The current stable checkpoint is `stable/android-d126-qa9-tests-complete`; both prior Stable 8 Git checkpoints remain frozen. **No APK reinstall or code bump.** Next work: 7 accessibility/device adaptation, 8 Android policy/privacy/hardening, 9 signed release, 10 branding, 11 Google Play, 12 additional-platform study. [Stable 9 certificate](STABLE9_D126_285_AUTOMATED_QA_ACCEPTANCE_2026_10_28.md).

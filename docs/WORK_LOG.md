@@ -1,9 +1,365 @@
+## 2026-10-28 — D-127 Stage 7 accessibility development
+
+2026-10-28 — D-127 Stage 7 accessibility **SOURCE COMMITTED / QA PENDING**. Development-only `D-127/versionCode21` implemented large-font tab navigation, wrapping Timer controls, accessible wheel and timeline descriptions, 48dp Free presets, and 3 new **UNRUN** Android UI tests. Source commit `b9d7064`; **not built, tested, installed, or accepted**. Installed Stable 9 stays D-126/code20 with prior 285/285 PASS; Saved Classes/Sounds and frozen stable refs untouched. Details: [D-127 Stage 7 record](D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
+
+Static palette sample contrasts calculated; no complete contrast audit or real-device validation yet. Shared documentation must also be synchronized to main; Android source stays on the development branch.
+
+## 2026-10-27 — STABLE 7 USER DESIGNATION / REAL D-119 PHONE PASS
+
+## 2026-10-28 — Stable 9 D-126 documentation synchronized across main and development
+
+User explicitly accepted current Stable 9 after completed D-126 tests and confirmation that Saved Classes and Sounds were preserved. Samsung evidence: `BUILD SUCCESSFUL` with 72 Gradle tasks, 243/243 JVM PASS, both APK SHA-256 PASS, 42/42 physical Android instrumentation PASS after AndroidTest-only fixes, total 285/285 automated tests. The installed app remains D-126/code20 unchanged; frozen checkpoint `stable/android-d126-qa9-tests-complete` and older Stable 8 checkpoints intact. Default-branch `main` documentation and canonical development docs have now been aligned, while preserving historical notes. [Current status](CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md), [certification](STABLE9_D126_285_AUTOMATED_QA_ACCEPTANCE_2026_10_28.md).
+
+
+After the previously logged D-119 Kotlin failure and corrective `AtelierSlimSlider` fix (dev commit `6fb06f361c4522b677cbad0804e89a835dc1ee30`), the user supplied CoGo screenshot showing **`BUILD SUCCESSFUL in 1m 16s`**, **72/72 Gradle tasks executed**, and **`D-119 JVM ACTUAL: tests=211 failures=0 errors=0 skipped=0`**. The script generated `Atelier-Time-D119-Candidate.apk`, `Atelier-Time-D119-Tests.apk`, QA manifest; no auto-install. User then explicitly said **"הכל עובד"** and **"מדובר בגרסה יציבה 7"**. This closes D-119 build gate and user functional acceptance, not Android instrumentation or production signing. Freeze `stable/android-d119-qa7` as latest accepted **Stable 7 = D-119/code14** without software changes or phone operations. Stable 5/6 and user-saved Classes/Sounds remain protected. [Stable 7 record](STABLE7_D119_QA_ACCEPTANCE_2026_10_27.md).
+
+## 2026-10-27 — D-119 REAL SAMSUNG COMPILE FAILURE / CORRECTIVE SOURCE PATCH
+
+Phone screenshot of Code on the Go D-119 build-only: **`:app:compileDebugKotlin` FAILED, 52s, 54/54 tasks**, before APK build success. User captured `grep` error lines from actual `/storage/emulated/0/Download/Atelier-Time-D119-JVM-build.log`: *all* in `AtelierSlimSlider.kt`, including line 34 generic type inference, line 36 unknown `trackRange` parameter, line 51 value callback inference, lines 60/67 non-`@Composable` lambda context, and experimental API errors. **Diagnosis:** D-119 newly introduced slider-state/custom thumb/track calls do not match Android's installed Compose Material3 API. **Local correction:** value-based `Slider` already used successfully by `AtelierDesign.kt`, visual `graphicsLayer(scaleY = 0.55f)` preserving input bounds and original `valueRange`, `steps`, `onValueChange`, `onValueChangeFinished`, colors; no schedule or stored data changes. Android recompile remains **PENDING** until a new phone build-only screenshot. Keep version D-119/code14 and frozen Stable 5/6. [Details](D119_COMPACT_CONTROLS_AND_WHEELS_2026_10_27.md).
+
+## 2026-10-27 — D-119 compact fixes — local JVM 211/211 PASS
+
+Installed D-118 works except user-observed tab clipping, lack of Class-bar legend, running Free preset menu/wheel replacement and thick Sound/Editor slider tracks. D-119 combines all changes without touching scheduling, sounds or persistence. Local JUnit 211/211 PASS; actual Android build/visual QA pending, publish approval required. Stable 5/6 frozen. [Details](D119_COMPACT_CONTROLS_AND_WHEELS_2026_10_27.md).
+
+## 2026-10-27 — D-118 two timer tabs + eight Free quick durations
+
+User reports D-117 working on phone. Requested longer tab titles and eight Free presets; implemented two-line `Programed Timer` / `Free Timer` labels, quick durations 1/4/5/10/15/25/30m and 1h above Free Start/Pause controls, only editable in READY/FINISHED, no auto-start or persistence changes. Compose test selectors updated; 2 JVM mapping regressions added. **Actual local 211/211 Kotlin tests PASS, 22 suites**; on-phone D-118 Gradle build, installation, instrumentation and visual check pending. Frozen Stable 5/6 untouched; [D118 record](D118_FREE_PRESETS_AND_TAB_LABELS_2026_10_27.md).
+
+## 2026-10-27 — HISTORICAL D-117 user bug report
+
+User-provided D-116 screenshot shows six navigation labels clipped (`Edito`, `Soun`, `Desig`); they request independent adjacent Elapsed and colored schedule bar, with ratios 11dp/33dp, and automatic special Break near physical Class center even after many Next operations. Implemented on development branch only, with `SpecialBreakRebalancer`, protected incremental `adjustFutureTail`, 4 new Kotlin tests, and guarded build/QA scripts. **Actually executed Kotlin/JUnit: 209/209 PASS, 22 suites**. Full Android Gradle compile, D-117 device update-install/acceptance and test instrumentation **not performed**. D-116 remains user-reported operational except those issues; D-114 Stable 5/6 snapshots unchanged. Full record: [D117](D117_TAB_CHART_AND_SPECIAL_BREAK_2026_10_27.md).
+
+## 2026-10-27 — HISTORICAL D-116 source changes following user-confirmed D-115 install
+
+**Observed D-115 phone evidence:** Samsung CoGo screenshot `BUILD SUCCESSFUL in 1m 23s`, 72/72 Gradle tasks, JVM XML `196 failures=0 errors=0 skipped=0`, both regular/test APKs and manifest created, no automatic installation. ADB wireless reconnect/pairing failed (no device connected); user instead used My Files to install regular D-115 and reported **"הכל עובד"**. Do not claim D-115 Android instrumentation ran, or Stable 6 replaced as frozen baseline.
+
+**New development-only D-116:** chronological actual-history / adjusted-future chart, elapsed+remaining embedded with one overlaid bar, no activity breakdown on live Timer; separate Free tab in six-way LTR navigation; Same sound all four cues; strict Next credit `A+B > 2×regularSession + regularBreak`, insert whole blocks before final two and split remainder, no original Class mutation. See [D116 specification and gate](D116_TIMELINE_AND_NEXT_RULES_2026_10_27.md). **Local 205/205 JVM PASS, Android Gradle/Compose/device QA unexecuted.**
+
+## 2026-10-27 — D-115 unified changeset / local JVM evidence
+
+User authorized doing every post-Stable-6 change request together. All app edits are confined to `android-native-kotlin-compose`, with Android package candidate D-115/versionCode 10. Source changes cover runtime short-final-pair merge (A + Break + B <= Editor regular Session), C before Summary, guarded Next + ephemeral trace, Free Countdown and sound, Timer live glance/remaining line, keep-awake and sound-volume UX, optional alarm-volume routing and transient focus. Added dedicated D-115 CoGo/Termux guarded scripts; no stable branch, installed APK, real saved Class or Sound settings was changed.
+
+**Observed local verification:** Kotlin 2.2.0 compiler for pure domain + `EditorInput`; JUnit4 runner through Java 17 gave **`OK (196 tests)` in `0.151s`, exit code 0** across 20 classes. No Android SDK/Gradle build is available in this local execution environment; **D-115 Android build/device tests have NOT run**. Separate consent remains required before any installed-phone impact. [D-115 runbook](D115_UNIFIED_CHANGESET_2026_10_27.md).
+
+## 2026-10-27 — NEW FIELD TEST / FEATURE CHANGE REQUESTS AFTER STABLE 6 (NOT IMPLEMENTED)
+
+User completed a real ~3-hour Class field check. **Clock correct (user-observed PASS).** Two audible cues not heard during screen lock (one occurrence had muted phone audio; other cause unknown). Several Pause operations and at least two Restarts; one Break seemed absent, but whether a mistaken Next/Restart action or an actual scheduler problem is **undetermined**. User requests: (1) optional keep-screen-awake mode and reliable audible cues, (2) audit/guard accidental phase advancement, (3) collapse two shortened final regular Sessions into one of their summed lengths when their sum is <= the Editor regular Session length, otherwise retain Editor's selected split, (4) C class-finish melody **before** an optional Summary rather than afterwards, (5) a permanent independent HH:MM:SS wheel free countdown in Timer with Start/Pause/Resume/Exit and its own selectable Sound-tab sound, and (6) live Class timeline-at-a-glance in Timer with Class remaining progress above.
+
+**Source-audit insights:** MelodyAudio uses `AudioAttributes.USAGE_MEDIA`; `Next` lacks a confirmation while Restart/Exit have one; `MonotonicSessionTimer.nextPhase` completes when invoked on final regular Session even if optional Summary follows; `FinalPairCompensation` currently maintains two 1m-minimum Sessions and preserves the intervening Break. Changing to one Session raises a **product rule to decide for that intervening Break** while also retaining the merged Session's exact A+B length and requested finish; do not silently alter timing or already-started phases. Timing was accepted, but intermittent audio is OPEN and skipped Break is UNDETERMINED.
+
+**Authoritative detailed field report and acceptance/test proposal:** [STABLE6_THREE_HOUR_FIELD_TEST_AND_NEXT_DEVELOPMENT_2026_10_27.md](STABLE6_THREE_HOUR_FIELD_TEST_AND_NEXT_DEVELOPMENT_2026_10_27.md). Reported requests are not code or APK changes. Approval and phase-by-phase development gates remain in place; no source code, installed data, or stable branch changes authorized by this recording. Stable 6 `stable/android-d114-qa6` remains frozen.
+
+## 2026-10-26 — STABLE 6 FROZEN REF VERIFIED (post-freeze dev-only record)
+
+Stable 6 was created and read back successfully from GitHub: **`stable/android-d114-qa6`**, exact **commit `89ed2873ef3c91fe224f3723f9523d7409e75f7c`**. The preserved earlier Stable 5 branch `stable/android-d114` remained at **`34a692a98282944a76e314efcc228dac3bd072ff`**. Stable 6 includes D-114 `versionName="D-114"`, `versionCode=9`, all 222 previously passing automated test sources and the recorded QA/acceptance documentation. Comparing tested development commit `3e78db0d014ec79f55ad41dd07f25c982a90173b` through the Stable 6 snapshot found **documentation-only intervening changes**. No production Kotlin version bump or new regular application APK was generated; phone installation unchanged. Freeze is intentionally immutable; this extra exact-SHA note was written **only in development branch after the freeze**.
+
+Stable 6 acceptance details: [STABLE6_D114_QA_ACCEPTANCE_2026_10_26.md](STABLE6_D114_QA_ACCEPTANCE_2026_10_26.md). Remaining long-run/Doze/system-clock, actual audio, OS-reclaim, and ADB probes were not included in the 222 automatic test result; continue separately only with appropriate approval.
+
+## 2026-10-26 — USER APPROVED STABLE 6 (D-114, 222/222 QA PASS)
+
+**Current canonical project status:** User explicitly declared **"זאת כרגע גרסה 6 יציבה לאור מעבר מספר רב של בדיקות בהצלחה"** (this is now Stable 6 due to the many tests passing). This **supersedes** historical headings that called Stable 5 the latest. Stable 6 is the *same installed, user-accepted D-114 application code and binary*, now elevated to a **verified QA stability checkpoint**; **no versionName/versionCode bump or APK installation** occurred.
+
+- **Stable 6 immutable branch:** `stable/android-d114-qa6`; snapshot of the tested code plus updated QA/stability documentation. Do not advance, force-push, merge into or develop on this branch.
+- **Frozen Stable 5 unchanged:** `stable/android-d114` SHA `34a692a98282944a76e314efcc228dac3bd072ff`.
+- **Current dev branch:** `android-native-kotlin-compose`, the only branch for subsequent work.
+- **Actual on-phone test evidence:** CoGo JVM **185/185 PASS**, errors=0, failures=0, skipped=0; Termux Android instrumentation **37/37 PASS**, `OK (37 tests)`, 20.602 s; **222/222 executed automated tests PASS**. The previously-built ~1.1MB `Atelier-Time-D114-Tests.apk` was installed as the test package only. Existing regular app was not replaced.
+- **Post-QA persistence:** user confirmed **two saved Classes and Sounds settings preserved unchanged**. This is explicit **manual preservation PASS**, not a binary/byte-level automated comparison.
+- **Boundary:** unresolved long-session/Doze/real clock shift/audio/OS process-reclaim checks and supplemental read-only ADB survey remain outside this test result. Stable 6 is approved despite these explicitly open separate QA gates. Never present the open checks as executed PASS.
+- **Stable 6 acceptance and source/QA evidence:** [STABLE6_D114_QA_ACCEPTANCE_2026_10_26.md](STABLE6_D114_QA_ACCEPTANCE_2026_10_26.md). **D-114 is still the Android versionName**, not a newly compiled D-115.
+
+## 2026-10-26 — D-114 Stage 2: POST-INSTRUMENTATION SAVED DATA ACCEPTED
+
+**Direct user confirmation after the actual 37/37 Android instrumentation PASS:** "כן נשמרו ללא שינוי הכל תקין" ("Yes, [they] were preserved unchanged; everything is working"). Before the device test, user had confirmed **two saved Classes**. The post-run confirmation means both saved Classes and the selected Sounds settings remained unchanged and functioning, as checked by the user on the real phone. Mark **manual post-test preservation QA PASS (user observed)**, not an automated deep comparison of preference bytes.
+
+**Consolidated, evidence-accurate status:** D-114 JVM **185/185 PASS** (CoGo JUnit XML); Android instrumentation **37/37 PASS** (`OK (37 tests)` in Termux, 20.602 s); total **222/222 automated PASS**; **two saved Classes + Sounds persisted unchanged (manual user PASS)**. Build and installed test-only APK succeeded. Neither user data nor the regular installed app was reset/replaced. Stable 5 `stable/android-d114` remains frozen at `34a692a98282944a76e314efcc228dac3bd072ff`.
+
+**Stage 2 remaining separate coverage:** read-only ADB package/permission/service/crash-log probes (not yet run in this checkpoint); Home/Back/Recents/lock-screen flows, true 3-hour duration, actual wall-clock ±120 s change, Doze, audible output, abnormal process death/notification cleanup require specific separate evidence and where necessary explicit additional consent. Do **not** claim the full range of these tests is covered by 222/222. Do not create Stable 6 without user's request.
+
+## 2026-10-26 — REAL D-114 ANDROID INSTRUMENTATION 37/37 PASS (Samsung phone)
+
+**Source of evidence:** user-provided Termux terminal screenshot of completed AndroidJUnitRunner run on the physical Samsung phone. Terminal displays class-by-class dot progress for `MelodyPreferencesTest`, `RunEndApprovalUiTest`, `RunEndTimeDeviceTest`, `StaticAudioTrackLifecycleTest` (with earlier suites above screenshot), followed by **`Time: 20.602`**, **`OK (37 tests)`**, and the D-114 runner's exact final line **`PASS: 37 Android instrumentation methods on D-114`**. This constitutes **observed on-device instrumentation PASS 37/37**, unlike the earlier D-110-only 14/14 baseline. No failures reported in observed result.
+
+**Previously observed on the same D-114 Stage 2 QA source:** real CoGo Gradle `BUILD SUCCESSFUL in 1m`, JVM XML summary **`D-114 JVM ACTUAL: tests=185 failures=0 errors=0 skipped=0`**, AndroidTest APK assembled. **Combined observed automated count: 185 JVM + 37 Android = 222 passed.** JVM source tested at `android-native-kotlin-compose` commit `3e78db0d014ec79f55ad41dd07f25c982a90173b`; later changes through this note are documentation-only. The installed application's `D-114/versionCode=9` preflight and APK hash/method count gates are enforced in `termux_run_all_device_qa.sh`.
+
+**Evidence retention:** script reports full local log at `~/storage/downloads/Atelier-Time-D114-Instrumentation.log` in Termux; the actual full log file was *not uploaded* into chat, and no additional per-case details should be invented. CoGo JVM/build log and test APK remain under Downloads from earlier run.
+
+**Safety & open acceptance:** the script's terminal output explicitly states **no app update/uninstall/`pm clear`/force-stop/system clock change was invoked**; it installed only the `androidTest` package. User reported exactly **two saved Classes** before instrumentation. The screenshot does **not** establish their post-test persistence or whether Sounds choices remain intact. Ask user to visually verify that the same two Classes and Sounds settings persist and report result; do not mark that post-run verification PASS until user does. The test suites use isolated preference namespaces.
+
+**Remaining separate QA (not covered by the 222 tests):** read-only ADB metadata / service / crash-log probes and, only with further specific permission, long ~3-hour running Class, real clock changes ±120 seconds, Doze/battery, actual audible sound, physical Home/Back/Recents/lock screen, and unexpected process death notification cleanup. The 222 green test result does not prove these scenarios. Stable 5 `stable/android-d114` checked unchanged at `34a692a98282944a76e314efcc228dac3bd072ff`; never alter this ref. Current development branch is for docs/further QA only; **no Stable 6 is authorized**.
+
+## 2026-10-26 — REAL D-114 Stage 2 CoGo JVM PASS / AndroidTest APK build PASS (device not yet run)
+
+**Evidence:** user-provided screenshot from the Samsung Code on the Go terminal after pulling the fixed D-114 UI test imports. Actual output: `:app:assembleDebugAndroidTest` and `:app:testDebugUnitTest` completed, `BUILD SUCCESSFUL in 1m`, `56 actionable tasks: 56 executed`. The script parsed actual JVM JUnit XML and printed **`D-114 JVM ACTUAL: tests=185 failures=0 errors=0 skipped=0`**. It also reported **`SOURCE AndroidTest methods=37, compiled APK NOT EXECUTED on device.`** AndroidTest APK path: `/storage/emulated/0/Download/Atelier-Time-D114-Tests.apk` (about 1.1 MB); associated manifest `/storage/emulated/0/Download/Atelier-Time-D114-QA-manifest.txt` (190 bytes), build/JVM log `/storage/emulated/0/Download/Atelier-Time-D114-JVM-build.log` (~6 KB). This is evidence of **185/185 JVM PASS and instrumentation APK BUILD PASS**, NOT evidence of 37/37 device execution or PASS.
+
+**Branch control:** source tested at development branch `android-native-kotlin-compose` commit `3e78db0d014ec79f55ad41dd07f25c982a90173b` (prior to documentation-only updates); frozen Stable 5 ref `stable/android-d114` confirmed unchanged at `34a692a98282944a76e314efcc228dac3bd072ff`. No production app APK copied/installed, no saved Classes/Sounds data reset or deleted.
+
+**STOP GATE:** Next task is AndroidTest instrumentation via Termux/ADB, but the user previously demanded **separate explicit approval before any operation that affects the installed application/phone**. Request approval before using `adb install -t -r` (test APK only) or running `am instrument`, which may restart the target process and exercise a temporary test Class/notification. Require no real Class active; never install ordinary APK, never `pm clear` or `uninstall`. After user approval, connect/verify ADB and run the approved Termux QA script, preserving its actual log and reporting honest results. This checkpoint marks Android instrumentation **PENDING**, not PASS.
+
+## 2026-10-26 — D-114 AndroidTest compilation: exact two-import fix
+
+Real CoGo compiler output from `Atelier-Time-D114-JVM-build.log` was provided by user. The only `e:` compiler diagnostics visible in the supplied screenshot are `RunEndApprovalUiTest.kt:5:33 Unresolved reference 'assertDoesNotExist'` and `RunEndApprovalUiTest.kt:6:33 Unresolved reference 'assertExists'`. Older lines marked `w:` are warnings, not the cause of this compilation failure. **Compilation FAIL remains an observed result; no new compile/AndroidTest PASS claim.**
+
+On development branch `android-native-kotlin-compose`, commit `5c86956d7feec21aa0f698720131d5b8e0df90ba` removed only the two erroneous top-level imports. The existing Compose `SemanticsNodeInteraction.assertDoesNotExist()` / `assertExists()` method calls and all test assertions remain intact. No production Kotlin, saved presets, Sounds, app version, installed APK or Stable 5 files changed.
+
+**Next safe gate:** in CoGo `cd /storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native`, then `git pull --ff-only` and `bash tools/build_all_qa_on_phone.sh` (JVM test + AndroidTest APK build only). Review full actual `D-114 JVM ACTUAL` and Gradle output before claiming PASS; isolate additional compiler errors if any. Device install/instrumentation still requires separate explicit permission.
+
+## 2026-10-26 — Actual D-114 CoGo compilation attempt failed (user screenshot)
+
+The user reran `bash tools/build_all_qa_on_phone.sh` after the unrelated `.cg/` guard correction. Screenshot of real Code on the Go terminal shows `Execution failed for task ':app:compileDebugAndroidTestKotlin'`, Kotlin compiler reported `Compilation error. See log for more details`, and **`BUILD FAILED in 47s`**, `48 actionable tasks: 48 executed`. This is **AndroidTest Kotlin compilation FAIL**, not an Android instrumentation execution result. **Do not classify the overall build, JVM suite, or AndroidTest as PASS without separately inspecting actual JUnit XML.** Detailed compiler errors are above the photographed screen area and are not yet available.
+
+The build script piped output to `/storage/emulated/0/Download/Atelier-Time-D114-JVM-build.log`. Next action is to retrieve only compiler `e:` / `error:` lines from the existing log (no rebuild, no phone install, no app data mutation), correct exact offending tests on development branch, then rerun the safe CoGo gate. Stable 5 stays frozen.
+
+## 2026-10-26 — Stage 2 CoGo guard corrected for an unrelated helper directory
+
+User ran `git pull --ff-only` in CoGo and provided a screenshot confirming the **fast-forward completed** to `bc5114b`. The next `bash tools/build_all_qa_on_phone.sh` invocation stopped **before Gradle** at `ERROR: working tree has local changes`. The requested `git status --short` showed only `?? ../../.cg/` — an unrelated untracked helper directory; the screenshot shows **no tracked file modifications**. This is a **QA script preflight false positive**, not a JVM or instrumentation failure.
+
+Fix committed to the development branch only: `android-native/tools/build_all_qa_on_phone.sh` now checks tracked file modifications across the checkout and untracked app source/test/tool files under `app/src` and `tools`, without blocking on unrelated untracked IDE/helper folders such as `../../.cg/`. **Do not delete or reset the `.cg/` directory**. Stable 5 is not changed. GitHub commit `7fedf4b90e89a2b2b31de0d1aff565ca9d015921`.
+
+Next in **Code on the Go** (safe source/test build only):
+```bash
+cd /storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native
+git pull --ff-only
+bash tools/build_all_qa_on_phone.sh
+```
+Await the actual Gradle/JVM and AndroidTest APK build results. **No D-114 JVM, AndroidTest compilation, or device instrumentation PASS has been demonstrated in this stage.** Device installation/instrumentation remains behind a separate user approval checkpoint.
+
+## 2026-10-25 — D-114 Stage 2 approved / source audit and safe QA preparation
+
+User approved Stage 2 after the mandatory Stable 5 handoff. **A second permission checkpoint is mandatory for installed-app/device operations.** Stable 5 ref `stable/android-d114` confirmed unchanged at `34a692a98282944a76e314efcc228dac3bd072ff`; changes only in `android-native-kotlin-compose`.
+
+**Source-only work completed:** replaced obsolete D-111 typed HH:mm Compose test interactions with D-114 live/wheel/tap/blocked-swipe/red-reason/green-reset, Confirm/Cancel and isolated persisted-Class assertions; expanded UI suite 7→12. Added six deterministic JVM finish-clock/boundary cases. Full current source counts: **185 JVM @Test across 18 files; 37 device @Test across 5 files; @Ignore=0**. Migrated `build_all_qa_on_phone.sh` to CoGo all-JVM + test-only APK/manifest with digest; migrated `termux_run_all_device_qa.sh` to strict installed D-114 preflight + test-only install + real instrumentation log, guarded with explicit no-active-Class confirmation. Retired `qa_build_d111.sh` and `qa_device_d111.sh` as fail-closed D-111 paths. No Classes/Sounds deletion, no regular APK installation.
+
+**Not yet executed:** CoGo Gradle JVM task, AndroidTest APK build, phone test package install, on-device JUnit instrumentation, ADB read-only probes. All D-114 automated outcomes **PENDING**, no fabricated PASS. Old D-110 `OK (14 tests)` remains historical only. Full runbook & future actual result ledger: [ANDROID_D114_STAGE2_QA_2026_10_25.md](ANDROID_D114_STAGE2_QA_2026_10_25.md).
+
 # Work log — every iteration and approval checkpoint
 
-## 2026-10-28 — Stable 9 / D-126 project closure and main documentation synchronization
+## 2026-10-25 — STABLE 5 APPROVED AND FROZEN: D-114
 
-Verified built D-126 main APK on Samsung: 72/72 Gradle tasks, 243/243 JVM unit tests, both APK SHA-256 checks OK; corrected test-only Android instrumentation rerun 42/42 PASS, 21.697 seconds. User confirmed all prior Saved Classes and Sound choices preserved and designated **Stable 9** as the completed-test checkpoint, no new app version or install. Frozen `stable/android-d126-qa9-tests-complete`; previous QA8 historical checkpoints preserved. This entry updates the **main documentation view only**, mirrors canonical HANDOFF/ROADMAP/TEST_PLAN/DECISIONS from the latest development snapshot, adds release/diagnostic documentation, and retains earlier historical entries. [Current status index](CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md).
+**User decision:** After personally testing D-114 on their Android phone, user explicitly stated: "הכל עובד , זאת גרסה יציבה 5" (everything works; this is Stable 5). This supersedes the previous Stage 1 acceptance-only status. The user accepted the complete D-114 Run finish-time feature, including live calculated end, user opt-in hours/minutes wheels, hard red-boundary stop and explanation when attempted selection is infeasible.
 
+- **Stable 5 source snapshot:** `stable/android-d114` at exact commit **`34a692a98282944a76e314efcc228dac3bd072ff`**, created from the development branch HEAD *before* this documentation update. Readback from GitHub confirms the branch ref, `versionName = "D-114"` and `versionCode = 9`. **Treat this branch and commit as immutable; never develop on it, force-push it or merge further changes into it.**
+- **Stable 4 remains untouched:** `stable/android-d108` is still at **`02beb0af46719301cccb72ad4698a337ab416d73`**. No Play Store, production distribution or signing is implied by Stable 5.
+- The user previously supplied **D-114 on-phone Gradle `:app:assembleDebug` BUILD SUCCESSFUL in 11s**, resulting in a 12M debug APK in Downloads. User confirms installed application works. **This is a user-accepted product milestone, NOT a claim that all D-114 automated tests have run.** A D-110 baseline AndroidTest run yielded `OK (14 tests)`, but this cannot be attributed to D-114.
+- **Strict stage gate:** Stage 1 feature implementation and personal device validation are completed and accepted. User earlier instructed "between the stages request approval"; therefore **Stage 2 — upgrade and execute ALL feasible automated tests (JVM + AndroidTest Compose UI/device + safe ADB checks) — remains PENDING EXPLICIT USER APPROVAL.** Do not start tests or mutate source before asking. Existing `RunEndApprovalUiTest.kt` still references retired typed HH:mm controls and will need migration to D-114 wheel tags on the **development branch only** when authorized. Tests must use isolated preferences and avoid clearing saved Classes/Sounds.
+- Future work stays on `android-native-kotlin-compose`; fork/branch from Stable 5 only for emergency patches, never edit the frozen snapshot. Handoff and current-status documentation must distinguish the accepted Stable 5 from the not-yet-run D-114 automated QA.
+
+## 2026-10-25 — D-114 STAGE 1 USER ACCEPTED; Stage 2 requires explicit approval
+
+- User explicitly confirmed **"הכל עובד"** (everything works) after building D-114 and receiving installation/verification instructions. Treat this as user acceptance of the D-114 Run end-time UX, including live Calculated finish, explicit opt-in hour/minute wheels, hard stop at first infeasible red boundary, explanatory red feedback when a blocked selection is attempted, ability to return to green and reset, and pre-Run confirmation. Do not assert independent instrumentation proof from this manual approval.
+- D-114 `versionCode=9`/`versionName=D-114` source on `android-native-kotlin-compose` is the approved development iteration. Last observed phone build: `:app:assembleDebug` BUILD SUCCESSFUL in 11s, APK copied to Downloads. User's "everything works" after guided installation supports acceptance on phone; an `adb install` Success screenshot for D-114 was not separately supplied.
+- **STOP GATE:** User previously specified **"בין שלבים תבקש אישור להמשיך"**: ask for EXPLICIT permission before starting Stage 2 comprehensive automation, including changing old Compose instrumentation tests, Gradle build of test APKs, and running device tests. Do not start Stage 2 until user approves.
+- Proposed Stage 2 scope once approved: reconcile stale `RunEndApprovalUiTest` typed HH:mm test tags against wheel/blocked-feedback UI; add deterministic domain/JVM tests for feasibility boundaries, live calculated finish and red-stop rule; execute complete :app:testDebugUnitTest + :app:assembleDebugAndroidTest, update-install test-only APK and run complete AndroidJUnitRunner on Samsung via Termux ADB, then safe notification/lifecycle probes with explicit protections for real saved Classes/Sounds. Previously observed D-110 14/14 device PASS is baseline, NOT proof D-114 passed.
+- Frozen Stable 4 `stable/android-d108` untouched; preserve installed app settings and saved Classes, no `adb shell pm clear`/uninstall of app. D-114 is not automatically declared Stable 5.
+
+## 2026-10-25 — D-114 phone build PASS; on-device install/feedback verification still pending
+
+- User screenshot proves Code on the Go `:app:assembleDebug` **BUILD SUCCESSFUL in 11s**, 36 actionable tasks (10 executed / 26 up-to-date).
+- `/storage/emulated/0/Download/Atelier-Time-D114.apk` exists, **12M**, dated October 25 21:26 local.
+- Kotlin reported non-fatal warning `SessionEditorScreen.kt:678:29 Elvis operator (?:) always returns the left operand of non-nullable type String`; compilation/packaging still succeeded.
+- **Stage 1 remains open:** user must update-install with `adb install -r ~/storage/downloads/Atelier-Time-D114.apk`, and confirm that attempting to swipe/tap a blocked red time still stops at the last green selection **and displays the new immediate explanatory reason**, then that moving to a valid green value clears the message. Run calculated finish should still tick; picker hidden until explicitly chosen. App data to be preserved.
+- **Stage 2 comprehensive automated tests are NOT RUN/APPROVED for D-114 yet**. Prior D-110 instrumentation 14/14 PASS does not apply to D-114. Stable 4 D-108 remains frozen.
+
+## 2026-10-25 — D-114 Stage 1: explain RED wheel blocking (source updated; phone QA pending)
+
+- User confirmed **D-113 runs correctly** except at a blocked red finish boundary there is no explanation for why the wheel stopped. Do not repeat prior feature redesign: D-113 live calculated finish, on-demand wheels and hard red boundary remain accepted.
+- `EndClockWheel.kt` now invokes `onBlocked(candidate)` both for blocked swipe and blocked tap on a red neighboring value, while still refusing to move into red; rapid drags check each step and never jump across invalid ranges.
+- `SessionEditorScreen.kt` uses `RunEndTimePlanner.plan` to generate the exact rejection reason for the attempted candidate hour/minute, and immediately renders a **red explanatory message** under the wheel (`run_end_blocked_reason`) with attempted HH:mm and corrective instruction. A permitted green move, `Use calculated finish`, or a newly opened Run clears the message. Calculated finish keeps moving while the dialog is open, wheels remain hidden until `Change finish time`, and `Confirm & Run` still validates/blocks impossible endings.
+- Gradle version advanced to `versionName="D-114"`, `versionCode=9` on **android-native-kotlin-compose** development branch only. GitHub source readback verifies both blocked callbacks, message display, clearing logic and version. Frozen `stable/android-d108` unaffected; saved Class and Sounds persistence code untouched.
+- **Status: source change completed; D-114 on-device build, APK install and user acceptance NOT YET VERIFIED.** User requested approval checkpoint between Stage 1 finish UX and Stage 2 all automated QA; do not run tests until user explicitly approves. Next phone command: git pull --ff-only; use CoGo Gradle `:app:assembleDebug` (no tests), copy APK to Downloads/Atelier-Time-D114.apk, update-install with Termux ADB `adb install -r`. Test red boundary swipe/tap gives visible explanation and other accepted features remain.
+
+## 2026-10-25 — D-113 phone assembleDebug PASS, installation pending
+
+- User-provided Code on the Go screenshot shows **BUILD SUCCESSFUL in 12s**, **36 actionable tasks: 10 executed / 26 up-to-date** for `:app:assembleDebug`.
+- Generated `/storage/emulated/0/Download/Atelier-Time-D113.apk` exists and is **12M**, dated Oct 25 21:09 local.
+- Nonfatal warning `SessionEditorScreen.kt:677:29 Elvis operator (?:) always returns the left operand of non-nullable type String` was displayed; package build succeeded.
+- User has **not yet shown installation/visual acceptance of D-113**. Next: `adb install -r ~/storage/downloads/Atelier-Time-D113.apk` via connected Termux ADB, then check wheels hidden before `Change finish time`, hard stop at first infeasible red adjacent value, reverse into green, no run without approval, and saved Classes/Sounds preserved. **Stage 2 comprehensive automated testing remains on hold until explicit user approval.** Stable D-108 frozen.
+
+## 2026-10-25 — D-113 Stage 1 UX refinement: stopped-at-red wheel and on-demand picker
+
+**User correction to D-112 (user says all else works great):** (1) An hour/minute wheel must hard-stop at the first infeasible RED neighboring value and NOT be allowed to scroll/choose deeper into red; user can reverse toward feasible GREEN. (2) Hide both wheels initially: show them ONLY after explicit Change finish time selection. Calculated finish stays live while deciding. No comprehensive automated QA until Stage 1 approval.
+
+**Code now in development branch, versionCode=8 / versionName=D-113:**
+- `EndClockWheel.kt`: independent hour/minute swipe wheels with `canSelect(candidate)` checked for EACH adjacent step, including fast drags (no skipping invalid boundary). Next/previous candidate shown red when blocked, green when feasible; invalid red step is visible but not selected. `RunEndTimePlanner.plan` remains authority; no mutation of saved Classes.
+- `SessionEditorScreen.kt`: no wheels on opening `Run` approval. `Change finish time` (testTag `run_end_change_finish`) reveals them. Important follow-up safeguard: revealing the picker does NOT freeze/truncate the continuously calculated finish; custom absolute HH:mm becomes active only on the first accepted wheel movement. `Use calculated finish` resets to live default and hides wheels. `Confirm & Run` still validates before activation; explicit default recomputes at actual start. No direct unapproved Start shortcut.
+- `app/build.gradle.kts`: versionCode=8 and versionName=D-113. GitHub source readback checked the wheel gating, canSelect bindings, on-demand visibility and version; **no D-113 CoGo build/APK installation, real-device screen acceptance or Stage 2 QA run has yet been observed.**
+
+**Next Stage 1 on user's Samsung phone:** In Code on the Go, git pull --ff-only, run only `:app:assembleDebug` using established Gradle/AAPT2, copy to Download/Atelier-Time-D113.apk, update-install with `adb install -r` from Termux (preserve saved Classes/Sounds), verify the two UX requirements, then request user's explicit acceptance of Stage 1. D-108 Stable 4 frozen. Existing RunEndApprovalUiTest targets old text-input tags and must be revised only in Stage 2 after approval; previous 14/14 Android device PASS pertained to D-110, not D-113.
+
+## 2026-10-25 — D-113: requested finish-wheel UX refinement (Stage 1, source only)
+
+**User phone confirmation for D-112:** 'הכל עובד מצויין' ('everything works great') except the two specified UI refinements. This is acceptance of existing D-112 behavior other than the new wheel requirement; do not treat D-113 as tested.
+
+**New exact requirements:** (1) Hour and minute wheels should be displayed **ONLY AFTER** the user elects to change/update the live Calculated finish; accepting default finish uses no wheel. (2) At every boundary where a candidate hour/minute would make the Class end infeasible, the **neighboring candidate is displayed RED but may not be scrolled/tapped into**; the wheel hard-stops at the last feasible GREEN selection and allows reversing into green values. The previous behavior that let users select red values (only then disabling Run) is insufficient.
+
+**Implemented on development branch:**
+- `SessionEditorScreen.kt`: The confirmation dialog initially displays continuously updated Calculated finish plus a `Change finish time` button (test tag `run_end_change_finish`) but no wheel. Pressing the button copies the live suggested HH:mm into the chosen custom time, then reveals the two wheels; `Use calculated finish` resets/hides them. Each prospective neighboring hour/minute is evaluated by the unchanged `RunEndTimePlanner.plan` against the same Class/session/actual current time and other selected wheel. `Confirm & Run` remains disabled if the overall selected finish becomes infeasible (including if wall time advances) and continues to revalidate at actual start.
+- `EndClockWheel.kt`: New `canSelect(Int): Boolean` gate checks EVERY adjacent step in a swipe, including fast multi-step swipes, rather than jumping over red candidates. The first invalid candidate stops traversal, is shown RED as an adjacent number, cannot be selected even by tapping, and user can swipe/tap back into feasible GREEN candidates. The selected number displays green when valid, red if a previously selected fixed time becomes invalid as the clock advances.
+- `app/build.gradle.kts`: bumped `versionCode=8`, `versionName="D-113"`. Frozen Stable 4 D-108 untouched. User data/saved Classes/Sounds unchanged by source edits; no Android functional/domain/notification/sound logic modified.
+
+**Verification:** GitHub source update only; **D-113 has NOT been built on phone, installed, or verified by user.** User should pull development branch in existing CoGo checkout, run `:app:assembleDebug` ONLY, copy APK as `Atelier-Time-D113.apk`, update-install via Termux `adb install -r`, and inspect default/no wheels, changed/wheels, red neighbor hard-stop via swipe and tap, backwards into green, and continuously updating Calculated finish. DO NOT start Stage 2 exhaustive automated tests without explicit approval after Stage 1 device acceptance. Previously authored Compose instrumentation test still references the OLD typed HH:mm UI; it must be replaced during Stage 2 preparation.
+
+## 2026-10-25 — D-112 phone APK build PASSED; install and UX acceptance pending
+
+- User screenshot from Code on the Go confirms `app:assembleDebug` **BUILD SUCCESSFUL in 13s**, 36 actionable tasks (12 executed, 24 up-to-date).
+- New `/storage/emulated/0/Download/Atelier-Time-D112.apk` exists, **12M**, screenshot timestamp Oct 25 20:53.
+- Non-blocking Kotlin warning at `SessionEditorScreen.kt:676:29` about redundant Elvis operator; build and packaging succeed.
+- Stage 1 now **source implemented + build PASS**. **Update-install is not yet verified**, and actual UI live clock + green/red independent hour/minute wheels are not yet phone verified.
+- Next: from Termux `adb install -r ~/storage/downloads/Atelier-Time-D112.apk`, after closing any live Class; expect `Success`. Verify About D-112; saved Classes/Sounds remain; live Calculated finish increases while dialog open; both wheels change and feasible/infeasible selection changes green/red with Confirm disabled for red; reset calculated finish and cancel. Ask for user approval before stage 2 comprehensive tests.
+- D-108 Stable 4 frozen; no Stage 2 automated tests requested or run for D-112.
+
+## 2026-10-25 — D-112: live calculated finish and swipe hour/minute picker (STAGE 1 ONLY)
+
+**User's clarified requirement:** In the pre-Run approval dialog, `Calculated finish` must keep advancing with the wall clock until the user confirms, rather than stay frozen at the original Run tap. Replace awkward typed HH:mm plus override switch with visible independently scrollable hour and minute wheels. A feasible selection shows GREEN; an infeasible one shows RED and blocks `Confirm & Run` until corrected back to a feasible (green) time. Keep mandatory explicit approval and compensation only through the last two regular Sessions.
+
+**Implemented in development branch:**
+- `SessionEditorScreen.kt`: `PendingRunApproval` no longer snapshots a finish time. The dialog recomputes the calculated finish from `wallClockMillis` (root updates every 200ms), shows seconds (`dd/MM HH:mm:ss`), and uses the updated actual-clock finish when confirming the calculated default. Once either wheel is moved, the chosen clock (HH:mm) remains fixed, while the calculated value still advances independently. The selected finish date is resolved by `RunEndTimePlanner.nextOccurrence` and previewed. `RunEndTimePlanner.plan` is evaluated live for green/red coloring and error messages; Confirm & Run has `enabled = isValid` and revalidates against `System.currentTimeMillis()` immediately before any preset activation or timer start. 'Use calculated finish' resets wheels/default.
+- Added `android-native/app/src/main/java/com/ateliertime/android/EndClockWheel.kt`: two simple independently vertically swipeable numeric wheels (hours 00–23, minutes 00–59), with adjacent tappable previous/next values, stable pointer gesture and accessibility test tags. Parent Surface tint changes green/red according to feasibility.
+- `app/build.gradle.kts` bumped monotonically to `versionCode=7`, `versionName=D-112` so installed D-111 (or D-110) is clearly distinguished from updated source. All changes confined to development branch. Frozen Stable 4 D-108 untouched; no user Classes/Sounds data altered by GitHub edits.
+- Existing backend `FinalPairCompensation`, `RunEndTimePlanner` 1-minute minimums, schedule invariants, monotonic physical deadline and no auto-resume on app closure/reboot remain unchanged. Unfeasible wheel values remain selectable only for correction; RUN is always disabled while red.
+
+**Verification gate:** GitHub write/readback confirms source and version; **no CoGo compiler/device build, install, or UI verification has yet run for D-112**. The previous D-111 assembleDebug PASS was for the *old* typed-time dialog. User must pull, run `:app:assembleDebug` only, copy APK to Downloads, update-install, verify live calculated finish/scroll hours/scroll minutes/green-red block/reset, then approve Stage 1. Do NOT start Stage 2 automated tests before explicit approval.
+
+**Stage 2 pending on approval:** Existing `RunEndApprovalUiTest.kt` targets old text input test tags `run_end_override` / `run_end_clock` and MUST be updated to the wheel tags (`run_end_hour`, `run_end_minute`, `run_end_confirm`, `run_end_invalid`, `run_end_reset_calculated`, `run_end_calculated`) before instrumented tests run. Add cases for live tick, green/red transition, invalid disabled, reset and user-confirmed deadline preservation. Then run all feasible JVM, device and ADB suites, preserving isolated data and D-108 Stable 4.
+
+## 2026-10-25 — D-111 first phone APK build PASS (Stage 1 only)
+
+- User supplied CoGo screenshot proving `app:assembleDebug` **BUILD SUCCESSFUL in 54s**, **36 actionable tasks (10 executed / 26 up-to-date)** on phone, and `/storage/emulated/0/Download/Atelier-Time-D111.apk` exists, size **12M**, dated Oct 25 20:31 local.
+- Kotlin compile warning `SessionEditorScreen.kt:682:29 Elvis operator (?:) always returns the left operand of non-nullable type String` is non-fatal; compilation/package completed.
+- Stage 1 production source is already updated with Run → calculated Class finish → explicit approve or edit HH:mm → final-two-Session compensation feasibility, and removed legacy timer Start bypass. **D-111 PHONE BUILD PASS; D-111 UPDATE-INSTALL + MANUAL FEATURE ACCEPTANCE NOT YET VERIFIED.** Only `:app:assembleDebug` was requested; no new automated tests executed. Historic D-110 device instrumentation **14/14 PASS** pertains to D-110, not D-111.
+- Next request user to install the D-111 APK as an **update** preserving user app data, then manually confirm About D-111 / saved Classes/Sounds / Run finish approval and corrected-invalid-input behavior. Explicit user approval needed before Stage 2 exhaustive automation. Frozen D-108 Stable 4 unaffected.
+
+## 2026-10-25 — Stage 1 D-111 Run end-time feature: source checkpoint; approval gate
+
+**User-requested ordering:** Stage 1 implement/repair end-time feature, obtain user approval; Stage 2 only AFTER that approval run every feasible automated test.
+
+- Preexisting development branch implementation already calculates a suggested absolute Class finish before Run, shows a confirm-or-edit dialog, accepts earlier/equal/later fixed end time (not optional/unlimited), previews adjustments restricted to the final two regular Sessions, blocks infeasible HH:mm times with a corrective error, and reevaluates at actual start. Saved presets never change. The selected finish uses the monotonic physical deadline, and original pause/Next/restart routines compensate in the last eligible Session(s). Single-Session legacy Classes can use only their unaltered default duration.
+- **Actual gap corrected now:** removed the old direct Start action and button from SessionEditorScreen.kt and SessionTimerScreen.kt. It could bypass finish-time confirmation while the Timer was READY. The READY UI now displays 'Starting approved Class...' only; new runs must pass saved-library Run -> Confirm Class finish time.
+- The existing Gradle file is already versionCode=6 and versionName=D-111. GitHub source readback verified no dangling onStart parameter/callback and Run approval dialog remains present.
+- **Stage 1: SOURCE READY; not compiled, installed, or accepted on the phone.** Installed user-approved D-110 remains unchanged; frozen Stable 4 D-108 remains untouched. Do not claim a new APK or a test PASS.
+- **Stage 1 next on phone:** git pull --ff-only in the existing CoGo checkout, assemble the debug APK only (:app:assembleDebug), copy it to Downloads and update-install without wiping existing saved Classes or Sounds. User validates the before-Run dialog and approves Stage 1. No tests before user confirms next stage.
+- Already-authored but not yet executed for D-111: RunEndTimePlannerTest, RunEndTimePropertyTest (JVM), RunEndTimeDeviceTest and RunEndApprovalUiTest (device), plus all existing unit and instrumentation suites. The earlier D-110 device result 14/14 PASS is historical baseline and must not be misrepresented as D-111 verification.
+
+## 2026-10-25 — D-111: confirmed-finish Run and full automated QA prepared (DEVICE GATES PENDING)
+
+- **Feature-first user direction:** on Run show calculated finish, require explicit approval or HH:mm override (earlier/later), and use signed changes to only the final two work Sessions. Block infeasible early targets (each final Session must retain >=1 minute), unrealistic late targets (2× original Class maximum) and invalid clock inputs with corrective feedback. The selected Class finish is a physical monotonic deadline. During pauses after the first final Session begins, only the unstarted last Session can be changed; completed phases remain immutable. Legacy one-Session default Run tolerates UI confirmation/start latency without enabling arbitrary custom adjustments.
+- **Code:** D-111 `versionName=D-111`, `versionCode=6` on `android-native-kotlin-compose`. Changes to `RunEndTimePlanner.kt`, `MonotonicSessionTimer.kt`, `SessionEditorScreen.kt`; an obsolete test expectation was corrected to last-only compensation. Frozen D-108 Stable 4 not changed.
+- **Coverage ready, NOT RUN:** 179 JVM `@Test` methods and 32 Android `@Test` methods (7 isolated Compose UI + 11 new finish/device + 7 preset persistence + 6 sound preferences + 1 silent AudioTrack). This inventory is source-audited, not a PASS claim. D-110's previous 14/14 on-device PASS remains the older baseline.
+- **Safe 2-stage runners committed:** `android-native/tools/build_all_qa_on_phone.sh` (CoGo Gradle JVM tests + app/AndroidTest APKs, copy to Downloads), then `android-native/tools/termux_run_all_device_qa.sh` (ADB in-place update to D-111, assert installed version, install test APK, run AndroidJUnitRunner and require `OK (32 tests)`, save output locally). Only execute with NO active Class. No `uninstall`, `pm clear`, data resets, or modifications to stable refs.
+- **Next action:** user runs `cd /storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native && git pull --ff-only && bash tools/build_all_qa_on_phone.sh` in Code on the Go, then `bash ~/storage/downloads/Atelier-Time-D111-QA.sh` in Termux if gate 1 passes. **Do not call D-111 built/tested/installed until device output confirms it.**
+- **Detailed handoff + acceptance gates:** [D-111 approved finish and automated QA](ANDROID_D111_APPROVED_FINISH_AND_AUTO_QA.md). Long actual 3-hour Doze/audio, OS process reclaim/Back/Recents notification checks and real ±120s wall-clock QA remain explicitly separate device follow-ups; no false PASS claims.
+
+## 2026-10-25 — D-111 Run finish-clock feature IMPLEMENTED IN SOURCE; all QA PENDING
+
+User superseded prior deadline discussion: **Every Run must first display its calculated finish and request confirmation or an alternate HH:mm end clock.** The accepted finish can be earlier, unchanged, or later, and becomes the real monotonic Class finish target. Only the final two regular Sessions change length under the existing split rules; other phases and the saved plan stay unchanged. A mathematically impossible edit or malformed clock keeps Run blocked with a correctable dialog alert. HH:mm resolves to next occurrence today/tomorrow; modal shows the date and exact final-pair lengths. Cancel must not start or activate the saved Class. Legacy Classes with no final pair can still Run unmodified at their original end.
+
+**Development D-111 (versionCode 6)** committed to `android-native-kotlin-compose`, not a Stable 5 release: `RunEndTimePlanner.kt`, `MonotonicSessionTimer.kt`, `SessionEditorScreen.kt`, `PresetLibrarySection.kt`, `SessionTimerScreen.kt` and tests. Automated suite sources cover previous JVM tests, new deterministic Run-clock tests, **447 property cases**, state transition tests, prior 14 physical Android methods, 7 new Android tests, and 3 isolated-storage Compose UI tests: **24 Android instrumentation methods expected**. Code on the Go one-shot build/test script: `android-native/tools/qa_build_d111.sh`. Termux one-shot install + connected Android QA script: `android-native/tools/qa_device_d111.sh --run`. They require working ADB, the user's phone and explicit execution; **not run yet**. Do **not** treat past D-110 `OK (14 tests)` as D-111 PASS. D-108 Stable 4 frozen unchanged; current D-110 remains installed until user runs D-111 device script. Follow [D-111 feature and QA handoff](ANDROID_D111_RUN_FINISH_QA.md). Real 3h Doze/audio and unexpected OS reclaim behavior are separate QA checks, not silently marked PASS.
+
+## 2026-10-25 — D-110 Stage 4 Android instrumentation: 14/14 DEVICE PASS
+
+**DEVICE RESULT VERIFIED FROM USER TERMUX SCREENSHOT (2026-10-25, ~18:08 Israel):** On Samsung Galaxy SM-S921B (ADB transport `10.0.0.6:34545`, `device`), the previously assembled 1.1 MB AndroidTest APK was installed successfully (`adb install -t -r ~/storage/downloads/Atelier-Time-D110-Tests.apk` → `Success`). The user executed:
+
+```bash
+adb shell am instrument -w com.ateliertime.android.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+**Actual AndroidJUnitRunner output:**
+
+```text
+com.ateliertime.android.AndroidPresetStoreTest:.......
+com.ateliertime.android.MelodyPreferencesTest:......
+com.ateliertime.android.StaticAudioTrackLifecycleTest:.
+
+Time: 0.295
+
+OK (14 tests)
+```
+
+**Acceptance:** Stage 4 connected Android instrumentation **PASS: 14 / 14**, zero observed failures (7 preset storage, 6 melody preferences, 1 silent AudioTrack lifecycle); actual phone execution, not merely compilation. No app source edit, no replacement of target D-110 regular APK, no `pm clear` / `adb uninstall` or intentional modification of real saved Classes/Sound; tests used isolated randomized preference namespaces. Stable 4 D-108 frozen and D-110 remains development/approved-on-phone, **not** implicitly promoted to Stable 5. **Out of scope and still not device-verified:** active physical Class ±120 s wall-clock adjustment, full 3-hour endurance/Doze/audio, and unexpected OS process-reclaim notification cleanup; the approved user-closure/reboot semantics remain unchanged. After QA, turn off Developer options → Wireless debugging; users can reopen Atelier Time normally. Earlier pre-PASS entries in these docs are chronological historical progress, superseded by this result.
+
+## Android instrumentation APK in Downloads — 2026-10-25
+
+- 2026-10-25 — **Test APK copied to shared Downloads, user screenshot PASS.** In Code on the Go terminal under `/storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native`, the user ran `APK="$(find app/build/outputs/apk/androidTest -type f -name '*.apk' -print -quit)"`, then guarded `cp "$APK" /storage/emulated/0/Download/Atelier-Time-D110-Tests.apk`. The resulting `ls -lh` shows a **1.1 MB APK at** `/storage/emulated/0/Download/Atelier-Time-D110-Tests.apk`, dated Oct 25 18:03. The copy step passed without rebuilding. **Next:** in Termux grant shared-storage access via `termux-setup-storage`, then `adb install -t -r ~/storage/downloads/Atelier-Time-D110-Tests.apk`. Android ADB transport confirmed via `adb devices -l` on device `10.0.0.6:34545` Samsung SM-S921B. Installing just the AndroidTest APK must not uninstall or clear target app data; make sure no Class active before instrumenting. **Install and all 14 Android instrumentation tests remain NOT YET VERIFIED**.
+
+## 2026-10-25 — ADB device transport verified on Samsung SM-S921B
+
+- User supplied verbatim `adb devices -l` output: `10.0.0.6:34545         device product:e1sxeea model:SM_S921B device:e1s transport_id:1`. **WIRELESS ADB CONNECTED, AUTHORIZED (PASS)**, after successful 6-digit pairing via external Wi-Fi IP. No need to pair again for this session.
+- Next locate previously built `androidTest` APK in CoGo checkout, copy test-only APK to Downloads (no rebuild and do not touch app/data), then install test-only APK and execute instrumentation. **14 device tests still NOT RUN**.
+
+## 2026-10-25 — Android instrumentation transport: Termux ADB verified
+
+- 2026-10-25 — **Termux ADB tool successfully installed, verified by user screenshots.** `pkg install -y android-tools && adb version` installed `android-tools 37.0.0p1-3` (plus `fmt` and `libprotobuf`), and reported `Android Debug Bridge version 1.0.41`, package version `37.0.0p1-android-tools`, binary `/data/data/com.termux/files/usr/bin/adb`, Android ARM64. Earlier `cannot connect to daemon at tcp:5037: Connection refused` appeared during setup, but `adb version` worked. **ADB server startup, Wireless Debugging pairing, device connection, and instrumentation execution NOT YET VERIFIED**; no test APK installed by this action. Next safe step: `adb start-server && adb devices -l`, then pair with Settings > Developer options > Wireless debugging on the same device, avoiding sharing one-time pairing code. Do not change CoGo SDK or installed D-110, and do not run tests during a real Class.
+
+## 2026-10-25 — Stage 4 ADB check and safe alternative
+
+- The user executed a read-only check in Code on the Go terminal, from the existing `Atelier-Time/android-native` checkout: `find "$HOME" "$ANDROID_HOME" -type f -name adb -size +0c 2>/dev/null | head -n 10`. **Output: no nonempty ADB candidates** under either search root (not a system-wide filesystem proof).
+- `ls -l "$ANDROID_HOME/platform-tools/adb"` shows a **0-byte regular file** with mode `-rw-------`; this is not an executable binary. Do **not** apply chmod or overwrite the CoGo SDK.
+- The prior screenshot proved `:app:assembleDebugAndroidTest` **BUILD SUCCESSFUL in 34s**, 50 tasks; this is a compilation/package result only. **None of the 14 Android instrumentation tests has run; no instrumented-test PASS has been claimed**.
+- Current authoritative Android guidance runs instrumentation through a connected target (Gradle `connectedDebugAndroidTest` or `adb shell am instrument -w`). Official CoGo debugger documentation describes a debugger pairing workflow but **does not demonstrate an instrumentation launcher for external projects**. Do not conflate debugger pairing with AndroidJUnitRunner execution.
+- **Non-invasive supported option:** use a **separate official Termux installation** (F-Droid source) with the `android-tools` package, pair its ADB client via Android's Wireless debugging on the **same phone** (Android 11+ and Wi-Fi), then use ADB to install the already-built **test APK only** and run its JUnit instrumentation runner, preserving the existing D-110 app and CoGo managed SDK. This path is reported as a documented option, **not yet installed, paired or executed**. The user should not post transient wireless-pairing codes/screenshots with pairing PIN. Avoid untrusted adb binaries and do not alter developer security settings beyond user-approved wireless debugging; switch it off afterward.
+- **User safety gate:** perform only while Atelier Time has no running Class. The 7 preset and 6 melody tests use separate random test preference namespaces, but a connected instrumentation run still briefly stops/restarts the application process; never uninstall or clear actual user data.
+- Other standard option if the separate-phone client is unwanted: a trusted PC with official Android SDK Platform Tools connected to the phone. This is optional, not a mandate to change the approved phone-first development setup.
+
+References: https://developer.android.com/studio/test/command-line ; https://developer.android.com/tools/adb ; https://github.com/termux/termux-app ; https://f-droid.org/packages/com.termux/ ; https://appdevforall.org/code-on-the-go-release-notes-26-40/
+
+## 2026-10-25 — Stage 4 AndroidTest APK compilation PASS (device screenshot)
+
+- **2026-10-25 — Stage 4 AndroidTest APK COMPILE/PACKAGE PASS on user's CoGo phone (screenshot):** `:app:compileDebugAndroidTestKotlin`, `:app:packageDebugAndroidTest`, `:app:assembleDebugAndroidTest` completed, terminal shows **BUILD SUCCESSFUL in 34s; 50 actionable tasks (30 executed, 20 up-to-date)**. These Gradle tasks assemble the Android instrumentation package but DO **NOT** invoke device tests; the **14 `androidTest` source methods remain NOT RUN**. The previously observed `$ANDROID_HOME/platform-tools/adb` is a 0-byte, non-executable placeholder; `adb` not found on PATH. Before requesting `:app:connectedDebugAndroidTest`, discover a supported usable ADB/device path rather than modify CoGo SDK, add untrusted binaries, install test package by hand, or infer a PASS. No new regular app build/update, no user-data changes, D-110 still approved and D-108 Stable 4 frozen.
+
+## 2026-10-25 — User clarification closes active-run resume requirement
+
+- **USER-APPROVED INTERRUPTION RULE (2026-10-25, clarified during active Timer):** If Atelier Time is actually **closed/terminated while a Class Timer is running**, or the **phone shuts down/reboots while it runs**, that Class run ends. **On a subsequent app launch the Timer MUST NOT remain running, automatically resume, restore elapsed progress, or replay missed audio cues.** Open at the saved-Class library / idle Timer; preserved saved Classes and Sound preferences remain available. This does **NOT** change the already accepted behavior when the user merely presses Android **Home**, switches apps or **locks the screen** without terminating the app: Timer/audio/background notification continue as previously approved. Existing Back / Recents-swipe closure behavior remains frozen. Do not build persistent active-run recovery features or demand a reboot-during-run test to prove a feature the user explicitly rejects. Source audit of D-110 already found no saved active Timer state; no user-device crash or running-reboot test has been executed, and immediate cleanup of stale OS notifications after unexpected **process** death remains an independent reliability check. Prior ordinary reboot persistence of stored Classes/Sound remains PASS. Proceed to Stage 4 Android automated tests.
+
+## 2026-10-25 — QA Stage 3 priority: active Class recovery audit
+
+- **2026-10-25 — USER PRIORITY: QA Stage 3 THEN Stage 4 (D-110), NO NEW APP BUILD.** [Active-Class recovery source audit and safe phone test protocol](ANDROID_QA_RECOVERY_AND_DEVICE_TESTS_2026_10_25.md) is complete. App uses Compose `remember` for active Class, Timer and tracker; no persisted active-run checkpoint, no BOOT_COMPLETED receiver and FGS is notification-only `START_NOT_STICKY`. Therefore **resume after process death/reboot is not implemented**, and immediate notification cleanup on unexpected process death is not guaranteed (new Activity launch dismisses stale status). A **normal reboot DURING an active test Class** has **NOT** yet been checked (older reboot PASS covered Classes/Sound when no Class running). OS memory reclaim needs system-level transport and is still **BLOCKED**. **Do not mark Stage 3 as device PASS**. Once actual 3b user observation returns, Stage 4 can validate instrumentation transport; existing CoGo adb path is a 0-byte file and 14 androidTest source methods remain **UNEXECUTED**. No app code/Gradle/installed APK/Stable 4 change.
+
+## 2026-10-25 — User confirms D-110 works after update
+
+- 2026-10-25 — **D-110 USER PHONE CONFIRMATION: "הכל תקין" (everything is OK)**, reported directly in reply to instructions for opening the freshly built `Atelier-Time-D110.apk` as an **update**, checking About, and ensuring saved Classes/Sound choices survive. **Status: user-reported D-110 functional acceptance / installation workflow OK**, not independently captured screenshots of About or a database inspection. The preceding Code on the Go Gradle `:app:testDebugUnitTest :app:assembleDebug` **BUILD SUCCESSFUL in 47s**, 42 tasks; package prepared as `versionName="D-110"`, `versionCode=5`. **No explicit real-device ±120s manual/system clock correction test was reported**; therefore the targeted wall-clock correction QA remains **OPEN ON DEVICE**, although source-level Kotlin tests and virtual clock simulation passed. Full 3-hour real-device/Doze and QA-R01 connected instrumentation also remain open/blocked. **D-108 Stable 4 frozen unchanged; D-110 is not declared Stable 5, no new build or deployment performed in this documentation update.**
+
+## 2026-10-25 — D-110 real phone Gradle build and JVM tests PASS
+
+- **D-110 phone build verified from user screenshot (2026-10-25, ~16:10 local):** CoGo Gradle executed `:app:assembleDebug` and `:app:testDebugUnitTest`; terminal displayed **BUILD SUCCESSFUL in 47s**, **42 actionable tasks: 14 executed, 28 up-to-date**. The subsequent `ls -lh` confirmed a roughly **12MB** APK at `/storage/emulated/0/Download/Atelier-Time-D110.apk`. This is **REAL PHONE BUILD + JVM UNIT TEST TASK PASS**, not Android connected instrumentation. **Install/update, About version readback, preserved data and focused D-110 UI/clock QA NOT YET CONFIRMED.** No evidence of Play/signed release. D-108 Stable 4 remains frozen.
+- Next: D-110 **update-install only**, About/version confirmation, data retention, and narrowly scoped Class physical remaining/elapsed/deadline QA. No uninstall, data reset, logo release work or repetitive A/B/C/Home/Back QA.
+
+## 2026-10-25 — D-110 source correction and virtual regression gate
+
+- **D-110 / 2026-10-25 — MONOTONIC CLASS DEADLINE FIX IN SOURCE, NOT YET BUILT:** QA-R03 identified Class remaining/elapsed display drift after ±120s wall-clock correction and a more serious wall-clock-based physical Class finish check. The narrow fix uses `SystemClock.elapsedRealtime()` (already the Timer clock) for physical Class elapsed/remaining and Class deadline enforcement, retaining Clock/Start/End wall-time labels and all approved controls/cues/UI. Added 3 Kotlin JVM test methods for clock corrections, Pause/Next and fixed original deadline. Prepared next actual APK `versionName="D-110"`, `versionCode=5`. Assistant-side extracted Kotlin clock harness PASSED 7 targeted groups and a 3-hour/10,801-checkpoint simulation; **full CoGo Gradle `:app:testDebugUnitTest :app:assembleDebug`, real D-110 APK and device acceptance NOT EXECUTED**. No edit to frozen `stable/android-d108` or production user data. [Scope and execution plan](ANDROID_D110_MONOTONIC_DEADLINE.md).
+- GitHub file readbacks verified after source edits. Future acceptance requires user's Code on the Go Gradle log, update-install and focused observation only. Do not repeat accepted regular background/audio/Home/Back checks.
+
+## 2026-10-25 — QA-R03 assistant-executed virtual Kotlin stress suite
+
+- **QA-R03 2026-10-25 / ACCELERATED KOTLIN RELIABILITY TESTS — COMPLETED WITH ONE OPEN DEFECT CANDIDATE:** [Report](ANDROID_QA_R03_ACCELERATED_2026_10_25.md). In local Kotlin/JVM (extracted D-108 timing paths, not APK), 150 seeded 3h simulations / **2,483,558 virtual updates** passed exact monotonic/deadline/one C-cue expectations; 30-day sparse samples and 0ms/5,999ms/6,000ms boundary tests passed current policy. Simulating a **±120-second device wall-clock correction** left monotonic engine remaining correct but changed **Class remaining/elapsed** wall-based values by 120s; static screen-source review confirms the UI consumes these fields. This is a **simulated, source-supported display discrepancy**, not an Android phone defect confirmed in vivo. Do not modify accepted UI/timer without targeted follow-on scope. Actual three-hour device/audio/Doze gate OPEN; connected instrumentation BLOCKED; normal reboot saved-data PASS. **No APK, code or stable-ref changes.**
+- Exact local stdout and reproducible sources exported in `Atelier_Time_QA_R03_Results_and_Repro.zip` in conversation. Source-equivalent timing paths only; pause/restart/Next and any real Android behavior remain untested in this step.
+
+## 2026-10-25 — QA-R02a simulated Kotlin three-hour run; QA-R02b device endurance open
+
+- Assistant built and executed a local Kotlin/JVM harness extracting D-108 uninterrupted timer path and ClassClockTracker math; a virtual monotonic clock was independently checked against a mathematical reference timeline for 180 minutes. **This is not a full original Android APK execution or 3h physical measurement.**
+- **PASS simulated:** 54,001 ticks at 200ms (6 A / 5 B / 1 C, zero deadline discrepancy), 10,801 ticks at 1000ms (same), 9,346 deterministic jittered ticks (max intermediate cue observation delay 1845ms, final completion observed 887ms late), 7,202 ticks with simulated one-hour update inactivity (skipped cue replay suppressed, final C once).
+- No observed *calculated* Class deadline drift. Device scheduler latency and physical time accuracy, long-run Android audio, battery/Doze, process death remain OPEN.
+- No phone build/install, source code changes, user data changes, or repeated previously approved checks. Read the [detailed QA record](ANDROID_RELIABILITY_QA_POST_D108.md) for exact bounds.
+
+
+## 2026-10-25 — QA-R04 phone reboot persistence PASS (user-reported)
+
+- The user completed the previously specified reboot-retention check on the existing D-108 installation and confirmed: **"הכל נשמר לאחר ריסטארט לנייד"**.
+- **PASS — normal phone reboot preserves previously saved Classes and Sound choices.** Evidence is user's on-phone observation, not automated connected instrumentation or independently captured screenshots.
+- Scope strictly excludes active Class timer restoration after reboot, unexpected OS process kill/Doze, malformed-data recovery and versioned APK update continuity. Those gates remain open.
+- No APK build, code modification, data removal or repeated approved UI/notification/cue tests.
+- QA-R01 instrumentation remains BLOCKED by zero-byte/nonexecutable ADB SDK placeholder in CoGo. Next independent reliability focus: QA-R02 real multi-hour timing/drift and unattended boundary behavior.
+
+## 2026-10-25 — QA-R01 terminal blocker confirmed (user's second CoGo screenshot)
+
+- CoGo Git root verified at `/storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time`; local checkout at original accepted source `02beb0a`.
+- `$ANDROID_HOME/platform-tools/adb` exists as a **zero-byte**, non-executable file; `adb` is not on PATH. Connected instrumentation cannot currently be invoked through this terminal. **QA-R01 BLOCKED**, not failed; 14 source `@Test` methods remain unexecuted.
+- No changes to app code, installed APK, saved user Classes, SDKs or untracked `../../.cg/`. Subsequent independent reliability/storage QA can proceed separately; no old accepted UI/Sound/notification tests need repeating.
+
+## 2026-10-25 — Post-Android Stable 4 QA audit (documentation only; NO new APK)
+
+- Read authoritative D-109/Stable 4 handoff, stable checkpoint, updated test plan/roadmap and current Kotlin/Android test sources. Verified `android-native-kotlin-compose` was identical to `stable/android-d108` at `02beb0af` before documentation changes.
+- Inventoried **14 `@Test` methods in source** across seven isolated AndroidPresetStore tests, six isolated MelodyPreferences tests and one silent StaticAudioTrack test. No test runner or phone-connected execution was performed. This count is not a JUnit PASS count.
+- Added [post-D108 reliability gate](ANDROID_RELIABILITY_QA_POST_D108.md), synchronized authoritative Stable 4 and icon/logo docs from `main` to the native development branch, and brought current canonical project logs/status docs forward. No app Kotlin code, Gradle version, UI, sounds, user Classes, stable ref, APK, release, or approved behavior was changed.
+- **Next open task:** QA-R01, verify real on-phone CoGo connected-device instrumentation capability without building for handoff. If accessible, run and record genuine connected test results with test-only preference namespaces. Then tackle long-run/Doze/OS process-reclaim and reboot recovery as separate unverified gates. No actual device evidence is claimed.
 
 ## 2026-10-25 — D-109 Android Stable 4 explicitly approved; frozen checkpoint and new-chat handoff
 
