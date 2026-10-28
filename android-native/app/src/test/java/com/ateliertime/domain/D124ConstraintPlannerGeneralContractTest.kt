@@ -272,4 +272,21 @@ class D124ConstraintPlannerGeneralContractTest {
         assertEquals(59 * 60, more.totalSeconds)
     }
 
+    @Test fun displayReportsOneActualFinalSessionAfterLegalMerge() {
+        val rules = SessionRules(
+            id = "merge-display", name = "merged display",
+            totalSeconds = 90 * 60, summarySeconds = 5 * 60,
+            poseSeconds = 25 * 60, shortBreakSeconds = 5 * 60,
+            specialBreakSeconds = 5 * 60, specialBreakCount = 0,
+        )
+        val approved = engine.approve(engine.generate(rules),
+            acknowledgeWarnings = true)
+        val timer = MonotonicSessionTimer(approved) { 0L }
+        timer.start(initialCorrectionSeconds = 30 * 60)
+        assertEquals(listOf(25 * 60), timer.finalEndingDurations())
+        assertNull(timer.finalTwoPoseDurations())
+        assertEquals(approved.rules.summarySeconds,
+            timer.activePhasesSnapshot().last().durationSeconds)
+    }
+
 }
