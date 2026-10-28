@@ -38,14 +38,14 @@ The defect is **structural reflow**, not time-budget accounting. Do not change t
 
 ## Added automated regression cases
 
-`D123TinyClassLateNextSplitTest` adds **five** test methods:
+`D123TinyClassLateNextSplitTest` adds **eight** test methods:
 1. Four early Next events through the last planned Break create regular future Sessions+Breaks instead of one giant Session, preserving exact past and Summary.
 2. More Next events through newly inserted tail Breaks re-split an oversized future work Session while freezing observed prefix.
 3. Restart a newly nonterminal work Session, recover only from future time, preserve Class finish.
 4. Without any Next credit, attempting Restart with two minimum-length final Sessions must be rejected atomically.
 5. Repeat with 60-second Sessions and **180-second Breaks**; require splitting already on the earlier Next that reaches the last planned Break, before consuming that Break, once `P+B+60s` fits.
 
-Existing expected JVM count: **228 + 5 = 233**; this is a *count expectation*, **not a measured result**. All old D-122 tests must continue to pass.
+Existing expected JVM count: **228 + 8 = 236**; this is a *count expectation*, **not a measured result**. All old D-122 tests must continue to pass.
 
 ## Verification gates
 
@@ -59,3 +59,15 @@ Existing expected JVM count: **228 + 5 = 233**; this is a *count expectation*, *
 ## Limitations and review findings
 
 Source-only analysis predicts the mismatch and plausible repair. The exact original "strange" trace was not supplied, so the added deterministic fixture represents the user's saved Class and description. Neither local Gradle/Android build nor Samsung manual reproduction has been executed for D-123 yet. Any tests passing will establish logical invariants, but only on-phone UI testing can accept behavior.
+
+
+## D-123 QA hardening — exact extra-block threshold and Resume (2026-10-28)
+
+The same development branch now has a single canonical implementation of terminal Session splitting in `FinalPairCompensation.splitExtendedTerminalPoseAfterNext`, invoked from `MonotonicSessionTimer.nextPhase`. No second splitter class remains.
+
+- Corrected `FinalPairCompensation.adjust`'s extra-block budget: `availableLong` is the sum of the two original final work Sessions and **already excludes the existing intervening Break**. After paying for an added regular work Session + regular Break, only two 60s minimum end Sessions must remain. The prior guard wrongly required the existing Break a second time. The pre-existing strict `tailWork > 2*regular+regularBreak` policy remains.
+- Extended `D123TinyClassLateNextSplitTest` to **8** regression methods (5 original plus 3): exact extra-block budget equality at 240s for `P=B=60s`; Restart of the regular Break immediately before a newly split terminal tail; Pause/Resume against the split future without changing its phase identity, Break kinds, Summary length or hard physical end.
+- Existing D-122 Next/Restart protection and original saved Class are still immutable. The runtime splitter runs only for `Next`, not Restart/Resume. A former final Session can restart only when it is no longer the actual final Session.
+- Exact expected JVM total now **236 = 228 previously passing + 8 D123**; **this count is a target, not an observed pass**. All JVM tests, Android APK assembly and instrumentation APK assembly are **pending a fresh on-phone build**. No installation or user-data change authorized/performed.
+
+Please run the non-installing `android-native/tools/build_d123_candidate_on_phone.sh` after a fast-forward pull. If it fails, inspect actual failing tests; do not relax expectations or claim completion. Only after a pass, verify hash, request separate installation permission, and manually test both `test` and the 3-hour Class. D-119 Stable 7 remains frozen.
