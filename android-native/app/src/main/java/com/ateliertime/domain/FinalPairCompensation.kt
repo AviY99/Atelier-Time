@@ -158,6 +158,82 @@ object FinalPairCompensation {
     }
 
     /**
+     * After Next enters (or skips toward) the terminal regular work Session,
+     * the Stable-7 last-only fallback may accumulate minutes of credit in one
+     * large work phase. Normalize ONLY its still-unstarted tail into full
+     * regular Session + regular Break cycles, leaving a final work Session of
+     * at least one minute. No observed phase, current target identity/start,
+     * fixed Summary, or real Class deadline is moved.
+     *
+     * This deliberately runs AFTER successful signed-budget reflow: it changes
+     * neither the signed correction nor the total virtual duration. The
+     * existing last-only strategy can subsequently recover Next/Restart/Resume
+     * against the last future Session without rebuilding protected history.
+     */
+    fun splitExtendedTerminalPoseAfterNext(
+        session: ApprovedSession,
+        phases: List<SchedulePhase>,
+        enteredIndex: Int,
+    ): List<SchedulePhase> {
+        val lastIndex = phases.indexOfLast {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }
+        if (lastIndex < enteredIndex || lastIndex < 0 ||
+            phases.drop(lastIndex + 1).any { it.kind != PhaseKind.SUMMARY }) return phases
+        val last = phases[lastIndex]
+        val regular = session.rules.poseSeconds.toLong()
+        val rest = session.rules.shortBreakSeconds.toLong()
+        val minPose = SECONDS_PER_MINUTE.toLong()
+        // One complete extra Session + Break must leave another legal Session.
+        if (regular < minPose || rest <= 0L ||
+            last.durationSeconds.toLong() < regular + rest + minPose) return phases
+
+        val existingSuffix = phases.mapNotNull { phase ->
+            (phase.id.removePrefix("runtime-tail-pose-")
+                .takeIf { it != phase.id }
+                ?: phase.id.removePrefix("runtime-tail-break-")
+                    .takeIf { it != phase.id })?.toIntOrNull()
+        }
+        var serial = (existingSuffix.maxOrNull() ?: 0) + 1
+        val result = phases.take(lastIndex).toMutableList()
+        var cursor = last.startSeconds.toLong()
+        var remaining = last.durationSeconds.toLong()
+        var poseId = last.id
+        var poseNumber = last.poseNumber
+        while (remaining >= regular + rest + minPose) {
+            val endPose = cursor + regular
+            result.add(last.copy(id = poseId,
+                startSeconds = cursor.toInt(), endSeconds = endPose.toInt(),
+                poseNumber = poseNumber))
+            cursor = endPose
+            remaining -= regular
+            val endBreak = cursor + rest
+            result.add(SchedulePhase(
+                id = "runtime-tail-break-$serial",
+                kind = PhaseKind.SHORT_BREAK,
+                startSeconds = cursor.toInt(),
+                endSeconds = endBreak.toInt(),
+            ))
+            cursor = endBreak
+            remaining -= rest
+            poseId = "runtime-tail-pose-$serial"
+            poseNumber = poseNumber?.plus(1)
+            serial++
+        }
+        require(remaining >= minPose && cursor + remaining == last.endSeconds.toLong())
+        result.add(last.copy(id = poseId, startSeconds = cursor.toInt(),
+            endSeconds = (cursor + remaining).toInt(), poseNumber = poseNumber))
+        result.addAll(phases.drop(lastIndex + 1))
+        check(result.take(enteredIndex) == phases.take(enteredIndex))
+        check(result[enteredIndex].id == phases[enteredIndex].id &&
+            result[enteredIndex].kind == phases[enteredIndex].kind &&
+            result[enteredIndex].startSeconds == phases[enteredIndex].startSeconds)
+        check(result.last().endSeconds == phases.last().endSeconds)
+        check(result.zipWithNext().all { (a, b) -> a.endSeconds == b.startSeconds })
+        return result
+    }
+
+    /**
      * Incremental reflow after a previously relocated special Break / added
      * regular block. Rebuilding from the SAVED schedule then would overwrite
      * observed runtime history, so lock the current Next target and all
