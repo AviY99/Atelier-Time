@@ -16,7 +16,7 @@ if [[ -n "$(git status --porcelain --untracked-files=no)" ]] ||
 fi
 if ! grep -Eq 'versionName[[:space:]]*=[[:space:]]*"D-122"' app/build.gradle.kts ||
    ! grep -Eq 'versionCode[[:space:]]*=[[:space:]]*17([[:space:]]|$)' app/build.gradle.kts; then
-    echo "ERROR: D-122/versionCode 15 source required." >&2
+    echo "ERROR: D-122/versionCode 17 source required." >&2
     exit 2
 fi
 : "${ANDROID_HOME:?Code on the Go Android SDK required}"
@@ -91,7 +91,7 @@ if [[ "$test_count" -lt 1 ]]; then
 fi
 manifest="$downloads/Atelier-Time-D122-QA-manifest.txt"
 {
-    printf 'version=D-122\ncode=16\nbranch=android-native-kotlin-compose\n'
+    printf 'version=D-122\ncode=17\nbranch=android-native-kotlin-compose\n'
     printf 'commit=%s\n' "$(git rev-parse HEAD)"
     printf 'test_count=%s\n' "$test_count"
     printf 'app_sha256=%s\n' "$(sha256sum "$regular" | awk '{print $1}')"
