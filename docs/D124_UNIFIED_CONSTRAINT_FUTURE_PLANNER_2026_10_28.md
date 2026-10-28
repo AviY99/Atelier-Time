@@ -37,3 +37,9 @@ Frozen Stable 7 branch `stable/android-d119-qa7` is unchanged.
 The planner evaluates the legally editable whole ending-pair allocation first and, when an invariant prevents it, the editable single-final-Session allocation under **the same validator**. This is constrained candidate enumeration, not the old split between source, future-tail and last-only correction mechanisms. The old functions remain audit/test helpers only. The actual terminal Session is also used for duration reporting after an allowed pair merge, rather than treating an unrelated earlier Session as part of the final ending.
 
 **Evidence limitation:** inspected source and static GitHub file identities only. The 243 expected JVM regressions and Android APK have not yet been executed. Unexpected test failures must be investigated rather than changing acceptance criteria. No installed app changes.
+
+## QA-D124-01 — Samsung JVM gate FAILED (2026-10-28)
+
+**User-provided on-phone screenshot:** Gradle `:app:testDebugUnitTest FAILED`; `Execution failed for task ':app:testDebugUnitTest'`; `There were failing tests`. The run terminated `BUILD FAILED in 1m 22s` with `66 actionable tasks: 66 executed`. Some APK packaging tasks ran but the entire build-only QA gate is **FAIL**. **Do not use or install any D-124 APK**, do not mark D-124 accepted, and do not modify Stable 7.
+
+The screenshot shows only the Gradle summary, not which JUnit cases failed, test counts, assertion messages or stack traces. Next step is a read-only diagnostic of `android-native/app/build/test-results/testDebugUnitTest/TEST-*.xml` on the phone, printing failing test names and exceptions. Make no speculative code changes and do not weaken or skip tests. Repair the unified constraint model based on evidence, rerun the full gate, and require a clean result before considering installation.
