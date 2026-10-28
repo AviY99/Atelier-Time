@@ -1,5 +1,9 @@
 package com.ateliertime.android
 
+import android.content.ContextWrapper
+import java.io.File
+import java.util.UUID
+import org.junit.After
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ateliertime.domain.*
@@ -8,13 +12,36 @@ import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Test-package private storage only. Never accesses real saved Classes or Sound data. */
+/**
+ * Isolated QA reports live under a unique directory in the TARGET application's
+ * cache. Instrumentation executes under the target app's UID, so the test APK's
+ * own Context.filesDir is not writable even though its resources are readable.
+ * Do not touch production atelier_run_reports or saved Classes/Sound preferences.
+ */
 @RunWith(AndroidJUnit4::class)
 class RunDiagnosticsInstrumentedTest {
+    private val target by lazy {
+        InstrumentationRegistry.getInstrumentation().targetContext
+    }
+    private val isolatedRoot by lazy {
+        File(target.cacheDir, "atelier_d126_instrumentation_" + UUID.randomUUID())
+    }
+    private fun isolatedArchive(): RunDiagnosticsArchive {
+        val isolatedContext = object : ContextWrapper(target) {
+            override fun getFilesDir(): File = isolatedRoot
+        }
+        return RunDiagnosticsArchive(isolatedContext)
+    }
+    @After fun removeOnlyIsolatedReports() {
+        if (isolatedRoot.exists()) {
+            check(isolatedRoot.deleteRecursively()) {
+                "Cannot remove only the randomized instrumentation test reports."
+            }
+        }
+    }
     @Test
     fun archivedRunHasCompleteEditorSnapshotOrderedEventsAndExplicitEnd() {
-        val testContext = InstrumentationRegistry.getInstrumentation().context
-        val archive = RunDiagnosticsArchive(testContext)
+        val archive = isolatedArchive()
         val rules = SessionRules(
             id = "diagnostic-isolated", name = "isolated test class",
             totalSeconds = 660, summarySeconds = 60, poseSeconds = 120,
@@ -69,8 +96,7 @@ class RunDiagnosticsInstrumentedTest {
 
     @Test
     fun unfinishedRunIsStillRetainedForCrashInvestigation() {
-        val testContext = InstrumentationRegistry.getInstrumentation().context
-        val archive = RunDiagnosticsArchive(testContext)
+        val archive = isolatedArchive()
         val rules = SessionRules(
             id = "diagnostic-incomplete", name = "incomplete run",
             totalSeconds = 660, summarySeconds = 60, poseSeconds = 120,
@@ -95,8 +121,7 @@ class RunDiagnosticsInstrumentedTest {
     }
     @Test
     fun longRunRetainsMoreThanThirtyEventsAndInitialReplannedSchedule() {
-        val testContext = InstrumentationRegistry.getInstrumentation().context
-        val archive = RunDiagnosticsArchive(testContext)
+        val archive = isolatedArchive()
         val rules = SessionRules(
             id = "diagnostic-many-events", name = "many events",
             totalSeconds = 660, summarySeconds = 60,
