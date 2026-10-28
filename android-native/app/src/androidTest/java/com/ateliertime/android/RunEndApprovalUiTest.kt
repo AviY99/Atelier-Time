@@ -103,6 +103,19 @@ class RunEndApprovalUiTest {
         assertEquals(1, reread.state().entries.size)
     }
 
+    /**
+     * The production Class has a continuously updating 200ms ticker.
+     * Compose's test clock auto-advancement can repeatedly advance that
+     * forever and report ComposeNotIdleException despite a correct RUN.
+     * After clicking Confirm, process a few initial frames, then freeze the
+     * virtual clock while inspecting the stable UI semantics. Test-only.
+     */
+    private fun freezeRunningTickerForUiAssertions() {
+        compose.mainClock.autoAdvance = false
+        compose.mainClock.advanceTimeBy(64L)
+        compose.waitForIdle()
+    }
+
     @Test fun freeCountdownStartPauseResumeExitDoesNotEditSavedClass() {
         compose.setContent {
             MaterialTheme {
@@ -254,6 +267,7 @@ class RunEndApprovalUiTest {
         openRunApproval()
         assertTrue(catalog.state().activeId == null)
         compose.onNodeWithTag("run_end_confirm").performClick()
+        freezeRunningTickerForUiAssertions()
         compose.onNodeWithTag("run_end_dialog").assertDoesNotExist()
         compose.onNodeWithText("Class timer").assertExists()
         compose.onNodeWithText("Running").assertExists()
@@ -268,6 +282,7 @@ class RunEndApprovalUiTest {
         compose.onNodeWithText("Final two Sessions:", substring = true).assertExists()
         compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
         compose.onNodeWithTag("run_end_confirm").performClick()
+        freezeRunningTickerForUiAssertions()
         compose.onNodeWithTag("run_end_dialog").assertDoesNotExist()
         compose.onNodeWithText("Running").assertExists()
         assertStoredClassUnchanged()
@@ -280,6 +295,7 @@ class RunEndApprovalUiTest {
         compose.onNodeWithText("Final two Sessions:", substring = true).assertExists()
         compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
         compose.onNodeWithTag("run_end_confirm").performClick()
+        freezeRunningTickerForUiAssertions()
         compose.onNodeWithTag("run_end_dialog").assertDoesNotExist()
         compose.onNodeWithText("Running").assertExists()
         assertStoredClassUnchanged()
