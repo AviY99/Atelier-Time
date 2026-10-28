@@ -101,10 +101,20 @@ internal object ConstraintFuturePlanner {
                 continue
             }
             val proposed = attempt.getOrThrow()
-            val finalRegular = proposed.filter {
+            val actualRegular = proposed.filter {
+                it.kind == PhaseKind.POSE &&
+                    it.poseSource == PoseSource.REGULAR
+            }
+            val originalFinal = session.phases.filter {
                 it.kind == PhaseKind.POSE &&
                     it.poseSource == PoseSource.REGULAR
             }.takeLast(2)
+            val merged = originalFinal.size == 2 &&
+                actualRegular.none { it.id == originalFinal.last().id } &&
+                actualRegular.none { it.id.startsWith("runtime-tail-pose-") }
+            val finalRegular = if (merged) actualRegular.filter {
+                it.id == originalFinal.first().id
+            } else actualRegular.takeLast(2)
             return CompensatedTimeline(
                 phases = proposed, totalSeconds = total.toInt(),
                 recoveredSeconds = correctionSeconds,
