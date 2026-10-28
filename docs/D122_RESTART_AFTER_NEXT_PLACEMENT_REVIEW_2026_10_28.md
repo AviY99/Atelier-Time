@@ -1,3 +1,11 @@
+## QA-D122-04 — candidate SHA-256 verified on Samsung (2026-10-28)
+
+The user ran the simplified verification after the old D-122 manifest `code=16` typo was discovered, and the screenshot explicitly shows `D-122 APK VERIFIED - PASS`. This confirms the existing `Atelier-Time-D122-Candidate.apk` SHA-256 equals the `app_sha256` stored in the original on-phone QA manifest. Earlier QA-D122-02 recorded 228/228 passing JVM tests and a successful build-only Android assembly.
+
+**Evidence limitations:** The final simplified command checked hash equality only; it did not successfully inspect the APK's embedded package version or its signing identity. The build script's Gradle-source check required D-122/code17, but the old manifest incorrectly recorded code16. No APK installation or user acceptance is established by this screenshot.
+
+**Next gate:** Request/obtain explicit permission before installing as an Android *update* (not uninstall). Android's installer must accept the package/signing compatibility without data clearing. If it refuses or requests uninstall, stop; do not delete existing Classes/Sound preferences. After installation, verify About D-122 and saved settings, then reproduce Next-added sessions + Restart + special-break position while Class end remains immutable. The D-119 Stable 7 branch stays frozen.
+
 ## QA-D122-03 — APK verification command failed due to manifest script typo (2026-10-28)
 
 User ran the version/code/branch/hash verifier following the 228/228 build; no `APK VERIFIED — PASS` appeared. Inspection of `tools/build_d122_candidate_on_phone.sh` confirmed a toolchain metadata defect: it correctly requires `versionCode=17` in Gradle, but wrote `code=16` into the generated `Atelier-Time-D122-QA-manifest.txt`. The previous verification therefore short-circuited on `grep -qx 'code=17'` **before** comparing hashes. This is not evidence of an invalid APK, but the APK must still be verified independently.
