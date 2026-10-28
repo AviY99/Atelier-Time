@@ -41,13 +41,15 @@ class RunDiagnosticsInstrumentedTest {
                 phasesBefore = approved.phases,
                 phasesAfter = approved.phases, alertsEnabled = true,
                 sounds = SoundSettings(), rejectedReason = "protected")
+            recorder.soundChange(SoundSettings(), alertsEnabled = false)
             recorder.finish("user_exit")
 
             val entries = generated.readLines().map { JSONObject(it) }
-            assertEquals(4, entries.size)
-            assertEquals(listOf("run_start", "event", "event", "run_end"),
+            assertEquals(5, entries.size)
+            assertEquals(listOf("run_start", "event", "event",
+                "sound_settings_change", "run_end"),
                 entries.map { it.getString("type") })
-            assertEquals(listOf(1, 2, 3, 4),
+            assertEquals(listOf(1, 2, 3, 4, 5),
                 entries.map { it.getInt("sequence") })
             val start = entries.first()
             assertEquals("isolated test class",
@@ -58,7 +60,8 @@ class RunDiagnosticsInstrumentedTest {
                 entries[1].getString("cueRequest"))
             assertEquals("rejected", entries[2].getString("status"))
             assertEquals("protected", entries[2].getString("reason"))
-            assertEquals("user_exit", entries[3].getString("reason"))
+            assertFalse(entries[3].getBoolean("alertsEnabled"))
+            assertEquals("user_exit", entries[4].getString("reason"))
         } finally {
             archive.delete(generated.name)
         }
