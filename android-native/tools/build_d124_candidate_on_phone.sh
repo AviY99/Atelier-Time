@@ -50,7 +50,7 @@ for file in files:
         for key in totals:
             totals[key] += int(suite.attrib.get(key, '0'))
 print('D-124 JVM ACTUAL: ' + ' '.join(f'{k}={v}' for k,v in totals.items()))
-if totals['tests'] < 241 or any(totals[k] for k in ('failures', 'errors', 'skipped')):
+if totals['tests'] < 242 or any(totals[k] for k in ('failures', 'errors', 'skipped')):
     raise SystemExit('FAIL: JVM suite incomplete; inspect XML and build log.')
 PY
 else
@@ -69,7 +69,7 @@ else
         }
         END {
             printf "D-124 JVM ACTUAL: tests=%d failures=%d errors=%d skipped=%d\n", sum[1], sum[2], sum[3], sum[4]
-            if (count == 0 || sum[1] < 241 || sum[2] || sum[3] || sum[4]) exit 1
+            if (count == 0 || sum[1] < 242 || sum[2] || sum[3] || sum[4]) exit 1
         }
     ' "$report_dir"/TEST-*.xml
 fi
