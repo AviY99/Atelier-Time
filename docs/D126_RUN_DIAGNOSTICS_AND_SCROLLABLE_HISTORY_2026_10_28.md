@@ -91,3 +91,9 @@ A new `android-native/tools/termux_install_and_test_d126.sh` automates the bound
 Use the latest tool script from GitHub via CoGo `git pull --ff-only`, copy into public Downloads and execute in the **Termux** environment with working paired wireless ADB. The Build Candidate APKs remain those already SHA-256 verified by the user. The script does **not** rebuild or silently install a newer binary; changes after the recorded build commit are only docs/QA test-driver scripts.
 
 **Honest status: device update, instrumentation, saved-data follow-up and manual acceptance all PENDING actual terminal/user evidence.**
+
+## Phone QA pre-install blocker — wireless ADB disconnected (2026-10-28)
+
+The user executed `Atelier-Time-D126-DeviceQA.sh --run` in Samsung Termux. Photo evidence confirms **SHA-256 PASS for the regular D-126 APK and the D-126 Tests APK**, followed by **STOP: exactly one authorized ADB device is required, found 0**. `adb devices` showed no connected devices; prior `adb connect` attempts to cached Wi-Fi addresses/ports failed `Connection refused`. The safety guard stopped **before any APK installation or instrumentation**; the installed Stable 8 and Saved Classes/Sound data remain unchanged by this script.
+
+Resolution: enable/check Samsung Developer Options → Wireless debugging, use the *current* displayed IP address and debugging port for `adb connect IP:PORT` (not a remembered value). If re-pairing is required, use **Pair device with pairing code** and its separate pairing address/port with `adb pair IP:PAIR_PORT` plus the displayed code, then use the main Wireless debugging screen's distinct current **IP address & Port** for `adb connect`. Verify `adb devices` displays exactly one `device`, then rerun the unchanged script when no Class is active. **No user-device QA PASS or installation should be claimed until actual outputs are supplied.**
