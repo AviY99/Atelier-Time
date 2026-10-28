@@ -59,7 +59,7 @@ internal object ConstraintFuturePlanner {
                     active[i].kind == session.phases[i].kind
             }
         val pairFlexible = pairAvailable && !boundary.lastOnly &&
-            first!! > lock &&
+            first != null && first > lock &&
             (entering == null || entering < first) &&
             !(boundary.preserveExistingTail && !sourceTopologyUnchanged)
         val proposed = when {
