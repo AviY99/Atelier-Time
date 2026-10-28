@@ -60,7 +60,11 @@ internal object ConstraintFuturePlanner {
             }
         val pairFlexible = pairAvailable && !boundary.lastOnly &&
             first != null && first > lock &&
-            (entering == null || entering < first) &&
+            (entering == null || entering < first ||
+                // At the exact Next-entry boundary, the first final Session
+                // has not yet been observed. A positive time loss may still
+                // need a legal end-pair merge instead of false rejection.
+                (entering == first && !mayRebuild)) &&
             !(boundary.preserveExistingTail && !sourceTopologyUnchanged)
         val proposed = when {
             pairFlexible -> allocatePair(session, active, first!!, last, rest!!,
