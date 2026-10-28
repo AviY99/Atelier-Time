@@ -1,3 +1,16 @@
+## QA-D122-02 — Samsung build-only rerun PASS (2026-10-28)
+
+User-supplied real Samsung Code on the Go terminal screenshot confirms:
+- `BUILD SUCCESSFUL in 1m 15s`; `72 actionable tasks: 72 executed`.
+- `D-122 JVM ACTUAL: tests=228 failures=0 errors=0 skipped=0`.
+- `BUILD ONLY PASS`.
+- Regular candidate `/storage/emulated/0/Download/Atelier-Time-D122-Candidate.apk`.
+- Android instrumentation APK `/storage/emulated/0/Download/Atelier-Time-D122-Tests.apk`.
+- QA manifest `/storage/emulated/0/Download/Atelier-Time-D122-QA-manifest.txt`.
+- Terminal explicitly states `NO regular/test APK installed`.
+
+The two legacy Restart tests and three newly added D-122 regression tests are part of the 228 executed JVM tests. This **closes the build-only QA gate**, not the product acceptance gate. The screenshot does not show the manifest's commit SHA; verify APK SHA-256 against the manifest before any installation. Android instrumentation was assembled, not executed. Manual Samsung testing must verify repeated Next, Restart ordinary break after many Next, genuine special-break preservation, unchanged saved Class end, and preserved Classes/Sounds. D-122 remains a development candidate; frozen D-119 Stable 7 is unchanged. Explicit approval for D-122 installation is still required.
+
 ## QA-D122-01 — FAILED on Samsung (2026-10-28)
 
 User-supplied Code on the Go screenshot shows `228 tests completed, 2 failed`, `:app:testDebugUnitTest FAILED`, `BUILD FAILED in 1m 18s` with 64 actionable tasks executed. The build-only gate did not pass; no D-122 candidate should be installed or called stable.
