@@ -1,3 +1,13 @@
+## QA-D122-05 — user reports timer logic acceptable; open intermittent audio-source mismatch (2026-10-28)
+
+**User observation, not yet reproduced:** The user reports D-122 Next/Restart behavior generally tested and working on the installed phone. However, after listening to a song in Poweramp the previous evening, an Atelier Time Session cue played a snippet of that song the following day. Visiting Sounds and reselecting the Session sound restored the expected cue. Do not mark sound playback as fully accepted or declare a new Stable build without resolving or explicitly accepting this anomaly. D-119 Stable 7 branch remains frozen.
+
+**Source review:** App melodies are synthesized in `MelodyAudioPlayer` via `AudioTrack`; system and user-file sounds use the saved URI and `MediaPlayer.setDataSource(context, Uri.parse(uri))` for every cue. Preferences persist `source`, `uri`, and `displayName` strings; a file selected via `OpenDocument` requests persistable read permission, while Android ringtone choices come from `RingtoneManager.ACTION_RINGTONE_PICKER`. The player also requests short-lived media/audio focus using `AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK`.
+
+**Hypotheses, not conclusions:** A dynamic/stale external sound URI or provider mapping, versus an independent Poweramp playback/audio-focus interaction. Source inspection alone cannot identify which occurred. The user has reselected the sound, so the original persisted URI may no longer be accessible as evidence.
+
+**Next diagnostic:** Ask whether the affected Session A cue was selected from Atelier Time (built-in), System sounds, or Audio file, and whether the song was audible only during the cue or resumed afterward. If built-in, investigate audio focus/external player rather than claiming a URI mismatch. If system/file, verify persisted URI semantics and sound content on next launch without changing the selection, and consider stable app-owned copy of user audio after explicit choice (or clear inaccessible-file error). Avoid speculative edits to timer logic, uninstall, or data clearing. No code changed in response to this sound report.
+
 ## QA-D122-04 — candidate SHA-256 verified on Samsung (2026-10-28)
 
 The user ran the simplified verification after the old D-122 manifest `code=16` typo was discovered, and the screenshot explicitly shows `D-122 APK VERIFIED - PASS`. This confirms the existing `Atelier-Time-D122-Candidate.apk` SHA-256 equals the `app_sha256` stored in the original on-phone QA manifest. Earlier QA-D122-02 recorded 228/228 passing JVM tests and a successful build-only Android assembly.
