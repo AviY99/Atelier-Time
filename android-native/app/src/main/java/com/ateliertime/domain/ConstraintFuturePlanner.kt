@@ -46,7 +46,8 @@ internal object ConstraintFuturePlanner {
                 PhaseKind.SPECIAL_BREAK)
         val lock = boundary.protectedThroughIndex
         val entering = boundary.nextIndex
-        val mayRebuild = entering != null && !boundary.noActiveTailRebuild &&
+        val mayRebuild = entering != null && correctionSeconds < 0 &&
+            !boundary.noActiveTailRebuild &&
             !boundary.preserveExistingTail && allowExtraRegular
         val pairFlexible = pairAvailable && first!! > lock &&
             (entering == null || entering < first)
@@ -303,8 +304,7 @@ internal object ConstraintFuturePlanner {
             val future = phases.filter { it.kind == PhaseKind.SPECIAL_BREAK &&
                 it.durationSeconds > session.rules.shortBreakSeconds }
             require(old.size == future.size &&
-                (!session.rules.placement.automatic ||
-                    old.map { it.id } == future.map { it.id })) {
+                old.map { it.id } == future.map { it.id }) {
                 "A protected Special Break cannot disappear or change identity."
             }
         }
