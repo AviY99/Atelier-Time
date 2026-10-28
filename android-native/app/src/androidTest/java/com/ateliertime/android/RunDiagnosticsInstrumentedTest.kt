@@ -93,4 +93,52 @@ class RunDiagnosticsInstrumentedTest {
             archive.delete(file.name)
         }
     }
+    @Test
+    fun longRunRetainsMoreThanThirtyEventsAndInitialReplannedSchedule() {
+        val testContext = InstrumentationRegistry.getInstrumentation().context
+        val archive = RunDiagnosticsArchive(testContext)
+        val rules = SessionRules(
+            id = "diagnostic-many-events", name = "many events",
+            totalSeconds = 600, summarySeconds = 60,
+            poseSeconds = 120, shortBreakSeconds = 60,
+            specialBreakSeconds = 60, specialBreakCount = 0,
+        )
+        val engine = ScheduleEngine()
+        val generated = engine.generate(rules, FinalPoseChoice.remainder())
+        assertTrue(generated.issues.toString(), generated.canApprove)
+        val approved = engine.approve(generated, acknowledgeWarnings = true)
+        val changed = FinalPairCompensation.reflow(
+            approved, approved.phases, correctionSeconds = -60)
+        val old = archive.reports().map { it.name }.toSet()
+        val recorder = archive.begin(approved, 1_700_000_000_000L,
+            1_700_000_660_000L, SoundSettings(), true)
+        val file = archive.reports().first { it.name !in old }
+        try {
+            recorder.event("Start", before = null, after = null,
+                phasesBefore = approved.phases, phasesAfter = changed.phases,
+                alertsEnabled = true, sounds = SoundSettings())
+            repeat(50) {
+                recorder.event("Next", before = null, after = null,
+                    phasesBefore = changed.phases, phasesAfter = changed.phases,
+                    alertsEnabled = true, sounds = SoundSettings())
+            }
+            recorder.finish("user_exit")
+            val lines = file.readLines().map { JSONObject(it) }
+            assertEquals(53, lines.size)
+            assertEquals((1..53).toList(), lines.map { it.getInt("sequence") })
+            assertEquals(50, lines.count { it.optString("action") == "Next" })
+            assertEquals("run_start", lines.first().getString("type"))
+            assertEquals("Start", lines[1].getString("action"))
+            assertTrue(lines[1].getBoolean("structureChanged"))
+            assertEquals(changed.totalSeconds,
+                lines[1].getJSONArray("scheduleAfter")
+                    .getJSONObject(changed.phases.lastIndex).getInt("endSeconds"))
+            assertEquals(approved.rules.totalSeconds,
+                lines.first().getJSONArray("approvedTimeline")
+                    .getJSONObject(approved.phases.lastIndex).getInt("endSeconds"))
+        } finally {
+            archive.delete(file.name)
+        }
+    }
+
 }
