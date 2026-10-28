@@ -1,6 +1,6 @@
 # D-125 — Terminal sub-minute remainder to Summary (user-requested rule, design only)
 
-**2026-10-28. Status: PRODUCT RULE PROPOSED BY USER, SOURCE NOT MODIFIED.** D-124 installed and user has reported broad manual improvement; Stable 7 remains frozen. Do not mark this feature implemented or tested merely because its design is recorded.
+**2026-10-28. FINAL STATUS: CLOSED / NOT ADOPTED BY USER. NO IMPLEMENTATION.** D-124 installed and user has reported broad manual improvement; Stable 7 remains frozen. Do not mark this feature implemented or tested merely because its design is recorded.
 
 ## Requested change — only at the far end of the mutable future
 
@@ -19,3 +19,9 @@ Do not perform this during Editor generation or saved Class approval, Run end-ti
 ## Engineering gate (not yet performed)
 
 Implement as D-125 development candidate with versionCode increment, preserving all D-124 tests. Add property tests spanning P/B ratios, 1..59 second remainder, exact 0 and 60 boundaries, no Summary, many Next, terminal Break immediately before Summary, transitions and C exactly once, Pause/Resume/Restart with prior Summary extension, immutable observed history and original physical deadline. Test existing 3-hour and genuine-special-break controls. Require full actual Samsung JVM/Android build and **separate approval** before update-install. No modifications to frozen Stable 7 or installed D-124 without approval.
+
+## CLOSED — USER REJECTED THE PROPOSED RULE (2026-10-28)
+
+**Authoritative decision:** The user explicitly rejected D-125 as unnecessary. The observed long final Session is an extreme condition of repeating regular Sessions and Breaks at their one-minute minimum, and real-life resolution is deliberately left to the user's situational judgement, with multiple possible choices. Do **not** implement automatic transfer of a sub-minute tail remainder into Summary. Do **not** extend runtime Summary or weaken the 60-second minimum for any Session. Preserve the current D-124 behavior, exact physical Class finish, existing Editor/Summary and saved Classes. No D-125 source patch, APK build, or installation was made. D-125 is **CLOSED / NOT ADOPTED**, not pending engineering work.
+
+The user considers the currently installed D-124 **good at this stage**; this is positive device feedback, **not** an explicit designation of a new numbered stable checkpoint. Frozen Stable 7 remains unchanged.
