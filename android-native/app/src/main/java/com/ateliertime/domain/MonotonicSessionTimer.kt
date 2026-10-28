@@ -436,13 +436,16 @@ class MonotonicSessionTimer(
     /** Immutable snapshot of the ACTUAL runtime plan for the live chart. */
     fun activePhasesSnapshot(): List<SchedulePhase> = activePhases.toList()
 
-    /** One item means the last pair and intervening break were merged. */
-    fun finalEndingDurations(): List<Int> {
-        val ids = session.phases.filter {
+    /**
+     * Show the ACTUAL final two runtime regular Sessions. After Next has
+     * divided a previously oversized terminal Session, the true final Session
+     * may be runtime-added rather than one of the originally approved IDs.
+     * A merged final pair still returns its one remaining regular Session.
+     */
+    fun finalEndingDurations(): List<Int> =
+        activePhases.filter {
             it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
-        }.takeLast(2).map { it.id }.toSet()
-        return activePhases.filter { it.id in ids }.map { it.durationSeconds }
-    }
+        }.takeLast(2).map { it.durationSeconds }
 
     /** Values shown in the timer after a pause/stop changes the selected ending. */
     fun finalTwoPoseDurations(): Pair<Int, Int>? {
