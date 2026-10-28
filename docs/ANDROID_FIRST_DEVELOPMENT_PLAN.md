@@ -1,5 +1,8 @@
 # Atelier Time — Android-first, phone-developed delivery plan
 
+> **CURRENT DELIVERY STAGE (2026-10-28):** Native Android Kotlin/Compose application reached accepted **Stable 9 D-126**, with 285/285 automated QA PASS, complete runtime logic and diagnostic reporting. The D-068/D-069 future tense below is historical; present remaining work is accessibility, Android hardening, signed release, branding, Google Play distribution and multiplatform feasibility. [Current roadmap](ROADMAP.md); [current status](CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md).
+
+
 > **CURRENT 2026-10-23 D-068/D-069:** User approved continuing actual native Android Kotlin/Compose/Gradle implementation and explicitly confirmed **all approved Atelier Time settings/product requirements remain unchanged**; only Android-on-phone delivery/development priority and toolchain differ from historic Flutter plans. Native [android-native/ branch](https://github.com/AviY99/Atelier-Time/tree/android-native-kotlin-compose/android-native) and [draft PR #3](https://github.com/AviY99/Atelier-Time/pull/3) NOW exist, containing real Compose session editor and Kotlin scheduling core plus **21 Kotlin JUnit test methods WRITTEN BUT NOT RUN**. No APK or CoGo compilation yet, offline presets/timer/audio not implemented. **Latest authority:** [new Kotlin Android implementation and test process](ANDROID_NATIVE_EXECUTION_AND_TEST.md) with K01–K06 gates. Historical candidate/proof-gate passages below do NOT supersede this. No toy apps, Actions, merges or requirements modification.
 
 

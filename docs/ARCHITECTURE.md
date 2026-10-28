@@ -1,5 +1,8 @@
 # Architecture and design constraints — implemented core, Stage 2 editor underway
 
+> **CURRENT ARCHITECTURE — Stable 9 / D-126 (2026-10-28):** Android Kotlin + Jetpack Compose, pure Kotlin scheduling domain with a unified `ConstraintFuturePlanner` for runtime Session/Break timeline reflow, Android-specific notification/audio and isolated Saved Class/Sound data stores, private per-Run JSONL diagnostics and user-directed SAF export. Existing Flutter/Dart design passages below are historical. Implementation is on [Android dev branch](https://github.com/AviY99/Atelier-Time/tree/android-native-kotlin-compose/android-native). [Current status](CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md).
+
+
 > **D-068/D-069 — 2026-10-23: CURRENT IMPLEMENTATION** User approved actual Android Kotlin/Compose source, explicitly **no changes to accepted session/schedule/product rules**. `android-native/` Gradle project on new [android-native-kotlin-compose](https://github.com/AviY99/Atelier-Time/tree/android-native-kotlin-compose) branch separates pure Kotlin deterministic `domain` from Android Compose editor/input for later KMP extraction. D-043 exact DP special break placement in Kotlin port; 21 Kotlin JUnit sources unrun. Offline local preset repository, monotonic timer and 3 cue adapters remain next tasks. Historic Flutter architecture below is obsolete for current delivery. See [native development/QA process](ANDROID_NATIVE_EXECUTION_AND_TEST.md).
 
 

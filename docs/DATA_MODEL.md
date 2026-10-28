@@ -1,5 +1,8 @@
 # Atelier Time — Data model and scheduling interfaces (Stage 1, Step 1.2)
 
+> **IMPLEMENTED STATUS — Stable 9 / D-126 (2026-10-28):** This original Stage 1 Flutter/Dart data-model proposal is archival and not an authoritative Android JSON/Kotlin schema. Current Kotlin `SessionRules`, `ApprovedSession`, `SchedulePhase` and `ConstraintFuturePlanner` are implemented on the Android development branch. Saved Classes/Sound preferences remain compatible and preserved; D-126 adds separate private append-only per-Run diagnostic JSONL, without replacing Saved Class storage. [Current status](CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md).
+
+
 **Prepared:** 2026-10-22  
 **Status (historical Step 1.2 design, updated 2026-10-23):** The document originally described conceptual field names and interfaces. Since then, the pure Dart core **has been implemented and verified 35/35 tests PASS** (D-052) on `stage-1-4-scheduling-core`. Refer to [actual scheduling code](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/lib/src/scheduling.dart) for implemented API names; this earlier conceptual model is not an exact code schema lock. Stage 2 Flutter editor/preview source exists on a separate branch but has **not been Flutter-tested**.  
 **Technology:** Flutter + Dart, one shared app targeting Android, Windows, iOS/iPadOS and macOS (approved TD-001).  

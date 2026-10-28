@@ -1,5 +1,8 @@
 # Atelier Time — mandatory icon and logo gate before store publication
 
+> **CURRENT GATE (2026-10-28):** Stable 9/D-126 Timer logic and automated QA are complete. The final launcher icon, brand mark and Play Store artwork still require separate user approval before public distribution; do not mistake successful QA for publication clearance. Remaining workflow stages 7–12 are in [current roadmap](ROADMAP.md), with [release status](CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md).
+
+
 **Added:** 2026-10-24, user directive after approving Android Stable 3. **Status: planned/not designed or implemented.** This is a **required step immediately BEFORE any store listing/publication** and must NOT be skipped. The user has not approved logo artwork yet.
 
 ## Product placement

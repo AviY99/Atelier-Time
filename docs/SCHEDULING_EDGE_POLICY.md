@@ -1,5 +1,8 @@
 # Stage 1 Step 1.3 — Scheduling and edge-case policies
 
+> **ARCHIVAL EDGE-POLICY CONTEXT — 2026-10-28:** The Step 1.3 approvals below are historical input, **not** the entire current runtime contract. The authoritative live Android constraint policy is [D-124 unified planner](D124_UNIFIED_CONSTRAINT_FUTURE_PLANNER_2026_10_28.md), accepted under Stable 9/D-126. Do not re-introduce rejected D-125 Summary extension. [Current status](CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md).
+
+
 **Updated:** 2026-10-22  
 **Status:** Step 1.3 P-01–P-06 approved (D-037), with D-036 prohibiting zero-minute sessions/breaks and D-031 retaining the advisory 25/5 warning. **Later D-044 expressly APPROVED any positive special replacement duration**, even shorter/equal than the normal break. The former D-038 question is resolved; Step 1.4 implements this on an isolated branch but is still unverified.  
 **Scope:** Step 1.3 approval record. **Later status:** user separately authorized Step 1.4 (D-040) on [isolated pure-Dart branch](https://github.com/AviY99/Atelier-Time/tree/stage-1-4-scheduling-core); engine/test source exists but is uncompiled and unexecuted. No budget-consuming Actions, no Step 1.4 completion and no later stages.

@@ -1,5 +1,8 @@
 # Scheduling contract and algorithm design
 
+> **CURRENT RUNTIME CONTRACT — Stable 9 / D-126 (2026-10-28):** Source authority is [D-124 unified planner](D124_UNIFIED_CONSTRAINT_FUTURE_PLANNER_2026_10_28.md), not superseded Dart/early-stage pseudocode below. One `ConstraintFuturePlanner.plan` for live reflow; immutable physical Class finish, actual observed history, manual and genuine Special Break constraints, fixed Summary, minimum 60-second regular work Session, valid Next extension by full regular Session+Break cycles. D-125 Summary-residue extension was **rejected**. Accepted D-126 diagnostics document these decisions without altering mathematics. [Current status](CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md).
+
+
 > **2026-10-24 APPROVED D-071 opening-group breaks:** Every *newly configured* opening group carries an editable break-after value in whole minutes. Earlier group boundary may be 0 (directly adjacent poses); after final group must be >=1m and must leave enough work time for a subsequent regular pose. Existing BREAK_FIRST regular break **counts once** if it matches the last configured group rest (Example A still 00:20–00:25 with no duplicate); custom final group rest replaces that initial slot rather than adding an adjacent duplicate. Custom group break is a rest phase but not a numbered regular-break replacement slot; all actual positive rests count under 25/5 safety. Legacy saved sessions with no explicit break values keep their old approval signatures/timeline. New source written, Kotlin rebuild/new tests pending. Details [D-071](DECISIONS.md), [editor review](EDITOR_LABEL_REVIEW_2026_10_24.md).
 
 
