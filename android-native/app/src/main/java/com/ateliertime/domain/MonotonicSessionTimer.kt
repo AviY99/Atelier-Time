@@ -441,10 +441,24 @@ class MonotonicSessionTimer(
      * may be runtime-added rather than one of the originally approved IDs.
      * A merged final pair still returns its one remaining regular Session.
      */
-    fun finalEndingDurations(): List<Int> =
-        activePhases.filter {
+    fun finalEndingDurations(): List<Int> {
+        val regular = activePhases.filter {
             it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
-        }.takeLast(2).map { it.durationSeconds }
+        }
+        val originalPair = session.phases.filter {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.takeLast(2)
+        // An earlier ordinary ending merge removes the second approved ID;
+        // do not mislabel an unrelated previous regular Session as part of
+        // the final pair. A later Next split creates a NEW actual final pair.
+        val merged = originalPair.size == 2 &&
+            regular.none { it.id == originalPair.last().id } &&
+            regular.none { it.id.startsWith("runtime-tail-pose-") }
+        val selected = if (merged) regular.filter {
+            it.id == originalPair.first().id
+        } else regular.takeLast(2)
+        return selected.map { it.durationSeconds }
+    }
 
     /** Values shown in the timer after a pause/stop changes the selected ending. */
     fun finalTwoPoseDurations(): Pair<Int, Int>? {
