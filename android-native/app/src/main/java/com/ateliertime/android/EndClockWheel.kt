@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import java.util.Locale
 import kotlin.math.abs
@@ -88,7 +90,9 @@ internal fun EndClockWheel(
     ) {
         Text(label, style = MaterialTheme.typography.labelMedium)
         TextButton(
-            modifier = Modifier.testTag(tag + "_previous"),
+            modifier = Modifier.testTag(tag + "_previous").semantics {
+                contentDescription = "$label, previous value ${"%02d".format(Locale.US, previous)}"
+            },
             enabled = !readOnly,
             onClick = {
                 if (previousIsValid) onChange(previous)
@@ -103,9 +107,14 @@ internal fun EndClockWheel(
         Text("%02d".format(Locale.US, value),
             color = if (canSelect(value)) validColor else invalidColor,
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.testTag(tag + "_value"))
+            modifier = Modifier.testTag(tag + "_value").semantics {
+                contentDescription = "$label, current value ${"%02d".format(Locale.US, value)}" +
+                    if (readOnly) ", read only" else ""
+            })
         TextButton(
-            modifier = Modifier.testTag(tag + "_next"),
+            modifier = Modifier.testTag(tag + "_next").semantics {
+                contentDescription = "$label, next value ${"%02d".format(Locale.US, next)}"
+            },
             enabled = !readOnly,
             onClick = {
                 if (nextIsValid) onChange(next)

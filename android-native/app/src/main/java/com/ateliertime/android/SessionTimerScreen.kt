@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -242,9 +243,10 @@ fun SessionTimerScreen(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text("Class controls", style = MaterialTheme.typography.titleSmall)
-                Row(modifier = Modifier.fillMaxWidth(),
+                val largeControlText = LocalDensity.current.fontScale >= 1.3f
+                FlowRow(modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
-                    verticalAlignment = Alignment.CenterVertically) {
+                    verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     val underway = view.status == TimerStatus.RUNNING ||
                         view.status == TimerStatus.PAUSED
                     // Run is allowed ONLY after approving its Class finish
@@ -260,7 +262,8 @@ fun SessionTimerScreen(
                             style = MaterialTheme.typography.labelSmall,
                         )
                     } else {
-                        Button(colors = atelierFilledColors(), onClick = onPauseResume, modifier = Modifier.weight(1f),
+                        Button(colors = atelierFilledColors(), onClick = onPauseResume, modifier = if (largeControlText) Modifier.widthIn(min = 150.dp)
+                                else Modifier.weight(1f),
                             contentPadding = PaddingValues(horizontal = 5.dp, vertical = 6.dp)) {
                             Text(if (view.status == TimerStatus.RUNNING) "Pause" else "Resume",
                                 maxLines = 1)
@@ -269,18 +272,21 @@ fun SessionTimerScreen(
                     OutlinedButton(colors = atelierOutlinedColors(), 
                         enabled = underway && canRestartSegment,
                         onClick = { confirmation = "restart" },
-                        modifier = Modifier.weight(1.45f),
+                        modifier = if (largeControlText) Modifier.widthIn(min = 150.dp)
+                            else Modifier.weight(1.45f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     ) { Text(restartTitle, style = MaterialTheme.typography.labelSmall) }
                     OutlinedButton(colors = atelierOutlinedColors(), 
                         enabled = underway,
                         onClick = { confirmation = "next" },
-                        modifier = Modifier.weight(0.8f),
+                        modifier = if (largeControlText) Modifier.widthIn(min = 150.dp)
+                            else Modifier.weight(0.8f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     ) { Text("Next", maxLines = 1) }
                     Button(
                         onClick = { confirmation = "exit" },
-                        modifier = Modifier.weight(0.85f),
+                        modifier = if (largeControlText) Modifier.widthIn(min = 150.dp)
+                            else Modifier.weight(0.85f),
                         contentPadding = PaddingValues(horizontal = 3.dp, vertical = 6.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -289,8 +295,9 @@ fun SessionTimerScreen(
                         ),
                     ) { Text("Exit", maxLines = 1, style = MaterialTheme.typography.labelSmall) }
                 }
-                Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly) {
+                FlowRow(modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     TextButton(colors = atelierTextColors(), onClick = { helpFor = "pause" },
                         contentPadding = PaddingValues(horizontal = 4.dp)) {
                         Text("Pause help", style = MaterialTheme.typography.labelSmall)

@@ -5,7 +5,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ateliertime.domain.FreeQuickPresets
@@ -62,8 +64,10 @@ fun FreeCountdownSection(
             if (editable) {
                 Text("Quick presets · select a duration, then press Start",
                     style = MaterialTheme.typography.labelMedium)
+                val largePresetText = LocalDensity.current.fontScale >= 1.3f
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    FreeQuickPresets.entries.chunked(4).forEach { choices ->
+                    FreeQuickPresets.entries.chunked(if (largePresetText) 2 else 4)
+                        .forEach { choices ->
                         Row(modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             choices.forEach { preset ->
@@ -75,15 +79,17 @@ fun FreeCountdownSection(
                                         minutes = preset.minutes
                                         seconds = preset.seconds
                                     },
-                                    modifier = Modifier.weight(1f).height(40.dp)
+                                    modifier = Modifier.weight(1f).heightIn(min = 48.dp)
                                         .testTag("free_preset_${preset.durationSeconds}"),
-                                    contentPadding = PaddingValues(horizontal = 0.dp),
+                                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
                                     colors = ButtonDefaults.outlinedButtonColors(
                                         containerColor = if (selected)
                                             MaterialTheme.colorScheme.secondaryContainer
                                         else MaterialTheme.colorScheme.surface,
                                     ),
-                                ) { Text(preset.label, fontSize = 11.sp, maxLines = 1) }
+                                ) { Text(preset.label,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    textAlign = TextAlign.Center, maxLines = 2) }
                             }
                         }
                     }

@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.testTag
 import java.util.UUID
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
@@ -648,7 +649,14 @@ fun SessionEditorScreen(
         // explicit lineHeight and breathing room for font scaling.
         // LTR is intentional even when the device uses a Hebrew locale.
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-            Row(modifier = Modifier.fillMaxWidth()) {
+            // Keep the accepted compact layout under normal font scaling.
+            // At large text settings allow horizontal tab scrolling instead
+            // of shrinking readable labels to unusable font sizes.
+            val largeNavigationText = LocalDensity.current.fontScale >= 1.3f
+            Row(modifier = Modifier.fillMaxWidth().then(
+                if (largeNavigationText) Modifier.horizontalScroll(rememberScrollState())
+                else Modifier
+            )) {
                 MainTab.entries.forEach { tab ->
                     val label = when (tab) {
                         MainTab.EDITOR -> "Editor"
@@ -671,7 +679,9 @@ fun SessionEditorScreen(
                         MainTab.SOUNDS, MainTab.ABOUT -> 0.80f
                     }
                     Column(
-                        modifier = Modifier.weight(tabWeight).testTag("top-tab-$label").selectable(
+                        modifier = (if (largeNavigationText) Modifier.widthIn(min = 104.dp)
+                            else Modifier.weight(tabWeight))
+                            .testTag("top-tab-$label").selectable(
                             selected = selected, onClick = { activeTab = tab },
                             role = Role.Tab,
                         ),
@@ -685,16 +695,24 @@ fun SessionEditorScreen(
                                 MainTab.FREE_TIMER -> "Free\nTimer"
                                 else -> label
                             }
-                            Text(displayLabel, color = contentColor,
-                                modifier = Modifier.fillMaxWidth(),
-                                lineHeight = 14.sp,
-                                autoSize = TextAutoSize.StepBased(
-                                    minFontSize = 8.sp, maxFontSize = 11.sp,
-                                    stepSize = 0.5.sp,
-                                ),
-                                maxLines = 2, softWrap = false,
-                                textAlign = TextAlign.Center,
-                                overflow = TextOverflow.Visible)
+                            if (largeNavigationText) {
+                                Text(displayLabel, color = contentColor,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    maxLines = 2, softWrap = true,
+                                    textAlign = TextAlign.Center)
+                            } else {
+                                Text(displayLabel, color = contentColor,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    lineHeight = 14.sp,
+                                    autoSize = TextAutoSize.StepBased(
+                                        minFontSize = 8.sp, maxFontSize = 11.sp,
+                                        stepSize = 0.5.sp,
+                                    ),
+                                    maxLines = 2, softWrap = false,
+                                    textAlign = TextAlign.Center,
+                                    overflow = TextOverflow.Visible)
+                            }
                         }
                         Box(modifier = Modifier.fillMaxWidth().height(2.dp).background(
                             if (selected) selectedColor else Color.Transparent))

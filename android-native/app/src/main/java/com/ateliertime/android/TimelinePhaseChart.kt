@@ -13,6 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ateliertime.domain.*
@@ -46,6 +48,30 @@ fun TimelinePhaseChart(
         .sumOf { it.durationSeconds }
     val pausedTotal = displaySegments.filter { it.kind == null }
         .sumOf { it.durationSeconds }
+    // Canvas content has an equivalent textual meaning for screen readers.
+    // Do not use a live region: an update every second would overwhelm TalkBack.
+    val accessibleTimeline = buildString {
+        append("Class timeline. Session time ")
+        append(chartTime(poseTotal))
+        append(", regular breaks ")
+        append(chartTime(normalTotal))
+        append(", special breaks ")
+        append(chartTime(specialTotal))
+        append(", summary ")
+        append(chartTime(summaryTotal))
+        if (pausedTotal > 0) {
+            append(", pauses ")
+            append(chartTime(pausedTotal))
+        }
+        if (runtimeTimeline != null) {
+            append(". Actual elapsed ")
+            append(chartTime(classElapsedSeconds ?: runtimeTimeline.elapsedSeconds))
+            if (classRemainingSeconds != null) {
+                append(", remaining ")
+                append(chartTime(classRemainingSeconds))
+            }
+        }
+    }
 
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp),
@@ -83,7 +109,9 @@ fun TimelinePhaseChart(
                 }
             }
             // D-116 schedule 44 dp -> 33 dp (three-quarters of its height).
-            Canvas(modifier = Modifier.fillMaxWidth().height(33.dp)) {
+            Canvas(modifier = Modifier.fillMaxWidth().height(33.dp)
+                .testTag("class_timeline_accessible_chart")
+                .semantics { contentDescription = accessibleTimeline }) {
                 val full = size.width
                 var cursorSeconds = 0
                 displaySegments.forEach { phase ->
