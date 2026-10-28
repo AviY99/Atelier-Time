@@ -1,5 +1,8 @@
 # Atelier Time
 
+> **DOCUMENTATION MAP:** [Branch roles, documentation structure and current handoff](docs/DOCUMENTATION_INDEX_AND_BRANCH_POLICY.md). This is the active Android Kotlin/Compose source branch. `main` is the documentation/history entrypoint; Stable 9 is an immutable snapshot. Begin with the compact [current status](docs/CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md), not outdated historical sections.
+
+
 > **LATEST CURRENT — Stable 9 / D-126 (2026-10-28):** Native Android Kotlin/Compose Timer and complete private JSONL diagnostics are user-accepted. Real Samsung QA: **243/243 JVM PASS**, **42/42 Android instrumentation PASS**, **285/285 combined**, Gradle 72 tasks successful, main/test APK SHA-256 OK; Saved Classes and Sounds preserved after tests (user confirmation). This is the same installed D-126/code20 build, not a new APK version. Immutable `stable/android-d126-qa9-tests-complete`; earlier Stable 8 branches unchanged. [Current status and Handoff](docs/CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md), [Stable 9 certificate](docs/STABLE9_D126_285_AUTOMATED_QA_ACCEPTANCE_2026_10_28.md). Old stage-status text below is historical.
 
 
