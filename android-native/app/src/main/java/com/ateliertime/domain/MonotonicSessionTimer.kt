@@ -373,7 +373,8 @@ class MonotonicSessionTimer(
                 it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
             }
             val insertedAlreadyStarted = activePhases.any { phase ->
-                phase.id.startsWith("runtime-added-") &&
+                (phase.id.startsWith("runtime-added-") ||
+                    phase.id.startsWith("runtime-tail-")) &&
                     elapsedBeforeRunMs >= phase.startSeconds.toLong() * 1_000L
             }
             val late = insertedAlreadyStarted || (firstFinal != null &&
@@ -535,16 +536,11 @@ class MonotonicSessionTimer(
             "Next cannot preserve the approved Class finish with the remaining " +
                 "future Sessions. No phase was skipped."
         }
-        // The approved Class end and correction are already validated by
-        // reflow. If late Next consumed the final planned Break, divide excess
-        // future Session time into regular Session/Break cycles rather than
-        // leaving one giant terminal Session. A split never touches the past.
-        val splitFuture = if (revision != null) {
-            FinalPairCompensation.splitExtendedTerminalPoseAfterNext(
-                session, revision.phases, enteredIndex = nextIndex)
-        } else activePhases
+        // One constraint solver has already allocated ALL unstarted work
+        // and Break cycles. Next can only apply approved automatic relocation
+        // of genuine unstarted Special Breaks after that atomic plan.
         val updatedFuture = SpecialBreakRebalancer.rebalance(
-            splitFuture,
+            revision?.phases ?: activePhases,
             firstUnstartedIndex = nextIndex,
             actualElapsedSeconds = ((now - (originalStartMs ?: now)) / 1_000L)
                 .coerceIn(0L, Int.MAX_VALUE.toLong()).toInt(),
