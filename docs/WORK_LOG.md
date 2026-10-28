@@ -1,3 +1,9 @@
+## 2026-10-28 — D-127 Stage 7 accessibility development
+
+2026-10-28 — D-127 Stage 7 accessibility **SOURCE COMMITTED / QA PENDING**. Development-only `D-127/versionCode21` implemented large-font tab navigation, wrapping Timer controls, accessible wheel and timeline descriptions, 48dp Free presets, and 3 new **UNRUN** Android UI tests. Source commit `b9d7064`; **not built, tested, installed, or accepted**. Installed Stable 9 stays D-126/code20 with prior 285/285 PASS; Saved Classes/Sounds and frozen stable refs untouched. Details: [D-127 Stage 7 record](D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
+
+Static palette sample contrasts calculated; no complete contrast audit or real-device validation yet. Shared documentation must also be synchronized to main; Android source stays on the development branch.
+
 ## 2026-10-27 — STABLE 7 USER DESIGNATION / REAL D-119 PHONE PASS
 
 ## 2026-10-28 — Stable 9 D-126 documentation synchronized across main and development
