@@ -17,7 +17,7 @@ class RunDiagnosticsInstrumentedTest {
         val archive = RunDiagnosticsArchive(testContext)
         val rules = SessionRules(
             id = "diagnostic-isolated", name = "isolated test class",
-            totalSeconds = 600, summarySeconds = 60, poseSeconds = 120,
+            totalSeconds = 660, summarySeconds = 60, poseSeconds = 120,
             shortBreakSeconds = 60, specialBreakSeconds = 120,
             specialBreakCount = 0, cycleStart = CycleStart.POSE_FIRST,
         )
@@ -28,7 +28,7 @@ class RunDiagnosticsInstrumentedTest {
         val before = archive.reports().map { it.name }.toSet()
         val recorder = archive.begin(
             approved, startEpochMs = 1_700_000_000_000L,
-            endEpochMs = 1_700_000_600_000L,
+            endEpochMs = 1_700_000_660_000L,
             sounds = SoundSettings(), alertsEnabled = true,
         )
         val generated = archive.reports().first { it.name !in before }
@@ -73,7 +73,7 @@ class RunDiagnosticsInstrumentedTest {
         val archive = RunDiagnosticsArchive(testContext)
         val rules = SessionRules(
             id = "diagnostic-incomplete", name = "incomplete run",
-            totalSeconds = 600, summarySeconds = 60, poseSeconds = 120,
+            totalSeconds = 660, summarySeconds = 60, poseSeconds = 120,
             shortBreakSeconds = 60, specialBreakSeconds = 120,
             specialBreakCount = 0,
         )
@@ -82,7 +82,7 @@ class RunDiagnosticsInstrumentedTest {
             engine.generate(rules, FinalPoseChoice.remainder()),
             acknowledgeWarnings = true)
         val old = archive.reports().map { it.name }.toSet()
-        archive.begin(approved, 1_700_000_500_000L, 1_700_001_100_000L,
+        archive.begin(approved, 1_700_000_500_000L, 1_700_001_160_000L,
             SoundSettings(), true)
         val file = archive.reports().first { it.name !in old }
         try {
@@ -99,7 +99,7 @@ class RunDiagnosticsInstrumentedTest {
         val archive = RunDiagnosticsArchive(testContext)
         val rules = SessionRules(
             id = "diagnostic-many-events", name = "many events",
-            totalSeconds = 600, summarySeconds = 60,
+            totalSeconds = 660, summarySeconds = 60,
             poseSeconds = 120, shortBreakSeconds = 60,
             specialBreakSeconds = 60, specialBreakCount = 0,
         )
@@ -111,7 +111,7 @@ class RunDiagnosticsInstrumentedTest {
             approved, approved.phases, correctionSeconds = -60)
         val old = archive.reports().map { it.name }.toSet()
         val recorder = archive.begin(approved, 1_700_000_000_000L,
-            1_700_000_660_000L, SoundSettings(), true)
+            1_700_000_720_000L, SoundSettings(), true)
         val file = archive.reports().first { it.name !in old }
         try {
             recorder.event("Start", before = null, after = null,
