@@ -443,6 +443,15 @@ fun SessionEditorScreen(
         }
     }
 
+    LaunchedEffect(soundSettings, soundEnabled) {
+        // A settings change during an active Class belongs in that Run's
+        // private report even when no Class action occurs at that instant.
+        try { currentReport?.soundChange(soundSettings, soundEnabled) }
+        catch (failure: Exception) {
+            diagnosticError = "Could not save sound setting change."
+        }
+    }
+
     LaunchedEffect(liveTimer, freeTimer, soundSettings, soundEnabled) {
         while (true) {
             val nowEpochMs = System.currentTimeMillis()
@@ -477,6 +486,8 @@ fun SessionEditorScreen(
                         soundSettings.secondsFor(tick.cue),
                         useAlarmVolume = soundSettings.classAlertsUseAlarmVolume) { message ->
                         melodyError = message
+                        recordClassEvent("Audio error", tick.view, tick.view,
+                            rejectedReason = message)
                     }
                 }
                 if (tick.view.status == TimerStatus.FINISHED) {
@@ -1167,6 +1178,7 @@ fun SessionEditorScreen(
                                 libraryRevision += 1
                             },
                         )
+                        diagnosticArchive?.let { RunDiagnosticsLibrary(it) }
                     }
                 } else {
                     SessionTimerScreen(
