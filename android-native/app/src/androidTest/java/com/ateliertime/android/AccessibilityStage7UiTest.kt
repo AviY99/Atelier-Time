@@ -112,7 +112,10 @@ class AccessibilityStage7UiTest {
         // shrink from their 94dp default rather than clip the last column.
         listOf("free_hours", "free_minutes", "free_seconds").forEach { tag ->
             val wheel = compose.onNodeWithTag(tag).assertIsDisplayed()
-            val actualWidth = wheel.getUnclippedBoundsInRoot().width
+            val bounds = wheel.getUnclippedBoundsInRoot()
+            // DpRect exposes Dp left/right values; subtraction yields Dp.
+            // Avoid the optional `androidx.compose.ui.unit.width` extension import.
+            val actualWidth = bounds.right - bounds.left
             assertTrue("$tag wheel width $actualWidth exceeds 90.dp", actualWidth <= 90.dp)
         }
     }
