@@ -1,5 +1,15 @@
 # Atelier Time — D-127 Stage 7 accessibility implementation / QA gate
 
+## 2026-10-29 — GitHub-hosted automated D-127 compile and accessible reports
+
+**Architecture change:** GitHub Actions is now the primary source-only Android compile gate. A free standard GitHub-hosted runner for this **public** repository compiles `android-native` on relevant development-branch code changes and saves full build logs in the Actions run plus a strictly redacted `d127-compiler-diagnostics` artifact (30-day retention). The GitHub connector can inspect the run, logs and artifact **directly**, without phone Git push credentials, local log handoffs or user uploads. [Workflow](https://github.com/AviY99/Atelier-Time/actions/workflows/d127-android-compile.yml) and [redaction source](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/.github/scripts/d127_extract_diagnostics.py).
+
+**What this does and does not prove:** this is an independent **cloud build of the same Git revision**, NOT an upload of the previously failed Samsung build log. It does not install APKs, execute the old 285 tests, run the six new Android instrumentation methods, prove physical Samsung compatibility, touch app data or change Stable 9. The old on-phone Git push failed due to phone-side authorization or branch rejection; the cloud compile route avoids that dependency for future source compile diagnostics. Do not ask user to upload logs manually.
+
+**Actual runs:** first [Actions run #1](https://github.com/AviY99/Atelier-Time/actions/runs/40889107144) automatically started, preserved its logs/artifact and failed while provisioning SDK because an obsolete action requested a nonexistent SDK package `tools` (not Kotlin source). Updated the workflow to use the hosted runner's preinstalled Android SDK. Second [run #2](https://github.com/AviY99/Atelier-Time/actions/runs/40889219808) reached Gradle/Kotlin compilation; verify its final status and fix from its exact GitHub log before attributing a compiler PASS or FAIL.
+
+
+
 ## 2026-10-29 — phone report generated but Git push FAILED; immediate handoff path
 
 The user ran the previously prepared `--existing` reporter. Samsung screenshot confirms `PRIVATE raw log retained` and `PUBLIC redacted preview` exist under `/storage/emulated/0/Download`. **Push failed** with `UPLOAD FAILED: Git push not authorized or branch changed`. Repository review verifies the report branch exists, is not marked protected, and repository rulesets are empty; branch head remained unchanged, making missing phone-side **write authentication the likely cause, not a proven root cause**. No report is available on GitHub yet. Do not run Gradle again or rerun reporter merely to recover the same already-generated report.
