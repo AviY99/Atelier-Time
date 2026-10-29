@@ -1,3 +1,9 @@
+## 2026-10-29 — D-127 Stage 7 targeted QA: five NEW tests written, 0 executed
+
+D-127/code21 remains unbuilt/uninstalled, with five NEW authored and UNRUN Android UI accessibility tests (original three plus selected-preset and narrow-wheel checks). Source fixes added on 2026-10-29: stack three Editor numeric field pairs at fontScale >=1.3 or inner width <320dp; size Free HH:MM:SS wheels to available card width; expose preset selection and blocked clock values to TalkBack. A build-only CoGo script is committed but NOT RUN. No Android Gradle build, AndroidTest execution, TalkBack exploration or user acceptance is claimed. Installed Stable 9 stays D-126/code20 (historical 285/285 PASS); frozen branches and Saved Classes/Sounds were not touched. [Detailed QA record](D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
+
+Required next evidence: D-127 UI APK + AndroidTest APK compile on the existing Android/CoGo toolchain; execute ONLY new targeted `AccessibilityStage7UiTest` on device; record real 100%/130%/200% font-scale narrow/normal displays, Day/Night contrast, 48dp targets, talkback focus/labels and no unsolicited tick announcements. Any in-place update requires its own approval and post-update Saved Classes/Sounds verification. Avoid retesting the previous D-126 285/285 suite without a concrete regression reason.
+
 ## D-127 Stage 7 QA plan — NOT EXECUTED (2026-10-28)
 
 2026-10-28 — D-127 Stage 7 accessibility **SOURCE COMMITTED / QA PENDING**. Development-only `D-127/versionCode21` implemented large-font tab navigation, wrapping Timer controls, accessible wheel and timeline descriptions, 48dp Free presets, and 3 new **UNRUN** Android UI tests. Source commit `b9d7064`; **not built, tested, installed, or accepted**. Installed Stable 9 stays D-126/code20 with prior 285/285 PASS; Saved Classes/Sounds and frozen stable refs untouched. Details: [D-127 Stage 7 record](D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
