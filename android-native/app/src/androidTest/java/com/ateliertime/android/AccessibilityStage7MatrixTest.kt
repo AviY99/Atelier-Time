@@ -79,7 +79,6 @@ class AccessibilityStage7MatrixTest {
         "Editor", "Programed Timer", "Free Timer", "Sound", "Design", "About"
     )
 
-    private fun isolatedEditor() = Unit
 
     @Test fun font100AllSixTabsRemainReachable() {
         render(1.0f) {
