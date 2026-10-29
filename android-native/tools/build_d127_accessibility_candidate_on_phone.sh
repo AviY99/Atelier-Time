@@ -36,26 +36,28 @@ fi
 downloads="/storage/emulated/0/Download"
 mkdir -p "$downloads"
 log="$downloads/Atelier-Time-D127-Stage7-build.log"
-# Publish a minimal, privacy-redacted report to the dedicated diagnostics
-# branch on BOTH success and failure. Never publish the full raw build log.
-# Never mask the real Gradle/build exit code if GitHub authentication fails.
-publish_d127_result() {
+# Cost policy: compile ONLY on Samsung. Never auto-upload a log, push
+# to GitHub or trigger a hosted build; phone Git write access is unverified.
+# On failure show the existing log's Kotlin diagnostics in the terminal, as
+# in the previously approved screenshot QA workflow. Preserve exit status.
+show_d127_failure() {
   result=$?
   trap - EXIT
-  if [[ -s "$log" ]]; then
-    if [[ "$result" -eq 0 ]]; then
-      bash tools/publish_d127_build_diagnostics.sh --passed ||
-        echo "WARNING: diagnostics remain in Downloads; GitHub upload failed."
+  if [[ "$result" -ne 0 ]]; then
+    echo "D-127 LOCAL BUILD FAILED (status $result)."
+    if [[ -s "$log" ]]; then
+      bash tools/show_d127_build_errors_on_phone.sh ||
+        echo "Saved full log: $log"
     else
-      bash tools/publish_d127_build_diagnostics.sh --failed ||
-        echo "WARNING: diagnostics remain in Downloads; GitHub upload failed."
+      echo "No build log was produced."
     fi
   fi
   exit "$result"
 }
-trap publish_d127_result EXIT
-echo "D-127 targeted UI compilation + two APKs. NO INSTALL; NO JVM or device test run."
-echo "Raw log LOCAL ONLY; redacted compiler locations uploaded to a diagnostics-only branch."
+trap show_d127_failure EXIT
+echo "D-127 local phone compilation + two APKs. NO INSTALL; NO JVM/device test run."
+echo "Full log stays in Downloads; failures are displayed in the terminal."
+echo "NO GitHub Actions; NO Git push or automatic remote upload."
 bash "$gradle" "-Pandroid.aapt2FromMavenOverride=$aapt2" \
   :app:assembleDebug :app:assembleDebugAndroidTest \
   --console=plain --no-daemon 2>&1 | tee "$log"
