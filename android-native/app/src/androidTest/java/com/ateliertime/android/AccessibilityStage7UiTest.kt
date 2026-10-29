@@ -13,7 +13,7 @@ import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.assertWidthIsAtMost
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -111,7 +111,9 @@ class AccessibilityStage7UiTest {
         // A 280dp card has 256dp after horizontal padding. The wheels must
         // shrink from their 94dp default rather than clip the last column.
         listOf("free_hours", "free_minutes", "free_seconds").forEach { tag ->
-            compose.onNodeWithTag(tag).assertIsDisplayed().assertWidthIsAtMost(90.dp)
+            val wheel = compose.onNodeWithTag(tag).assertIsDisplayed()
+            val actualWidth = wheel.getUnclippedBoundsInRoot().width
+            assertTrue("$tag wheel width $actualWidth exceeds 90.dp", actualWidth <= 90.dp)
         }
     }
 
