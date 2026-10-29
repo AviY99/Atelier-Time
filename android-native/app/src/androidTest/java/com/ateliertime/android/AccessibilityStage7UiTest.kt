@@ -1,13 +1,19 @@
 package com.ateliertime.android
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertWidthIsAtMost
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -69,6 +75,40 @@ class AccessibilityStage7UiTest {
         assertTrue(description.contains("Session time 01:00"))
         assertTrue(description.contains("regular breaks 00:30"))
         assertTrue(description.contains("summary 00:30"))
+    }
+
+    @Test fun selectedFreePresetIsExposedToScreenReaders() {
+        compose.setContent {
+            MaterialTheme {
+                FreeCountdownSection(
+                    view = FreeTimerView(FreeTimerStatus.READY, 0, 0),
+                    onStart = { _, _, _ -> },
+                    onPauseResume = {},
+                    onExit = {},
+                )
+            }
+        }
+        compose.onNodeWithTag("free_preset_60").performClick().assertIsSelected()
+    }
+
+    @Test fun narrowFreeTimerFitsAllThreeWheels() {
+        compose.setContent {
+            MaterialTheme {
+                Box(Modifier.width(280.dp)) {
+                    FreeCountdownSection(
+                        view = FreeTimerView(FreeTimerStatus.READY, 0, 0),
+                        onStart = { _, _, _ -> },
+                        onPauseResume = {},
+                        onExit = {},
+                    )
+                }
+            }
+        }
+        // A 280dp card has 256dp after horizontal padding. The wheels must
+        // shrink from their 94dp default rather than clip the last column.
+        listOf("free_hours", "free_minutes", "free_seconds").forEach { tag ->
+            compose.onNodeWithTag(tag).assertIsDisplayed().assertWidthIsAtMost(90.dp)
+        }
     }
 
     @Test fun freePresetsHaveAtLeast48DpTouchHeight() {
