@@ -35,6 +35,9 @@ report="$downloads/Atelier-Time-D127-Stage7-public-diagnostics.txt"
 # paths stay in the private Downloads log. The repo is PUBLIC.
 stamp="$(date -u +%Y%m%dT%H%M%SZ)"
 source_sha="$(git rev-parse HEAD)"
+# A previously captured log predates this reporter; its build SHA was not
+# recorded on failed builds. Never falsely attribute it to the updated HEAD.
+[[ "$1" == "--existing" ]] && source_sha="UNKNOWN_ORIGINAL_BUILD_SHA"
 {
   echo "Atelier Time public, redacted D-127 Android build diagnostics"
   echo "schema=compiler-locations-v1"
