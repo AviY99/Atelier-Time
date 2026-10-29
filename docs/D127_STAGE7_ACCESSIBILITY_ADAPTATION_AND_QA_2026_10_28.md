@@ -1,5 +1,11 @@
 # Atelier Time — D-127 Stage 7 accessibility implementation / QA gate
 
+## 2026-10-29 — final handoff for new chat (supersedes dated entries below)
+
+The user closed this conversation. **Use [HANDOFF_D127_STAGE7_TO_NEXT_CHAT_2026_10_29.md](HANDOFF_D127_STAGE7_TO_NEXT_CHAT_2026_10_29.md) as the authoritative next-chat starting point.** Latest **physical Samsung** build failed at `:app:compileDebugAndroidTestKotlin` after 19 seconds (61 tasks; 1 executed / 60 up-to-date), with `AccessibilityStage7UiTest.kt` errors at 115:64 and 116:83. **Source-only test correction already committed** as [`62617aa`](https://github.com/AviY99/Atelier-Time/commit/62617aa90005abfa9e1ed2845e9368c2952f3c98): `getUnclippedBoundsInRoot()` returns a `DpRect`, width is computed as `bounds.right - bounds.left`, then compared with `90.dp`. All six authored accessibility tests preserved. **No post-fix Samsung build or test has executed, Stage 7 remains open**. Next phone-only build from CoGo: `git pull --ff-only && bash tools/build_d127_accessibility_candidate_on_phone.sh`. Cost policy forbids GitHub Actions/cloud compilation; no install, data clearing or 285-test rerun. Frozen Stable 9 D-126/code20 remains approved and unchanged.
+
+
+
 ## 2026-10-29 — Samsung D-127 AndroidTest second compile failure, test-only fix
 
 New local CoGo screenshot: `BUILD FAILED in 19s` with 61 Gradle tasks (1 executed, 60 up-to-date). The **only two shown Kotlin errors** are `AccessibilityStage7UiTest.kt:115:64` (no overload candidates) and `:116:83` (invalid `compareTo` operator). Both came from accessing `getUnclippedBoundsInRoot().width` without importing the `androidx.compose.ui.unit.width` extension; previous test-only fix did not compile. Corrected only AndroidTest source in [`62617aa`](https://github.com/AviY99/Atelier-Time/commit/62617aa90005abfa9e1ed2845e9368c2952f3c98): calculate `DpRect` width using `bounds.right - bounds.left`, which produces `Dp`, then compare with `90.dp`. Six Stage 7 test methods retained. GitHub readback confirms code; **post-fix Samsung build has NOT RUN**, six tests remain unexecuted, no install, and GitHub Actions remains disabled by the user's budget policy. Next: pull updated dev branch and run the established phone-only build script once; errors print locally upon failure. Stable 9 D-126 is immutable.
