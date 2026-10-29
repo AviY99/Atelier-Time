@@ -93,7 +93,9 @@ internal fun EndClockWheel(
         Text(label, style = MaterialTheme.typography.labelMedium)
         TextButton(
             modifier = Modifier.testTag(tag + "_previous").semantics {
-                contentDescription = "$label, previous value ${"%02d".format(Locale.US, previous)}"
+                contentDescription = "$label, previous value ${"%02d".format(Locale.US, previous)}" +
+                    if (readOnly) ", read only" else if (!previousIsValid)
+                        ", blocked, tap for explanation" else ""
             },
             enabled = !readOnly,
             onClick = {
@@ -115,7 +117,9 @@ internal fun EndClockWheel(
             })
         TextButton(
             modifier = Modifier.testTag(tag + "_next").semantics {
-                contentDescription = "$label, next value ${"%02d".format(Locale.US, next)}"
+                contentDescription = "$label, next value ${"%02d".format(Locale.US, next)}" +
+                    if (readOnly) ", read only" else if (!nextIsValid)
+                        ", blocked, tap for explanation" else ""
             },
             enabled = !readOnly,
             onClick = {
