@@ -1,3 +1,7 @@
+## 2026-10-29 — Stage 7 D-127 follow-through (source-only, pending phone QA)
+
+Read the previously prepared D-127 code/QA record first rather than redoing it. Implemented three responsive Editor input pairs, narrow-card Free wheel sizing and extra TalkBack states for preset selection and infeasible finish choices; added two isolated Android Compose tests to the original three (five new methods, none executed). Added a non-installing D-127 CoGo build script. Production timing/domain/sound/persistence and frozen Stable 9 remain untouched. No Android compilation, instrumentation, phone install or actual TalkBack results occurred. Canonical docs synchronized to main; details in [D-127 Stage 7](D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
+
 ## 2026-10-28 — D-127 Stage 7 accessibility development
 
 2026-10-28 — D-127 Stage 7 accessibility **SOURCE COMMITTED / QA PENDING**. Development-only `D-127/versionCode21` implemented large-font tab navigation, wrapping Timer controls, accessible wheel and timeline descriptions, 48dp Free presets, and 3 new **UNRUN** Android UI tests. Source commit `b9d7064`; **not built, tested, installed, or accepted**. Installed Stable 9 stays D-126/code20 with prior 285/285 PASS; Saved Classes/Sounds and frozen stable refs untouched. Details: [D-127 Stage 7 record](D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
