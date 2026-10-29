@@ -1,5 +1,11 @@
 # Atelier Time — D-127 Stage 7 accessibility implementation / QA gate
 
+## 2026-10-29 — Samsung D-127 AndroidTest compile FAIL repaired in test source
+
+A real on-phone local build screenshot shows `:app:compileDebugAndroidTestKotlin` failed after 47s. Two actual compiler errors: `AccessibilityStage7UiTest.kt:16:33` and `:114:60`, both `Unresolved reference 'assertWidthIsAtMost'`. `SessionEditorScreen.kt:245:36` (unnecessary safe call) and `:951:29` (redundant Elvis) are warnings, not build blockers. Inspected current AndroidTest source and confirmed the nonexistent test assertion is used once plus its import. **Fixed source-only** in [`6839242`](https://github.com/AviY99/Atelier-Time/commit/68392421f2a88bfcca1094260d11638f06182167): replace the unsupported `assertWidthIsAtMost` with Compose's documented `getUnclippedBoundsInRoot().width` and a standard JUnit `assertTrue(actualWidth <= 90.dp)`. All six existing tests remain; the main app code, timer and persistence were not touched. GitHub readback verified patch. **No post-fix Samsung rebuild, no AndroidTest execution, no GitHub Actions/cloud build and no installation** were performed. Next: `git pull --ff-only && bash tools/build_d127_accessibility_candidate_on_phone.sh` in the existing Samsung Code on the Go `android-native` folder. The phone build script automatically prints new Kotlin errors on failure. Stable 9 stays frozen D-126/code20. **Cost policy: Samsung-only builds, GitHub code/docs only.**
+
+
+
 ## 2026-10-29 — phone-only QA restored after user budget directive
 
 The user explicitly reaffirmed: GitHub Actions/cloud compilation is prohibited because monthly GitHub spend already exceeded budget. **Build only on Samsung CoGo.** The workflow was removed (`0f2aab9`), unused cloud diagnostics helper removed (`b15ed1f`), and both historical GitHub Actions attempts are complete; no further cloud builds. Existing Actions run #2 logs had identified `MelodySettingsSection.kt` unresolved `testTag` at lines 158 and 195. The missing `testTag` import was fixed at `6837de7` **source-only**, with no claimed new Android compilation or test PASS.
