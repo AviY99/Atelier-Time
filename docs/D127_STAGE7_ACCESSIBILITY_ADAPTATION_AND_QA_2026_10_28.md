@@ -1,5 +1,9 @@
 # Atelier Time — D-127 Stage 7 accessibility implementation / QA gate
 
+> **CURRENT NON-NEGOTIABLE COST POLICY — 2026-10-29:** Per user instruction, **NO GitHub Actions / cloud Android builds or CI reactivation** due to monthly spending overrun. Removed workflow `.github/workflows/d127-android-compile.yml` (commit `0f2aab9`) and unused CI extractor (commit `b15ed1f`); verified two historical Actions runs completed, neither active. **Compile only locally on Samsung Code on the Go**. Source-only Kotlin fix for missing `testTag` import in `MelodySettingsSection.kt` was committed as [`6837de7`](https://github.com/AviY99/Atelier-Time/commit/6837de78741e1c56d9b7978096dd5cf064ca6477), **not yet rebuilt on phone**. Redacted diagnostic upload to GitHub requires ONE-TIME phone-side authorization; it is NOT operational yet (last git push failed); do not pretend remote reports are automatically accessible. A daily automation monitors repository Actions activity, NOT actual billed dollars; GitHub account Billing/Budgets access is not exposed by connector. [Mandatory cost/build policy](COST_AND_BUILD_POLICY_2026_10_29.md). Stable 9 D-126 unchanged.
+
+
+
 ## 2026-10-29 — GitHub-hosted automated D-127 compile and accessible reports
 
 **Architecture change:** GitHub Actions is now the primary source-only Android compile gate. A free standard GitHub-hosted runner for this **public** repository compiles `android-native` on relevant development-branch code changes and saves full build logs in the Actions run plus a strictly redacted `d127-compiler-diagnostics` artifact (30-day retention). The GitHub connector can inspect the run, logs and artifact **directly**, without phone Git push credentials, local log handoffs or user uploads. [Workflow](https://github.com/AviY99/Atelier-Time/actions/workflows/d127-android-compile.yml) and [redaction source](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/.github/scripts/d127_extract_diagnostics.py).
