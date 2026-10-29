@@ -7,6 +7,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -86,7 +88,8 @@ fun FreeCountdownSection(
                                         seconds = preset.seconds
                                     },
                                     modifier = Modifier.weight(1f).heightIn(min = 48.dp)
-                                        .testTag("free_preset_${preset.durationSeconds}"),
+                                        .testTag("free_preset_${preset.durationSeconds}")
+                                        .semantics { this.selected = selected },
                                     contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
                                     colors = ButtonDefaults.outlinedButtonColors(
                                         containerColor = if (selected)
