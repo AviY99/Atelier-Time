@@ -1,9 +1,0 @@
-# Independent Flutter package analysis context.
-#
-# Keep Flutter files IN scope when running flutter analyze here on a
-# Flutter-capable machine. Unlike the root Dart-only package, do not exclude
-# Flutter UI or widget tests; any real Flutter errors must be fixed.
-analyzer:
-  exclude:
-    - build/**
-    - .dart_tool/**
