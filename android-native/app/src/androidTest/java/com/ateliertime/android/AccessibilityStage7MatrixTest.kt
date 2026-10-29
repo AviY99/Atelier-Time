@@ -35,6 +35,7 @@ import com.ateliertime.domain.FreeTimerStatus
 import com.ateliertime.domain.FreeTimerView
 import com.ateliertime.domain.PhaseKind
 import com.ateliertime.domain.SchedulePhase
+import com.ateliertime.domain.SoundAssignmentMode
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -190,7 +191,10 @@ class AccessibilityStage7MatrixTest {
     }
 
     @Test fun font200SoundSlidersRetainSpokenPurposeAndSeconds() {
-        var soundSettings by mutableStateOf(isolatedSounds.loadSettings())
+        // Class C duration is shown only in SEPARATE mode; use isolated in-memory settings.
+        var soundSettings by mutableStateOf(
+            isolatedSounds.loadSettings().setAssignmentMode(SoundAssignmentMode.SEPARATE)
+        )
         render(2.0f) {
             Column(Modifier.width(320.dp).verticalScroll(rememberScrollState())) {
                 MelodySettingsSection(
