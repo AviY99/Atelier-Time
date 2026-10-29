@@ -1,5 +1,15 @@
 # Atelier Time — D-127 Stage 7 accessibility implementation / QA gate
 
+## 2026-10-29 — phone report generated but Git push FAILED; immediate handoff path
+
+The user ran the previously prepared `--existing` reporter. Samsung screenshot confirms `PRIVATE raw log retained` and `PUBLIC redacted preview` exist under `/storage/emulated/0/Download`. **Push failed** with `UPLOAD FAILED: Git push not authorized or branch changed`. Repository review verifies the report branch exists, is not marked protected, and repository rulesets are empty; branch head remained unchanged, making missing phone-side **write authentication the likely cause, not a proven root cause**. No report is available on GitHub yet. Do not run Gradle again or rerun reporter merely to recover the same already-generated report.
+
+Follow-up code commit [`047968f`](https://github.com/AviY99/Atelier-Time/commit/047968fd3d589406a2f2062f108ee40cb3a243ad) improves the publisher: capture private Git push output locally, print only an allowlisted reason category, show up to 20 already redacted compiler locations, and direct the user to share **only** `Atelier-Time-D127-Stage7-public-diagnostics.txt` from Downloads in this chat when phone Git push is not authorized. The assistant has connected GitHub write permissions and can upload a user-supplied, reviewed report after receipt. This does not remotely access the device or create an automatic file transport without the phone's push credentials.
+
+D-127 latest observed build is still FAIL at `:app:compileDebugKotlin`; exact Kotlin compiler diagnostics remain unread by the assistant. Six targeted Stage 7 UI tests remain NOT RUN. Installed Stable 9 remains D-126/code20 with data intact; no edits to frozen branches.
+
+
+
 ## 2026-10-29 — diagnostics delivery branch initialized and verified
 
 The dedicated public reporting branch [`diagnostics/d127-build-reports`](https://github.com/AviY99/Atelier-Time/tree/diagnostics/d127-build-reports) has now been **created in GitHub and independently read back** at `0695d12b2056a35a0107625848c18392029535ef`. It initially contains only a report-privacy README; **there is still no real D-127 compiler report**. Existing `publish_d127_build_diagnostics.sh` and the D-127 Gradle wrapper were already committed before this follow-up, so were not duplicated. The build wrapper invokes the redacted publisher on Gradle PASS/FAIL; actual publication requires push credentials on Samsung and has not been tested there.
