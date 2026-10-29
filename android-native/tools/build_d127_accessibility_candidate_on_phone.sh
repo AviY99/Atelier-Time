@@ -12,6 +12,17 @@ if [[ -n "$(git status --porcelain --untracked-files=no)" ]] ||
   echo "ERROR: inspect local modifications before building." >&2
   git status --short; exit 2
 fi
+# Guard against building the older five-test source or an unrelated branch.
+stage7_code_commit="c83c19738ea70bba0223acd84c46c93411276b7a"
+if ! git merge-base --is-ancestor "$stage7_code_commit" HEAD; then
+  echo "ERROR: D-127 six-test accessibility source commit is missing." >&2; exit 2
+fi
+test_source="app/src/androidTest/java/com/ateliertime/android/AccessibilityStage7UiTest.kt"
+test_count="$(grep -Ec '^[[:space:]]*@Test fun ' "$test_source")"
+if [[ "$test_count" != "6" ]]; then
+  echo "ERROR: expected six new targeted accessibility test methods, got $test_count." >&2
+  exit 2
+fi
 if ! grep -Eq 'versionName[[:space:]]*=[[:space:]]*"D-127"' app/build.gradle.kts ||
    ! grep -Eq 'versionCode[[:space:]]*=[[:space:]]*21([[:space:]]|$)' app/build.gradle.kts; then
   echo "ERROR: expected D-127/versionCode 21 source." >&2; exit 2
@@ -42,9 +53,18 @@ manifest="$downloads/Atelier-Time-D127-Stage7-build-manifest.txt"
 {
   printf 'version=D-127\ncode=21\nbranch=android-native-kotlin-compose\n'
   printf 'source_commit=%s\n' "$(git rev-parse HEAD)"
+  printf 'stage7_code_commit=%s\n' "$stage7_code_commit"
+  printf 'stage7_test_count=%s\n' "$test_count"
   printf 'app_sha256=%s\n' "$(sha256sum "$regular" | awk '{print $1}')"
   printf 'test_sha256=%s\n' "$(sha256sum "$tests" | awk '{print $1}')"
   printf 'qa_state=build-only; android_instrumentation_not_run; installation_not_performed\n'
 } > "$manifest"
+# Package a guarded, optional device-test runner. It refuses to run unless
+# the main D-127 application was separately approved and already installed.
+runner_src="tools/termux_run_d127_targeted_accessibility_qa.sh"
+runner_copy="$downloads/Atelier-Time-D127-TargetedQA.sh"
+[[ -s "$runner_src" ]] || { echo "ERROR: missing guarded test runner." >&2; exit 3; }
+cp "$runner_src" "$runner_copy"
 echo "COMPILE/BUILD PASS: $regular ; $tests ; $manifest"
+echo "Guarded targeted AndroidTest runner copied: $runner_copy (NOT executed)"
 echo "No APK installed, app data untouched. Separate device/visual QA remains mandatory."
