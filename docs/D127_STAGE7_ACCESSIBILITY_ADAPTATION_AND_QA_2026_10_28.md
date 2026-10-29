@@ -1,5 +1,15 @@
 # Atelier Time — D-127 Stage 7 accessibility implementation / QA gate
 
+## 2026-10-29 — diagnostics delivery branch initialized and verified
+
+The dedicated public reporting branch [`diagnostics/d127-build-reports`](https://github.com/AviY99/Atelier-Time/tree/diagnostics/d127-build-reports) has now been **created in GitHub and independently read back** at `0695d12b2056a35a0107625848c18392029535ef`. It initially contains only a report-privacy README; **there is still no real D-127 compiler report**. Existing `publish_d127_build_diagnostics.sh` and the D-127 Gradle wrapper were already committed before this follow-up, so were not duplicated. The build wrapper invokes the redacted publisher on Gradle PASS/FAIL; actual publication requires push credentials on Samsung and has not been tested there.
+
+**Recovery of the previous failed build without rebuilding:** run `git pull --ff-only && bash tools/publish_d127_build_diagnostics.sh --existing` from the Samsung CoGo `android-native` checkout. This reuses the old local `Download/Atelier-Time-D127-Stage7-build.log`, labels the original source SHA as unknown, and attempts to upload only allowlisted Kotlin filename/line/error categories to the already-created report branch. It does **not** rerun Gradle, install APKs, clear data or repeat old tests. Verify an actual `GITHUB UPLOAD VERIFIED` URL before treating the report as accessible. Never publish the raw log to the public repository.
+
+D-127's last observed build remains **FAIL** at `:app:compileDebugKotlin`, and exact compiler diagnostics remain unverified until the phone's report is uploaded. Installed Stable 9 D-126/code20 remains unchanged.
+
+
+
 ## 2026-10-29 — build-report delivery repaired; past failed log still on Samsung
 
 **Additional off-device verification:** ran an isolated synthetic AWK parse over three representative Kotlin error formats (reported only `SessionTimerScreen.kt:247 | experimental-api`, `SoundOptions.kt:12 | unresolved-reference` and `Other.kt:9 | type-mismatch`; deliberately excluded a fabricated bearer-token line). Also exercised git plumbing against a disposable local bare repository: a diagnostics-only report branch was created, its file read back and the source working tree remained clean. These tests verify the core redaction and isolated-branch mechanism, **not** Android/CoGo execution, remote GitHub permissions or D-127 compilation. The public diagnostic branch will not exist until the phone's authorized git push succeeds.
