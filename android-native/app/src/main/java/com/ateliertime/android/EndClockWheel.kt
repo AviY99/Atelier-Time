@@ -15,6 +15,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.util.Locale
 import kotlin.math.abs
@@ -40,6 +41,7 @@ internal fun EndClockWheel(
     onBlocked: (Int) -> Unit,
     onChange: (Int) -> Unit,
     readOnly: Boolean = false,
+    wheelWidth: Dp = 94.dp,
 ) {
     val currentValue = rememberUpdatedState(value)
     val currentCanSelect = rememberUpdatedState(canSelect)
@@ -55,7 +57,7 @@ internal fun EndClockWheel(
     val nextIsValid = !readOnly && canSelect(next)
     val neighborColor = MaterialTheme.colorScheme.onSurfaceVariant
     Column(
-        modifier = Modifier.width(94.dp).testTag(tag)
+        modifier = Modifier.width(wheelWidth).testTag(tag)
             .then(if (readOnly) Modifier else Modifier.pointerInput(limit) {
                 var travel = 0f
                 var chosenValue = currentValue.value
