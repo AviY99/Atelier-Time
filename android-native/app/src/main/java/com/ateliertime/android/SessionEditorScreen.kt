@@ -787,10 +787,10 @@ fun SessionEditorScreen(
             label = { Text("Class title") }, modifier = Modifier.fillMaxWidth(),
             singleLine = true,
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MinuteInput("Total class duration (min)", total, { total = it; invalidate() }, Modifier.weight(1f))
-            MinuteInput("End-of-class summary (min)", summary, { summary = it; invalidate() }, Modifier.weight(1f))
-        }
+        AdaptiveMinuteInputPair(
+            "Total class duration (min)", total, { total = it; invalidate() },
+            "End-of-class summary (min)", summary, { summary = it; invalidate() },
+        )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Opening session groups", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
@@ -815,14 +815,14 @@ fun SessionEditorScreen(
                         "the initial regular break, only one break occurs."
                 }) { Text("Help") }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                MinuteInput("Number of sessions", group.count, {
+            AdaptiveMinuteInputPair(
+                "Number of sessions", group.count, {
                     opening[index] = group.copy(count = it); invalidate()
-                }, Modifier.weight(1f))
-                MinuteInput("Each session duration (min)", group.minutes, {
+                },
+                "Each session duration (min)", group.minutes, {
                     opening[index] = group.copy(minutes = it); invalidate()
-                }, Modifier.weight(1f))
-            }
+                },
+            )
             MinuteInput(
                 "Break after group (min)" +
                     if (index == opening.lastIndex) " · required" else " · 0 allowed",
@@ -917,12 +917,10 @@ fun SessionEditorScreen(
                     "Break or a manually placed Break is never moved."
             }) { Text("Help") }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MinuteInput("Special break duration (min)", special,
-                { special = it; invalidate() }, Modifier.weight(1f))
-            MinuteInput("Number of special breaks", count,
-                { count = it; invalidate() }, Modifier.weight(1f))
-        }
+        AdaptiveMinuteInputPair(
+            "Special break duration (min)", special, { special = it; invalidate() },
+            "Number of special breaks", count, { count = it; invalidate() },
+        )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Automatic special-break placement", modifier = Modifier.weight(1f))
             Switch(checked = automatic,
@@ -1569,6 +1567,36 @@ fun SessionEditorScreen(
         )
     }
     }
+    }
+}
+
+/**
+ * Keep two-column Editor inputs on approved normal-width displays, but prevent
+ * clipped long labels when Android font scaling is large or the screen is narrow.
+ * Pure layout adaptation: values, callbacks, validation and persistence are unchanged.
+ */
+@Composable
+private fun AdaptiveMinuteInputPair(
+    firstLabel: String,
+    firstValue: String,
+    onFirstChange: (String) -> Unit,
+    secondLabel: String,
+    secondValue: String,
+    onSecondChange: (String) -> Unit,
+) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val stackFields = LocalDensity.current.fontScale >= 1.3f || maxWidth < 320.dp
+        if (stackFields) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                MinuteInput(firstLabel, firstValue, onFirstChange, Modifier.fillMaxWidth())
+                MinuteInput(secondLabel, secondValue, onSecondChange, Modifier.fillMaxWidth())
+            }
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                MinuteInput(firstLabel, firstValue, onFirstChange, Modifier.weight(1f))
+                MinuteInput(secondLabel, secondValue, onSecondChange, Modifier.weight(1f))
+            }
+        }
     }
 }
 
