@@ -39,13 +39,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Prepare Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android API 36
+      - name: Use runner Android SDK and install API 36
         shell: bash
         run: |
-          sdkmanager --install 'platforms;android-36' 'build-tools;36.0.0'
+          set -euo pipefail
+          : "${ANDROID_HOME:?GitHub runner must include Android SDK}"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | sort -Vr | head -n 1)"
+          test -n "$SDKMANAGER"
+          "$SDKMANAGER" --install 'platforms;android-36' 'build-tools;36.0.0'
 
       - name: Set up Gradle 9.6.1
         uses: gradle/actions/setup-gradle@v6
