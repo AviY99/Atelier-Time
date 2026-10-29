@@ -36,7 +36,26 @@ fi
 downloads="/storage/emulated/0/Download"
 mkdir -p "$downloads"
 log="$downloads/Atelier-Time-D127-Stage7-build.log"
+# Publish a minimal, privacy-redacted report to the dedicated diagnostics
+# branch on BOTH success and failure. Never publish the full raw build log.
+# Never mask the real Gradle/build exit code if GitHub authentication fails.
+publish_d127_result() {
+  result=$?
+  trap - EXIT
+  if [[ -s "$log" ]]; then
+    if [[ "$result" -eq 0 ]]; then
+      bash tools/publish_d127_build_diagnostics.sh --passed ||
+        echo "WARNING: diagnostics remain in Downloads; GitHub upload failed."
+    else
+      bash tools/publish_d127_build_diagnostics.sh --failed ||
+        echo "WARNING: diagnostics remain in Downloads; GitHub upload failed."
+    fi
+  fi
+  exit "$result"
+}
+trap publish_d127_result EXIT
 echo "D-127 targeted UI compilation + two APKs. NO INSTALL; NO JVM or device test run."
+echo "Raw log LOCAL ONLY; redacted compiler locations uploaded to a diagnostics-only branch."
 bash "$gradle" "-Pandroid.aapt2FromMavenOverride=$aapt2" \
   :app:assembleDebug :app:assembleDebugAndroidTest \
   --console=plain --no-daemon 2>&1 | tee "$log"
