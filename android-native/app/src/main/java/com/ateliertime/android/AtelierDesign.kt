@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +18,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -304,7 +308,13 @@ private fun PaletteChoiceCard(
         if (day) Color(0xFFB86B53) else Color(0xFFD5BD94)
     } else if (day) Color(0xFFDCD4C8) else Color(0xFF607B9C)
     Card(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier
+            .testTag(if (day) "design_palette_day" else "design_palette_night")
+            .selectable(selected = chosen, role = Role.RadioButton, onClick = onClick)
+            .semantics {
+                contentDescription = if (day) "Day, Studio Linen palette"
+                    else "Night, Night Blue palette"
+            },
         colors = CardDefaults.cardColors(containerColor = surface),
         border = BorderStroke(if (chosen) 2.dp else 1.dp, borderColor),
         shape = RoundedCornerShape(20.dp),
@@ -408,7 +418,11 @@ fun DesignSettingsPanel(
                     ) {
                         PaletteSymbol(DesignPalette.DAY, Modifier.size(35.dp))
                         Slider(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f)
+                                .testTag("design_auto_night_start_slider")
+                                .semantics {
+                                    contentDescription = "Night begins at $draftNightStart:00"
+                                },
                             colors = SliderDefaults.colors(
                                 thumbColor = MaterialTheme.colorScheme.primary,
                                 activeTrackColor = if (currentPalette == DesignPalette.DAY)

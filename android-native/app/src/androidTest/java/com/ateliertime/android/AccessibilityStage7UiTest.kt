@@ -16,9 +16,13 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertWidthIsAtMost
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.ateliertime.domain.DesignMode
+import com.ateliertime.domain.DesignPalette
+import com.ateliertime.domain.DesignPreferences
 import com.ateliertime.domain.FreeTimerStatus
 import com.ateliertime.domain.FreeTimerView
 import com.ateliertime.domain.PhaseKind
@@ -125,4 +129,30 @@ class AccessibilityStage7UiTest {
         compose.onNodeWithTag("free_preset_60").assertHeightIsAtLeast(48.dp)
         compose.onNodeWithTag("free_preset_3600").assertHeightIsAtLeast(48.dp)
     }
+    @Test fun designPaletteSelectionAndAutoSliderAreAccessible() {
+        var preferences by mutableStateOf(DesignPreferences(mode = DesignMode.DAY))
+        compose.setContent {
+            MaterialTheme {
+                DesignSettingsPanel(
+                    settings = preferences,
+                    currentPalette = DesignPalette.DAY,
+                    currentClockMillis = 0L,
+                    onPreviewHourChange = {},
+                    onChange = { preferences = it },
+                )
+            }
+        }
+        compose.onNodeWithTag("design_palette_day").assertIsSelected()
+        val dayLabel = compose.onNodeWithTag("design_palette_day")
+            .fetchSemanticsNode().config[SemanticsProperties.ContentDescription].joinToString()
+        assertTrue(dayLabel.contains("Day, Studio Linen palette"))
+        compose.onNodeWithTag("design_palette_night").performClick().assertIsSelected()
+        compose.runOnIdle { assertEquals(DesignMode.NIGHT, preferences.mode) }
+        compose.onNodeWithText("Auto · Switch Day / Night by time").performClick()
+        compose.runOnIdle { assertEquals(DesignMode.AUTO, preferences.mode) }
+        val autoSliderLabel = compose.onNodeWithTag("design_auto_night_start_slider")
+            .fetchSemanticsNode().config[SemanticsProperties.ContentDescription].joinToString()
+        assertTrue(autoSliderLabel.contains("Night begins at"))
+    }
+
 }

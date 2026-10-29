@@ -154,7 +154,11 @@ fun MelodySettingsSection(
                 },
                 valueRange = 5f..60f,
                 steps = 54,
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
+                    .testTag("sound_class_end_length_slider")
+                    .semantics {
+                        contentDescription = "Class C end sound length, ${sliderSeconds.roundToInt()} seconds"
+                    },
             )
             Text("60s", style = MaterialTheme.typography.labelSmall)
         }
@@ -188,6 +192,10 @@ fun MelodySettingsSection(
                 it.roundToInt().coerceIn(5, 60)))
         },
         valueRange = 5f..60f, steps = 54,
+        modifier = Modifier.testTag("sound_free_length_slider")
+            .semantics {
+                contentDescription = "Free countdown completion sound length, ${settings.freeTimerSeconds} seconds"
+            },
     )
     HorizontalDivider()
     Row(verticalAlignment = Alignment.CenterVertically) {
