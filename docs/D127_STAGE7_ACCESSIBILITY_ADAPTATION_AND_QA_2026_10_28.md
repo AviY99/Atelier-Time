@@ -1,11 +1,11 @@
 # Atelier Time — D-127 Stage 7 accessibility implementation / QA gate
-**Date:** 2026-10-28. **Development branch:** `android-native-kotlin-compose`.
-**Production source commit:** [b9d7064](https://github.com/AviY99/Atelier-Time/commit/b9d7064cf5f9c68a288adac0a45a2909d541ee4b).
+**Opened:** 2026-10-28. **Updated:** 2026-10-29. **Development branch:** `android-native-kotlin-compose`.
+**Initial D-127 source commit:** [b9d7064](https://github.com/AviY99/Atelier-Time/commit/b9d7064cf5f9c68a288adac0a45a2909d541ee4b). **Latest accessibility-code commit (unbuilt):** [b31105e](https://github.com/AviY99/Atelier-Time/commit/b31105e2b1e4f08f7c7826a53253201992a455be).
 
 ## State — do not conflate versions
 - **Approved and installed:** Stable 9 = D-126 / versionCode 20, 243/243 JVM + 42/42 on-device instrumentation = **285/285 PASS**. Saved Classes and Sounds were preserved.
 - **New candidate:** D-127 / versionCode 21, source written and committed only. No Gradle build, APK, installation, connected AndroidTest, TalkBack exploration, screenshot acceptance, or user confirmation for D-127 has occurred.
-- Three new Android instrumentation tests have been **AUTHORED, NOT EXECUTED**. Do not count them toward previous 285/285.
+- Five targeted Android instrumentation tests have been **AUTHORED, NOT EXECUTED**. Do not count them toward previous 285/285.
 - Frozen `stable/android-d126-qa9-tests-complete` and historical Stable 8 branches remain unchanged. No app data or Samsung installation was touched.
 
 ## Implemented Stage 7 source changes
@@ -19,7 +19,20 @@
 ## QA evidence
 - **Static source audit** identified high-scale tabs, small Free presets and custom Canvas/wheel semantics as targeted improvements. GitHub readback is source evidence only.
 - Selected existing palette contrast ratios calculated statically: Day primary/white 5.10:1; Day secondary/white 4.81:1; Night primary/white 4.98:1; Night secondary/white 4.88:1; Night timer card/white 5.12:1; Day on-background 12.17:1; Night on-background 8.67:1. This is a sample, **not** full WCAG audit.
-- **3 new AndroidTest methods authored, not run:** `clockWheelButtonsHaveSpokenContextAndKeepBlockedBoundary`, `timelineHasEquivalentNonColorDescription`, `freePresetsHaveAtLeast48DpTouchHeight` in `AccessibilityStage7UiTest.kt`.
+- **Initially 3 AndroidTest methods authored, not run:** `clockWheelButtonsHaveSpokenContextAndKeepBlockedBoundary`, `timelineHasEquivalentNonColorDescription`, `freePresetsHaveAtLeast48DpTouchHeight` in `AccessibilityStage7UiTest.kt`.
+
+## Additional targeted Stage 7 changes — 2026-10-29
+
+The user authorized Stage 7 as one continuous development task. Readback of the existing D-127 implementation showed two remaining responsive-layout gaps; neither was a proven device failure:
+
+- Editor: three pairs of numeric inputs now stack vertically at Android fontScale >=1.3 or when inner content width <320dp; ordinary normal-width displays retain their approved two-column layout. All original field values, labels, setters and validation remain intact.
+- Free HH:MM:SS: all three EndClockWheel columns now use measured available width (capped at their original 94dp) instead of potentially overflowing a small card. No timers, wheel constraints or sound callbacks were modified.
+- Free presets now announce the selected state via Compose semantics; blocked adjacent finish-clock choices announce that the value is blocked and a tap explains why. Existing blocking and red/green behavior are unchanged.
+- Two additional isolated AndroidTest methods were **written, not run**: `selectedFreePresetIsExposedToScreenReaders` and `narrowFreeTimerFitsAllThreeWheels`, bringing the Stage 7 new-method inventory to **five unexecuted tests**.
+- Safe build-only script: [`android-native/tools/build_d127_accessibility_candidate_on_phone.sh`](../android-native/tools/build_d127_accessibility_candidate_on_phone.sh). It checks branch/clean tree/version and, on a supported Samsung CoGo installation, assembles a main APK and a test APK with source identity and SHA-256 manifest. It **does not run prior JVM tests, install either APK, execute instrumentation or touch app data**. Script committed but **not executed** in this environment.
+- Static scope review after commits: `EndClockWheel.kt`, `FreeCountdownSection.kt`, `SessionEditorScreen.kt` and `AccessibilityStage7UiTest.kt`; no `ConstraintFuturePlanner`, persistence, services, notification, audio or stable-branch changes.
+
+**Evidence boundary (2026-10-29):** GitHub source and test declarations exist, but Android SDK/physical Samsung are not available to this execution environment. Android Gradle/Compose compile, five new UI tests, font-scale/day-night screenshot matrix and real TalkBack must still be executed and their results documented. Earlier D-126 285/285 PASS must not be attributed to D-127. Do not declare Stage 7 accepted or create Stable 10 without real evidence and user designation.
 
 ## Completion criteria — PENDING
 - Build and targeted Compose tests for D-127 in supported Android/CoGo environment; record actual logs and any corrections.
