@@ -40,18 +40,24 @@ fun FreeCountdownSection(
             val displayHours = if (editable) hours else view.remainingSeconds / 3600
             val displayMinutes = if (editable) minutes else (view.remainingSeconds / 60) % 60
             val displaySeconds = if (editable) seconds else view.remainingSeconds % 60
-            Row(modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically) {
-                EndClockWheel("Hours", displayHours, 100, "free_hours",
-                    canSelect = { true }, onBlocked = {}, onChange = { hours = it },
-                    readOnly = !editable)
-                EndClockWheel("Minutes", displayMinutes, 60, "free_minutes",
-                    canSelect = { true }, onBlocked = {}, onChange = { minutes = it },
-                    readOnly = !editable)
-                EndClockWheel("Seconds", displaySeconds, 60, "free_seconds",
-                    canSelect = { true }, onBlocked = {}, onChange = { seconds = it },
-                    readOnly = !editable)
+            // Three 94dp wheels can exceed a small screen's inner card width.
+            // Bound each wheel to the measured available width instead of
+            // clipping the Seconds column; default phones keep the 94dp format.
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val wheelWidth = ((maxWidth - 12.dp) / 3).coerceAtMost(94.dp)
+                Row(modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically) {
+                    EndClockWheel("Hours", displayHours, 100, "free_hours",
+                        canSelect = { true }, onBlocked = {}, onChange = { hours = it },
+                        readOnly = !editable, wheelWidth = wheelWidth)
+                    EndClockWheel("Minutes", displayMinutes, 60, "free_minutes",
+                        canSelect = { true }, onBlocked = {}, onChange = { minutes = it },
+                        readOnly = !editable, wheelWidth = wheelWidth)
+                    EndClockWheel("Seconds", displaySeconds, 60, "free_seconds",
+                        canSelect = { true }, onBlocked = {}, onChange = { seconds = it },
+                        readOnly = !editable, wheelWidth = wheelWidth)
+                }
             }
             val statusText = when (view.status) {
                 FreeTimerStatus.READY -> "Ready"
