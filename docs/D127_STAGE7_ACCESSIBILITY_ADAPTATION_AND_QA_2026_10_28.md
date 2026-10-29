@@ -1,5 +1,15 @@
 # Atelier Time — D-127 Stage 7 accessibility implementation / QA gate
 
+## 2026-10-29 — phone-only QA restored after user budget directive
+
+The user explicitly reaffirmed: GitHub Actions/cloud compilation is prohibited because monthly GitHub spend already exceeded budget. **Build only on Samsung CoGo.** The workflow was removed (`0f2aab9`), unused cloud diagnostics helper removed (`b15ed1f`), and both historical GitHub Actions attempts are complete; no further cloud builds. Existing Actions run #2 logs had identified `MelodySettingsSection.kt` unresolved `testTag` at lines 158 and 195. The missing `testTag` import was fixed at `6837de7` **source-only**, with no claimed new Android compilation or test PASS.
+
+Restored the previously successful phone terminal workflow: `android-native/tools/build_d127_accessibility_candidate_on_phone.sh` at `292cb8f` builds locally, saves the full log in `Download/Atelier-Time-D127-Stage7-build.log`, and automatically prints the first 30 relevant error lines in the terminal on failure; it **does not push, upload or run GitHub Actions**. New read-only `tools/show_d127_build_errors_on_phone.sh` at `c6e938c` prints errors from the *existing* saved log without rerunning Gradle. User may supply a screenshot of these terminal diagnostics as in prior project QA; **no raw log uploads requested**.
+
+Remote log storage is not claimed functional: phone Git write credentials failed previously. A connected cloud-storage account with one-time Android automatic sync could be configured separately, but user connection and verified sync are required before we can access such logs. A daily notification guard monitors repository Actions activity (not actual GitHub account billing). D-127 six UI instrumentation tests still not executed, Stage 7 unaccepted, installed Stable 9 D-126/code20 unchanged.
+
+
+
 > **CURRENT NON-NEGOTIABLE COST POLICY — 2026-10-29:** Per user instruction, **NO GitHub Actions / cloud Android builds or CI reactivation** due to monthly spending overrun. Removed workflow `.github/workflows/d127-android-compile.yml` (commit `0f2aab9`) and unused CI extractor (commit `b15ed1f`); verified two historical Actions runs completed, neither active. **Compile only locally on Samsung Code on the Go**. Source-only Kotlin fix for missing `testTag` import in `MelodySettingsSection.kt` was committed as [`6837de7`](https://github.com/AviY99/Atelier-Time/commit/6837de78741e1c56d9b7978096dd5cf064ca6477), **not yet rebuilt on phone**. Redacted diagnostic upload to GitHub requires ONE-TIME phone-side authorization; it is NOT operational yet (last git push failed); do not pretend remote reports are automatically accessible. A daily automation monitors repository Actions activity, NOT actual billed dollars; GitHub account Billing/Budgets access is not exposed by connector. [Mandatory cost/build policy](COST_AND_BUILD_POLICY_2026_10_29.md). Stable 9 D-126 unchanged.
 
 
