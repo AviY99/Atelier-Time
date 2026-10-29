@@ -121,10 +121,31 @@ else
     GIT_COMMITTER_NAME="Atelier Build Reporter" GIT_COMMITTER_EMAIL="atelier-build@users.noreply.github.com" \
     git commit-tree "$tree")"
 fi
-# Never force-push. Authentication or race failure leaves the local report.
-if git push --quiet origin "$commit:$ref" >/dev/null 2>&1; then
+# Never force-push. Capture private Git stderr locally rather than hiding
+# all reasons behind "not authorized or branch changed". Never echo raw stderr
+# because credential helpers/remotes may include sensitive details.
+push_log="$(mktemp)"
+trap 'rm -f "$temp_index" "$push_log"' EXIT
+if git push --porcelain origin "$commit:$ref" >"$push_log" 2>&1; then
   echo "GITHUB UPLOAD VERIFIED: https://github.com/AviY99/Atelier-Time/blob/diagnostics/d127-build-reports/$outpath"
 else
-  echo "UPLOAD FAILED: Git push not authorized or branch changed. Local redacted report kept."
+  if grep -Eiq 'authentication failed|could not read username|permission denied|not authorized|write access|http[^[:space:]]* 403|403 forbidden|403|repository not found|password authentication' "$push_log"; then
+    echo "UPLOAD FAILED: GitHub write credentials are missing or unauthorized on this phone."
+    echo "A successful git pull proves read access, NOT git push authorization."
+  elif grep -Eiq 'non-fast-forward|fetch first|stale info|rejected|remote rejected' "$push_log"; then
+    echo "UPLOAD FAILED: remote diagnostics branch changed or server rejected the update."
+    echo "Do not force-push. Retry only after reviewing repository permissions."
+  else
+    echo "UPLOAD FAILED: Git could not publish (reason undetermined; private stderr retained only on phone until script exits)."
+  fi
+  echo "NO BUILD RERUN REQUIRED. The SAFE text report is already available at:"
+  echo "$report"
+  echo "Attach ONLY that .txt file to this ChatGPT conversation; it contains"
+  echo "allowlisted Kotlin filename/line/category metadata, not your raw log."
+  echo "When provided in chat, the connected assistant can commit the safe report"
+  echo "to GitHub without needing write credentials on your phone."
+  echo "Redacted diagnostic summary:"
+  awk '/^diagnostics:/{in_diag=1;next} in_diag && (count++ < 20){print}' "$report"
+  echo "Original build output remains local: $log"
   exit 5
 fi
