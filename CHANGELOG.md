@@ -1,3 +1,7 @@
+## 2026-10-29 — D-127 Stage 7 accessibility source refinement (NOT BUILT/INSTALLED)
+
+Additional responsive Editor numeric input pairs and narrow HH:MM:SS wheel layout, spoken blocked-value and Free preset selection semantics; two extra targeted Compose tests (five total **unexecuted** new D-127 tests). Safe build-only runner added and **not run**. Older D-127 changes remain; installed Stable 9/D-126, 285 prior PASS, Saved Classes/Sounds and immutable branches unchanged. [QA state](docs/D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
+
 ## 2026-10-28 — D-127 Stage 7 accessibility development (NOT DEVICE QA)
 
 Development source commit `b9d7064` adds font-responsive tabs and controls, TalkBack descriptions for custom wheels and schedule chart, 48dp Free preset targets, and three authored but **UNRUN** Compose UI tests. Dev candidate D-127/code21 is **not built or installed**; Stable 9 D-126/code20, its 285/285 past PASS and preserved data remain unchanged. See [Stage 7](docs/D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
