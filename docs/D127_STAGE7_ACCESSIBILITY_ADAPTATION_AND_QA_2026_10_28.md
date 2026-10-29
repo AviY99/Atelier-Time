@@ -1,6 +1,12 @@
 # Atelier Time — D-127 Stage 7 accessibility implementation / QA gate
 **Opened:** 2026-10-28. **Updated:** 2026-10-29. **Development branch:** `android-native-kotlin-compose`.
-**Initial D-127 source commit:** [b9d7064](https://github.com/AviY99/Atelier-Time/commit/b9d7064cf5f9c68a288adac0a45a2909d541ee4b). **Latest accessibility-code commit (unbuilt):** [b31105e](https://github.com/AviY99/Atelier-Time/commit/b31105e2b1e4f08f7c7826a53253201992a455be).
+**Initial D-127 source commit:** [b9d7064](https://github.com/AviY99/Atelier-Time/commit/b9d7064cf5f9c68a288adac0a45a2909d541ee4b). **Latest accessibility-code commit (unbuilt):** [c83c197](https://github.com/AviY99/Atelier-Time/commit/c83c19738ea70bba0223acd84c46c93411276b7a) (previous b31105e).
+
+## 2026-10-29 — further Design/Sound TalkBack completion (latest)
+
+Read back existing D-127 work before editing; it already included responsive tabs, controls, narrow Editor/Free layouts, accessible wheels/chart and five unexecuted UI tests. Follow-up code commit [`c83c197`](https://github.com/AviY99/Atelier-Time/commit/c83c19738ea70bba0223acd84c46c93411276b7a) adds selected-state/RadioButton semantics and accessible names to Day/Night palette cards, a spoken hour label for the Design Auto slider, and spoken purpose/current-seconds descriptions for the two Sound duration sliders. It adds one isolated UI test for Day/Night selection and Auto slider label. This makes **six new Stage 7 AndroidTest methods written, zero executed**. The earlier five-test count below is dated history, not the current inventory.
+
+**Actual verification:** all three edited files were read back from GitHub and six test declarations counted. No supported Android SDK or physical Samsung is accessible to this execution environment. **D-127/code21 is not Android-compiled, APK-built, installed, visually verified, TalkBack-tested or user-accepted.** The D-126 285/285 historical PASS does not apply to D-127. No app data was accessed, no stable refs were changed, and no full regression suite was repeated. Build only via the documented CoGo script on the supported phone/toolchain; then run six targeted D-127 tests and check 100%/130%/200% text, narrow/normal, both palettes, TalkBack focus/labels and touch targets. An in-place update to the main app requires separate explicit permission and preservation verification. Stages 8–12 remain deferred.
 
 ## State — do not conflate versions
 - **Approved and installed:** Stable 9 = D-126 / versionCode 20, 243/243 JVM + 42/42 on-device instrumentation = **285/285 PASS**. Saved Classes and Sounds were preserved.
