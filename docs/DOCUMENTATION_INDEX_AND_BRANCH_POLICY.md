@@ -1,9 +1,11 @@
+> **Latest Stage 7 development update (2026-10-29):** D-127/code21 accessibility source has further responsive Editor/Free wheel and TalkBack improvements, plus **five authored but unexecuted new Android UI tests**. CoGo build-only runner committed, NOT EXECUTED. Stage 7 device/compile/visual/TalkBack QA still PENDING; accepted installed Stable 9 remains D-126/code20. [Stage 7 evidence and gates](D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md).
+
 > **Current development candidate:** Stage 7 accessibility D-127/code21 source on Android dev, **QA/build/installation pending**, no new stable designation. See [Stage 7 QA record](D127_STAGE7_ACCESSIBILITY_ADAPTATION_AND_QA_2026_10_28.md). Main remains documentation/history entrypoint; installed accepted Stable 9 remains D-126/code20.
 
 # Atelier Time — תיעוד קנוני, ענפים והעברת שיחה
 # Atelier Time — canonical documentation index and branch policy
 
-**Updated:** 2026-10-28. **Current user-approved stable:** **Stable 9 = Android D-126 / versionCode 20**; **285/285 automated tests PASS**, user-confirmed Saved Classes and Sounds preserved after tests. This is a QA designation of the already installed D-126 app, not a new APK build or Android version bump.
+**Updated:** 2026-10-29. **Current user-approved stable:** **Stable 9 = Android D-126 / versionCode 20**; **285/285 automated tests PASS**, user-confirmed Saved Classes and Sounds preserved after tests. This is a QA designation of the already installed D-126 app, not a new APK build or Android version bump.
 
 ## Start here — one reliable reading order
 
