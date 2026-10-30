@@ -49,7 +49,7 @@ This policy may be updated when app features or data practices change. The effec
 
 **Developer:** Avi Yosfan
 
-For privacy questions or requests about Atelier Time, contact Avi Yosfan through **[Instagram Direct Message (@aviyosfan)](https://www.instagram.com/aviyosfan/)** or submit an inquiry through the **[Atelier Time GitHub issue tracker](https://github.com/AviY99/Atelier-Time/issues/new)**. These third-party services may require their own accounts. **Do not post sensitive personal information publicly in GitHub issues.**
+For privacy questions or requests about Atelier Time, email **[Avi_yosfan@walla.com](mailto:Avi_yosfan@walla.com)**. You may also visit the developer's [Instagram profile (@aviyosfan)](https://www.instagram.com/aviyosfan/); Instagram's own privacy practices apply if you use that service. Do not post sensitive personal information publicly.
 
 ---
 
