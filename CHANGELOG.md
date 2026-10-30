@@ -1,3 +1,7 @@
+## 2026-10-30 — D-128 accepted user QA after installation
+
+After the user's confirmed in-place installation of locally built D-128 (targetSdk 36/code22), the user replied **"כן הכל נבדק ותקין"** to the post-install check on Saved Classes, Sounds and unclipped UI. Record user-observed PASS for preservation and visuals in their Samsung, without inventing independent OS-version proof, Android 16-specific coverage, instrumentation, Play acceptance or Stable 10 designation. No new source/build/device operation and no repeat of previously accepted lifecycle/timer/audio suites. Stage 8 agreed technical/device gate closed; Play release policy/signing/branding work remains pending. [D-128 audit record](docs/D128_STAGE8_ANDROID_PLAY_POLICY_AUDIT_2026_10_29.md).
+
 ## 2026-10-30 — D-128 installation confirmed by user (runtime QA not yet confirmed)
 
 After the Samsung `BUILD SUCCESSFUL` for local `D-128 / API 36` candidate and authorization to update in place, the user wrote **"הותקן"**. This confirms user-reported installation of D-128/code22 over D-127/code21. The user has **not yet stated** whether Saved Classes/Sounds/history remain present, whether the layout has clipping, or whether the phone runs Android 16. No such PASS is claimed; no new screenshot/ADB check, build, Google Play action or instrumented tests. Stable 9 remains frozen. See [Stage 8 D-128 record](docs/D128_STAGE8_ANDROID_PLAY_POLICY_AUDIT_2026_10_29.md).
