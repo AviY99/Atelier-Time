@@ -585,8 +585,8 @@ fun AtelierAboutPanel() {
     }
 }
 
-private const val ATELIER_PRIVACY_POLICY_URL = ""
-private const val ATELIER_INSTAGRAM_URL = ""
+private const val ATELIER_PRIVACY_POLICY_URL = "https://github.com/AviY99/Atelier-Time/blob/main/PRIVACY_POLICY.md"
+private const val ATELIER_INSTAGRAM_URL = "https://www.instagram.com/aviyosfan/"
 
 /**
  * Footer links are intentionally disabled until the exact publisher URLs
