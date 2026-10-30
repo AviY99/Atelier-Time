@@ -555,15 +555,38 @@ fun AtelierAboutPanel() {
                     softWrap = false,
                 )
                 HorizontalDivider()
-                Text(
-                    "Atlier Time is a live studio timer that reflects the progress " +
-                        "of an ongoing class—its work sessions, breaks and remaining " +
-                        "time—and makes day-to-day class management easier. " +
-                        "Timed sound cues help keep the class on track.",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Justify,
-                    style = MaterialTheme.typography.bodySmall,
-                )
+                // D-131: user-approved Vitruvian clock artwork to the LEFT of
+                // the unchanged About description, within this existing card.
+                // LTR explicitly retains left-image/right-copy in RTL locales.
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                        val artSize = if (maxWidth < 270.dp) 76.dp else 96.dp
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.atelier_vitruvian_clock),
+                                contentDescription = "Atelier Time Vitruvian clock artwork",
+                                modifier = Modifier.size(artSize)
+                                    .clip(RoundedCornerShape(18.dp))
+                                    .testTag("about_description_vitruvian_icon"),
+                                contentScale = ContentScale.Fit,
+                            )
+                            Text(
+                                "Atlier Time is a live studio timer that reflects the progress " +
+                                    "of an ongoing class—its work sessions, breaks and remaining " +
+                                    "time—and makes day-to-day class management easier. " +
+                                    "Timed sound cues help keep the class on track.",
+                                modifier = Modifier.weight(1f)
+                                    .testTag("about_description_text"),
+                                textAlign = TextAlign.Start,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                    }
+                }
             }
         }
         // Release-preparation links: separate footer cards, NEVER fabricated URLs.
