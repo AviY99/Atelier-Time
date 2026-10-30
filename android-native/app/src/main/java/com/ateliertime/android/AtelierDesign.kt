@@ -1,6 +1,10 @@
 package com.ateliertime.android
 
 import android.content.Context
+import android.content.Intent
+import android.content.ActivityNotFoundException
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -31,6 +35,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontFamily
@@ -567,7 +573,7 @@ fun AtelierAboutPanel() {
                             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
                         ) {
                             Image(
-                                painter = painterResource(R.drawable.atelier_vitruvian_clock),
+                                bitmap = rememberTransparentVitruvianArtwork(),
                                 contentDescription = "Atelier Time Vitruvian clock artwork",
                                 modifier = Modifier.size(artSize)
                                     .clip(RoundedCornerShape(18.dp))
@@ -611,11 +617,14 @@ fun AtelierAboutPanel() {
             linkTag = "about_instagram_link",
             avatarResourceId = R.drawable.instagram_profile_avatar,
         )
+        AtelierAboutWhatsAppShareCard()
     }
 }
 
 private const val ATELIER_PRIVACY_POLICY_URL = "https://aviy99.github.io/Atelier-Time/privacy-policy.html"
 private const val ATELIER_INSTAGRAM_URL = "https://www.instagram.com/aviyosfan/"
+private const val ATELIER_PLAY_STORE_URL =
+    "https://play.google.com/store/apps/details?id=com.ateliertime.android"
 
 /**
  * Both links now lead to real external HTTPS destinations. The policy is
@@ -636,6 +645,13 @@ private fun AtelierAboutExternalLinkCard(
 ) {
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
     val verifiedScheme = url.startsWith("https://")
+    // Night: primary blue is low contrast against the blue footer card.
+    // Day retains the existing brown primary accent.
+    val linkColors = ButtonDefaults.textButtonColors(
+        contentColor = if (MaterialTheme.colorScheme.onSurface.luminance() > 0.5f)
+            MaterialTheme.colorScheme.onSurface
+        else MaterialTheme.colorScheme.primary,
+    )
     OutlinedCard(modifier = Modifier.fillMaxWidth().testTag(cardTag)) {
         if (avatarResourceId == null) {
             // Keep the Privacy Policy card unchanged.
@@ -649,7 +665,7 @@ private fun AtelierAboutExternalLinkCard(
                     style = MaterialTheme.typography.bodySmall,
                 )
                 TextButton(
-                    modifier = Modifier.testTag(linkTag),
+                    modifier = Modifier.testTag(linkTag),                    colors = linkColors,
                     enabled = verifiedScheme,
                     onClick = { if (verifiedScheme) uriHandler.openUri(url) },
                 ) {
@@ -674,7 +690,7 @@ private fun AtelierAboutExternalLinkCard(
                             style = MaterialTheme.typography.bodySmall,
                         )
                         TextButton(
-                            modifier = Modifier.testTag(linkTag),
+                            modifier = Modifier.testTag(linkTag),                            colors = linkColors,
                             enabled = verifiedScheme,
                             onClick = { if (verifiedScheme) uriHandler.openUri(url) },
                         ) {
@@ -687,6 +703,111 @@ private fun AtelierAboutExternalLinkCard(
                         modifier = Modifier.size(64.dp).clip(CircleShape)
                             .testTag("about_instagram_avatar"),
                         contentScale = ContentScale.Crop,
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * D-132: remove the near-white opaque matte of the approved D-131 Vitruvian
+ * raster at display time. The artwork file itself stays local and unchanged.
+ */
+@Composable
+private fun rememberTransparentVitruvianArtwork(): androidx.compose.ui.graphics.ImageBitmap {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    return remember(context) {
+        val source = BitmapFactory.decodeResource(
+            context.resources, R.drawable.atelier_vitruvian_clock,
+        )
+        val w = source.width
+        val h = source.height
+        val pixels = IntArray(w * h)
+        source.getPixels(pixels, 0, w, 0, 0, w, h)
+        for (i in pixels.indices) {
+            val p = pixels[i]
+            val r = android.graphics.Color.red(p)
+            val g = android.graphics.Color.green(p)
+            val b = android.graphics.Color.blue(p)
+            val low = minOf(r, g, b)
+            val high = maxOf(r, g, b)
+            val matte = (255 - low - 10f) / 75f
+            val pigment = (high - low - 18f) / 30f
+            val a = maxOf(matte, pigment).coerceIn(0f, 1f)
+            pixels[i] = if (a < 0.005f) {
+                android.graphics.Color.TRANSPARENT
+            } else {
+                val rr = ((r - (1f - a) * 255f) / a).toInt().coerceIn(0, 255)
+                val gg = ((g - (1f - a) * 255f) / a).toInt().coerceIn(0, 255)
+                val bb = ((b - (1f - a) * 255f) / a).toInt().coerceIn(0, 255)
+                android.graphics.Color.argb((a * 255f).toInt().coerceIn(0, 255), rr, gg, bb)
+            }
+        }
+        val result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        result.setPixels(pixels, 0, w, 0, 0, w, h)
+        result.asImageBitmap()
+    }
+}
+
+private fun shareAtelierTimeOnWhatsApp(context: Context) {
+    // The prospective listing URL becomes public only after Google Play publication.
+    val text = "Atelier Time — art studio timer for artists\n$ATELIER_PLAY_STORE_URL"
+    val send = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, text)
+    }
+    // Direct WhatsApp recipient flow; also support WhatsApp Business.
+    for (packageName in listOf("com.whatsapp", "com.whatsapp.w4b")) {
+        try {
+            context.startActivity(Intent(send).apply { setPackage(packageName) })
+            return
+        } catch (_: ActivityNotFoundException) {
+            // Try the next handler.
+        }
+    }
+    try {
+        context.startActivity(Intent.createChooser(send, "Share Atelier Time"))
+    } catch (_: ActivityNotFoundException) {
+        android.widget.Toast.makeText(
+            context, "No sharing app available", android.widget.Toast.LENGTH_SHORT,
+        ).show()
+    }
+}
+
+@Composable
+private fun AtelierAboutWhatsAppShareCard() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    OutlinedCard(modifier = Modifier.fillMaxWidth().testTag("about_share_card")) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(14.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text("Share with a friend", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Share the Atelier Time Google Play link.",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        "Link available after Play publication.",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                IconButton(
+                    onClick = { shareAtelierTimeOnWhatsApp(context) },
+                    modifier = Modifier.size(56.dp).testTag("about_whatsapp_share"),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_whatsapp_share),
+                        contentDescription = "Share Atelier Time via WhatsApp",
+                        tint = Color(0xFF25D366),
+                        modifier = Modifier.size(40.dp),
                     )
                 }
             }
