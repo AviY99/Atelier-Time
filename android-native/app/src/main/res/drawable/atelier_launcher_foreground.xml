@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- D-137 cleaned-alpha icon keeps 12/3/6/9 and outer circle visible.
-     Original artwork used by About is unchanged. -->
+<!-- D-138 cleaned-alpha icon keeps 12/3/6/9 and outer circle visible.
+     About artwork remains unchanged; approved tighter visual crop for launcher. -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/atelier_vitruvian_launcher_clean"
+    android:drawable="@drawable/atelier_vitruvian_launcher_d138"
     android:inset="17dp"/>
