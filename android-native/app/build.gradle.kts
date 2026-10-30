@@ -13,12 +13,12 @@ android {
     defaultConfig {
         applicationId = "com.ateliertime.android"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         // Android versionCode is the monotonic package-upgrade integer.
         // versionName is the real development iteration shown verbatim in About.
         // Keep this D-identifier synchronized with each future APK build.
-        versionCode = 21
-        versionName = "D-127"
+        versionCode = 22
+        versionName = "D-128"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
