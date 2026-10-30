@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Use the exact already bundled user-approved artwork; 18dp margin keeps
-     all clock numbers/figure within the OEM-dependent adaptive icon mask. -->
+<!-- D-136: enlarge the exact approved Vitruvian clock artwork to the
+     adaptive-icon mask. D-135's +18dp inset made a white picture-in-picture
+     square; a small -3dp expansion hides the original raster's white edge.
+     No changes to the About image, theme, or clock illustration. -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
     android:drawable="@drawable/atelier_vitruvian_clock"
-    android:inset="18dp"/>
+    android:inset="-3dp"/>
