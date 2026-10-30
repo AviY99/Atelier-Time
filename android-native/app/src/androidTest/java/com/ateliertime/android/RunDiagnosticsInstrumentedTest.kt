@@ -40,6 +40,28 @@ class RunDiagnosticsInstrumentedTest {
         }
     }
     @Test
+    fun deleteAllRemovesEveryRunReportButPreservesUnrelatedPrivateFiles() {
+        val archive = isolatedArchive()
+        val directory = File(isolatedRoot, "atelier_run_reports")
+        assertTrue(directory.mkdirs())
+        val other = File(directory, "do-not-delete.txt")
+        other.writeText("keep this file")
+        repeat(8) { index ->
+            File(directory, "run-170000000000${index}-isolated.jsonl")
+                .writeText("{\"type\":\"run_start\"}\n")
+        }
+        assertEquals(8, archive.reports().size)
+        assertEquals(
+            "run-1700000000007-isolated.jsonl",
+            archive.reports().first().name,
+        )
+        assertEquals(8, archive.deleteAll())
+        assertTrue(archive.reports().isEmpty())
+        assertEquals("keep this file", other.readText())
+        assertEquals(0, archive.deleteAll())
+    }
+
+    @Test
     fun archivedRunHasCompleteEditorSnapshotOrderedEventsAndExplicitEnd() {
         val archive = isolatedArchive()
         val rules = SessionRules(

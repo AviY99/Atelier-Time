@@ -86,6 +86,24 @@ internal class RunDiagnosticsArchive(private val context: Context) {
     fun delete(name: String) {
         check(report(name).delete()) { "Could not delete the selected report." }
     }
+
+    /**
+     * Delete ONLY locally stored Run JSONL reports, never the directory itself,
+     * Saved Classes, Sound preferences, or other files in app storage.
+     * Return the number removed; report partial failures for UI feedback.
+     */
+    fun deleteAll(): Int {
+        val savedReports = reports()
+        var deleted = 0
+        savedReports.forEach { file ->
+            if (file.delete()) deleted++
+        }
+        check(deleted == savedReports.size) {
+            "Deleted $deleted of ${savedReports.size} reports; " +
+                "${savedReports.size - deleted} could not be deleted."
+        }
+        return deleted
+    }
 }
 
 internal class RunDiagnosticsRecorder(
