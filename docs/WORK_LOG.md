@@ -1,3 +1,7 @@
+## 2026-10-30 — D-128 Samsung build-only PASS
+
+The user's physical Samsung terminal screenshot confirms `BUILD SUCCESSFUL` from D-128/API36 local `assembleDebug` build script and shows APK/manifest saved in Downloads. No install or device test executed, and no independent SHA verification was performed. No cloud build; D-127 installation and Stable 9 checkpoint stay unchanged. See [Stage 8 record](D128_STAGE8_ANDROID_PLAY_POLICY_AUDIT_2026_10_29.md).
+
 ## 2026-10-30 — Approved D-128 Android 16 target API 36 source migration
 
 On `android-native-kotlin-compose`, changed only `android-native/app/build.gradle.kts`: `compileSdk=36` unchanged, `targetSdk=36`, `versionCode=22`, `versionName="D-128"`. Added checked local Samsung CoGo build-only helper `tools/build_d128_api36_on_phone.sh`, and corrected newline/diagnostic escaping in that helper. No phone/Gradle access in chat: **not compiled, not installed, not device tested**. Existing D-127 code21 stays installed, Stable 9 SHA c48c890 untouched; previously passed 6+8 Stage 7 tests and user-accepted notification/lock/background/audio behavior preserved without repeat. Android 16 Back and edge-to-edge effects and Play specialUse eligibility remain release gates, not implemented behavior fixes. No GitHub Actions or cloud compilation. [Stage 8 evidence](D128_STAGE8_ANDROID_PLAY_POLICY_AUDIT_2026_10_29.md).
