@@ -32,7 +32,7 @@ echo "No GitHub Actions, no Git push, no user-data or stable-branch changes."
 if ! bash "$gradle" "-Pandroid.aapt2FromMavenOverride=$aapt2" \
     :app:assembleDebug --console=plain --no-daemon > "$log" 2>&1; then
   echo "BUILD FAILED: relevant compiler lines from the local log:"
-  awk '/(^|[[:space:]])e: |(^|[[:space:]])error: |\\.kt:[0-9]+|^FAILURE:|^BUILD FAILED|Execution failed for task/ { if (n++ < 35) print }' "$log"
+  awk '/(^|[[:space:]])e: |(^|[[:space:]])error: |\.kt:[0-9]+|^FAILURE:|^BUILD FAILED|Execution failed for task/ { if (n++ < 35) print }' "$log"
   echo "Saved full log: $log"
   exit 1
 fi
@@ -44,11 +44,11 @@ fi
 out="$downloads/Atelier-Time-D128-API36-Candidate.apk"
 cp "${apks[0]}" "$out"
 {
-  printf 'version=D-128\\ncode=22\\ntargetSdk=36\\n'
-  printf 'branch=android-native-kotlin-compose\\n'
-  printf 'source_commit=%s\\n' "$(git rev-parse HEAD)"
-  printf 'app_sha256=%s\\n' "$(sha256sum "$out" | awk '{print $1}')"
-  printf 'state=COMPILED_ONLY; NOT_INSTALLED; NOT_DEVICE_TESTED\\n'
+  printf 'version=D-128\ncode=22\ntargetSdk=36\n'
+  printf 'branch=android-native-kotlin-compose\n'
+  printf 'source_commit=%s\n' "$(git rev-parse HEAD)"
+  printf 'app_sha256=%s\n' "$(sha256sum "$out" | awk '{print $1}')"
+  printf 'state=COMPILED_ONLY; NOT_INSTALLED; NOT_DEVICE_TESTED\n'
 } > "$downloads/Atelier-Time-D128-API36-Manifest.txt"
 echo "BUILD SUCCESSFUL — D-128 debug APK saved: $out"
 echo "Manifest: $downloads/Atelier-Time-D128-API36-Manifest.txt"
