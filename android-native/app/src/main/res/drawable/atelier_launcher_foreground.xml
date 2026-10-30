@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- D-136: enlarge the exact approved Vitruvian clock artwork to the
-     adaptive-icon mask. D-135's +18dp inset made a white picture-in-picture
-     square; a small -3dp expansion hides the original raster's white edge.
-     No changes to the About image, theme, or clock illustration. -->
+<!-- D-137 cleaned-alpha icon keeps 12/3/6/9 and outer circle visible.
+     Original artwork used by About is unchanged. -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/atelier_vitruvian_clock"
-    android:inset="-3dp"/>
+    android:drawable="@drawable/atelier_vitruvian_launcher_clean"
+    android:inset="17dp"/>

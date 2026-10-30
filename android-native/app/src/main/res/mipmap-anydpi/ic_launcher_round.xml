@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-137 fallback icon for nonadaptive APK thumbnail consumers. -->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/atelier_vitruvian_launcher_clean"
+    android:gravity="fill"/>
