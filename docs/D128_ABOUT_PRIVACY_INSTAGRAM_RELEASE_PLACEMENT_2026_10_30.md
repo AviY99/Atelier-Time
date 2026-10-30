@@ -1,0 +1,36 @@
+# Atelier Time — approved About footer placement and release-stage insertion (2026-10-30)
+
+**User UI decision (scope):** On the existing **About tab**, at the **BOTTOM** of its vertically scrollable content **after the existing About identity/description card**, add **TWO SEPARATE full-width framed cards**, in the following exact order:
+1. **Privacy Policy** — a clearly labeled external link to Atelier Time's finalized, public privacy policy webpage. Optional secondary copy: "View our privacy policy"; show a suitable privacy/shield icon and external-link affordance.
+2. **Instagram** — a clearly labeled external link to the publisher's own Instagram profile. Optional secondary copy: "Visit my Instagram profile"; show Instagram icon and external-link affordance.
+
+**Style:** two distinct matching outlined/elevated frames, not embedded into the existing identity/About text card, not in a single combined box, responsive to narrow Samsung display and RTL settings, accessible tap targets, labels and screen reader descriptions. Use same visual language/spacing as existing Material 3 About. The existing title/version/copyright/developer/description text and scroll behavior must remain intact; no new bottom tab.
+
+**Technical source inspected:** `android-native/app/src/main/java/com/ateliertime/android/AtelierDesign.kt` defines `AtelierAboutPanel()` with scrollable `Column` containing one existing `ElevatedCard`. The new two cards belong **after** that existing card in the same scrollable Column. `SessionEditorScreen.kt` already hosts `MainTab.ABOUT -> AtelierAboutPanel()`; no tab navigation refactor required.
+
+**No invented URLs:** The actual HTTPS privacy-policy URL has NOT been published/confirmed, and the actual Instagram username/profile URL has NOT been supplied/verified. Store no example/placeholder live links in production. Require those TWO exact destinations before implementing active links; avoid opening unrelated profiles or invalid URLs. The privacy page additionally needs publisher/privacy contact, truthful contents and public worldwide access. Link to Instagram should be outbound only, without an embedded feed, Instagram SDK, tracking or authentication.
+
+**Google Play requirement:** Google requires a privacy policy link or text accessible INSIDE the app, a separate URL in Play Console, and a public non-editable non-geofenced webpage; it does NOT require Privacy Policy to appear on the home screen or in a specific Android screen. About is an appropriate discoverable location. Official: https://support.google.com/googleplay/android-developer/answer/10144311
+
+## Updated release sequence (specific and executable)
+
+1. **Freeze existing D-128 timer/background/notification architecture**: preserve the user-accepted `specialUse` rationale and device data; Stable 9 D-126 remains immutable.
+2. **Finalize and publish privacy policy**: verify publisher identity/contact, source-based data disclosures (including local diagnostic device metadata and voluntary exported reports), host stable public HTTPS web page, validate access without login; confirm final privacy URL. Existing working drafts: [privacy-policy draft](STAGE8_PLAY_PRIVACY_POLICY_DRAFT_2026_10_29.md), [Data safety readiness](D128_PLAY_PRIVACY_DATA_SAFETY_READINESS_2026_10_30.md).
+3. **Implement the TWO About footer links together (single focused UI change AFTER exact URLs are available):** insert *Privacy Policy* and *Instagram* separately, in that order, at About bottom. Privacy Policy links to live policy; Instagram to user's verified profile. Preserve timer, audio, FGS, notification permissions, settings, local data and existing About content. Code modification **not performed in this documentation-only scope**.
+4. **Visual/store branding**: finalize icon, screenshots, store listing and approved assets.
+5. **Prepare Play statements and evidence**: FGS `specialUse` declaration/video ([approved rationale](D128_SPECIALUSE_PLAY_CONSOLE_DECLARATION_AND_RATIONALE_2026_10_30.md)), final Data safety declaration, target audience and other store fields.
+6. **Create signed local release AAB** without paid/cloud GitHub Actions; independently inspect merged release manifest and dependency/SDK inventory. Do not uninstall/clear user's installed app.
+7. **Focused verification**: open each About link, check policy page works, Instagram lands on correct profile, narrow viewport/RTL, verify release package/signature and only relevant new changes; do NOT repeat historic timer/lock/audio/device QA suites without evidence of regression.
+8. **Submit for Google Play closed testing/policy review**, and monitor FGS policy/other store-gate review outcomes. This may also require developer-account eligibility and additional tester conditions.
+9. **Fix actual review findings only after explicit agreement for code changes**; re-test affected cases, then request production release when all gates pass.
+10. **Final acceptance/archive**: user acceptance, designate new immutable stable release only when explicitly approved, update main documentation, handoff/version certificate and branch reference.
+
+## Implementation boundaries / acceptance checklist
+
+- [ ] Final privacy URL supplied/verified; content matches store identity and Data safety. Not done.
+- [ ] Exact Instagram profile URL supplied/verified. Not done.
+- [ ] Both cards visible at bottom of About, separate and in specified order. Not implemented.
+- [ ] Both external links tested; no dead/sample URLs. Not implemented.
+- [ ] Existing About card and timer/background/audio/FGS unaffected. No code change authorized in this work item.
+- [ ] Play Console also contains the same privacy-policy public URL. Not submitted.
+- [x] UI placement and release-stage sequence **approved and documented**.
