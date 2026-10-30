@@ -3,6 +3,7 @@ package com.ateliertime.android
 import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.selection.selectable
@@ -10,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,6 +20,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -581,6 +586,7 @@ fun AtelierAboutPanel() {
             actionLabel = "Open Instagram",
             cardTag = "about_instagram_card",
             linkTag = "about_instagram_link",
+            avatarResourceId = R.drawable.instagram_profile_avatar,
         )
     }
 }
@@ -593,6 +599,7 @@ private const val ATELIER_INSTAGRAM_URL = "https://www.instagram.com/aviyosfan/"
  * hosted as static HTML through the user-enabled GitHub Pages website.
  * Verify live opening on device before Play Console submission.
  */
+/** Offline, bundled Instagram avatar only. No network fetch or refresh. */
 @Composable
 private fun AtelierAboutExternalLinkCard(
     title: String,
@@ -602,25 +609,63 @@ private fun AtelierAboutExternalLinkCard(
     actionLabel: String,
     cardTag: String,
     linkTag: String,
+    avatarResourceId: Int? = null,
 ) {
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
     val verifiedScheme = url.startsWith("https://")
     OutlinedCard(modifier = Modifier.fillMaxWidth().testTag(cardTag)) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Text(
-                if (verifiedScheme) description else pendingLabel,
-                style = MaterialTheme.typography.bodySmall,
-            )
-            TextButton(
-                modifier = Modifier.testTag(linkTag),
-                enabled = verifiedScheme,
-                onClick = { if (verifiedScheme) uriHandler.openUri(url) },
+        if (avatarResourceId == null) {
+            // Keep the Privacy Policy card unchanged.
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Text(actionLabel)
+                Text(title, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    if (verifiedScheme) description else pendingLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                TextButton(
+                    modifier = Modifier.testTag(linkTag),
+                    enabled = verifiedScheme,
+                    onClick = { if (verifiedScheme) uriHandler.openUri(url) },
+                ) {
+                    Text(actionLabel)
+                }
+            }
+        } else {
+            // Fixed left-text/right-photo layout, even when the device is RTL.
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(14.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text(title, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            if (verifiedScheme) description else pendingLabel,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        TextButton(
+                            modifier = Modifier.testTag(linkTag),
+                            enabled = verifiedScheme,
+                            onClick = { if (verifiedScheme) uriHandler.openUri(url) },
+                        ) {
+                            Text(actionLabel)
+                        }
+                    }
+                    Image(
+                        painter = painterResource(id = avatarResourceId),
+                        contentDescription = "Instagram profile image",
+                        modifier = Modifier.size(64.dp).clip(CircleShape)
+                            .testTag("about_instagram_avatar"),
+                        contentScale = ContentScale.Crop,
+                    )
+                }
             }
         }
     }
