@@ -562,8 +562,8 @@ fun AtelierAboutPanel() {
             }
         }
         // Release-preparation links: separate footer cards, NEVER fabricated URLs.
-        // Both destinations are deliberately unset until publisher-provided
-        // verified URLs exist. A disabled control must never open a fake page.
+        // The two destination URLs are set to the public privacy policy
+        // and the publisher-supplied Instagram profile. Never use fake URLs.
         AtelierAboutExternalLinkCard(
             title = "Privacy Policy",
             description = "Read how Atelier Time handles local app data.",
@@ -589,9 +589,9 @@ private const val ATELIER_PRIVACY_POLICY_URL = "https://github.com/AviY99/Atelie
 private const val ATELIER_INSTAGRAM_URL = "https://www.instagram.com/aviyosfan/"
 
 /**
- * Footer links are intentionally disabled until the exact publisher URLs
- * are verified. For the Play release, the policy URL must be publicly
- * accessible, non-editable and also entered in Play Console.
+ * Both links now lead to real external HTTPS destinations. The policy is
+ * currently on the public GitHub repository, pending verification of
+ * final Play policy URL requirements and Play Console entry.
  */
 @Composable
 private fun AtelierAboutExternalLinkCard(
