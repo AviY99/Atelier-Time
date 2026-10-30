@@ -21,3 +21,7 @@ The script checks branch `android-native-kotlin-compose`, clean tracked sources,
 After the actual phone BUILD SUCCESSFUL and separately approved in-place upgrade, inspect Home/app drawer and fresh D-138 APK thumbnail / installer: crop near edge, numerals intact, no nested white border; confirm Saved Classes, Sounds and diagnostics preserved. If the Samsung mask crops too far, adjust launcher-only assets in D-139 after fresh screenshots.
 
 Stable 9/D-126 checkpoint is frozen. D-134 remains last explicitly user-accepted working app. D-138 is source prepared only; **not locally compiled, installed, device-tested, declared stable or Play-ready**.
+
+
+## Post-build acceptance update (2026-10-31)
+Samsung Code on the Go actual **BUILD SUCCESSFUL** for D-138 was shown. User supplied installed launcher and APK thumbnail screenshots and states **"הכל עובד כנדרש"**, designating **Stable 10**. This supersedes the historical “source-only/not yet built” statements above; the build-only helper itself still did not auto-install or execute automated QA. See [Stable 10 certificate](STABLE10_D138_USER_ACCEPTANCE_AND_PREPLAY_CHECKPOINT_2026_10_31.md). Frozen source snapshot `stable/android-d138-qa10-user-accepted` at `6497db7`.
