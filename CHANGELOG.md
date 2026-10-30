@@ -1,3 +1,7 @@
+## 2026-10-30 — D-130 static Instagram profile photo (source only)
+
+Prepared user-supplied profile photo as an offline, 64dp circular About Instagram image on the right; D-130/code24 source and local build helper ready. D-129/code23 installed and links user-confirmed PASS. D-130 not yet built/installed. No timer, sound, FGS, permission or online functionality changes. Stable 9 unchanged. [Record](docs/D130_FIXED_INSTAGRAM_PROFILE_AVATAR_2026_10_30.md).
+
 ## 2026-10-30 — GitHub Pages verified live in user screenshot; About policy URL switched to static HTML
 
 User provided GitHub Pages settings screenshot verifying the public site at **https://aviy99.github.io/Atelier-Time/** is live. Source `main/docs/privacy-policy.html` is the public HTML policy intended for **https://aviy99.github.io/Atelier-Time/privacy-policy.html**, with privacy email **Avi_yosfan@walla.com**; `docs/index.html` links/redirects site root there. Android development About Privacy Policy card updated from the GitHub Markdown URL to this GitHub Pages HTML URL in [commit ab54d30](https://github.com/AviY99/Atelier-Time/commit/ab54d30647b13c2e72106d1410c70b2cd6d0f06c); separate Instagram card unchanged. External direct-page fetch was unavailable to the assistant: **do not mark link clicking or Google Play approval verified**. No local Android build/device install, no timer/audio/FGS/permissions/user-data changes, no Play submission, no cloud Android build; installed D-128 remains unchanged and Stable 9 immutable.
