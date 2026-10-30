@@ -1,5 +1,7 @@
 # Atelier Time — Google Play privacy policy draft (NOT YET A PUBLISHED POLICY)
 
+> **2026-10-30 D-128 source-audit clarification (DRAFT, not public):** Local JSONL Run diagnostic reports include the approved Class name/rules and events, sound selection metadata (but not user-selected audio content URIs), plus **Android API version, device manufacturer/model, app version and timezone**. Files stay in app-private storage unless a user explicitly chooses Export and a document-provider destination; that chosen destination may be managed by another app or cloud provider. The final public policy must disclose this local processing and user-directed export transparently. This draft has NOT been published or approved for release; see [D-128 Data safety source review](D128_PLAY_PRIVACY_DATA_SAFETY_READINESS_2026_10_30.md) and [approved `specialUse` rationale](D128_SPECIALUSE_PLAY_CONSOLE_DECLARATION_AND_RATIONALE_2026_10_30.md). No code/UI/Play action taken.
+
 **Draft created 2026-10-29 for Stage 8 policy preparation.** Do not submit this Markdown file to Play as the live privacy-policy webpage. Before submission, the publisher must verify the final release binary/SDK manifests, add a valid developer privacy contact/method, publish a non-editable publicly accessible HTTPS webpage, link it in Play Console, and make policy text/link accessible in the app. This draft does **not** authorize a network service or an app code/UI change.
 
 ## Draft privacy policy text (English for prospective store submission)
