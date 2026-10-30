@@ -1,3 +1,7 @@
+## 2026-10-30 — D-130 user screenshot confirms local installation and avatar layout
+
+**D-130 DEVICE SCREENSHOT QA — 2026-10-30 (latest):** User supplied a Samsung About-screen screenshot after the local D-130 BUILD PASS. Screenshot shows **Version D-130** in the running app, the user's bundled circular Instagram photo visibly on the RIGHT of the existing Instagram card, the Privacy Policy and Instagram cards, and no visible clipping. **Installed/visual About QA PASS by screenshot.** The screenshot alone does **not** verify tapping either link in D-130 or post-upgrade Saved Classes/Sounds preservation; these remain confirmation points. (Both links were separately user-confirmed working in D-129.) Do not claim automated D-130 tests, full regression PASS, Google Play acceptance, or Stable 10. Stable 9/D-126 remains frozen. No code changes/builds/reinstall/paid GitHub Actions for this docs-only record. [D-130 QA record](D130_FIXED_INSTAGRAM_PROFILE_AVATAR_2026_10_30.md).
+
 ## 2026-10-30 — D-130 static Instagram avatar prepared
 
 D-129/code23 installed; user confirms two About links work. User provided photo and chose permanently local image only. Committed D-130/code24 Android source with bundled WebP, right-aligned circular image, guarded Samsung-only build helper. No image downloads, INTERNET permission, cloud builds, install or QA. Stable 9 frozen. [Record](D130_FIXED_INSTAGRAM_PROFILE_AVATAR_2026_10_30.md).
