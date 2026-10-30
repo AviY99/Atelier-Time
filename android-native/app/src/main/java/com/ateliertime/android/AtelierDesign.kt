@@ -561,5 +561,67 @@ fun AtelierAboutPanel() {
                 )
             }
         }
+        // Release-preparation links: separate footer cards, NEVER fabricated URLs.
+        // Both destinations are deliberately unset until publisher-provided
+        // verified URLs exist. A disabled control must never open a fake page.
+        AtelierAboutExternalLinkCard(
+            title = "Privacy Policy",
+            description = "Read how Atelier Time handles local app data.",
+            url = ATELIER_PRIVACY_POLICY_URL,
+            pendingLabel = "Privacy policy link pending publication",
+            actionLabel = "Open privacy policy",
+            cardTag = "about_privacy_policy_card",
+            linkTag = "about_privacy_policy_link",
+        )
+        AtelierAboutExternalLinkCard(
+            title = "Instagram",
+            description = "Visit the developer's Instagram profile.",
+            url = ATELIER_INSTAGRAM_URL,
+            pendingLabel = "Instagram profile link pending confirmation",
+            actionLabel = "Open Instagram",
+            cardTag = "about_instagram_card",
+            linkTag = "about_instagram_link",
+        )
+    }
+}
+
+private const val ATELIER_PRIVACY_POLICY_URL = ""
+private const val ATELIER_INSTAGRAM_URL = ""
+
+/**
+ * Footer links are intentionally disabled until the exact publisher URLs
+ * are verified. For the Play release, the policy URL must be publicly
+ * accessible, non-editable and also entered in Play Console.
+ */
+@Composable
+private fun AtelierAboutExternalLinkCard(
+    title: String,
+    description: String,
+    url: String,
+    pendingLabel: String,
+    actionLabel: String,
+    cardTag: String,
+    linkTag: String,
+) {
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+    val verifiedScheme = url.startsWith("https://")
+    OutlinedCard(modifier = Modifier.fillMaxWidth().testTag(cardTag)) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                if (verifiedScheme) description else pendingLabel,
+                style = MaterialTheme.typography.bodySmall,
+            )
+            TextButton(
+                modifier = Modifier.testTag(linkTag),
+                enabled = verifiedScheme,
+                onClick = { if (verifiedScheme) uriHandler.openUri(url) },
+            ) {
+                Text(actionLabel)
+            }
+        }
     }
 }
