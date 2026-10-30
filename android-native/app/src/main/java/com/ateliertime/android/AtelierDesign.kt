@@ -585,13 +585,13 @@ fun AtelierAboutPanel() {
     }
 }
 
-private const val ATELIER_PRIVACY_POLICY_URL = "https://github.com/AviY99/Atelier-Time/blob/main/PRIVACY_POLICY.md"
+private const val ATELIER_PRIVACY_POLICY_URL = "https://aviy99.github.io/Atelier-Time/privacy-policy.html"
 private const val ATELIER_INSTAGRAM_URL = "https://www.instagram.com/aviyosfan/"
 
 /**
  * Both links now lead to real external HTTPS destinations. The policy is
- * currently on the public GitHub repository, pending verification of
- * final Play policy URL requirements and Play Console entry.
+ * hosted as static HTML through the user-enabled GitHub Pages website.
+ * Verify live opening on device before Play Console submission.
  */
 @Composable
 private fun AtelierAboutExternalLinkCard(
