@@ -656,8 +656,9 @@ private fun AtelierAboutExternalLinkCard(
         if (avatarResourceId == null) {
             // Keep the Privacy Policy card unchanged.
             Column(
-                modifier = Modifier.fillMaxWidth().padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(title, style = MaterialTheme.typography.titleMedium)
                 Text(
@@ -677,13 +678,14 @@ private fun AtelierAboutExternalLinkCard(
             // Fixed left-text/right-photo layout, even when the device is RTL.
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
                 ) {
                     Column(
                         modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
                         Text(title, style = MaterialTheme.typography.titleMedium)
                         Text(
@@ -775,22 +777,33 @@ private fun rememberTransparentVitruvianArtwork(): androidx.compose.ui.graphics.
 }
 
 private fun shareAtelierTimeOnWhatsApp(context: Context) {
-    // D-132 preview: Google Play listing is NOT public yet. Share only the
-    // already verified Instagram destination; switch after Play publication.
+    // D-133: the Play listing does not exist yet; share the user's Instagram.
+    // WhatsApp documents wa.me/?text= for contact-selection with a draft.
+    // No network call is made by Atelier Time itself and nothing is sent
+    // until the user chooses a recipient and confirms in WhatsApp.
     val text = "Atelier Time — an art studio timer for artists\n" +
         "Follow the developer on Instagram:\n$ATELIER_INSTAGRAM_URL"
+    val link = android.net.Uri.parse(
+        "https://wa.me/?text=" + android.net.Uri.encode(text),
+    )
+    for (packageName in listOf("com.whatsapp", "com.whatsapp.w4b")) {
+        val openWhatsApp = Intent(Intent.ACTION_VIEW, link).apply {
+            setPackage(packageName)
+        }
+        try {
+            context.startActivity(openWhatsApp)
+            return
+        } catch (_: ActivityNotFoundException) {
+            // This variant of WhatsApp is unavailable; try another.
+        } catch (_: SecurityException) {
+            // Target declined the request; use the system share sheet.
+        }
+    }
+    // If direct WhatsApp linking is unavailable, always offer a visible
+    // Android Sharesheet, with WhatsApp among the choices if installed.
     val send = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
         putExtra(Intent.EXTRA_TEXT, text)
-    }
-    // Direct WhatsApp recipient flow; also support WhatsApp Business.
-    for (packageName in listOf("com.whatsapp", "com.whatsapp.w4b")) {
-        try {
-            context.startActivity(Intent(send).apply { setPackage(packageName) })
-            return
-        } catch (_: ActivityNotFoundException) {
-            // Try the next handler.
-        }
     }
     try {
         context.startActivity(Intent.createChooser(send, "Share Atelier Time"))
@@ -798,13 +811,22 @@ private fun shareAtelierTimeOnWhatsApp(context: Context) {
         android.widget.Toast.makeText(
             context, "No sharing app available", android.widget.Toast.LENGTH_SHORT,
         ).show()
+    } catch (_: SecurityException) {
+        android.widget.Toast.makeText(
+            context, "Sharing is unavailable", android.widget.Toast.LENGTH_SHORT,
+        ).show()
     }
 }
 
 @Composable
 private fun AtelierAboutWhatsAppShareCard() {
     val context = androidx.compose.ui.platform.LocalContext.current
-    OutlinedCard(modifier = Modifier.fillMaxWidth().testTag("about_share_card")) {
+    // Make the entire share card tappable, not just the icon, so the action
+    // remains discoverable even above the Android navigation bar.
+    OutlinedCard(
+        onClick = { shareAtelierTimeOnWhatsApp(context) },
+        modifier = Modifier.fillMaxWidth().testTag("about_share_card"),
+    ) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(14.dp),
