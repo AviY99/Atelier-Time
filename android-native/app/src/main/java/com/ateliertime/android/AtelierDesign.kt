@@ -623,8 +623,8 @@ fun AtelierAboutPanel() {
 
 private const val ATELIER_PRIVACY_POLICY_URL = "https://aviy99.github.io/Atelier-Time/privacy-policy.html"
 private const val ATELIER_INSTAGRAM_URL = "https://www.instagram.com/aviyosfan/"
-private const val ATELIER_PLAY_STORE_URL =
-    "https://play.google.com/store/apps/details?id=com.ateliertime.android"
+// Future switch: when the actual Google Play listing is public, replace the
+// Instagram link in shareAtelierTimeOnWhatsApp with the verified store URL.
 
 /**
  * Both links now lead to real external HTTPS destinations. The policy is
@@ -665,7 +665,8 @@ private fun AtelierAboutExternalLinkCard(
                     style = MaterialTheme.typography.bodySmall,
                 )
                 TextButton(
-                    modifier = Modifier.testTag(linkTag),                    colors = linkColors,
+                    modifier = Modifier.testTag(linkTag),
+                    colors = linkColors,
                     enabled = verifiedScheme,
                     onClick = { if (verifiedScheme) uriHandler.openUri(url) },
                 ) {
@@ -690,7 +691,8 @@ private fun AtelierAboutExternalLinkCard(
                             style = MaterialTheme.typography.bodySmall,
                         )
                         TextButton(
-                            modifier = Modifier.testTag(linkTag),                            colors = linkColors,
+                            modifier = Modifier.testTag(linkTag),
+                            colors = linkColors,
                             enabled = verifiedScheme,
                             onClick = { if (verifiedScheme) uriHandler.openUri(url) },
                         ) {
@@ -711,8 +713,10 @@ private fun AtelierAboutExternalLinkCard(
 }
 
 /**
- * D-132: remove the near-white opaque matte of the approved D-131 Vitruvian
- * raster at display time. The artwork file itself stays local and unchanged.
+ * D-132: make only the pale OUTER matte transparent, retaining every pixel
+ * of the user's approved Vitruvian clock drawing, parchment and numerals.
+ * Flood-fill near-white neutral pixels reachable from the bitmap edges;
+ * do NOT globally key out pale colors inside the illustration.
  */
 @Composable
 private fun rememberTransparentVitruvianArtwork(): androidx.compose.ui.graphics.ImageBitmap {
@@ -725,24 +729,44 @@ private fun rememberTransparentVitruvianArtwork(): androidx.compose.ui.graphics.
         val h = source.height
         val pixels = IntArray(w * h)
         source.getPixels(pixels, 0, w, 0, 0, w, h)
-        for (i in pixels.indices) {
-            val p = pixels[i]
-            val r = android.graphics.Color.red(p)
-            val g = android.graphics.Color.green(p)
-            val b = android.graphics.Color.blue(p)
-            val low = minOf(r, g, b)
-            val high = maxOf(r, g, b)
-            val matte = (255 - low - 10f) / 75f
-            val pigment = (high - low - 18f) / 30f
-            val a = maxOf(matte, pigment).coerceIn(0f, 1f)
-            pixels[i] = if (a < 0.005f) {
-                android.graphics.Color.TRANSPARENT
-            } else {
-                val rr = ((r - (1f - a) * 255f) / a).toInt().coerceIn(0, 255)
-                val gg = ((g - (1f - a) * 255f) / a).toInt().coerceIn(0, 255)
-                val bb = ((b - (1f - a) * 255f) / a).toInt().coerceIn(0, 255)
-                android.graphics.Color.argb((a * 255f).toInt().coerceIn(0, 255), rr, gg, bb)
+
+        // Outer matte is almost white and low-chroma; parchment is golden.
+        fun isMatte(pixel: Int): Boolean {
+            val r = android.graphics.Color.red(pixel)
+            val g = android.graphics.Color.green(pixel)
+            val b = android.graphics.Color.blue(pixel)
+            return minOf(r, g, b) >= 228 && maxOf(r, g, b) - minOf(r, g, b) <= 30
+        }
+        val external = BooleanArray(pixels.size)
+        val queue = IntArray(pixels.size)
+        var next = 0
+        var length = 0
+        fun visit(index: Int) {
+            if (!external[index] && isMatte(pixels[index])) {
+                external[index] = true
+                queue[length++] = index
             }
+        }
+        for (x in 0 until w) {
+            visit(x)
+            visit((h - 1) * w + x)
+        }
+        for (y in 0 until h) {
+            visit(y * w)
+            visit(y * w + w - 1)
+        }
+        while (next < length) {
+            val i = queue[next++]
+            val x = i % w
+            val y = i / w
+            if (x > 0) visit(i - 1)
+            if (x + 1 < w) visit(i + 1)
+            if (y > 0) visit(i - w)
+            if (y + 1 < h) visit(i + w)
+        }
+        // Remove only background pixels; keep foreground color and detail.
+        for (i in pixels.indices) {
+            if (external[i]) pixels[i] = android.graphics.Color.TRANSPARENT
         }
         val result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         result.setPixels(pixels, 0, w, 0, 0, w, h)
@@ -751,8 +775,10 @@ private fun rememberTransparentVitruvianArtwork(): androidx.compose.ui.graphics.
 }
 
 private fun shareAtelierTimeOnWhatsApp(context: Context) {
-    // The prospective listing URL becomes public only after Google Play publication.
-    val text = "Atelier Time — art studio timer for artists\n$ATELIER_PLAY_STORE_URL"
+    // D-132 preview: Google Play listing is NOT public yet. Share only the
+    // already verified Instagram destination; switch after Play publication.
+    val text = "Atelier Time — an art studio timer for artists\n" +
+        "Follow the developer on Instagram:\n$ATELIER_INSTAGRAM_URL"
     val send = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
         putExtra(Intent.EXTRA_TEXT, text)
@@ -791,11 +817,11 @@ private fun AtelierAboutWhatsAppShareCard() {
                 ) {
                     Text("Share with a friend", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "Share the Atelier Time Google Play link.",
+                        "Send Atelier Time to a friend via WhatsApp.",
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
-                        "Link available after Play publication.",
+                        "For now, share the developer's Instagram link.",
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }

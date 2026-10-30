@@ -23,6 +23,12 @@ for image in "app/src/main/res/drawable-nodpi/instagram_profile_avatar.webp" "ap
     echo "STOP: bundled image is missing: $image" >&2; exit 2
   fi
 done
+# Release gate: interim share MUST be the real Instagram link, NOT the
+# unpublished Google Play store details URL.
+source_file="app/src/main/java/com/ateliertime/android/AtelierDesign.kt"
+if ! grep -Fq 'Follow the developer on Instagram:' "$source_file"; then
+  echo "STOP: D-132 must share the Instagram link until Play publication." >&2; exit 2
+fi
 : "${ANDROID_HOME:?Samsung Code on the Go Android SDK is required}"
 gradle="$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle"
 aapt2="$ANDROID_HOME/build-tools/36.0.0/aapt2"
