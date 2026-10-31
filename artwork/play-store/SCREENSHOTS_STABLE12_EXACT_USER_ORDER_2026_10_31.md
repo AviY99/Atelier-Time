@@ -1,3 +1,5 @@
+> **HISTORICAL RECORD OF THE ORIGINAL TEN — NOT THE CURRENT PLAY GALLERY.** The user subsequently chose to exclude **#02 About** and **#07 Class Timer Start** due to Google Play's limit of eight. The final selection **in original relative order** is **#01, #03, #04, #05, #06, #08, #09, #10**. See [binding 8-photo selection](SCREENSHOTS_STABLE12_FINAL_8_SELECTED_2026_10_31.md). The prior proposed first-eight selection and any old 'reserve 09/10' comments below are superseded; all 10 originals continue to be preserved unchanged as historical source material.
+
 # Atelier Time — 10 real Stable 12 screenshots in EXACT user-supplied order
 
 **2026-10-31 binding user instruction:** `בקיצור , המסכים שלחתי בדיוק בסדר ששלחתי בדיוק !! תתקדם`.
