@@ -13,11 +13,14 @@
 - The user confirms “הכל תקין בגרסה 140” after installation and testing. Accepted design includes a **white Android system icon-only splash**, the **approved full-portrait Atelier/Time image**, and navigation-bar backing that follows **Day/Night** rather than retaining parchment color. Retain user-approved timer, Sounds, Saved Classes, About, diagnostic history and background behavior.
 - This is **user/manual device acceptance**, not proof that fresh D-140 Android instrumentation or JVM regression suites ran. Historical **285/285 PASS is for Stable9/D126 only**. No signed release AAB, Play Console review, or production publishing is claimed.
 
-## Step 1: synchronize phone-local Git (PENDING until user executes)
+## Step 1: phone-local Git sync — COMPLETE (2026-10-31)
+
+**COMPLETION CONFIRMED by user-supplied Samsung Code on the Go terminal screenshot, 2026-10-31:** `git fetch origin android-native-kotlin-compose` advanced `origin/android-native-kotlin-compose` to `7979af6`. The scripted branch, clean tracked-tree and equal-image-blob safeguards passed; the backup branch was created (otherwise the chained command would have stopped). Git displayed `dropping 84f1afb... -- patch contents already upstream` and `Successfully rebased and updated refs/heads/android-native-kotlin-compose`. Final `git status --short --branch` displayed `## android-native-kotlin-compose...origin/android-native-kotlin-compose` with no ahead/behind indicator, and only `?? ../.cg/` (unrelated untracked Code on the Go workspace). **Step 1 complete: local and remote Git histories synchronized.** No push, password, token, Android build, install, data clear, or GitHub Actions was needed. Archive file remains in repository and Stable 10/11 branches are unchanged.
+
 - On the phone, a separately created local commit `84f1afb` included the exact PNG. Its `git push` failed due to GitHub password authentication, while the connected GitHub source later received the **same exact image** in commit `b58634e439b16bac3f45010d64a23003b7f69777` (plus docs). Both commits descend from the same earlier Android developer head; histories differ even though approved image bytes are identical.
-- **Remote repository art/source is already synchronized. The phone's local Git history is not yet reconciled.** We cannot run a Git command in Samsung Code on the Go from the GitHub connector, so require a single explicit phone-side read/rebase.
+- **Remote AND phone-local Git history are now synchronized.** Historical context below explains why rebase was necessary. We cannot run a Git command in Samsung Code on the Go from the GitHub connector, so require a single explicit phone-side read/rebase.
 - Before rebasing: fetch only (no push/credentials), confirm correct branch, **clean tracked tree** (ignore untracked `../.cg/`), verify the same Git blob for PNG on local and remote, and create a **backup local branch** preserving original commit. A test using two branches adding byte-identical files showed Git automatically drops the duplicate commit when rebasing.
-- Exact command from `Atelier-Time/android-native`:
+- Exact command that was executed from `Atelier-Time/android-native`:
 
 ```bash
 git fetch origin android-native-kotlin-compose && \
@@ -29,7 +32,7 @@ git rebase origin/android-native-kotlin-compose && \
 git status --short --branch
 ```
 
-- If any guard or rebase fails, stop and share output, do **not** delete assets, use `git clean`, force push, reset, uninstall or clear app data. Rebase is Git history maintenance only; no build needed. Until confirmed, do not state phone Git is synchronized or use `git pull --ff-only` on its diverged history.
+- If any guard or rebase fails, stop and share output, do **not** delete assets, use `git clean`, force push, reset, uninstall or clear app data. Rebase is Git history maintenance only; no build needed. The requested phone screenshot now confirms success; this precaution applied only before the verified rebase.
 - Do not request passwords or tokens: GitHub remote asset archive has already been completed by the assistant's connected GitHub action. Local fetch previously worked in CoGo.
 - No GitHub Actions or cloud compilation permitted. Phone build/test/install remain Samsung Code on the Go actions with separate user permission.
 
