@@ -58,3 +58,5 @@ git pull --ff-only && bash tools/persist_d139_splash_art_in_git_on_phone.sh && b
 ```
 
 If the Git push fails, the image remains in the phone's Git working copy; do not claim remote storage. Resolve permissions on GitHub before retrying; never ask user to share passwords/tokens. Alternatively the builder itself can extract from the D-139 APK.
+
+**Implementation clarification (latest):** The persistence helper attempts an **unattended, non-interactive** `git push`. If GitHub credentials are unavailable, it emits a clear warning, keeps the exact file and commit in the user's local Git checkout, and permits the subsequent local D-140 build to proceed. Only a verified successful push means the source asset is actually in remote GitHub; screenshots/logs should be checked. No `GitHub Actions` workflows are present in the development branch's `.github/workflows` folder (no folder found). Do not treat missing upload as a failed Android compilation.
