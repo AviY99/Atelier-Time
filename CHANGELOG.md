@@ -1,3 +1,7 @@
+## 2026-10-31 — Pre-Play readiness documents and approved store graphics (NO app update)
+
+Personal Google Play developer account created and fee paid; identity verification pending, Create app disabled. User approved store icon based on the original Stable12 launcher and locked the **first** feature graphic without alterations. User-approved phone gallery consists of original screenshot positions **1,3,4,5,6,8,9,10** (About/initial timer excluded); eight PNGs prepared in exact original order. No app code, versionCode, D-141 device install, frozen branch, upload or Play submission was changed. [Current handoff](docs/HANDOFF_CURRENT_STABLE12_TO_GOOGLE_PLAY_2026_10_31.md).
+
 ## 2026-10-31 — Stable 12 / D-141 user accepted (final fixes and UI/menu refinement)
 
 User confirms **"הכל עובד"** and corrects the final checkpoint to **Stable 12 / D-141** (versionCode35). Changes: less on-screen help text; Free Timer larger digits; clear Timer sounds ON/OFF; special-break manual replacement-slot explanation while ON remains default; unchanged Session first / Break first; Even ending default when legal; unified automatic Session+Break reflow for initial finish adjustments. Samsung CoGo JVM tests and debug build PASS. Frozen accepted branch `stable/android-d141-qa12-final-user-accepted`; former Stable 11 / D-140 remains unchanged. No release AAB/Play publication. [Stable 12 certificate](docs/STABLE12_D141_FINAL_USER_ACCEPTANCE_2026_10_31.md) · [Next handoff](docs/HANDOFF_CURRENT_STABLE12_TO_GOOGLE_PLAY_2026_10_31.md).
