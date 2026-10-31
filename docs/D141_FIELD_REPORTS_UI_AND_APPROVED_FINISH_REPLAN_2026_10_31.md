@@ -1,7 +1,17 @@
 # D-141 — user field feedback, pre-Play Android development candidate (2026-10-31)
 
-**Status: SOURCE CHANGED / NOT BUILT / NOT INSTALLED / NOT USER-ACCEPTED.**
+**Status: SOURCE CHANGED / FIRST LOCAL JVM QA FAILED (2 TESTS) / REPAIRS NOT RETESTED / NO VERIFIED APK / NOT INSTALLED / NOT USER-ACCEPTED.**
 Android developer branch: `android-native-kotlin-compose`; `versionName D-141`, `versionCode 35`, target/compile API 36. Stable 11 / D-140 remains frozen and user-accepted at `stable/android-d140-qa11-user-accepted` (`b58634e`). The existing user phone APK and locally saved Classes/Sounds have not been touched.
+
+## D-141 local QA attempt #1 — failed; two source fixes prepared (2026-10-31)
+
+**Evidence:** User-provided Samsung Code on the Go terminal screenshot. Kotlin compilation reached JVM tests with nonblocking warnings. `:app:testDebugUnitTest FAILED`; Gradle `BUILD FAILED in 50s`; full log on phone at `/storage/emulated/0/Download/Atelier-Time-D141-API36-Build.log`. Do **not** claim an assembled APK, passing JVM suite, device install or acceptance.
+
+Two identified failing tests:
+1. `RunEndTimePlannerTest.originalFinishOfLegacySingleSessionStillRunsUnchanged`, assertion at test line 191. The D-141 initial planner had inadvertently allowed extending a legacy Class with only one regular work Session. **Repair:** `FinalPairCompensation.reflowInitialFinish` now forbids any changed initial finish without a legitimate last-two-Session pair separated by an existing Break; unchanged original finish remains supported.
+2. `RunEndTimePropertyTest.everyFeasibleWholeMinuteEndKeepsUnrelatedPhasesAndTargetExact`, assertion at test line 36. The historical test incorrectly froze the entire early phase prefix even when D-141 inserts full regular Session+Break cycles and deliberately relocates a still-unstarted automatic special Break. **Repair:** retain strict unchanged-prefix assertions when no cycles are inserted; for inserted cycles test exact end time, contiguous phases, ≥1-minute work, original saved Class unchanged, preserved Summary and special-break count/total length, and valid final-ending shape. This is a revised test requirement, **not** permission to alter observed work or manually placed special Breaks.
+
+Both code changes are on the development branch only. **They have not been retested.** The next authorized step is a phone-local rerun of the existing `tools/build_d141_field_feedback_on_phone.sh` gate after safe Git fast-forward. Failed tests prevent creating the candidate APK. Installation still requires separate consent.
 
 ## User field decisions — complete list
 
