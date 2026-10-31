@@ -50,9 +50,6 @@ fun PresetLibrarySection(
             modifier = Modifier.weight(1f))
         TextButton(colors = atelierTextColors(), onClick = { showHelp = true }) { Text("Help") }
     }
-    Text("Run first asks you to approve or change the calculated finish time. " +
-        "Edit opens its approved plan " +
-        "in Editor, where Save can replace it after confirmation.")
     error?.let { Text(it, color = atelierErrorTextColor()) }
     if (collection.entries.isEmpty()) {
         Text("No saved classes. Create a class in Editor and select Save class.")
