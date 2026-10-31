@@ -1,3 +1,5 @@
+> **HISTORICAL LOCAL PHONE BUILD RUNBOOK (2026-10-31):** Stable12/D-141 already tested, built and user accepted. **Do not rerun this runbook for the already accepted debug build.** Future release-signed AAB must use a new explicitly authorized local build with upload keys off GitHub, never cloud Actions. Current Play account identity verification pending; no release upload. [Current project handoff](../docs/HANDOFF_CURRENT_STABLE12_TO_GOOGLE_PLAY_2026_10_31.md).
+
 # Atelier Time — on-phone execution bridge (K01–K03)
 
 ## 2026-10-23 — Required native AAPT2 override for CLI Gradle on ARM64
