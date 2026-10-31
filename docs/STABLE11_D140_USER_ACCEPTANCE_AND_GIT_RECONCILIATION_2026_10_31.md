@@ -1,3 +1,5 @@
+> **Current consolidated status (31 Oct 2026):** Stable 11 frozen and certified, phone Git reconciliation **COMPLETE**, approved image permanently archived in Android GitHub source. The command/error narrative below is retained for historical audit only; do not re-run its rebase. [Active handoff](HANDOFF_CURRENT_STABLE11_TO_GOOGLE_PLAY_2026_10_31.md).
+
 # Stable 11 — D-140: user-accepted release-candidate checkpoint
 
 **Date:** 2026-10-31. **Acceptance:** user reports “הכל תקין בגרסה 140” and then explicitly authorizes freezing Stable 11 and Git synchronization (“בצע 1 ו 2”).
@@ -18,7 +20,7 @@
 **COMPLETION CONFIRMED by user-supplied Samsung Code on the Go terminal screenshot, 2026-10-31:** `git fetch origin android-native-kotlin-compose` advanced `origin/android-native-kotlin-compose` to `7979af6`. The scripted branch, clean tracked-tree and equal-image-blob safeguards passed; the backup branch was created (otherwise the chained command would have stopped). Git displayed `dropping 84f1afb... -- patch contents already upstream` and `Successfully rebased and updated refs/heads/android-native-kotlin-compose`. Final `git status --short --branch` displayed `## android-native-kotlin-compose...origin/android-native-kotlin-compose` with no ahead/behind indicator, and only `?? ../.cg/` (unrelated untracked Code on the Go workspace). **Step 1 complete: local and remote Git histories synchronized.** No push, password, token, Android build, install, data clear, or GitHub Actions was needed. Archive file remains in repository and Stable 10/11 branches are unchanged.
 
 - On the phone, a separately created local commit `84f1afb` included the exact PNG. Its `git push` failed due to GitHub password authentication, while the connected GitHub source later received the **same exact image** in commit `b58634e439b16bac3f45010d64a23003b7f69777` (plus docs). Both commits descend from the same earlier Android developer head; histories differ even though approved image bytes are identical.
-- **Remote AND phone-local Git history are now synchronized.** Historical context below explains why rebase was necessary. We cannot run a Git command in Samsung Code on the Go from the GitHub connector, so require a single explicit phone-side read/rebase.
+- **Remote AND phone-local Git history are now synchronized.** Historical context below explains why rebase was necessary. The once-required phone-side fetch/rebase was subsequently performed successfully and confirmed by the user; older instructions below are historical.
 - Before rebasing: fetch only (no push/credentials), confirm correct branch, **clean tracked tree** (ignore untracked `../.cg/`), verify the same Git blob for PNG on local and remote, and create a **backup local branch** preserving original commit. A test using two branches adding byte-identical files showed Git automatically drops the duplicate commit when rebasing.
 - Exact command that was executed from `Atelier-Time/android-native`:
 
