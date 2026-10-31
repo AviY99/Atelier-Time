@@ -1,3 +1,5 @@
+> **SUPERSEDED: HISTORICAL STABLE 11 / D-140 HANDOFF.** The latest user-accepted checkpoint is **Stable 12 / D-141**, documented in [the current Stable 12 → Google Play handoff](HANDOFF_CURRENT_STABLE12_TO_GOOGLE_PLAY_2026_10_31.md) and [Stable 12 certificate](STABLE12_D141_FINAL_USER_ACCEPTANCE_2026_10_31.md). Stable 11/D-140 remains an untouched recovery snapshot. Ignore older 'next steps' and pending claims in this historical document.
+
 # Atelier Time — authoritative handoff after Stable 11 (2026-10-31)
 
 > **CURRENT STATUS — READ THIS FIRST.** This document supersedes conflicting historical "latest", "pending", "needs rebase" or "image not in GitHub" statements in older sections of `docs/HANDOFF.md` and legacy D-139/D-140 build records. Those older entries are kept solely as audit history. **Start here in a new project conversation; do not repeat finished tasks.**
