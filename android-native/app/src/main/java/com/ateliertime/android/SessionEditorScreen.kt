@@ -1180,7 +1180,7 @@ fun SessionEditorScreen(
                     Switch(checked = soundEnabled,
                         onCheckedChange = { soundEnabled = it })
                 }
-                if (!soundEnabled) Text("Timer sounds are OFF — no sounds will play.",
+                if (!soundEnabled) Text("Timer sounds are OFF — no timer completion sounds will play.",
                     style = MaterialTheme.typography.bodySmall)
             }
             MainTab.TIMER -> {
