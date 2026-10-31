@@ -60,3 +60,16 @@ git pull --ff-only && bash tools/persist_d139_splash_art_in_git_on_phone.sh && b
 If the Git push fails, the image remains in the phone's Git working copy; do not claim remote storage. Resolve permissions on GitHub before retrying; never ask user to share passwords/tokens. Alternatively the builder itself can extract from the D-139 APK.
 
 **Implementation clarification (latest):** The persistence helper attempts an **unattended, non-interactive** `git push`. If GitHub credentials are unavailable, it emits a clear warning, keeps the exact file and commit in the user's local Git checkout, and permits the subsequent local D-140 build to proceed. Only a verified successful push means the source asset is actually in remote GitHub; screenshots/logs should be checked. No `GitHub Actions` workflows are present in the development branch's `.github/workflows` folder (no folder found). Do not treat missing upload as a failed Android compilation.
+
+
+## D-140 media audit and Code on the Go untracked `.cg/` fix (2026-10-31)
+
+Latest phone screenshot shows D-140 stopped BEFORE compilation at `STOP: working tree has changes`, printing only `?? ../.cg/`. That is the Samsung Code on the Go generated workspace directory, **not** a changed app resource. Do not delete/clean that directory. Earlier helper incorrectly rejected any untracked item anywhere. The revised helper checks tracked source changes and unexpected untracked items **only inside `android-native/app/src` and `android-native/tools`**; it ignores unrelated `.cg/` while preserving all files. The verified original user-approved splash is extracted from the existing D-139 APK and SHA checked; exact JPEG source is archived only if the original byte-identical JPG is already available in Download. It commits and attempts to push the runtime PNG to GitHub; a failed push is reported separately and local build remains possible. The app source/assets now have an inventory at `artwork/README.md` and a deterministic local check `android-native/tools/audit_artwork_on_phone.sh`. No user files or Samsung workspace files are ever deleted by the helper.
+
+**Run in Samsung Code on the Go from `Atelier-Time/android-native`:**
+
+```bash
+git pull --ff-only && bash tools/persist_d139_splash_art_in_git_on_phone.sh && bash tools/audit_artwork_on_phone.sh && bash tools/build_d140_navbar_fix_on_phone.sh
+```
+
+The art audit verifies that the approved asset is **tracked in local Git**. Only a successful push (or separate GitHub verification) proves it is in remote GitHub. Build is offline/local, no GitHub Actions, no APK install, no data removal. D-140 is still not compiled or tested as of this document update; Stable 10 is frozen.
