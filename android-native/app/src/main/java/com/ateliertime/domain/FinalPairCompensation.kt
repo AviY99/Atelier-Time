@@ -44,6 +44,8 @@ data class ReflowBoundary(
      * Unlike preserveExistingTail this also applies before the first Next.
      */
     val noActiveTailRebuild: Boolean = false,
+    /** An initial approved finish may repartition the entirely unstarted tail. */
+    val allowInitialTailRebuild: Boolean = false,
     /** Physical time remaining until the immutable approved Class deadline. */
     val physicalRemainingMillis: Long? = null,
     /** Virtual cursor immediately after the proposed transition. */
@@ -75,6 +77,35 @@ object FinalPairCompensation {
         allowExtraRegular = allowExtraRegular,
         boundary = boundary,
     )
+
+    /** One plan for BOTH the finish-time preview and the actual Run start.
+     * Rebuild only an entirely unstarted future. Next/Restart constraints remain
+     * unchanged; existing approved/saved Classes are never mutated.
+     */
+    fun reflowInitialFinish(
+        session: ApprovedSession,
+        correctionSeconds: Int,
+    ): CompensatedTimeline {
+        val adjusted = reflow(session, session.phases, correctionSeconds,
+            allowExtraRegular = true,
+            boundary = ReflowBoundary(allowInitialTailRebuild = true))
+        // Newly inserted cycles also create new eligible regular Break slots.
+        // Only automatic genuine special Breaks may move to rebalance them.
+        val addedCycles = adjusted.phases.any {
+            it.id.startsWith("runtime-added-") || it.id.startsWith("runtime-tail-")
+        }
+        if (!addedCycles || !session.rules.placement.automatic) return adjusted
+        val relocated = SpecialBreakRebalancer.rebalance(
+            phases = adjusted.phases,
+            firstUnstartedIndex = 0,
+            actualElapsedSeconds = 0,
+            physicalClassSeconds = adjusted.totalSeconds,
+            automatic = true,
+            genuineSpecial = session.rules.specialBreakSeconds >
+                session.rules.shortBreakSeconds,
+        )
+        return adjusted.copy(phases = relocated)
+    }
 
     /**
      * Incremental reflow after a previously relocated special Break / added
