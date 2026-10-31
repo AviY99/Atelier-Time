@@ -1,3 +1,7 @@
+## 2026-10-31 — Stable 11 / D-140 approved, original intro artwork archived
+
+User confirmed `הכל תקין בגרסה 140` after phone build/QA. Stable 11 froze code and exact approved PNG at `b58634e439b16bac3f45010d64a23003b7f69777` on `stable/android-d140-qa11-user-accepted`. Confirmed `ARTWORK AUDIT PASS`, `BUILD SUCCESSFUL` in Samsung Code on the Go; **user/manual acceptance** only, without newly evidenced D-140 automated tests. User's local `84f1afb` duplicate image commit differs from GitHub's approved remote art commit; safe fetch/guarded rebase on phone remains pending, no extra password/token or Build required. Stable 10 preserved; Play launch tasks remain. [Stable 11](docs/STABLE11_D140_USER_ACCEPTANCE_AND_GIT_RECONCILIATION_2026_10_31.md).
+
 ## 2026-10-31 — D-140 artwork audit and safe Code on the Go recovery
 
 Phone evidence shows D-140 first refused missing Download PNG, and later refused untracked `../.cg/` Code on the Go workspace. No Android build or installation occurred. Developer source now includes an exact SHA-256 recovery helper (from D-139 APK), an asset audit and versioned artwork inventory. Git push of binary assets remains **unconfirmed** until helper actually runs and push succeeds. No saved classes, audio, personal reports or frozen Stable10 files are changed. [Art inventory](artwork/README.md); [D-140 detailed record](docs/D140_SPLASH_NAVIGATION_PALETTE_FIX_2026_10_31.md).

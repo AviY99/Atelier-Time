@@ -1,3 +1,5 @@
+> **ATELIER TIME STABLE 11 / D-140 (2026-10-31, PRE-PLAY CHECKPOINT):** User-confirmed working Android app and approved intro art are frozen at `stable/android-d140-qa11-user-accepted` (`b58634e439b16bac3f45010d64a23003b7f69777`), code34/API36. Full original PNG saved byte-identically in Android GitHub source; no phone download dependency. Phone Git local `84f1afb` requires safe guarded rebase with backup; no force/reset or new credentials. The application is not yet submitted to Google Play. [Stable 11 certificate](../docs/STABLE11_D140_USER_ACCEPTANCE_AND_GIT_RECONCILIATION_2026_10_31.md).
+
 # Atelier Time — versioned visual artwork
 
 This directory is the source/artwork inventory for **Atelier Time**. Source ownership and hashes are tracked separately from application runtime assets.
