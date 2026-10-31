@@ -112,7 +112,7 @@ if [[ "$actual_art_sha" != "$approved_art_sha" ]]; then
   exit 2
 fi
 if ! grep -Fq 'Theme.AtelierTime.Launch' app/src/main/AndroidManifest.xml ||
-   ! grep -Fq 'android:windowSplashScreenAnimatedIcon' app/src/main/res/values-v31/styles.xml ||
+   ! grep -Fq 'android:windowSplashScreenAnimatedIcon' app/src/main/res/values-v31/atelier_splash_styles.xml ||
    ! grep -Fq 'atelier_splash_approved_d139.png' app/src/main/java/com/ateliertime/android/MainActivity.kt; then
   echo "STOP: splash screen source/theme is incomplete." >&2
   exit 2
@@ -165,7 +165,7 @@ cp "${apks[0]}" "$out"
   printf 'branch=android-native-kotlin-compose\n'
   printf 'source_commit=%s\n' "$(git rev-parse HEAD)"
   printf 'app_sha256=%s\n' "$(sha256sum "$out" | awk '{print $1}')"
-  printf 'artwork_sha256=${approvedSha}\n'
+  printf 'artwork_sha256=c7d69a52c53a86738cc416b4c29eb621f8792cf367539732ce0ffa3639d8460d\n'
   printf 'state=COMPILED_ONLY; NOT_INSTALLED; NOT_DEVICE_TESTED\n'
 } > "$downloads/Atelier-Time-D139-API36-Manifest.txt"
 echo "BUILD SUCCESSFUL — D-139 debug APK saved: $out"
