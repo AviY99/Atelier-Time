@@ -86,6 +86,22 @@ object FinalPairCompensation {
         session: ApprovedSession,
         correctionSeconds: Int,
     ): CompensatedTimeline {
+        // Preserve legacy one-Session Classes: changing their finish cannot
+        // rewrite the single work Session or create a new cycle out of it.
+        // The old initial-finish path also required two ending regular Sessions
+        // separated by an existing regular/special Break.
+        if (correctionSeconds != 0) {
+            val ending = session.phases.indices.filter { index ->
+                session.phases[index].kind == PhaseKind.POSE &&
+                    session.phases[index].poseSource == PoseSource.REGULAR
+            }.takeLast(2)
+            require(ending.size == 2 && ending[1] == ending[0] + 2 &&
+                session.phases[ending[0] + 1].kind in setOf(
+                    PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK
+                )) {
+                "This Class has no adjustable final Session pair."
+            }
+        }
         val adjusted = reflow(session, session.phases, correctionSeconds,
             allowExtraRegular = true,
             boundary = ReflowBoundary(allowInitialTailRebuild = true))
