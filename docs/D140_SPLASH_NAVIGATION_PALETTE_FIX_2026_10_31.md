@@ -41,3 +41,20 @@ Creates `/storage/emulated/0/Download/Atelier-Time-D140-API36-Candidate.apk` and
 5. No full automated test suite was rerun on D-140; screenshot review and test outcomes await user. Stable 10 stays frozen.
 
 Do not declare D-140 stable or Play-ready before explicit user acceptance.
+
+
+## 2026-10-31: follow-up on missing Download file / reproducible source archive
+
+The user deleted the standalone approved PNG from Downloads. The first D-140 attempt stopped in a **pre-build source-file check**, with **NO compilation, install or data change**. This exposed a prior workflow mistake: the exact approved image was not committed in GitHub along with D-139, so the APK build depended on an unrelated temporary Download file. The original 1080×2340 PNG is still embedded verbatim in the user's already-built/installed D-139 APK asset (subject to SHA verification).
+
+Developer branch now includes `tools/persist_d139_splash_art_in_git_on_phone.sh`. It can recover the **exact byte-identical original image** from the D-139 APK in Downloads, or the readable installed package, verify SHA `c7d69a52c53a86738cc416b4c29eb621f8792cf367539732ce0ffa3639d8460d`, then commit and attempt `git push` on the existing Android development branch. It does not access user data, uninstall apps, perform builds or run paid GitHub Actions. Git credentials may be required for the user's device to push. **Only a successful push actually preserves the asset in remote GitHub.** Until verified, never claim that the PNG is already in the remote source.
+
+D-140 builder additionally accepts the image from an existing tracked `app/src/main/assets/atelier_splash_approved_d139.png`, or original Download PNG, or re-extracts it from the D-139 APK with strict hash verification. Thus D-140 can build from the user's already-present D-139 APK without re-downloading the artwork even if Git push credentials are unavailable. If neither source exists it stops safely. No extra Android version increment: still D-140/code34.
+
+Recommended single Code on the Go command when GitHub push authentication is configured:
+
+```bash
+git pull --ff-only && bash tools/persist_d139_splash_art_in_git_on_phone.sh && bash tools/build_d140_navbar_fix_on_phone.sh
+```
+
+If the Git push fails, the image remains in the phone's Git working copy; do not claim remote storage. Resolve permissions on GitHub before retrying; never ask user to share passwords/tokens. Alternatively the builder itself can extract from the D-139 APK.

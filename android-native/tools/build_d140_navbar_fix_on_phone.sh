@@ -109,44 +109,79 @@ for required in 'LaunchedEffect(activity, designPalette)' '0xFFF7F4ED' '0xFF304D
     echo "STOP: palette navigation-bar synchronization missing: $required" >&2; exit 2
   fi
 done
-# D-140: accept ONLY the exact artwork approved in this conversation.
-# The image is transiently included in APK assets; source Git remains clean.
+# Exact artwork must be inside the APK. Prefer Git-tracked source, then
+# legacy Download copy; recover the SAME exact bytes from an already-built
+# D-139 APK on this phone if the original Download PNG was deleted.
 downloads="/storage/emulated/0/Download"
-source_art="$downloads/Atelier_Time_Splash_User_Artwork_Preview.png"
+asset_dir="app/src/main/assets"
+asset_path="$asset_dir/atelier_splash_approved_d139.png"
+legacy_art="$downloads/Atelier_Time_Splash_User_Artwork_Preview.png"
 approved_art_sha="c7d69a52c53a86738cc416b4c29eb621f8792cf367539732ce0ffa3639d8460d"
-if [[ ! -s "$source_art" ]]; then
-  echo "STOP: approved splash preview is missing from $source_art" >&2
-  echo "Save the original approved 1080x2340 PNG in Download under that exact filename, then rerun." >&2
-  exit 2
+source_art=""
+temporary_asset=false
+if [[ -s "$asset_path" ]]; then
+  source_art="$asset_path"
+  echo "Approved splash art: using source-tracked project asset."
+elif [[ -s "$legacy_art" ]]; then
+  source_art="$legacy_art"
+  echo "Approved splash art: using original Download PNG."
+else
+  source_apk="$downloads/Atelier-Time-D139-API36-Candidate.apk"
+  if [[ ! -s "$source_apk" ]]; then
+    # The installed package may still carry the exact approved asset even
+    # after the D-139 build APK or standalone PNG was deleted.
+    installed_apk="$(pm path com.ateliertime.android 2>/dev/null | sed -n 's/^package://p' | head -n 1 || true)"
+    if [[ -n "$installed_apk" && -r "$installed_apk" ]]; then
+      source_apk="$installed_apk"
+    fi
+  fi
+  if [[ ! -s "$source_apk" ]]; then
+    echo "STOP: no tracked approved PNG, Download PNG, D-139 APK or readable installed APK." >&2
+    echo "Preserve installed app/data. The unchanged approved artwork must be recovered from an existing D-139 APK." >&2
+    exit 2
+  fi
+  if ! command -v unzip >/dev/null 2>&1; then
+    echo "STOP: unzip is required to recover the D-139 bundled asset, but is not installed." >&2
+    exit 2
+  fi
+  mkdir -p "$asset_dir"
+  if ! unzip -p "$source_apk" "assets/atelier_splash_approved_d139.png" > "$asset_path"; then
+    rm -f "$asset_path"
+    echo "STOP: D-139 APK does not include the approved 1080x2340 image." >&2
+    exit 2
+  fi
+  source_art="$asset_path"
+  temporary_asset=true
+  echo "Approved splash art: recovered from D-139 APK, awaiting SHA verification."
 fi
 actual_art_sha="$(sha256sum "$source_art" | awk '{print $1}')"
 if [[ "$actual_art_sha" != "$approved_art_sha" ]]; then
-  echo "STOP: supplied art does not match the exact user-approved PNG (SHA-256 mismatch)." >&2
+  if [[ "$temporary_asset" == "true" ]]; then rm -f "$asset_path"; fi
+  echo "STOP: approved splash art SHA-256 mismatch. Not building a different image." >&2
   exit 2
 fi
 if ! grep -Fq 'Theme.AtelierTime.Launch' app/src/main/AndroidManifest.xml ||
    ! grep -Fq 'android:windowSplashScreenAnimatedIcon' app/src/main/res/values-v31/atelier_splash_styles.xml ||
    ! grep -Fq 'atelier_splash_approved_d139.png' app/src/main/java/com/ateliertime/android/MainActivity.kt; then
+  if [[ "$temporary_asset" == "true" ]]; then rm -f "$asset_path"; fi
   echo "STOP: splash screen source/theme is incomplete." >&2
   exit 2
 fi
-asset_dir="app/src/main/assets"
-asset_path="$asset_dir/atelier_splash_approved_d139.png"
-if [[ -e "$asset_path" ]]; then
-  echo "STOP: temporary splash asset already exists; inspect local source to avoid overwriting." >&2
-  exit 2
-fi
-created_asset_directory=false
-if [[ ! -d "$asset_dir" ]]; then
+if [[ "$source_art" != "$asset_path" ]]; then
+  if [[ -e "$asset_path" ]]; then
+    echo "STOP: unexpected conflicting project asset." >&2; exit 2
+  fi
   mkdir -p "$asset_dir"
-  created_asset_directory=true
+  cp "$source_art" "$asset_path"
+  temporary_asset=true
 fi
 cleanup_approved_asset() {
-  rm -f "$asset_path"
-  if [[ "$created_asset_directory" == "true" ]]; then rmdir "$asset_dir" 2>/dev/null || true; fi
+  if [[ "$temporary_asset" == "true" ]]; then
+    rm -f "$asset_path"
+    rmdir "$asset_dir" 2>/dev/null || true
+  fi
 }
 trap cleanup_approved_asset EXIT
-cp "$source_art" "$asset_path"
 : "${ANDROID_HOME:?Samsung Code on the Go Android SDK is required}"
 gradle="$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle"
 aapt2="$ANDROID_HOME/build-tools/36.0.0/aapt2"
