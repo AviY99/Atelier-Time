@@ -1,7 +1,11 @@
 # D-141 — user field feedback, pre-Play Android development candidate (2026-10-31)
 
-**Current status: D-141 / code35 SAMSUNG LOCAL JVM TESTS PASS + DEBUG APK BUILD SUCCESSFUL; APK NOT INSTALLED; DEVICE UX/REGRESSION QA PENDING; NOT USER ACCEPTED.**
-Android developer branch: `android-native-kotlin-compose`; `versionName D-141`, `versionCode 35`, target/compile API 36. Stable 11 / D-140 remains frozen and user-accepted at `stable/android-d140-qa11-user-accepted` (`b58634e`). The existing user phone APK and locally saved Classes/Sounds have not been touched.
+**FINAL STATUS (2026-10-31): USER ACCEPTED — STABLE 11 FINAL / D-141, code35.** Samsung JVM suite and debug build PASS; user subsequently states **"הכל עובד !!! זאת גרסה יציבה 11 תיקון באגים וטיוב מסכים ותפריטים סופי"**. Exact on-phone installation steps or individual test cases were not supplied. D-140 remains an unchanged historical Stable 11 recovery checkpoint. [Official final certificate](STABLE11_D141_FINAL_USER_ACCEPTANCE_2026_10_31.md).
+Android developer branch: `android-native-kotlin-compose`; `versionName D-141`, `versionCode 35`, target/compile API 36. Stable 11 / D-140 remains frozen and user-accepted at `stable/android-d140-qa11-user-accepted` (`b58634e`). Source-only GitHub updates did not modify device user data. User subsequently reports D-141 works on device; no separate post-install screenshot is held.
+
+## Final user acceptance — 2026-10-31
+
+The user explicitly approved the working D-141 as **Stable 11 final**, describing final bug fixes and screen/menu refinement. This supersedes the **historical** earlier D-141 preinstall and unaccepted statuses written below, which are retained to document the build/test chronology. Do not repeat the completed JVM build; no APK install or device operation was performed by the GitHub connector. Stable 11 / D-140 source and archive are preserved, not rewritten. Google Play preparation is next, with all external actions approval-gated.
 
 ## D-141 local QA attempt #2 — successful tests and debug APK build (2026-10-31)
 
@@ -42,13 +46,13 @@ Both code changes are on the development branch only. **They have not been retes
 - `android-native/app/build.gradle.kts`: D-141/code35.
 - `android-native/tools/build_d141_field_feedback_on_phone.sh`: a **prepared but not executed**, local Samsung Code on the Go build gate that checks Git, exact art, JVM tests and debug APK, without installation or GitHub Actions.
 
-## QA required before any user acceptance
+## Historical QA plan established before user acceptance (now accepted by user)
 
 1. **Separate explicit approval required before running ANY build/test** in Samsung Code on the Go. No Gradle/Android build in GitHub Actions, no paid CI, no Termux compile.
 2. On the phone before a build, verify branch `android-native-kotlin-compose`, clean tracked changes, and fast-forward only from the completed phone Git reconciliation. Do not rebase/reset/force/delete `.cg`; do not ask for Git passwords/tokens. Once approved, use the prepared one-command script only on Samsung CoGo after branch confirmation.
 3. **COMPLETED:** Samsung local JVM regression suite and debug APK assembly PASS on attempt #2. Exact passing test count not shown. **NEXT:** installation requires distinct user authorization; then physical-device functional/UI acceptance and preservation of Classes/Sounds.
 4. UI on device: Free Timer digits twice size without clipping at normal/large font sizes; functional wheel edit/read-only states; Sounds ON/OFF semantics; manual-break OFF field help and ON default; Even selected when applicable and overridable; `Session first / Break first` remain unchanged; compact on-screen labels still make sense; Day/Night behavior.
 5. Scheduling: extension at +6m (existing pair only) versus +90m (new full cycles, distributed breaks), shortening and impossible red boundary, preview matches actual Run phases, fixed physical end, Summary preserved, genuinely long special breaks protected, manual placement unchanged, repeated Next/Restart/Pause/Resume do not rewrite observed prefix. Test saved legacy presets and user Sounds/Classes preservation.
-6. D-141 may be promoted to a new stable checkpoint **only after explicit device QA and user acceptance**. Stable 11 remains immutable; Google Play preparation resumes after resolving the field findings.
+6. **COMPLETE:** User explicitly declares D-141 final Stable 11 after reporting that everything works. New frozen branch `stable/android-d141-qa11-final-user-accepted` records this final D-141 source; D-140 frozen snapshot remains intact. Resume Google Play preparation.
 
 **This document records an already authorized Samsung local JVM build/test that succeeded. It does NOT authorize publication, payment, user data modifications, APK installation, or AAB generation.**
