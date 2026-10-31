@@ -101,17 +101,15 @@ if [[ -s "$downloads/1000099031.jpg" ]]; then
   fi
 fi
 
+commit_paths=("$asset")
 git add -- "$asset"
-if [[ -s "$source_jpg" ]]; then
-  if [[ "$(sha256sum "$source_jpg" | awk '{print $1}')" == "$expected_source" ]]; then
-    git add -- "$source_jpg"
-  fi
+if [[ -s "$source_jpg" ]] &&
+   [[ "$(sha256sum "$source_jpg" | awk '{print $1}')" == "$expected_source" ]]; then
+  git add -- "$source_jpg"
+  commit_paths+=("$source_jpg")
 fi
-if ! git diff --cached --quiet -- "$asset" "$source_jpg"; then
-  git commit -m "assets: archive exact approved D-139 splash artwork" -- "$asset" "$source_jpg" || {
-    # Older Git requires no absent pathspec in a path-limited commit.
-    git commit -m "assets: archive exact approved D-139 splash artwork"
-  }
+if ! git diff --cached --quiet -- "${commit_paths[@]}"; then
+  git commit -m "assets: archive exact approved D-139 splash artwork" -- "${commit_paths[@]}"
 fi
 if ! git cat-file -e "HEAD:android-native/$asset" 2>/dev/null; then
   echo "STOP: approved image did not enter the current Git commit" >&2; exit 2
