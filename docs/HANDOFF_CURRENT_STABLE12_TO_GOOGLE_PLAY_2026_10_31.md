@@ -1,47 +1,84 @@
-> **FINAL PHONE GALLERY SELECTION — USER DECISION (2026-10-31):** Google Play permits at most 8 phone screenshots. The user chose to exclude **About (original #02)** and **the initial Class Timer session (original #07)**. The authoritative gallery is originals **01, 03, 04, 05, 06, 08, 09, 10 IN THAT ORDER** — Splash, Editor, Timeline, Saved Classes, Running Timer (progress), Free Timer, Design, Sound. [Final selection and verified ZIP checksums](../artwork/play-store/SCREENSHOTS_STABLE12_FINAL_8_SELECTED_2026_10_31.md). Both excluded originals remain preserved in the earlier all-10 archive; the earlier 01–08 ZIP is **SUPERSEDED, DO NOT UPLOAD**. Verified new eight-image upload ZIP is a conversation artifact, not committed PNG binaries. Approved icon and locked original promo graphic unchanged. No Play uploads, app modifications or new build.
-
-> **STORE SCREENSHOTS IN EXACT USER ORDER (2026-10-31):** The user supplied **10 genuine Stable12 screens** and instructed **do not change their sequence**. All 10 are preserved byte-for-byte in a downloadable master ZIP, plus 10 proportionally scaled/side-padded 1080×1920 Play-ready PNGs; a separate phone ZIP contains items **01–08 in unchanged order** because official Google Play limits phone screenshots to **8 per device type**. Items 09–10 remain numbered and preserved as reserve, **not deleted or reordered**. [Exact original order, per-file SHA-256 and handling rules](../artwork/play-store/SCREENSHOTS_STABLE12_EXACT_USER_ORDER_2026_10_31.md). User-approved 512×512 Play icon and locked first feature graphic remain unchanged. **Binary screenshots/ZIPs are conversation artifacts, NOT GitHub-stored image files.** Play developer identity verification pending in last screenshot, no store upload or publication.
-
-> **GOOGLE PLAY PREPARATION UPDATE (2026-10-31):** User's personal Play Console account was created and payment completed. Identity documents uploaded and awaiting Google's approval; `Create app` is disabled pending account verification. **512×512 Play icon sourced from the existing approved Stable12 app launcher was explicitly APPROVED**; [approval and SHA record](../artwork/play-store/PLAY_STORE_ICON_STABLE12_APPROVED_2026_10_31.md). The first feature graphic remains locked and unchanged; [lock record](../artwork/play-store/FEATURE_GRAPHIC_FIRST_ORIGINAL_LOCK_2026_10_31.md). Store PNGs are available as downloadable conversation artifacts but **are not yet committed as binaries to GitHub**. Next: genuine Stable12 screenshots and identity verification; no store upload, AAB, app rebuild or payment authorization.
-
 # Atelier Time — CURRENT authoritative handoff: Stable 12 / D-141 → Google Play
 
-**Date:** 2026-10-31. **Start here for new conversations.** This handoff **supersedes** the historical `HANDOFF_CURRENT_STABLE11_TO_GOOGLE_PLAY_2026_10_31.md` and older status text. Keep older records as audit history; never repeat finished builds, old rebase instructions or image recovery work.
+**Verified/updated 2026-10-31. Start every continuation here.** This is the current operational source of truth. Previous handoffs and stage-specific documents are historical evidence and must not be interpreted as new to-do tasks when already completed. [Documentation reconciliation audit](DOCUMENTATION_RECONCILIATION_STABLE12_GOOGLE_PLAY_2026_10_31.md).
 
-## 1. Accepted project state
+## 1. Final accepted Android version — do not rebuild
 
-- **Latest FINAL accepted version: Stable 12 / D-141**, `versionName=D-141`, `versionCode=35`, package `com.ateliertime.android`, compile/target API 36, min API 26, native Android Kotlin/Jetpack Compose.
-- The user reported **everything works** and explicitly designated **Stable 12** following the final bug fixes and UI/menu refinements; this corrects the user's earlier message mentioning Stable 11. **Stable 11 remains D-140**, not D-141.
-- **Frozen Stable 12 source branch:** `stable/android-d141-qa12-final-user-accepted`. **Samsung Code on the Go JVM-test/build source:** commit `6e86399807aa11d674f333bbd1cfb1fcb6bd25f7`. Commits after this up to freeze change only documentation. [Official Stable 12 certificate](STABLE12_D141_FINAL_USER_ACCEPTANCE_2026_10_31.md).
-- **Historical immutable branches:** `stable/android-d140-qa11-user-accepted` (Stable 11 / D-140, `b58634e439b16bac3f45010d64a23003b7f69777`) and `stable/android-d138-qa10-user-accepted` (Stable 10 / D-138). Do not change any stable branch.
-- Latest user-provided Samsung screenshot confirms successful `git pull --ff-only`, `ARTWORK AUDIT PASS` and **D-141 JVM tests and BUILD SUCCESSFUL**; local debug APK `/storage/emulated/0/Download/Atelier-Time-D141-API36-Candidate.apk`, with local build log/manifest. Exact JVM test count not provided. Subsequent user acceptance is self-reported; separate installation screenshot and detailed case-by-case device test report not provided. Do not invent them or rerun accepted work.
-- **D-141 user-approved changes:** concise UI text with Help available; Free Timer main digits ×2; `Timer sounds ON/OFF` (ON default; OFF mutes auto timer sounds); keep automatic/manual special-break placement with ON default and clear OFF replacement-slot input; **Session first / Break first unchanged**; `Even` default where eligible for final pair; initial finish-time extension using unified future planner to distribute full regular Sessions and Breaks. [Full D-141 work and QA record](D141_FIELD_REPORTS_UI_AND_APPROVED_FINISH_REPLAN_2026_10_31.md).
-- **Not yet done:** signed release AAB, Google Play Console submission, mandatory store testing (if applicable), or publication.
+- **Stable 12 / D-141, versionName D-141, versionCode 35**, Android native Kotlin + Jetpack Compose, application ID `com.ateliertime.android`, target/compile SDK 36, min SDK 26.
+- User explicitly stated **"הכל עובד !!! זאת גרסה יציבה 12 תיקון באגים וטיוב מסכים ותפריטים סופי"**. Its final bug fixes, screens/menus and timer behavior are accepted.
+- **Frozen source:** `stable/android-d141-qa12-final-user-accepted`. Android active DEV branch: `android-native-kotlin-compose`. `main` contains project-wide documentation, not the Android build.
+- Phone-local Samsung Code on the Go art audit, complete JVM test task and debug APK build PASSED from exact source commit `6e86399807aa11d674f333bbd1cfb1fcb6bd25f7`. Changes up to Stable 12 freeze were documentation only. User subsequently reported the app works. No exact JVM count, independent instrumentation D-141 count or separate installed APK digest was supplied.
+- **Stable 11 / D-140** remains frozen at `stable/android-d140-qa11-user-accepted`, commit `b58634e439b16bac3f45010d64a23003b7f69777`. **Stable 10 / D-138** also remains frozen. Never edit stable branches.
+- [Stable 12 acceptance certificate](STABLE12_D141_FINAL_USER_ACCEPTANCE_2026_10_31.md) · [Seven D-141 field fixes and QA](D141_FIELD_REPORTS_UI_AND_APPROVED_FINISH_REPLAN_2026_10_31.md).
+- No release-signed AAB, Play upload or publication yet. Do not invent completed release tasks or repeat accepted device QA.
 
-## 2. Preserved artwork and on-phone data
+## 2. Google Play account — latest user screenshots
 
-- Approved splash image **already Git-tracked** at `android-native/app/src/main/assets/atelier_splash_approved_d139.png`; SHA-256 `c7d69a52c53a86738cc416b4c29eb621f8792cf367539732ce0ffa3639d8460d`, Git blob `8950a9c509bbc2c2bac02d18c0b9bfdfca06eabc`. Launcher, About, Instagram, WhatsApp/status images are also in source; see `artwork/README.md`. Do not ask for artwork reupload or regenerate approved pieces.
-- Saved user Classes, Sounds, diagnostic reports and history reside on phone. No uninstall, reinstall, reset/clear-data or permission changes without express consent.
-- `android-native-kotlin-compose` is the only Android **development** branch. `main` is shared documentation index, **not** the Android build branch; Stable branches are frozen. Future code changes must receive a new D/versionCode with approval. Do not run GitHub Actions / paid cloud builds; Android builds only locally on Samsung Code on the Go, when separately authorized.
-- The old phone Git rebase was completed and D-141 `git pull --ff-only` succeeded. Do not repeat rebase/reset/force push. Extra `../.cg/` belongs to Code on the Go, leave untouched. No password/token request.
+- Personal developer account **successfully created** under the user's chosen Google account; **one-time registration fee paid** and Google says a receipt was emailed. Two-step verification is ON.
+- Identity documents were uploaded and **Google identity verification is pending**. The latest Console screenshot explicitly shows **"Complete account verifications to create apps"** with **Create app disabled**.
+- Contact phone verification was blocked pending approval of the identity documents. Any additional Android-device verification should be checked in the actual Console after identity approval, not asserted complete or assumed separately actionable.
+- The user wants to distribute initially to **a few specifically invited individuals**, by **Internal testing**, not to the public. A new personal developer account may need a separate qualifying **closed test** before later production release; do not confuse it with initial internal testing.
+- Do **not** request passwords, OTP codes, payment card details, or account identifiers in chat. Account verification proceeds via Google and Google email, not via GitHub.
+- No app draft has yet been created and no listing metadata, asset or AAB uploaded to Play Console.
 
-## 3. Next work — Google Play preparation (not publication)
+## 3. Store listing copy / ASO — drafted, not submitted
 
-Reuse existing ASO and compliance drafts rather than rebuilding completed work:
-1. **Play Console account and current eligibility/testing rules:** confirm developer account state, verification and whether personal-account closed-test requirements apply. Research and guidance only until user authorizes any account/payment action.
-2. **Store listing / ASO:** finalize draft Hebrew and English title, short/long description, target audience, category, keywords. Existing `docs/ASO01_DISCOVERABILITY_REQUIREMENTS_AND_USER_APPROVAL_2026_10_30.md` and `docs/ASO01_GOOGLE_PLAY_STORE_LISTING_HE_EN_2026_10_30.md`.
-3. **Play artwork:** obtain user approval for store icon 512×512, feature graphic 1024×500, actual app screenshots. Show previews **before** using/uploading assets. Preserve approved runtime art.
-4. **Privacy / Data safety:** verify already drafted `PRIVACY_POLICY.md`, the public live policy URL and About link, and actual data/permission behavior.
-5. **Android foreground service Play declaration:** review existing `docs/D128_SPECIALUSE_PLAY_CONSOLE_DECLARATION_AND_RATIONALE_2026_10_30.md` and `docs/STAGE8_SPECIALUSE_FGS_POLICY_REVIEW_2026_10_30.md`, verify current Play requirements and any required demonstration.
-6. **Final release-readiness audit:** permissions, background playback/notifications, API target, app data, export, retention and signing/upgrades.
-7. **Signing and AAB:** secure upload key **off GitHub** and prepare signed release AAB *locally on Samsung Code on the Go* only after explicit approval; don't confuse debug APK with Play release.
-8. **Release tests / internal or mandatory closed testing / Play review / production release** only with explicit approvals. No cost/payment, upload, Play signing action or publication is currently authorized.
+- Existing user-approved ASO direction and Hebrew/English titles and descriptions are at [ASO listing draft](ASO01_GOOGLE_PLAY_STORE_LISTING_HE_EN_2026_10_30.md) and [ASO search intent / original queries](ASO01_DISCOVERABILITY_REQUIREMENTS_AND_USER_APPROVAL_2026_10_30.md).
+- Hebrew title: `Atelier Time - טיימר לסטודיו`. English title: `Atelier Time: Art Studio Timer`. Short/full descriptions already drafted; verify final field lengths/policy in the real Play Console.
+- Do not treat old D-130/Stable9 context written inside the dated ASO research documents as current Android status. No exact search-ranking guarantees, misleading 3D/fashion claims or keyword stuffing.
+- Primary language and real Play Console tags/category still need selection when the account allows creating the app. No store description published yet.
 
-## 4. Documents and workflow
+## 4. Play store art — user's binding approvals
 
-- **Source of truth:** this current handoff, [Stable 12 acceptance certificate](STABLE12_D141_FINAL_USER_ACCEPTANCE_2026_10_31.md), [D-141 QA record](D141_FIELD_REPORTS_UI_AND_APPROVED_FINISH_REPLAN_2026_10_31.md).
-- Historical D-140 certificate `docs/STABLE11_D140_USER_ACCEPTANCE_AND_GIT_RECONCILIATION_2026_10_31.md` remains correct **for Stable 11 only**. A transient `STABLE11_D141_FINAL_USER_ACCEPTANCE_2026_10_31.md` was created before the user corrected the number; it is marked **SUPERSEDED** and must not be treated as current.
-- `docs/DOCUMENTATION_INDEX_AND_BRANCH_POLICY.md` and `docs/HANDOFF.md` are cumulative historical indexes; newest heading determines current state.
-- **Next interaction:** Present accepted status + next concrete Google Play prep step concisely; obtain consent before any external account/payment, release build/upload or app change. Do not ask again for completed QA, original images, passwords or Git sync.
+### 4.1 Feature graphic (locked, unchanged)
 
-**New-chat opener:** `המשך את Atelier Time לפי docs/HANDOFF_CURRENT_STABLE12_TO_GOOGLE_PLAY_2026_10_31.md ב-GitHub. Stable 12 / D-141 היא הגרסה היציבה הסופית שאושרה; Stable 11 / D-140 קפואה. בדיקות JVM ובניית D-141 הצליחו, והממצאים תוקנו. אל תחזור על עבודה שהושלמה. הצג מצב ותוכנית Google Play, ללא תשלום, בנייה או העלאה בלי אישור.`
+- Use the **first/original** Atelier Time wide promo image **exactly** as user first approved/locked, **without an added app icon** or any other retouching. Later alternate with top-corner icon is rejected.
+- Master filename: `Atelier_Time_Google_Play_Feature_Graphic_ORIGINAL_LOCKED_1024x500.png`; size **1024×500**; PNG SHA-256 `c2921bdb6d61cb24619201f3c20e8ac5bb811569a84c034acf1abf14fec4c04e`.
+- [Full artistic lock record](../artwork/play-store/FEATURE_GRAPHIC_FIRST_ORIGINAL_LOCK_2026_10_31.md). Never regenerate, replace, resize with content crop, or alter without the user's explicit approval.
+
+### 4.2 Store icon (user approved)
+
+- Exact approved store icon is created **directly from the existing Stable12 launcher**, not by new art generation. **512×512 PNG**.
+- Filename `Atelier_Time_Google_Play_Icon_Stable12_APPROVED_512x512.png`; SHA-256 `2e40dd769dbd04201efd3286d335f1d4f289f554280a7f68443b24069fbc030e`.
+- [Icon approval and provenance](../artwork/play-store/PLAY_STORE_ICON_STABLE12_APPROVED_2026_10_31.md). Source WebP remains in frozen Android source.
+
+### 4.3 User-final phone gallery — exactly 8 genuine screenshots
+
+- Google Play's phone-gallery upper bound is 8. User deliberately removed original **#02 About** and **#07 Class Timer Start**, while preserving all 10 JPEG originals separately.
+- **Upload these eight in the user's exact original relative order**:
+  1. Original #01 Splash
+  2. Original #03 Class editor
+  3. Original #04 Complete class timeline
+  4. Original #05 Saved classes and diagnostic reports
+  5. Original #06 Progressed/running Class timer
+  6. Original #08 Free timer
+  7. Original #09 Design settings
+  8. Original #10 Sound choices
+- Verified phone-upload ZIP: `Atelier_Time_Stable12_Google_Play_8_Approved_Selection.zip` (8 PNGs, **1080×1920**, no content cropping). SHA-256 `6353ee0ce2c911b29973f14bab4fb620fa8ef5e5aeeed5652e7167341faa676d`.
+- Backup ZIP with selected untouched JPEGs and prepared PNGs: `Atelier_Time_Stable12_8_Selected_With_Originals_And_Manifest.zip`. SHA-256 `836688045c4fef879956a3e50ddc7c8fa417e9ea7f9116d865fc821d3eae1bad`.
+- [Final eight-image selection](../artwork/play-store/SCREENSHOTS_STABLE12_FINAL_8_SELECTED_2026_10_31.md). [Original 10-image historic record](../artwork/play-store/SCREENSHOTS_STABLE12_EXACT_USER_ORDER_2026_10_31.md).
+- **DO NOT UPLOAD** previously prepared "first 8" ZIP: that selection was superseded.
+- **Binary archival limitation:** Original locked feature graphic, approved icon PNG and all screenshot ZIPs currently exist as **conversation artifacts** (and can be downloaded by user), but **their exact binaries are not stored in GitHub**. GitHub contains documentation, checksums and the accepted native launcher WebP. Future durable asset archival/Play upload requires copying verified binaries; do not imply these remote files exist. Do not replace any approved file with a fresh generated variant.
+
+## 5. Policies, privacy and Play declarations — next active prep
+
+- [Public Privacy Policy markdown](../PRIVACY_POLICY.md), [HTML policy source](privacy-policy.html) and recorded GitHub Pages website. Expected public policy page: `https://aviy99.github.io/Atelier-Time/privacy-policy.html`. Its direct browser availability and About click-through **still require confirmation**; do not claim live page acceptance merely because Pages index is live.
+- [Data Safety/privacy readiness notes](D128_PLAY_PRIVACY_DATA_SAFETY_READINESS_2026_10_30.md): saved Classes, sounds, diagnostic reports are stored locally; user-controlled export only; no inferred developer-server upload. Confirm what the **release build actually does**, and complete Play Data Safety truthfully; no Data Safety declaration yet submitted.
+- [FGS `specialUse` approved keep-design rationale](D128_SPECIALUSE_PLAY_CONSOLE_DECLARATION_AND_RATIONALE_2026_10_30.md) and [related review](STAGE8_SPECIALUSE_FGS_POLICY_REVIEW_2026_10_30.md): user decided to **retain existing background behavior and service**. Draft Play specialUse declaration, evidence video and policy review are **not approved by Google Play**, and may require review upon release. Do not change accepted code without separate authorization.
+- **Do not ask for a new version/build merely to update documentation**.
+
+## 6. Ordered remaining work — nothing submitted yet
+
+1. **NOW, while Google identity review is pending:** verify privacy policy page and the drafted Data Safety declarations and permission/FGS evidence against Stable12 sources; prepare only, no Console submission.
+2. Once Google confirms identity: complete contact phone/remaining account verifications. Create the Atelier Time **free** Play app as a **draft**, not public, when Console enables Create app.
+3. Apply existing approved HE/EN listing; upload the **exact verified approved** 512×512 icon, locked 1024×500 graphic, and final eight PNG screenshots in the user-mandated order. **User to approve actual Play actions**; do not infer upload from docs.
+4. Finish privacy/Data Safety, FGS specialUse evidence, app access, category/audience/contact and other actual Console requirements.
+5. Assess package identity and Play signing strategy; create a securely signed **release AAB locally on Samsung Code on the Go** (upload key stays off GitHub) only after explicit approval. The accepted D-141 debug APK is not a signed Play release AAB.
+6. Internal testing invite for a few chosen people initially, then mandatory closed testing if Google requires it for production eligibility; review outcomes, submit/publish only on explicit user approval.
+
+## 7. Boundaries and docs authority
+
+- No GitHub Actions/paid cloud Android builds; never delete user local Classes, Sounds, diagnostics, history, app data, private audio or `.cg`. No Git reset/rebase/forced pushes, reinstall, passwords, remote signing keys or unauthorized payments.
+- Freeze all Stable branches. Any future app source change requires an approved new D-number/versionCode. Documentation changes may be applied to `main` and mirrored to Android DEV, not stable.
+- [Documentation index / archive separation](DOCUMENTATION_INDEX_AND_BRANCH_POLICY.md) · [Reconciliation audit](DOCUMENTATION_RECONCILIATION_STABLE12_GOOGLE_PLAY_2026_10_31.md). Older handoffs, dated stage plans, release notes and proposals are audit history; they are not current operational instructions.
+- **New-chat start text:** `המשך Atelier Time לפי docs/HANDOFF_CURRENT_STABLE12_TO_GOOGLE_PLAY_2026_10_31.md ב-GitHub. Stable12/D-141 מאושרת וקפואה, Stable11/D-140 קפואה. חשבון Play אישי נפתח ושולם; אימות זהות ממתין ולכן יצירת אפליקציה חסומה. האייקון מאושר, תמונת הקידום המקורית נעולה, ושמונת הצילומים הסופיים בסדר 1,3,4,5,6,8,9,10. אין לבנות, לשנות, להעלות או לפרסם ללא אישור. המשך לבדיקת מדיניות פרטיות ו-Data Safety.`
