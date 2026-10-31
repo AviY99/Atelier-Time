@@ -23,7 +23,7 @@ if [[ -s "$asset" ]]; then
     echo "STOP: project artwork does not match the approved PNG." >&2; exit 2
   fi
   echo "Approved artwork already exists locally; checking whether its commit reached GitHub."
-  if git push origin "$branch"; then
+  if GIT_TERMINAL_PROMPT=0 git push origin "$branch"; then
     echo "PUSH SUCCESSFUL: approved image source confirmed in remote GitHub."
   else
     echo "WARNING: image available LOCALLY but NOT CONFIRMED in GitHub; build can still proceed." >&2
@@ -63,7 +63,7 @@ fi
 git add -- "$asset"
 git commit -m "assets: preserve exact approved Atelier Time D-139 splash art"
 echo "Pushing only the approved image source to GitHub; never running Actions."
-if ! git push origin "$branch"; then
+if ! GIT_TERMINAL_PROMPT=0 git push origin "$branch"; then
   echo "WARNING: approved art is committed LOCALLY, but remote GitHub push FAILED." >&2
   echo "Build may proceed from the verified local source; preserve this Git checkout and send a screenshot." >&2
   exit 0
