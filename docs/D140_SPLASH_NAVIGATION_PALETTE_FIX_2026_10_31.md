@@ -73,3 +73,10 @@ git pull --ff-only && bash tools/persist_d139_splash_art_in_git_on_phone.sh && b
 ```
 
 The art audit verifies that the approved asset is **tracked in local Git**. Only a successful push (or separate GitHub verification) proves it is in remote GitHub. Build is offline/local, no GitHub Actions, no APK install, no data removal. D-140 is still not compiled or tested as of this document update; Stable 10 is frozen.
+
+
+## Final visual-asset archive confirmation — 2026-10-31
+
+The user uploaded the exact approved PNG to a separate GitHub branch `archive-d139-artwork`. Its browser upload name was `Atelier_Time_Splash_User_Artwork_Preview-2.png` (not the runtime path). Git tree returned **blob SHA `8950a9c509bbc2c2bac02d18c0b9bfdfca06eabc`**, **size 2,903,002 bytes**, which matches the original approved PNG's actual Git blob SHA and SHA-256 `c7d69a52c53a86738cc416b4c29eb621f8792cf367539732ce0ffa3639d8460d`. The exact existing GitHub blob was reused directly at `android-native/app/src/main/assets/atelier_splash_approved_d139.png` on development (no new pixels, conversion or image generation). As a result the Android source now contains the final runtime art and builds no longer depend on a file in Downloads. The user confirmed D-140 built and operates correctly, including navigation bar color correction.
+
+**Local checkout caveat:** the phone's local branch includes an earlier independent commit `84f1afb` with the same file bytes; simply doing `git pull --ff-only` after this remote archive commit would reject divergent ancestry. Before any next update, a safe `git pull --rebase origin android-native-kotlin-compose` on a clean tracked working tree should recognize/drop the already-applied identical image change. Inspect Git status; do not delete the local image or force push. Never request user account password/token for this already-completed remote archive.
