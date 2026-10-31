@@ -1195,9 +1195,7 @@ fun SessionEditorScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text("Keep screen awake during timers",
                             style = MaterialTheme.typography.titleSmall)
-                        Text("While Atelier Time is visible. Uses more battery; " +
-                            "manual locking still works.",
-                            style = MaterialTheme.typography.labelSmall)
+                        Text("Uses more battery", style = MaterialTheme.typography.labelSmall)
                     }
                     Switch(checked = keepScreenAwake,
                         onCheckedChange = { keepScreenAwake = it },
