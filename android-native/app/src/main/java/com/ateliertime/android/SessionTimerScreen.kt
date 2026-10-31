@@ -348,8 +348,6 @@ fun SessionTimerScreen(
                             )
                         }
                     }
-                    Text("Newest first · Scroll for the complete Run history",
-                        style = MaterialTheme.typography.labelSmall)
                 }
             }
         }
