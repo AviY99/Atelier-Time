@@ -408,10 +408,15 @@ fun SessionEditorScreen(
 
     var parseError: String? = null
     val candidate = try {
-        engine.generate(EditorInput(
+        val rules = EditorInput(
             name, total, summary, pose, normal, special, count,
             opening.toList(), cycle, automatic, manualOrdinals,
-        ).toRules(), ending)
+        ).toRules()
+        val firstPass = engine.generate(rules, ending)
+        // Default to Even only when a legal split exists; saved approvals remain unchanged.
+        if (ending == null && firstPass.finalPoseIsShort &&
+            firstPass.canSplitFinalTwo && !firstPass.hasBlockingIssues
+        ) engine.generate(rules, FinalPoseChoice.even()) else firstPass
     } catch (error: IllegalArgumentException) {
         parseError = error.message
         null
@@ -792,17 +797,13 @@ fun SessionEditorScreen(
                     },
                 )
                 freeTimerError?.let { Text(it, color = atelierErrorTextColor()) }
-                Text("Completion sound: Sounds → Same sound for all / Free countdown.",
-                    style = MaterialTheme.typography.bodySmall)
             }
             MainTab.EDITOR -> Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("Atelier Time", style = MaterialTheme.typography.headlineMedium)
-        Text("Class editor · Android", style = MaterialTheme.typography.titleMedium)
-        Text("Changes update the preview. Save approves and stores this class.")
+        Text("Class editor", style = MaterialTheme.typography.headlineMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(colors = atelierOutlinedColors(), onClick = { applyA() }) { Text("Example A") }
             OutlinedButton(colors = atelierOutlinedColors(), onClick = { applyB() }) { Text("Example B") }
@@ -947,7 +948,8 @@ fun SessionEditorScreen(
             "Number of special breaks", count, { count = it; invalidate() },
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Automatic special-break placement", modifier = Modifier.weight(1f))
+            Text("Place special breaks automatically", modifier = Modifier.weight(1f))
+            Text(if (automatic) "ON" else "OFF", style = MaterialTheme.typography.labelMedium)
             Switch(checked = automatic,
                 onCheckedChange = { automatic = it; invalidate() })
         }
@@ -955,7 +957,8 @@ fun SessionEditorScreen(
             OutlinedTextField(colors = atelierInputColors(), 
                 value = manualOrdinals,
                 onValueChange = { manualOrdinals = it; invalidate() },
-                label = { Text("Regular-break numbers, e.g. 2,4") },
+                label = { Text("Regular breaks to replace (e.g. 2,4)") },
+                supportingText = { Text("Enter positions, not a break count. Example: 3 replaces regular break #3 with a special break.") },
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -979,12 +982,16 @@ fun SessionEditorScreen(
                 Text(it.message, color = atelierErrorTextColor())
             }
             if (candidate.finalPoseIsShort && !candidate.hasBlockingIssues) {
-                Text("Final regular session: choose an ending", style = MaterialTheme.typography.titleMedium)
-                Text("Last gets remaining time: keep the first of the final two " +
-                    "sessions at its planned length when possible; give the " +
-                    "remaining time to the last. Even splits the time equally; " +
-                    "Custom lets you choose the split.",
-                    style = MaterialTheme.typography.bodySmall)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Final sessions", style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.weight(1f))
+                    TextButton(colors = atelierTextColors(), onClick = {
+                        helpSection = "Final sessions" to
+                            "Last gets remaining time preserves the first Session. " +
+                            "Even divides the remaining work equally; Custom lets you " +
+                            "choose the first Session length. Even is the default when possible."
+                    }) { Text("Help") }
+                }
                 // Keep all three ending choices visible without horizontal scrolling.
                 // The longest option deliberately occupies two text lines on phones.
                 Row(modifier = Modifier.fillMaxWidth(),
@@ -1003,7 +1010,7 @@ fun SessionEditorScreen(
                     )
                     FilterChip(colors = atelierChipColors(), 
                         modifier = Modifier.weight(0.8f),
-                        selected = ending?.mode == FinalPoseMode.EVEN_SPLIT,
+                        selected = (ending ?: candidate.selectedChoice)?.mode == FinalPoseMode.EVEN_SPLIT,
                         enabled = candidate.canSplitFinalTwo,
                         onClick = {
                             ending = FinalPoseChoice.even()
@@ -1114,10 +1121,6 @@ fun SessionEditorScreen(
                 ) {
                     Text("Save class")
                 }
-                Text("Save approves the exact timeline and stores the class offline. " +
-                    "If another saved class already has this name, you must " +
-                    "confirm before replacing it.",
-                    style = MaterialTheme.typography.bodySmall)
             }
         }
     }
@@ -1173,11 +1176,11 @@ fun SessionEditorScreen(
                     Text(melodyError ?: "", color = atelierErrorTextColor())
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Automatic timer alerts", modifier = Modifier.weight(1f))
+                    Text("Timer sounds " + if (soundEnabled) "ON" else "OFF", modifier = Modifier.weight(1f))
                     Switch(checked = soundEnabled,
                         onCheckedChange = { soundEnabled = it })
                 }
-                Text("Sound changes take effect on the next cue; Class timing is unchanged.",
+                if (!soundEnabled) Text("Timer sounds are OFF — no sounds will play.",
                     style = MaterialTheme.typography.bodySmall)
             }
             MainTab.TIMER -> {
@@ -1370,11 +1373,6 @@ fun SessionEditorScreen(
                         style = MaterialTheme.typography.titleMedium,
                     )
                     if (!finishPickerVisible) {
-                        Text(
-                            "Approve the live calculated finish, or choose to " +
-                                "change it using hour and minute wheels.",
-                            style = MaterialTheme.typography.bodySmall,
-                        )
                         TextButton(
                             modifier = Modifier.testTag("run_end_change_finish"),
                             colors = atelierTextColors(),
@@ -1389,8 +1387,7 @@ fun SessionEditorScreen(
                         ) { Text("Change finish time") }
                     } else {
                         Text(
-                            "Scroll hours and minutes. Red values are blocked; " +
-                                "the wheel stops at the last green value.",
+                            "Red values cannot be selected.",
                             style = MaterialTheme.typography.bodySmall,
                         )
                         Surface(
