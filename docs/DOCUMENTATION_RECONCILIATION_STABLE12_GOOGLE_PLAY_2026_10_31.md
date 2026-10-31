@@ -1,5 +1,18 @@
 # Atelier Time — project-wide documentation reconciliation before Privacy / Data Safety
 
+## Final independent recheck after the user's repeat request — 2026-10-31
+
+A fresh read of the **live recursive Git trees** of `main` and `android-native-kotlin-compose` (neither response truncated) confirmed:
+- **111** Markdown/HTML/text blobs in `main`, **96** in Android DEV; **92** shared paths, of which **81 are byte-identical**.
+- All **11 active authority files** are byte-identical across branches: current Stable12 handoff, this reconciliation audit (before this new section), Stable12 certificate, D-141 QA report, approved store-icon record, original feature-graphic lock, final 8-phone-screenshot selection, HE/EN Play listing draft, root Privacy Policy, Data Safety readiness, and `specialUse` FGS declaration.
+- Exactly **11 shared archival/cumulative paths** currently differ in SHA: `CHANGELOG.md`, `README.md`, `artwork/README.md`, `docs/D140_SPLASH_NAVIGATION_PALETTE_FIX_2026_10_31.md`, `docs/DECISIONS.md`, `docs/DOCUMENTATION_INDEX_AND_BRANCH_POLICY.md`, `docs/HANDOFF.md`, `docs/HANDOFF_CURRENT_STABLE11_TO_GOOGLE_PLAY_2026_10_31.md`, `docs/ROADMAP.md`, `docs/STEP_1_3_REVIEW.md`, `docs/TECH_DECISION_001_PLATFORM.md`. Branch-specific historic body/sequence explains these differences; current entrypoints are marked Stable12 and refer to the same handoff. Earlier in this audit the *initial* nine-difference snapshot was true at that earlier point; **11 is the final observed number**.
+- Git compare: certified Stable11/D140 and Stable10/D138 branches remain exactly identical to their freeze commits. Comparing frozen Stable12 to the D-141 locally tested source, and Android DEV to frozen Stable12, shows **documentation-only differences**; no new Android source or binary was changed.
+- The binding store gallery is originals `01,03,04,05,06,08,09,10`; excluded `02 About` and `07 initial Session` remain retained separately. Never revert to the obsolete first-eight ZIP. Feature graphic remains unchanged and the launcher-derived store icon remains approved.
+- The authoritative handoff still says the actual Play account identity check is **pending**, draft app creation was **blocked** in the latest screenshot, and **Privacy/Data Safety** is the next preparation task. No upload, release build, app install or payment is inferred.
+- This recheck is a **documentation/source audit**, not a physical device test, Google Console verification, or proof that downloadable store binary artifacts are already archived on GitHub.
+
+**Result: NO missing current-status update or active handoff inconsistency was found.** Historical documents deliberately remain historically accurate; do not rewrite every old dated QA/proposal document to current status.
+
 **Audit performed 2026-10-31.** Scope: the live GitHub repository `AviY99/Atelier-Time`, project-wide `main` and native Android development branch `android-native-kotlin-compose`; immutable stable branches checked, not modified. **This is an audit of current project documentation, not a claim that all historic implementation and proposal files should be rewritten.**
 
 ## Executive result
