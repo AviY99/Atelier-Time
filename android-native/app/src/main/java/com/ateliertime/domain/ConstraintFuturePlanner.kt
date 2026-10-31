@@ -46,7 +46,10 @@ internal object ConstraintFuturePlanner {
                 PhaseKind.SPECIAL_BREAK)
         val lock = boundary.protectedThroughIndex
         val entering = boundary.nextIndex
-        val mayRebuild = entering != null && correctionSeconds < 0 &&
+        // Initial end-clock approval may also create complete unstarted work/break
+        // cycles; previously this was restricted to Next, stretching two poses.
+        val mayRebuild = (entering != null || boundary.allowInitialTailRebuild) &&
+            correctionSeconds < 0 &&
             !boundary.noActiveTailRebuild &&
             !boundary.preserveExistingTail && allowExtraRegular
         // A Resume/Restart after Next must not redistribute an existing
