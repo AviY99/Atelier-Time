@@ -33,25 +33,54 @@ class RunEndTimePropertyTest {
                 )
                 assertEquals(targetSeconds, plan.adjusted.totalSeconds)
                 assertEquals(m(signedMinutes), plan.correctionSeconds)
-                assertEquals(original.take(regular.first()),
-                    plan.adjusted.phases.take(regular.first()))
+                val revised = plan.adjusted.phases
+                val addedCycles = revised.any {
+                    it.id.startsWith("runtime-added-") ||
+                        it.id.startsWith("runtime-tail-")
+                }
+                // With no inserted cycles the old protected-prefix contract
+                // still holds. A large initial extension may instead move an
+                // AUTOMATIC special Break into a newly added regular slot.
+                if (!addedCycles) {
+                    assertEquals(original.take(regular.first()),
+                        revised.take(regular.first()))
+                }
                 val merged = plan.adjusted.lastFinalPoseSeconds == 0
                 if (merged) {
-                    assertEquals(original.size - 2, plan.adjusted.phases.size)
+                    assertFalse("A merged ending cannot have inserted cycles", addedCycles)
+                    assertEquals(original.size - 2, revised.size)
                     assertTrue(plan.adjusted.firstFinalPoseSeconds <= approved.rules.poseSeconds)
                     assertEquals(original[regular.first()].id,
-                        plan.adjusted.phases[regular.first()].id)
-                } else {
+                        revised[regular.first()].id)
+                } else if (!addedCycles) {
                     assertEquals(original[regular.first() + 1].durationSeconds,
-                        plan.adjusted.phases[regular.first() + 1].durationSeconds)
+                        revised[regular.first() + 1].durationSeconds)
                 }
+                // Initial extension can distribute work and insert breaks, but
+                // the approved summary, the physical end, and genuine special
+                // Break count/durations must remain exact.
                 assertEquals(original.last().durationSeconds,
-                    plan.adjusted.phases.last().durationSeconds)
+                    revised.last().durationSeconds)
+                assertEquals(original.count { it.kind == PhaseKind.SPECIAL_BREAK },
+                    revised.count { it.kind == PhaseKind.SPECIAL_BREAK })
+                assertEquals(
+                    original.filter { it.kind == PhaseKind.SPECIAL_BREAK }
+                        .sumOf { it.durationSeconds },
+                    revised.filter { it.kind == PhaseKind.SPECIAL_BREAK }
+                        .sumOf { it.durationSeconds },
+                )
+                assertEquals(
+                    approved.rules.summarySeconds,
+                    revised.filter { it.kind == PhaseKind.SUMMARY }
+                        .sumOf { it.durationSeconds },
+                )
+                assertTrue(revised.all { it.durationSeconds > 0 &&
+                    (it.kind != PhaseKind.POSE || it.durationSeconds >= m(1)) })
                 assertTrue(plan.adjusted.firstFinalPoseSeconds >= m(1))
                 if (!merged) assertTrue(plan.adjusted.lastFinalPoseSeconds >= m(1))
                 assertEquals(plan.adjusted.totalSeconds,
-                    plan.adjusted.phases.last().endSeconds)
-                plan.adjusted.phases.zipWithNext().forEach { (left, right) ->
+                    revised.last().endSeconds)
+                revised.zipWithNext().forEach { (left, right) ->
                     assertEquals(left.endSeconds, right.startSeconds)
                 }
                 assertEquals(original, approved.phases)
