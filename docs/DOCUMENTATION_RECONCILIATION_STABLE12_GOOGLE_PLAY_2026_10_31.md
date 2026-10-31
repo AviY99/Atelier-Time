@@ -43,6 +43,14 @@
 - Google Play Console account identity verification, contact-phone verification, draft-app creation, store uploads, Play Data Safety, FGS approval, release signing/AAB, and internal/closed/public rollout are **still pending as described in the current handoff**.
 - A GitHub documentation audit does not independently verify availability of the live privacy-policy web URL, behavior of installed app About link, current Play Console verification state, or the final release binary. These need the targeted next steps. The user has not approved a new Android code change, build, APK install, Play upload or payment.
 
+## Final post-reconciliation verification
+
+- After creating this audit file: `main` contains **111** Markdown/text/HTML documents and Android DEV **96**; current handoff and audit document have **identical Git blob SHA** across the two branches.
+- A further **156 relative Markdown links across seven high-priority `main` entrypoint, artwork and certification documents resolved with zero missing targets**, after creating this audit report. Historical D127 link targets in Roadmap and Decisions were corrected to the Android development branch.
+- Comparing Android DEV to frozen Stable12 after the documentation edits showed **no non-documentation source or binary changes**. Frozen Stable11/D140 and Stable10/D138 still compare byte-identically with their certified commits.
+- Android DEV-only `android-native/README.md`, `android-native/PHONE_RUNNER.md`, and legacy `apps/atelier_time_flutter/README.md` were separately marked with the active Stable12 handoff and **historic/non-active** build/platform status. `main` does not need copies of these development-only documents.
+- All above means **the active documentation is ready to hand off to Privacy/Data Safety review**; it does **not** mean Google Play verified the account or that store PNG/ZIP binaries are remotely stored in GitHub.
+
 ## Continuation rule
 
 Use only [the current handoff](HANDOFF_CURRENT_STABLE12_TO_GOOGLE_PLAY_2026_10_31.md) for forward-looking priorities. **Next stage is Privacy Policy and Data Safety evidence review, not more Stable12 development or another screenshot reordering.** Preserve historic documents for traceability. Any new Play Console or publication action requires explicit user permission.
