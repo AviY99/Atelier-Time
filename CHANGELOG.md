@@ -1,3 +1,7 @@
+## 2026-10-31 — D-140 artwork audit and safe Code on the Go recovery
+
+Phone evidence shows D-140 first refused missing Download PNG, and later refused untracked `../.cg/` Code on the Go workspace. No Android build or installation occurred. Developer source now includes an exact SHA-256 recovery helper (from D-139 APK), an asset audit and versioned artwork inventory. Git push of binary assets remains **unconfirmed** until helper actually runs and push succeeds. No saved classes, audio, personal reports or frozen Stable10 files are changed. [Art inventory](artwork/README.md); [D-140 detailed record](docs/D140_SPLASH_NAVIGATION_PALETTE_FIX_2026_10_31.md).
+
 ## 2026-10-31 — D-140 approved splash asset recovery after deleted local PNG
 
 D-140 build attempt stopped safely due to missing Download/Atelier_Time_Splash_User_Artwork_Preview.png. Original asset was never committed to GitHub (previous workflow error), though a matching copy exists within the D-139 APK. Android development now checks the exact PNG SHA-256, optionally recovers from D-139 APK and provides a single Code on the Go command to commit/push the image to GitHub then build D-140. **Actual remote image push/build/install are pending user execution and confirmation.** [Full corrective workflow](docs/D140_SPLASH_NAVIGATION_PALETTE_FIX_2026_10_31.md).\n\n## 2026-10-31 — D-140: white system splash and Day/Night navigation bar follow-up (source only)
