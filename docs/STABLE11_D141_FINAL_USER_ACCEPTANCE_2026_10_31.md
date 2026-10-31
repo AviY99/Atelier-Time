@@ -1,3 +1,5 @@
+> **SUPERSEDED — WRONG STABLE NUMBER.** After the user explicitly corrected the milestone, **D-141 is Stable 12 (not Stable 11)**. This earlier D-141/Stable-11 document is retained **only as audit history**. The authoritative certificate is [STABLE12_D141_FINAL_USER_ACCEPTANCE_2026_10_31.md](STABLE12_D141_FINAL_USER_ACCEPTANCE_2026_10_31.md), with immutable branch `stable/android-d141-qa12-final-user-accepted`. **Stable 11 remains D-140**. No code/branch changes were made to Stable 11 as part of this correction.
+
 # Atelier Time — Stable 11 FINAL / D-141 user-accepted checkpoint
 
 **Date:** 2026-10-31  
