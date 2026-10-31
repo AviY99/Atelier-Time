@@ -1,7 +1,18 @@
 # D-141 — user field feedback, pre-Play Android development candidate (2026-10-31)
 
-**Status: SOURCE CHANGED / FIRST LOCAL JVM QA FAILED (2 TESTS) / REPAIRS NOT RETESTED / NO VERIFIED APK / NOT INSTALLED / NOT USER-ACCEPTED.**
+**Current status: D-141 / code35 SAMSUNG LOCAL JVM TESTS PASS + DEBUG APK BUILD SUCCESSFUL; APK NOT INSTALLED; DEVICE UX/REGRESSION QA PENDING; NOT USER ACCEPTED.**
 Android developer branch: `android-native-kotlin-compose`; `versionName D-141`, `versionCode 35`, target/compile API 36. Stable 11 / D-140 remains frozen and user-accepted at `stable/android-d140-qa11-user-accepted` (`b58634e`). The existing user phone APK and locally saved Classes/Sounds have not been touched.
+
+## D-141 local QA attempt #2 — successful tests and debug APK build (2026-10-31)
+
+**Evidence:** User-supplied Samsung Code on the Go terminal screenshot after a successful fast-forward from `f08f146` to `6e86399` on `android-native-kotlin-compose`; output explicitly shows `ARTWORK AUDIT PASS`, `D-141 JVM tests and BUILD SUCCESSFUL`, and `No install, GitHub Actions, push, permission change, or app data wipe`. The guarded script runs `:app:testDebugUnitTest` before `:app:assembleDebug` and aborts on failure. Therefore **local JVM regression tests and the debug APK build passed**, including the previously failing tests. The screenshot does not expose a test count, detailed test XML, or a separately checked APK digest; do not invent counts.
+
+Local output on user phone:
+- `/storage/emulated/0/Download/Atelier-Time-D141-API36-Candidate.apk`
+- `/storage/emulated/0/Download/Atelier-Time-D141-API36-Manifest.txt` (source commit and APK SHA-256)
+- `/storage/emulated/0/Download/Atelier-Time-D141-API36-Build.log` (full local log)
+
+**Gate:** The app **has NOT been installed**; the installed user-accepted version is still Stable 11 / D-140. Seek explicit separate authorization for an **in-place Android Update** of the D-141 APK, never uninstall/delete/reset app data, then test the seven field requirements and regression matrix. Do not declare a new Stable version until device checks and user acceptance.
 
 ## D-141 local QA attempt #1 — failed; two source fixes prepared (2026-10-31)
 
@@ -35,9 +46,9 @@ Both code changes are on the development branch only. **They have not been retes
 
 1. **Separate explicit approval required before running ANY build/test** in Samsung Code on the Go. No Gradle/Android build in GitHub Actions, no paid CI, no Termux compile.
 2. On the phone before a build, verify branch `android-native-kotlin-compose`, clean tracked changes, and fast-forward only from the completed phone Git reconciliation. Do not rebase/reset/force/delete `.cg`; do not ask for Git passwords/tokens. Once approved, use the prepared one-command script only on Samsung CoGo after branch confirmation.
-3. Run all JVM regression tests during the approved local build and review actual failures. Tests have been added to source **but not run yet**. Do not claim a passing test count. Produce debug candidate only; do **not** install without a second user authorization.
+3. **COMPLETED:** Samsung local JVM regression suite and debug APK assembly PASS on attempt #2. Exact passing test count not shown. **NEXT:** installation requires distinct user authorization; then physical-device functional/UI acceptance and preservation of Classes/Sounds.
 4. UI on device: Free Timer digits twice size without clipping at normal/large font sizes; functional wheel edit/read-only states; Sounds ON/OFF semantics; manual-break OFF field help and ON default; Even selected when applicable and overridable; `Session first / Break first` remain unchanged; compact on-screen labels still make sense; Day/Night behavior.
 5. Scheduling: extension at +6m (existing pair only) versus +90m (new full cycles, distributed breaks), shortening and impossible red boundary, preview matches actual Run phases, fixed physical end, Summary preserved, genuinely long special breaks protected, manual placement unchanged, repeated Next/Restart/Pause/Resume do not rewrite observed prefix. Test saved legacy presets and user Sounds/Classes preservation.
 6. D-141 may be promoted to a new stable checkpoint **only after explicit device QA and user acceptance**. Stable 11 remains immutable; Google Play preparation resumes after resolving the field findings.
 
-**No deployment, publication, account/payment, user data modification, APK installation, Android compilation or AAB generation is authorized by this document.**
+**This document records an already authorized Samsung local JVM build/test that succeeded. It does NOT authorize publication, payment, user data modifications, APK installation, or AAB generation.**
