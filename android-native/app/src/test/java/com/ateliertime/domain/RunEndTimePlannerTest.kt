@@ -63,6 +63,51 @@ class RunEndTimePlannerTest {
         assertEquals(mins(11), plan.adjusted.lastFinalPoseSeconds)
     }
 
+    @Test fun longApprovedExtensionCreatesFullSessionsAndBreaks() {
+        val session = approved(FinalPoseChoice.even())
+        val original = session.phases.toList()
+        val extended = RunEndTimePlanner.plan(session, 0L, mins(270).toLong() * 1_000L)
+        assertEquals(mins(270), extended.adjustedDurationSeconds)
+        assertEquals(-mins(90), extended.correctionSeconds)
+        val future = extended.adjusted.phases
+        val inserted = future.filter { it.id.startsWith("runtime-added-pose-") }
+        val insertedBreaks = future.filter { it.id.startsWith("runtime-added-break-") }
+        assertTrue("A long extension needs new normal-length work Sessions", inserted.isNotEmpty())
+        assertEquals(inserted.size, insertedBreaks.size)
+        assertTrue(inserted.all { it.durationSeconds == session.rules.poseSeconds })
+        assertTrue(insertedBreaks.all { it.durationSeconds == session.rules.shortBreakSeconds })
+        val lastTwo = future.filter {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }.takeLast(2)
+        assertEquals(2, lastTwo.size)
+        assertTrue("The ending must not contain giant Sessions",
+            lastTwo.all { it.durationSeconds <= session.rules.poseSeconds })
+        assertEquals(session.rules.summarySeconds,
+            future.filter { it.kind == PhaseKind.SUMMARY }.sumOf { it.durationSeconds })
+        assertTrue(future.zipWithNext().all { (a, b) -> a.endSeconds == b.startSeconds })
+        assertEquals(original, session.phases)
+        val timer = MonotonicSessionTimer(session) { 0L }
+        assertEquals(mins(270), timer.start(extended.correctionSeconds).totalSeconds)
+        assertEquals("The clock preview and actual start must match exactly",
+            future, timer.activePhasesSnapshot())
+    }
+
+    @Test fun manualSpecialBreakDoesNotMoveOnApprovedFinishExtension() {
+        val rules = SessionRules(
+            id = "manual-start", name = "Manual special position",
+            totalSeconds = mins(180), summarySeconds = mins(15),
+            poseSeconds = mins(25), specialBreakCount = 1,
+            placement = SpecialBreakPlacement.manual(listOf(1)),
+        )
+        val session = engine.approve(engine.generate(rules, FinalPoseChoice.even()))
+        val originalSpecial = session.phases.first { it.kind == PhaseKind.SPECIAL_BREAK }
+        val extended = RunEndTimePlanner.plan(session, 0L, mins(270).toLong() * 1_000L)
+        val newSpecial = extended.adjusted.phases.first { it.kind == PhaseKind.SPECIAL_BREAK }
+        assertEquals(originalSpecial.id, newSpecial.id)
+        assertEquals(originalSpecial.startSeconds, newSpecial.startSeconds)
+        assertEquals(originalSpecial.durationSeconds, newSpecial.durationSeconds)
+    }
+
     @Test fun evenModeIsRespectedWhenTargetEarlierAndLater() {
         val session = approved(FinalPoseChoice.even())
         val before = RunEndTimePlanner.plan(session, 0L, mins(174) * 1_000L)
