@@ -172,8 +172,8 @@ class MonotonicSessionTimer(
         // Compute the entire adjusted plan before mutating timer state.
         // A rejected deadline leaves the Class READY, never half-started.
         val revised = if (initialCorrectionSeconds == 0)
-            runCatching { FinalPairCompensation.reflow(session, session.phases, 0) }.getOrNull()
-        else FinalPairCompensation.reflow(session, session.phases, initialCorrectionSeconds)
+            runCatching { FinalPairCompensation.reflowInitialFinish(session, 0) }.getOrNull()
+        else FinalPairCompensation.reflowInitialFinish(session, initialCorrectionSeconds)
         val adjustedTotalMs = (revised?.totalSeconds ?: session.rules.totalSeconds).toLong() * 1_000L
         val exactPhysicalDuration = physicalDurationMillis ?: adjustedTotalMs
         require(exactPhysicalDuration >= adjustedTotalMs &&
