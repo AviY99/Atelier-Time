@@ -1,3 +1,5 @@
+> **CURRENT CONTEXT (2026-10-31):** This document preserves the user's original 96 target searches and approved ASO decisions from D-130. **D-130/Stable9 status text inside is HISTORICAL**; the current app is **Stable12/D-141**, already frozen. Google Play personal developer account was created/paid, identity verification pending; no listing created or uploaded. Final approved icon, locked feature graphic, and final eight screenshots are in the [current handoff](HANDOFF_CURRENT_STABLE12_TO_GOOGLE_PLAY_2026_10_31.md). Keep original ASO copy intact until Play Console entry review.
+
 # ASO-01 — Original user search request, full discussion decisions and authorization (2026-10-30)
 
 ## Project state and placement
