@@ -1,4 +1,6 @@
-## 2026-10-31 — D-140: white system splash and Day/Night navigation bar follow-up (source only)
+## 2026-10-31 — D-140 approved splash asset recovery after deleted local PNG
+
+D-140 build attempt stopped safely due to missing Download/Atelier_Time_Splash_User_Artwork_Preview.png. Original asset was never committed to GitHub (previous workflow error), though a matching copy exists within the D-139 APK. Android development now checks the exact PNG SHA-256, optionally recovers from D-139 APK and provides a single Code on the Go command to commit/push the image to GitHub then build D-140. **Actual remote image push/build/install are pending user execution and confirmation.** [Full corrective workflow](docs/D140_SPLASH_NAVIGATION_PALETTE_FIX_2026_10_31.md).\n\n## 2026-10-31 — D-140: white system splash and Day/Night navigation bar follow-up (source only)
 
 Observed after successful D-139 user installation: full approved parchment portrait is correct, but Android first icon-only splash was parchment rather than prior white and its tint lingered behind Samsung navigation buttons. Android dev changes first system splash background to white and updates 3-button navigation bar/window fallback to current Day (#F7F4ED) / Night (#304D70) color and icon contrast, including AUTO and slider preview, without changing image, timer, sound, data, or frozen Stable10. Samsung CoGo local-only build script is prepared but **D-140 compilation, installation and phone test are pending**. [Technical details](docs/D140_SPLASH_NAVIGATION_PALETTE_FIX_2026_10_31.md).
 
