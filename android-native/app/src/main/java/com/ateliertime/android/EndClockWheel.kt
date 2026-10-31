@@ -42,6 +42,7 @@ internal fun EndClockWheel(
     onChange: (Int) -> Unit,
     readOnly: Boolean = false,
     wheelWidth: Dp = 94.dp,
+    mainNumberScale: Float = 1f,
 ) {
     val currentValue = rememberUpdatedState(value)
     val currentCanSelect = rememberUpdatedState(canSelect)
@@ -110,7 +111,12 @@ internal fun EndClockWheel(
         }
         Text("%02d".format(Locale.US, value),
             color = if (canSelect(value)) validColor else invalidColor,
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontSize = MaterialTheme.typography.headlineMedium.fontSize * mainNumberScale,
+                lineHeight = MaterialTheme.typography.headlineMedium.lineHeight * mainNumberScale,
+            ),
+            maxLines = 1,
+            softWrap = false,
             modifier = Modifier.testTag(tag + "_value").semantics {
                 contentDescription = "$label, current value ${"%02d".format(Locale.US, value)}" +
                     if (readOnly) ", read only" else ""
