@@ -34,8 +34,6 @@ fun FreeCountdownSection(
         Column(modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("Free countdown", style = MaterialTheme.typography.titleMedium)
-            Text("Independent timer · hours / minutes / seconds",
-                style = MaterialTheme.typography.bodySmall)
             // Preserve the HH:MM:SS wheel clock both before and during the run.
             // While running/paused its displayed values follow the remaining
             // monotonic time; gestures and neighbor buttons cannot edit it.
@@ -52,13 +50,13 @@ fun FreeCountdownSection(
                     verticalAlignment = Alignment.CenterVertically) {
                     EndClockWheel("Hours", displayHours, 100, "free_hours",
                         canSelect = { true }, onBlocked = {}, onChange = { hours = it },
-                        readOnly = !editable, wheelWidth = wheelWidth)
+                        readOnly = !editable, wheelWidth = wheelWidth, mainNumberScale = 2f)
                     EndClockWheel("Minutes", displayMinutes, 60, "free_minutes",
                         canSelect = { true }, onBlocked = {}, onChange = { minutes = it },
-                        readOnly = !editable, wheelWidth = wheelWidth)
+                        readOnly = !editable, wheelWidth = wheelWidth, mainNumberScale = 2f)
                     EndClockWheel("Seconds", displaySeconds, 60, "free_seconds",
                         canSelect = { true }, onBlocked = {}, onChange = { seconds = it },
-                        readOnly = !editable, wheelWidth = wheelWidth)
+                        readOnly = !editable, wheelWidth = wheelWidth, mainNumberScale = 2f)
                 }
             }
             val statusText = when (view.status) {
@@ -70,7 +68,7 @@ fun FreeCountdownSection(
             Text(statusText, style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.testTag("free_timer_status"))
             if (editable) {
-                Text("Quick presets · select a duration, then press Start",
+                Text("Quick presets",
                     style = MaterialTheme.typography.labelMedium)
                 val largePresetText = LocalDensity.current.fontScale >= 1.3f
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -124,9 +122,6 @@ fun FreeCountdownSection(
                     Text("Exit")
                 }
             }
-            Text("Completion plays the Free countdown sound selected in Sounds. " +
-                "The saved Class and its clock are unchanged.",
-                style = MaterialTheme.typography.bodySmall)
         }
     }
 }
