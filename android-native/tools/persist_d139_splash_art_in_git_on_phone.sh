@@ -22,7 +22,12 @@ if [[ -s "$asset" ]]; then
   if [[ "$actual" != "$expected" ]]; then
     echo "STOP: project artwork does not match the approved PNG." >&2; exit 2
   fi
-  echo "Approved artwork already exists in source. No changes necessary."
+  echo "Approved artwork already exists locally; checking whether its commit reached GitHub."
+  if git push origin "$branch"; then
+    echo "PUSH SUCCESSFUL: approved image source confirmed in remote GitHub."
+  else
+    echo "WARNING: image available LOCALLY but NOT CONFIRMED in GitHub; build can still proceed." >&2
+  fi
   exit 0
 fi
 downloads="/storage/emulated/0/Download"
@@ -59,8 +64,8 @@ git add -- "$asset"
 git commit -m "assets: preserve exact approved Atelier Time D-139 splash art"
 echo "Pushing only the approved image source to GitHub; never running Actions."
 if ! git push origin "$branch"; then
-  echo "PUSH FAILED: approved art remains safely committed LOCALLY, NOT YET IN GITHUB." >&2
-  echo "Do NOT delete or reset files; provide terminal screenshot for auth/branch diagnosis." >&2
-  exit 3
+  echo "WARNING: approved art is committed LOCALLY, but remote GitHub push FAILED." >&2
+  echo "Build may proceed from the verified local source; preserve this Git checkout and send a screenshot." >&2
+  exit 0
 fi
 echo "PUSH SUCCESSFUL: approved image is now versioned on GitHub in $branch."
