@@ -168,11 +168,7 @@ fun MelodySettingsSection(
     HorizontalDivider()
     Text("Free countdown · completion sound",
         style = MaterialTheme.typography.titleSmall)
-    if (settings.assignmentMode == SoundAssignmentMode.SHARED) {
-        Text("Same sound for all includes the Free countdown. " +
-            "Its completion length stays adjustable below.",
-            style = MaterialTheme.typography.bodySmall)
-    } else {
+    if (settings.assignmentMode != SoundAssignmentMode.SHARED) {
         SoundPicker(
             cue = TimerCue.FREE_TIMER_FINISHED, settings = settings,
             onSettingsChange = onSettingsChange,
@@ -203,9 +199,6 @@ fun MelodySettingsSection(
         Column(modifier = Modifier.weight(1f)) {
             Text("Use alarm volume for Class A/B/C",
                 style = MaterialTheme.typography.titleSmall)
-            Text("Optional: uses Android's alarm volume instead of media. " +
-                "Does not override silent alarms or Do Not Disturb.",
-                style = MaterialTheme.typography.bodySmall)
         }
         Switch(checked = settings.classAlertsUseAlarmVolume,
             onCheckedChange = {
