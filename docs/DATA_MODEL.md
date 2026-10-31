@@ -1,9 +1,12 @@
 # Atelier Time — Data model and scheduling interfaces (Stage 1, Step 1.2)
 
+> **IMPLEMENTED STATUS — Stable 9 / D-126 (2026-10-28):** This original Stage 1 Flutter/Dart data-model proposal is archival and not an authoritative Android JSON/Kotlin schema. Current Kotlin `SessionRules`, `ApprovedSession`, `SchedulePhase` and `ConstraintFuturePlanner` are implemented on the Android development branch. Saved Classes/Sound preferences remain compatible and preserved; D-126 adds separate private append-only per-Run diagnostic JSONL, without replacing Saved Class storage. [Current status](CURRENT_STATUS_AND_HANDOFF_STABLE9_2026_10_28.md).
+
+
 **Prepared:** 2026-10-22  
-**Status:** Step 1.2 **design documented and used as the basis for Step 1.3**, following the user's further “Continue”. Named types/fields remain a technical proposal, not executable source or new product behavior. No Flutter scaffold or engine exists.  
+**Status (historical Step 1.2 design, updated 2026-10-23):** The document originally described conceptual field names and interfaces. Since then, the pure Dart core **has been implemented and verified 35/35 tests PASS** (D-052) on `stage-1-4-scheduling-core`. Refer to [actual scheduling code](https://github.com/AviY99/Atelier-Time/blob/stage-1-4-scheduling-core/lib/src/scheduling.dart) for implemented API names; this earlier conceptual model is not an exact code schema lock. Stage 2 Flutter editor/preview source exists on a separate branch but has **not been Flutter-tested**.  
 **Technology:** Flutter + Dart, one shared app targeting Android, Windows, iOS/iPadOS and macOS (approved TD-001).  
-**Current gate:** **Step 1.3 policies APPROVED via D-037** in [STEP_1_3_REVIEW.md](STEP_1_3_REVIEW.md) and [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md), except specifically unresolved comparison D-038 (positive special break <= normal). **Step 1.4 code/tests remain blocked until separately authorized.**
+**Current gate update (D-052–D-054):** Step 1.3 policies approved via D-037/D-044. Stage 1 Step 1.4 **VERIFIED/COMPLETE** on branch (screenshot-confirmed **35/35 Dart tests PASS** on Android Termux 3.13.7; prior smoke and analyzer PASS). Stage 2 editor work **STARTED** under D-053 with nested Flutter source on [branch](https://github.com/AviY99/Atelier-Time/tree/stage-2-session-editor), [Stage 2 plan](STAGE_2_PLAN.md) and draft PR #2. **Flutter editor uncompiled/untested, no installed app; no GitHub Actions or paid build.**
 
 ## 1. Product-to-model mapping
 
@@ -259,7 +262,7 @@ Step 1.3's [SCHEDULING_EDGE_POLICY.md](SCHEDULING_EDGE_POLICY.md) and [approved 
 1. Exact automatic-middle replacement-break placement and ties when session lengths/counts vary.
 2. How to deal with multiple long breaks and explicit break-ordinal changes after edits.
 3. Inputs too short to fit any pose or a complete break; opening groups exhausting work time.
-4. **Resolved by approved D-036 and D-037:** configured 0-minute breaks and 0-minute full sessions invalid; 0-minute logical break-slot proposal withdrawn; warning counter resets on each activated full session (no automatic cross-preset carryover). **OPEN D-038:** whether positive special break can be <= positive normal break.
+4. **Resolved by approved D-036 and D-037:** configured 0-minute breaks and 0-minute full sessions invalid; 0-minute logical break-slot proposal withdrawn; warning counter resets on each activated full session (no automatic cross-preset carryover). **RESOLVED D-044:** a positive special replacement may be <= positive normal break; 0 remains invalid and 25/5 warning acknowledgment applies when needed.
 5. What to show if only one last pose, or no intervening break, remains for end resolution.
 6. Precise activity/label for “summary”; audio at every pose or just set end.
 7. Exact on-disk preset serialization format and file/DB technology (Stage 3).
@@ -277,4 +280,4 @@ Nothing in this data-model proposal overwrites approved user requirements or the
 - [x] Distinguish engineering proposals from approved behavior and unresolved edge rules
 - [x] User said “Continue” after Step 1.2 review, authorizing discussion/documentation of **Step 1.3**. The technical field names remain proposals, not an implemented API.
 
-**STATUS UPDATE (2026-10-22): Step 1.3 formally APPROVED / COMPLETE as D-037**, subject to D-036 strict-positive session/break durations and D-031 25/5 rest warnings; D-038 special break comparison remains specifically OPEN. **Stage 1 Step 1.4 and all programming are NOT authorized.**
+**STATUS UPDATE (2026-10-22): Step 1.3 formally APPROVED / COMPLETE as D-037**, subject to D-036 strict-positive session/break durations and D-031 25/5 rest warnings; D-038 special break comparison was subsequently resolved as APPROVED by D-044 (any positive duration). **Stage 1 Step 1.4 and all programming are NOT authorized.**

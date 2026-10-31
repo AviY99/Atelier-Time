@@ -1,0 +1,308 @@
+package com.ateliertime.domain
+
+import org.junit.Assert.*
+import org.junit.Test
+import kotlin.math.abs
+import kotlin.random.Random
+
+/**
+ * General invariant and feasibility gates for one runtime constraint solver.
+ * Tests vary work/break ratios, actual special duration, summary, cycle order,
+ * and sequences of actions, not a single named saved Class.
+ */
+class D124ConstraintPlannerGeneralContractTest {
+    private val engine = ScheduleEngine()
+
+    private fun plan(
+        pose: Int, rest: Int, special: Int, summary: Int,
+        start: CycleStart, count: Int = 1,
+    ): ApprovedSession? {
+        // Construct a valid 6-Session cycle: POSE_FIRST uses five Breaks,
+        // BREAK_FIRST uses six. Replace exactly one ordinary Break with the
+        // configured Special duration; do not leave a sub-minute final Session.
+        val regularBreakSlots = if (start == CycleStart.BREAK_FIRST) 6 else 5
+        val time = 6 * pose + regularBreakSlots * rest +
+            count * (special - rest) + summary
+        val rules = SessionRules(
+            id = "matrix-$pose-$rest-$special-$summary-$start",
+            name = "matrix", totalSeconds = time,
+            summarySeconds = summary, poseSeconds = pose,
+            shortBreakSeconds = rest, specialBreakSeconds = special,
+            specialBreakCount = count, cycleStart = start,
+        )
+        val generated = engine.generate(rules)
+        // Some valid patterns have a shortened last work Session and must
+        // explicitly approve the final distribution, rather than silently
+        // dropping the scenario from the matrix.
+        val candidate = if (generated.needsFinalPoseChoice)
+            engine.generate(rules, FinalPoseChoice.remainder()) else generated
+        check(candidate.canApprove) {
+            "Fixture generator produced an invalid Class: p=$pose b=$rest " +
+                "L=$special summary=$summary start=$start; " +
+                candidate.issues.joinToString { it.code + ":" + it.message }
+        }
+        return engine.approve(candidate, acknowledgeWarnings = true)
+    }
+
+    private fun verify(
+        original: ApprovedSession,
+        timer: MonotonicSessionTimer,
+        millis: Long,
+    ) {
+        val phases = timer.activePhasesSnapshot()
+        assertTrue(phases.isNotEmpty())
+        assertEquals(0, phases.first().startSeconds)
+        assertTrue(phases.all { it.durationSeconds > 0 &&
+            (it.kind != PhaseKind.POSE ||
+                it.durationSeconds >= SECONDS_PER_MINUTE) })
+        assertTrue(phases.zipWithNext().all { (a, b) ->
+            a.endSeconds == b.startSeconds
+        })
+        assertEquals(phases.last().endSeconds, timer.view().totalSeconds)
+        assertEquals(original.rules.summarySeconds,
+            phases.filter { it.kind == PhaseKind.SUMMARY }
+                .sumOf { it.durationSeconds })
+        assertEquals(phases.size, phases.map { it.id }.distinct().size)
+        if (original.rules.specialBreakSeconds >
+            original.rules.shortBreakSeconds) {
+            assertEquals(original.phases.count {
+                it.kind == PhaseKind.SPECIAL_BREAK &&
+                    it.durationSeconds > original.rules.shortBreakSeconds
+            }, phases.count {
+                it.kind == PhaseKind.SPECIAL_BREAK &&
+                    it.durationSeconds > original.rules.shortBreakSeconds
+            })
+        }
+        val physicalLeft = original.rules.totalSeconds * 1_000L - millis
+        val virtualLeft = (timer.view().totalSeconds -
+            timer.view().elapsedSeconds).toLong() * 1_000L
+        assertTrue("Fixed physical finish mismatch: physical=$physicalLeft " +
+            "virtual=$virtualLeft", abs(physicalLeft - virtualLeft) < 2_000L)
+        // Approved/saved plan is never a mutable runtime scratch buffer.
+        assertEquals(original.rules.totalSeconds, original.phases.last().endSeconds)
+    }
+
+    @Test fun exhaustivePairBudgetFeasibilityAcrossDurations() {
+        var checked = 0
+        for (p in listOf(60, 120, 300, 900, 1_500)) {
+            for (b in listOf(60, 180, 300, 600)) {
+                val rules = SessionRules(
+                    id = "feasible-$p-$b", name = "matrix",
+                    totalSeconds = 3 * p + 2 * b + 60,
+                    summarySeconds = 60,
+                    poseSeconds = p, shortBreakSeconds = b,
+                    specialBreakSeconds = b, specialBreakCount = 0,
+                )
+                val approved = engine.approve(engine.generate(rules),
+                    acknowledgeWarnings = true)
+                val pair = approved.phases.filter {
+                    it.kind == PhaseKind.POSE &&
+                        it.poseSource == PoseSource.REGULAR
+                }.takeLast(2)
+                assertEquals(2, pair.size)
+                val work0 = pair.sumOf { it.durationSeconds }
+                for (work in 1..work0 + 240 step 7) {
+                    val correction = work0 - work
+                    val legal = work >= 120 ||
+                        (work + b in 60..p)
+                    val proposed = runCatching {
+                        FinalPairCompensation.reflow(
+                            approved, approved.phases,
+                            correctionSeconds = correction)
+                    }
+                    assertEquals("p=$p b=$b work=$work",
+                        legal, proposed.isSuccess)
+                    if (proposed.isSuccess) {
+                        val result = proposed.getOrThrow()
+                        assertEquals(rules.totalSeconds - correction,
+                            result.totalSeconds)
+                        assertEquals(60, result.phases.last().durationSeconds)
+                        assertTrue(result.phases.zipWithNext().all { (a, c) ->
+                            a.endSeconds == c.startSeconds
+                        })
+                    }
+                    checked++
+                }
+            }
+        }
+        assertTrue(checked > 2_000)
+    }
+
+    @Test fun crossProductNextReflowsProtectThePastAndPhysicalDeadline() {
+        var cases = 0
+        var successfulNexts = 0
+        for (p in listOf(60, 120, 300, 1_500)) {
+            for (b in listOf(60, 180, 300, 600)) {
+                for (special in listOf(60, b, b + 180).distinct()) {
+                    for (summary in listOf(0, 60)) {
+                        for (start in CycleStart.entries) {
+                            val approved = plan(p, b, special, summary, start)
+                                ?: continue
+                            var millis = 0L
+                            val timer = MonotonicSessionTimer(approved) { millis }
+                            timer.start()
+                            verify(approved, timer, millis)
+                            repeat(12) {
+                                millis += 1_400L
+                                val before = timer.view()
+                                val prefix = timer.activePhasesSnapshot()
+                                val index = prefix.indexOfFirst {
+                                    it.id == before.phase?.id
+                                }
+                                val advanced = runCatching { timer.nextPhase() }
+                                if (advanced.isSuccess) {
+                                    successfulNexts++
+                                    assertTrue(index >= 0)
+                                    assertEquals(prefix.take(index + 1),
+                                        timer.activePhasesSnapshot()
+                                            .take(index + 1))
+                                    verify(approved, timer, millis)
+                                } else {
+                                    assertEquals(before, timer.view())
+                                    assertEquals(prefix,
+                                        timer.activePhasesSnapshot())
+                                }
+                            }
+                            cases++
+                        }
+                    }
+                }
+            }
+        }
+        assertTrue(cases > 80)
+        assertTrue(successfulNexts > cases)
+    }
+
+    @Test fun randomizedMixedNextRestartResumeRejectionsAreAtomic() {
+        val random = Random(124_2026)
+        var operations = 0
+        for (p in listOf(60, 300, 1_500)) {
+            for (b in listOf(60, 180, 600)) {
+                val session = plan(p, b, b + 180, 60,
+                    CycleStart.POSE_FIRST) ?: continue
+                var millis = 0L
+                val timer = MonotonicSessionTimer(session) { millis }
+                timer.start()
+                repeat(35) {
+                    millis += random.nextLong(100L, 2_400L)
+                    val previous = timer.view()
+                    val phases = timer.activePhasesSnapshot()
+                    val operation = random.nextInt(3)
+                    val action = runCatching {
+                        when (operation) {
+                            0 -> timer.nextPhase()
+                            1 -> timer.restartCurrentSegmentKeepingEndTime()
+                            else -> {
+                                timer.pause()
+                                millis += random.nextLong(100L, 1_900L)
+                                timer.resume()
+                            }
+                        }
+                    }
+                    if (action.isFailure && operation != 2) {
+                        assertEquals(previous, timer.view())
+                        assertEquals(phases, timer.activePhasesSnapshot())
+                    }
+                    if (timer.view().status == TimerStatus.RUNNING) {
+                        verify(session, timer, millis)
+                    }
+                    operations++
+                }
+            }
+        }
+        assertTrue(operations >= 200)
+    }
+
+    @Test fun equalLengthSpecialRetainsItsConfiguredDurationEvenWithNextCredit() {
+        val session = plan(60, 180, 180, 60,
+            CycleStart.POSE_FIRST)!!
+        val original = session.phases.filter {
+            it.kind == PhaseKind.SPECIAL_BREAK
+        }
+        assertEquals(1, original.size)
+        assertEquals(180, original.single().durationSeconds)
+        var millis = 0L
+        val timer = MonotonicSessionTimer(session) { millis }
+        timer.start()
+        repeat(5) {
+            millis += 2_000L
+            runCatching { timer.nextPhase() }
+            verify(session, timer, millis)
+        }
+        assertEquals(180, session.phases.single {
+            it.kind == PhaseKind.SPECIAL_BREAK
+        }.durationSeconds)
+    }
+    @Test fun aNewlyEnteredUnobservedFinalSessionMayUseLegalPairMerge() {
+        val rules = SessionRules(
+            id = "merge-target", name = "target boundary",
+            totalSeconds = 65 * 60, poseSeconds = 25 * 60,
+            shortBreakSeconds = 5 * 60,
+            specialBreakSeconds = 5 * 60, specialBreakCount = 1,
+            placement = SpecialBreakPlacement.manual(listOf(2)),
+        )
+        // 65m with 25m regular work ends in a 5m final Session:
+        // an explicit Remainder choice is required for editor approval.
+        val session = engine.approve(engine.generate(
+            rules, FinalPoseChoice.remainder()), acknowledgeWarnings = true)
+        val first = session.phases.indexOfLast {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        } - 2
+        assertTrue(first > 0)
+        val revised = FinalPairCompensation.reflow(
+            session, session.phases, correctionSeconds = 10 * 60,
+            boundary = ReflowBoundary(
+                protectedThroughIndex = first - 1,
+                nextIndex = first,
+            ),
+        )
+        assertEquals(session.phases[first].id, revised.phases[first].id)
+        assertEquals(session.phases[first].startSeconds,
+            revised.phases[first].startSeconds)
+        assertEquals(25 * 60, revised.phases[first].durationSeconds)
+        assertEquals(0, revised.phases.count {
+            it.kind == PhaseKind.SPECIAL_BREAK
+        })
+        assertEquals(55 * 60, revised.totalSeconds)
+    }
+
+    @Test fun furtherCompensationAfterLegalMergeNeverRewritesEarlierWork() {
+        val rules = SessionRules(
+            id = "merge-continuation", name = "merged",
+            totalSeconds = 90 * 60, summarySeconds = 5 * 60,
+            poseSeconds = 25 * 60, shortBreakSeconds = 5 * 60,
+            specialBreakSeconds = 5 * 60, specialBreakCount = 0,
+        )
+        val session = engine.approve(engine.generate(rules),
+            acknowledgeWarnings = true)
+        val merged = FinalPairCompensation.reflow(
+            session, session.phases, correctionSeconds = 30 * 60)
+        assertEquals(session.phases.size - 2, merged.phases.size)
+        val prior = merged.phases.dropLast(2)
+        val more = FinalPairCompensation.reflow(
+            session, merged.phases, correctionSeconds = 31 * 60)
+        assertEquals(prior, more.phases.take(prior.size))
+        assertEquals(merged.phases.size, more.phases.size)
+        assertEquals(merged.phases[prior.size].durationSeconds - 60,
+            more.phases[prior.size].durationSeconds)
+        assertEquals(59 * 60, more.totalSeconds)
+    }
+
+    @Test fun displayReportsOneActualFinalSessionAfterLegalMerge() {
+        val rules = SessionRules(
+            id = "merge-display", name = "merged display",
+            totalSeconds = 90 * 60, summarySeconds = 5 * 60,
+            poseSeconds = 25 * 60, shortBreakSeconds = 5 * 60,
+            specialBreakSeconds = 5 * 60, specialBreakCount = 0,
+        )
+        val approved = engine.approve(engine.generate(rules),
+            acknowledgeWarnings = true)
+        val timer = MonotonicSessionTimer(approved) { 0L }
+        timer.start(initialCorrectionSeconds = 30 * 60)
+        assertEquals(listOf(25 * 60), timer.finalEndingDurations())
+        assertNull(timer.finalTwoPoseDurations())
+        assertEquals(approved.rules.summarySeconds,
+            timer.activePhasesSnapshot().last().durationSeconds)
+    }
+
+}
