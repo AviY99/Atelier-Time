@@ -1,6 +1,9 @@
 package com.ateliertime.android
 
 import android.graphics.BitmapFactory
+import android.graphics.drawable.ColorDrawable
+import android.os.Build
+import androidx.core.view.WindowCompat
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
@@ -65,6 +68,20 @@ class MainActivity : ComponentActivity() {
         ClassNotificationTaskService.allowNewTask()
         if (savedInstanceState == null) {
             ClassNotificationTaskService.dismiss(applicationContext)
+        }
+        // D-140: this warm parchment color belongs ONLY to the approved full
+        // opening illustration. After it, SessionEditorScreen synchronizes the
+        // navigation/status bars and window fallback with Day or Night.
+        // Android's separate short system splash is white by XML theme.
+        window.setBackgroundDrawable(ColorDrawable(0xFFC8A77C.toInt()))
+        @Suppress("DEPRECATION")
+        window.navigationBarColor = 0xFFC8A77C.toInt()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightNavigationBars = true
+            isAppearanceLightStatusBars = true
         }
         val coldLaunch = savedInstanceState == null
         setContent {

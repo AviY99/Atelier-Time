@@ -35,6 +35,8 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
 import android.view.WindowManager
+import android.graphics.drawable.ColorDrawable
+import androidx.core.view.WindowCompat
 import android.media.RingtoneManager
 import android.net.Uri
 import android.provider.OpenableColumns
@@ -295,6 +297,29 @@ fun SessionEditorScreen(
     var classClockTimes by remember(liveTimer) { mutableStateOf(ClassClockTimes()) }
     var timerError by remember(liveTimer) { mutableStateOf<String?>(null) }
     val activity = context as? Activity
+    // D-140: system navigation belongs to the CURRENT in-app design palette,
+    // not to the one-time parchment splash. This also follows AUTO by clock and
+    // the Design tab's live preview without requiring an Activity restart.
+    LaunchedEffect(activity, designPalette) {
+        val day = designPalette == DesignPalette.DAY
+        val barColor = if (day) 0xFFF7F4ED.toInt() else 0xFF304D70.toInt()
+        activity?.window?.let { window ->
+            // Android 15/16 3-button navigation uses the window background if
+            // no bar color is drawn. Keep its backing synchronized as well.
+            window.setBackgroundDrawable(ColorDrawable(barColor))
+            @Suppress("DEPRECATION")
+            window.navigationBarColor = barColor
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Remove the default tinted 3-button contrast scrim so the
+                // app's existing full-screen Surface shows its real palette.
+                window.isNavigationBarContrastEnforced = false
+            }
+            WindowCompat.getInsetsController(window, window.decorView).apply {
+                isAppearanceLightNavigationBars = day
+                isAppearanceLightStatusBars = day
+            }
+        }
+    }
     val activeClass = timerView?.status == TimerStatus.RUNNING ||
         timerView?.status == TimerStatus.PAUSED
     val activeFree = freeTimerView.status == FreeTimerStatus.RUNNING ||
