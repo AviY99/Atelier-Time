@@ -1,3 +1,5 @@
+> **CURRENT ASO DRAFT STATUS (2026-10-31):** English/Hebrew store title and description drafts below are prepared and previously approved in direction, **not entered in Play Console**. Old D-130/Stable9 descriptions in the dated boundaries below are historical. Current approved Android app is **Stable12/D-141**, developer identity pending and Create app disabled. Store icon user-approved, first original feature graphic locked, final eight genuine phone screenshots selected in original order **1,3,4,5,6,8,9,10**. No metadata, images or release uploaded. [Current Google Play handoff](HANDOFF_CURRENT_STABLE12_TO_GOOGLE_PLAY_2026_10_31.md).
+
 # ASO-01 — Proposed Google Play store listing (Hebrew + English) — 2026-10-30
 
 > **APPROVED DIRECTION; DRAFT PREPARED; NOT PUBLISHED.** User approved all ASO recommendations and requested the entire original question and discussion recorded in [ASO-01 decision & original user queries](ASO01_DISCOVERABILITY_REQUIREMENTS_AND_USER_APPROVAL_2026_10_30.md). The text below is suggested store copy, not evidence of Google search indexing or store availability.
