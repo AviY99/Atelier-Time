@@ -1,3 +1,5 @@
+> **PLAY STORE ARTWORK STATUS (2026-10-31):** The user explicitly APPROVED the existing-Stable12-derived **512×512 store icon** (PNG; SHA-256 `2e40dd769dbd04201efd3286d335f1d4f289f554280a7f68443b24069fbc030e`). [Approval and file provenance](play-store/PLAY_STORE_ICON_STABLE12_APPROVED_2026_10_31.md). The **original feature graphic remains locked and unchanged** under [its separate design lock](play-store/FEATURE_GRAPHIC_FIRST_ORIGINAL_LOCK_2026_10_31.md). **Neither PNG binary has yet been archived in GitHub**; only source icon WebP and approval/checksum records are there. Genuine app screenshots still pending. Frozen Stable12 app branch unchanged.
+
 > **Stable 11 / D-140 is frozen**, including the verified approved PNG. [Certificate](../docs/STABLE11_D140_USER_ACCEPTANCE_AND_GIT_RECONCILIATION_2026_10_31.md).
 
 # Atelier Time — versioned visual artwork
