@@ -75,16 +75,16 @@ object RunEndTimePlanner {
         require(difference in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
             "The selected finish time is outside the supported range."
         }
-        // Backwards compatibility: a Class with no adjustable pair can still
-        // run at its ORIGINAL finish. Only a changed finish requires a pair.
+        // Preview and real start call the SAME initial constraint planner.
+        // Added time can form complete regular Sessions and Breaks, rather
+        // than stretching just the final pair. A no-pair legacy Class still
+        // runs at its original end without changing its saved schedule.
         val adjustment = if (difference == 0L) {
             val pair = session.phases.filter {
                 it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
             }.takeLast(2)
-            // A naturally short final pair is merged at runtime too. Classes
-            // without a valid adjustable pair still retain their old plan.
-            runCatching { FinalPairCompensation.adjust(session, 0) }.getOrNull()
-                ?: CompensatedTimeline(
+            runCatching { FinalPairCompensation.reflowInitialFinish(session, 0) }
+                .getOrNull() ?: CompensatedTimeline(
                 phases = session.phases,
                 totalSeconds = session.rules.totalSeconds,
                 recoveredSeconds = 0,
@@ -92,12 +92,11 @@ object RunEndTimePlanner {
                 lastFinalPoseSeconds = pair.getOrNull(1)?.durationSeconds ?: 0,
             )
         } else try {
-            FinalPairCompensation.adjust(session, difference.toInt())
+            FinalPairCompensation.reflowInitialFinish(session, difference.toInt())
         } catch (_: IllegalArgumentException) {
             throw IllegalArgumentException(
-                "This finish time cannot fit the final Session(s): " +
-                    "the merged Session must last at least one minute, " +
-                    "or two Sessions must each last one minute. Choose another time."
+                "This finish time cannot fit the final Session(s) and Breaks. " +
+                    "Choose another finish time."
             )
         }
         require(adjustment.totalSeconds.toLong() == plannedSeconds) {
