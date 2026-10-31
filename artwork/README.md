@@ -1,3 +1,5 @@
+> **Stable 11 / D-140 is frozen**, including the verified approved PNG. [Certificate](../docs/STABLE11_D140_USER_ACCEPTANCE_AND_GIT_RECONCILIATION_2026_10_31.md).
+
 # Atelier Time — versioned visual artwork
 
 This directory is the source/artwork inventory for **Atelier Time**. Source ownership and hashes are tracked separately from application runtime assets.
