@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Average edge tone of approved parchment splash preview, not white. -->
+    <color name="atelier_splash_parchment">#C8A77C</color>
+</resources>
