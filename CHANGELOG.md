@@ -1,3 +1,7 @@
+## 2026-11-01 — Complete Google Play artwork package archived and verified
+
+User uploaded [approved 15.29MB artwork ZIP](https://github.com/AviY99/Atelier-Time/blob/main/artwork/play-store/Atelier_Time_Google_Play_Approved_Assets_Complete_Pack.zip) to GitHub main, commit `4eaa1462573c45de4c9d305acd129a932ca673fd`. Blob SHA `506a9b9e6dd27b7d4531e71d1053096de1d3e6b0` matches local ZIP; CRC passed. Inside: approved icon, original locked feature graphic, final eight screenshots in exact user order, all ten originals backup, manifest. [Receipt](https://github.com/AviY99/Atelier-Time/blob/main/artwork/play-store/GOOGLE_PLAY_APPROVED_ASSETS_ARCHIVE_VERIFIED_2026_11_01.md). No Play upload or changes to Stable12.
+
 ## 2026-10-31 — Pre-Play readiness documents and approved store graphics (NO app update)
 
 Personal Google Play developer account created and fee paid; identity verification pending, Create app disabled. User approved store icon based on the original Stable12 launcher and locked the **first** feature graphic without alterations. User-approved phone gallery consists of original screenshot positions **1,3,4,5,6,8,9,10** (About/initial timer excluded); eight PNGs prepared in exact original order. No app code, versionCode, D-141 device install, frozen branch, upload or Play submission was changed. [Current handoff](docs/HANDOFF_CURRENT_STABLE12_TO_GOOGLE_PLAY_2026_10_31.md).
