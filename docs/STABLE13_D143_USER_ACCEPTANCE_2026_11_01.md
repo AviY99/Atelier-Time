@@ -5,7 +5,7 @@
 **Android app:** native Kotlin/Jetpack Compose; `applicationId com.ateliertime.android`; **versionName D-143 / versionCode 37**, compile/target SDK 36, minSdk 26.  
 **Acceptance basis:** The user first installed D-142 and reported its three-option terminal-remainder recovery worked, then requested an Editor reset after confirmed selections became locked. They explicitly approved D-143's first-in-row distinctly colored Reset Editor and, after the local build and in-place install, responded **"הכל עובד כנדרש"** ("Everything works as required") and requested declaring the next stable release. This constitutes **user acceptance**, not an independent automated full-device test record.
 
-**Frozen branch to be created at this acceptance:** `stable/android-d143-qa13-user-accepted`, branched from Android DEV after the final source and documentation acceptance records; record the actual frozen commit SHA once verified in GitHub.  
+**Frozen branch (official accepted recovery ref):** `stable/android-d143-qa13-user-accepted`, branched from Android DEV after this source/documentation acceptance record. GitHub branch SHA is verified separately after freezing; this historical certificate intentionally does not embed a self-referential commit hash.  
 **Pre-acceptance Android DEV source snapshot:** `665d5294e75a23e2eece578751f432f76c8f31ee` (last documentation commit before the user accepted). Production source had no further changes after this SHA at acceptance.  
 **Previous accepted frozen recovery:** Stable12 / D-141 / code35 at `stable/android-d141-qa12-final-user-accepted`; Stable11/D-140 and Stable10/D-138 untouched. D-142/code36 is an intermediate development candidate and is not separately designated a stable release.
 
