@@ -42,7 +42,7 @@ fi
 
 downloads='/storage/emulated/0/Download'
 mkdir -p "$downloads"
-log="$downloads/Atelier-Time-D142-API36-Build.log"
+log="$downloads/Atelier-Time-D143-API36-Build.log"
 echo 'D-143: running full JVM suite (forced fresh) and assembling debug APK; NO INSTALL.'
 if ! bash "$gradle" "-Pandroid.aapt2FromMavenOverride=$aapt2" \
     :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest \
@@ -106,11 +106,11 @@ mapfile -t apks < <(find "$apk_dir" -type f -name '*.apk' | sort)
 if [[ "${#apks[@]}" -ne 1 || ! -s "${apks[0]:-}" ]]; then
   echo "STOP: expected exactly one nonempty debug APK, found ${#apks[@]}." >&2; exit 3
 fi
-out="$downloads/Atelier-Time-D142-API36-Candidate.apk"
+out="$downloads/Atelier-Time-D143-API36-Candidate.apk"
 cp "${apks[0]}" "$out"
-manifest="$downloads/Atelier-Time-D142-API36-Manifest.txt"
+manifest="$downloads/Atelier-Time-D143-API36-Manifest.txt"
 {
-  printf 'version=D-143\nversion_code=36\ntarget_sdk=36\n'
+  printf 'version=D-143\nversion_code=37\ntarget_sdk=36\n'
   printf 'branch=android-native-kotlin-compose\n'
   printf 'source_commit=%s\n' "$(git rev-parse HEAD)"
   printf 'apk_sha256=%s\n' "$(sha256sum "$out" | awk '{print $1}')"
