@@ -12,6 +12,22 @@ data class OpeningDraft(
     // Preserve the exact immutable approved group identifier on Edit.
     val originalGroupId: String? = null,
 )
+/** D-143: one source of truth for the editor's original fresh-start values. */
+internal fun freshEditorInput() = EditorInput(
+    name = "Atelier class",
+    totalMinutes = "180",
+    summaryMinutes = "15",
+    poseMinutes = "25",
+    normalBreakMinutes = "5",
+    specialBreakMinutes = "15",
+    specialCount = "1",
+    opening = emptyList(),
+    cycleStart = CycleStart.POSE_FIRST,
+    automaticPlacement = true,
+    manualOrdinals = "3",
+    tailExtensionMinutes = 0,
+)
+
 data class EditorInput(
     val name: String,
     val totalMinutes: String,
