@@ -1351,7 +1351,7 @@ fun SessionEditorScreen(
         val preview = when (selection) {
             TailRecoveryChoice.EDITOR -> null
             TailRecoveryChoice.FINAL_SESSION -> extended.takeIf { validExtension }
-            TailRecoveryChoice.SUMMARY -> reallocated.takeIf { validSummary }
+            TailRecoveryChoice.SUMMARY -> reallocated?.takeIf { validSummary }
         }
         val canApply = selection == TailRecoveryChoice.EDITOR ||
             (selection == TailRecoveryChoice.FINAL_SESSION && validExtension) ||
