@@ -1,3 +1,5 @@
+> **ICON BINARY PERMANENTLY ARCHIVED (2026-11-01):** User's exact approved 512×512 PNG is stored **inside** [the verified complete ZIP on GitHub main](https://github.com/AviY99/Atelier-Time/blob/main/artwork/play-store/Atelier_Time_Google_Play_Approved_Assets_Complete_Pack.zip). Git blob `506a9b9e6dd27b7d4531e71d1053096de1d3e6b0` verified byte-identical to local archive; icon PNG SHA-256 `2e40dd769dbd04201efd3286d335f1d4f289f554280a7f68443b24069fbc030e` from package manifest. [Permanent archive receipt](https://github.com/AviY99/Atelier-Time/blob/main/artwork/play-store/GOOGLE_PLAY_APPROVED_ASSETS_ARCHIVE_VERIFIED_2026_11_01.md). Older 'PNG not yet in GitHub' text below is historical; it is a ZIP member, not a standalone repository file. No art redesign or Play upload.
+
 # Atelier Time — Google Play store icon: USER APPROVED (2026-10-31)
 
 **Decision:** User explicitly replied **"מאושר"** to the final 512×512 store icon that was made **directly from the already accepted Atelier Time / Stable 12 launcher art**. This constitutes **visual/asset approval only**, not Play Console upload or publication authorization.
