@@ -5,7 +5,7 @@
 ## 1. Latest accepted app checkpoint
 
 - **Stable13 / D-143 / versionCode37**, Android Kotlin + Jetpack Compose, `applicationId com.ateliertime.android`, targetSdk36. User's latest explicit message: **"הכל עובד כנדרש , תעד והכרז על גרסה יציבה הבאה לאחר תיקון באגים חדשים ממשתמשים"**.
-- **Official frozen checkpoint:** `stable/android-d143-qa13-user-accepted` — verify exact branch SHA against GitHub refs after freezing. Do **not** commit to this branch.
+- **Official frozen checkpoint:** `stable/android-d143-qa13-user-accepted` — immutable accepted source recovery branch; branch SHA should be read directly from GitHub when needed. Do **not** commit to this branch.
 - **Previous frozen recovery:** `stable/android-d141-qa12-final-user-accepted` (Stable12), plus older Stable11, Stable10. Never rewrite them.
 - D-142/code36 resolves the terminal blocked-break leftover by three validated explicit choices (Editor recommendation, exact last Session extension with 25/5 safety consent, exact Summary extension preserving total) including saved legacy compatibility. The user said D-142 works before requesting a follow-up.
 - D-143 adds a distinct-color **Reset Editor** FIRST in ONE horizontal row with Example A and Example B; confirmation/cancel; only Editor draft resets to original starting values; saved Classes, Sounds, reports and running timer remain undisturbed. User installed and accepted D-143.
