@@ -986,6 +986,16 @@ fun SessionEditorScreen(
                     "5-minute break requires acknowledgment before Save."
             }) { Text("Help") }
         }
+        if (tailExtensionMinutes > 0) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Final Session: +$tailExtensionMinutes min (user-selected)",
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                TextButton(onClick = { invalidate() }) { Text("Remove") }
+            }
+        }
         if (parseError != null) {
             Text(parseError ?: "", color = atelierErrorTextColor())
         } else if (candidate != null) {
