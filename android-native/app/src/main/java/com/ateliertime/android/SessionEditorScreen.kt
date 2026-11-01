@@ -177,20 +177,22 @@ fun SessionEditorScreen(
             }
         }
     }
+    val initialEditor = remember { freshEditorInput() }
     var selectedPresetId by remember { mutableStateOf<String?>(null) }
-    var name by remember { mutableStateOf("Atelier class") }
-    var total by remember { mutableStateOf("180") }
-    var summary by remember { mutableStateOf("15") }
-    var pose by remember { mutableStateOf("25") }
-    var normal by remember { mutableStateOf("5") }
-    var special by remember { mutableStateOf("15") }
-    var count by remember { mutableStateOf("1") }
-    var cycle by remember { mutableStateOf(CycleStart.POSE_FIRST) }
-    var automatic by remember { mutableStateOf(true) }
-    var manualOrdinals by remember { mutableStateOf("3") }
+    var name by remember { mutableStateOf(initialEditor.name) }
+    var total by remember { mutableStateOf(initialEditor.totalMinutes) }
+    var summary by remember { mutableStateOf(initialEditor.summaryMinutes) }
+    var pose by remember { mutableStateOf(initialEditor.poseMinutes) }
+    var normal by remember { mutableStateOf(initialEditor.normalBreakMinutes) }
+    var special by remember { mutableStateOf(initialEditor.specialBreakMinutes) }
+    var count by remember { mutableStateOf(initialEditor.specialCount) }
+    var cycle by remember { mutableStateOf(initialEditor.cycleStart) }
+    var automatic by remember { mutableStateOf(initialEditor.automaticPlacement) }
+    var manualOrdinals by remember { mutableStateOf(initialEditor.manualOrdinals) }
     var ending by remember { mutableStateOf<FinalPoseChoice?>(null) }
     var tailExtensionMinutes by remember { mutableIntStateOf(0) }
     var showTailRecovery by remember { mutableStateOf(false) }
+    var showResetEditorConfirm by remember { mutableStateOf(false) }
     var tailRecoveryChoice by remember { mutableStateOf(TailRecoveryChoice.EDITOR) }
     var acceptedWarning by remember { mutableStateOf(false) }
     var approved by remember { mutableStateOf<ApprovedSession?>(null) }
@@ -386,6 +388,25 @@ fun SessionEditorScreen(
         opening.add(OpeningDraft(nextOpeningId++, "4", "1", "0"))
         opening.add(OpeningDraft(nextOpeningId++, "4", "4", "5"))
         invalidate()
+    }
+
+    /** Reset only the in-memory Editor draft. Never touch saved Classes, Sounds or a running clock. */
+    fun resetEditorToStart() {
+        selectedPresetId = null
+        name = initialEditor.name
+        total = initialEditor.totalMinutes
+        summary = initialEditor.summaryMinutes
+        pose = initialEditor.poseMinutes
+        normal = initialEditor.normalBreakMinutes
+        special = initialEditor.specialBreakMinutes
+        count = initialEditor.specialCount
+        cycle = initialEditor.cycleStart
+        automatic = initialEditor.automaticPlacement
+        manualOrdinals = initialEditor.manualOrdinals
+        opening.clear()
+        nextOpeningId = 1
+        invalidate() // Drops old tail choice, final-pose split, warning consent and Save approval.
+        showResetEditorConfirm = false
     }
 
     fun loadPreset(preset: StoredPreset, restored: ApprovedSession) {
@@ -815,13 +836,38 @@ fun SessionEditorScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("Class editor", style = MaterialTheme.typography.headlineMedium)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(colors = atelierOutlinedColors(), onClick = { applyA() }) { Text("Example A") }
-            OutlinedButton(colors = atelierOutlinedColors(), onClick = { applyB() }) { Text("Example B") }
+        // D-143: one compact row, Reset first with a distinct Day/Night-safe background.
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                ),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                modifier = Modifier.weight(1.2f).testTag("editor_reset_button"),
+                onClick = { showResetEditorConfirm = true },
+            ) { Text("Reset Editor", maxLines = 1,
+                style = MaterialTheme.typography.labelMedium) }
+            OutlinedButton(
+                colors = atelierOutlinedColors(),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                modifier = Modifier.weight(1f),
+                onClick = { applyA() },
+            ) { Text("Example A", maxLines = 1,
+                style = MaterialTheme.typography.labelMedium) }
+            OutlinedButton(
+                colors = atelierOutlinedColors(),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                modifier = Modifier.weight(1f),
+                onClick = { applyB() },
+            ) { Text("Example B", maxLines = 1,
+                style = MaterialTheme.typography.labelMedium) }
         }
-        OutlinedTextField(colors = atelierInputColors(), 
+        OutlinedTextField(colors = atelierInputColors(),
             value = name, onValueChange = { name = it; invalidate() },
-            label = { Text("Class title") }, modifier = Modifier.fillMaxWidth(),
+            label = { Text("Class title") }, modifier = Modifier.fillMaxWidth()
+                .testTag("editor_class_title"),
             singleLine = true,
         )
         AdaptiveMinuteInputPair(
@@ -1329,6 +1375,32 @@ fun SessionEditorScreen(
                 }
             }
         }
+    }
+
+    // D-143: explicit confirmation protects unsaved draft edits; Saved Classes remain intact.
+    if (showResetEditorConfirm) {
+        AlertDialog(
+            modifier = Modifier.testTag("editor_reset_dialog"),
+            onDismissRequest = { showResetEditorConfirm = false },
+            title = { Text("Reset Editor?") },
+            text = { Text("Return every Editor field and choice to the original starting " +
+                "values? Unsaved Editor changes will be lost. Saved Classes, Sounds " +
+                "and a running timer will not be changed.") },
+            confirmButton = {
+                TextButton(
+                    colors = atelierTextColors(),
+                    modifier = Modifier.testTag("editor_reset_confirm"),
+                    onClick = { resetEditorToStart() },
+                ) { Text("Reset Editor") }
+            },
+            dismissButton = {
+                TextButton(
+                    colors = atelierTextColors(),
+                    modifier = Modifier.testTag("editor_reset_cancel"),
+                    onClick = { showResetEditorConfirm = false },
+                ) { Text("Cancel") }
+            },
+        )
     }
 
     // D-142: show choices only for a diagnosed terminal-break mismatch.
