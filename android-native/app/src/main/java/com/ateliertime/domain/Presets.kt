@@ -168,6 +168,11 @@ class PresetCatalog(
                     it.breakOrdinal,
                 ))
             }
+            // Existing records keep their exact signature bytes. Only a new
+            // explicitly confirmed tail extension contributes extra signed fields.
+            if (rules.tailPoseExtensionSeconds > 0) {
+                fields.addAll(listOf("tail_pose_extension", rules.tailPoseExtensionSeconds))
+            }
             fields.add(session.acknowledgedWarnings.size)
             session.acknowledgedWarnings.forEach {
                 fields.addAll(listOf(it.code, it.offsetSeconds))
