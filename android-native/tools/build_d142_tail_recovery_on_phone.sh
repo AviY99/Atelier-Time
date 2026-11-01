@@ -29,7 +29,7 @@ for source in \
   fi
 done
 
-# Verify byte-exact approved splash/launcher artwork, not merely the presence of a file.
+# Verify the approved splash SHA and tracked presence of the launcher/UI artwork.
 bash tools/audit_artwork_on_phone.sh
 : "${ANDROID_HOME:?Code on the Go Android SDK is required}"
 gradle="$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle"
@@ -46,7 +46,7 @@ if ! bash "$gradle" "-Pandroid.aapt2FromMavenOverride=$aapt2" \
     :app:testDebugUnitTest :app:assembleDebug \
     --rerun-tasks --console=plain --no-daemon > "$log" 2>&1; then
   echo 'D-142 JVM TESTS OR BUILD FAILED. Relevant local terminal diagnostics:'
-  awk '/(^|[[:space:]])e: |(^|[[:space:]])error: |\\.kt:[0-9]+|^FAILURE:|^BUILD FAILED|Execution failed for task|FAILED/ {if (n++ < 60) print}' "$log"
+  awk '/(^|[[:space:]])e: |(^|[[:space:]])error: |\.kt:[0-9]+|^FAILURE:|^BUILD FAILED|Execution failed for task|FAILED/ {if (n++ < 60) print}' "$log"
   echo "Complete PRIVATE log kept ONLY on phone: $log"
   exit 1
 fi
