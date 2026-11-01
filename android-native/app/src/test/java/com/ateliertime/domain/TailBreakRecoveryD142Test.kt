@@ -103,6 +103,24 @@ class TailBreakRecoveryD142Test {
         assertTrue(unrelatedValid.issues.any { it.code == "unbuildable_timeline" })
     }
 
+    @Test fun automaticSpecialPlacementAlsoReportsAndResolvesTerminalGap() {
+        val automaticRules = reported().copy(placement = SpecialBreakPlacement())
+        val blocked = engine.generate(automaticRules)
+        assertEquals(minutes(1), blocked.tailBreakRemainder?.remainingSeconds)
+        assertTrue(blocked.hasBlockingIssues)
+
+        val lastPose = engine.generate(automaticRules.copy(
+            tailPoseExtensionSeconds = minutes(1)
+        ))
+        assertFullTimeline(lastPose)
+        assertEquals(1, lastPose.phases.count { it.kind == PhaseKind.SPECIAL_BREAK })
+        val summary = engine.generate(automaticRules.copy(
+            summarySeconds = minutes(16)
+        ))
+        assertFullTimeline(summary)
+        assertEquals(1, summary.phases.count { it.kind == PhaseKind.SPECIAL_BREAK })
+    }
+
     @Test fun manuallyRequiredSpecialCannotBeDroppedAtTheTail() {
         val base = SessionRules(
             id = "manualSpecial",
