@@ -103,6 +103,12 @@ class AndroidPresetStore(
         .put("specialBreakSeconds", r.specialBreakSeconds)
         .put("specialBreakCount", r.specialBreakCount)
         .put("cycleStart", r.cycleStart.name)
+        .apply {
+            // No field written for existing saved plans (schema v1 compatible).
+            if (r.tailPoseExtensionSeconds > 0) {
+                put("tailPoseExtensionSeconds", r.tailPoseExtensionSeconds)
+            }
+        }
         .put("placementAutomatic", r.placement.automatic)
         .put("placementOrdinals", JSONArray().apply {
             r.placement.breakOrdinals.forEach { put(it) }
@@ -154,6 +160,7 @@ class AndroidPresetStore(
             specialBreakCount = data.getInt("specialBreakCount"),
             cycleStart = CycleStart.valueOf(data.getString("cycleStart")),
             placement = placement,
+            tailPoseExtensionSeconds = data.optInt("tailPoseExtensionSeconds", 0),
         )
     }
 
