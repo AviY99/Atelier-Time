@@ -9,6 +9,14 @@ enum class PoseSource { OPENING, REGULAR }
 enum class IssueSeverity { ERROR, WARNING }
 enum class FinalPoseMode { REMAINDER, EVEN_SPLIT, CUSTOM_SPLIT }
 
+/** A blocked terminal break: there is not room for this break and another 1m pose. */
+data class TailBreakRemainder(
+    val remainingSeconds: Int,
+    val attemptedBreakSeconds: Int,
+    val breakOrdinal: Int,
+    val attemptedSpecial: Boolean,
+)
+
 /**
  * breakAfterSeconds: null is the pre-D071 legacy model; it retains the old
  * approved timeline for existing saved presets. New editor revisions always
@@ -40,6 +48,8 @@ data class SessionRules(
     val specialBreakCount: Int = 0,
     val cycleStart: CycleStart = CycleStart.POSE_FIRST,
     val placement: SpecialBreakPlacement = SpecialBreakPlacement(),
+    /** Explicit user-approved terminal extension. Zero preserves every old preset. */
+    val tailPoseExtensionSeconds: Int = 0,
 ) {
     val workSeconds: Int get() = totalSeconds - summarySeconds
 }
@@ -76,6 +86,7 @@ class ScheduleCandidate internal constructor(
     val finalPoseIsShort: Boolean,
     val canSplitFinalTwo: Boolean,
     val selectedChoice: FinalPoseChoice?,
+    val tailBreakRemainder: TailBreakRemainder? = null,
 ) {
     val phases: List<SchedulePhase> = phases.toList()
     val issues: List<ScheduleIssue> = issues.toList()
