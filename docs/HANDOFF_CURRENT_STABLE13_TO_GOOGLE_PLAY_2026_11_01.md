@@ -1,0 +1,43 @@
+> **GITHUB FROZEN BRANCH VERIFIED 2026-11-01:** Official Stable13/D-143/code37 immutable recovery reference `stable/android-d143-qa13-user-accepted` points to commit `2a40f2d9ae79fa6eee41dcb387840d22b5caccf6`, verified immediately after branch creation; previous Stable12 branch remains `7debd01946535d699a269cbe56d325ce93676343`. Latest source UI change and user acceptance are documented below.
+
+# Atelier Time — CURRENT handoff: Stable 13 / D-143 → Google Play preparation
+
+**Updated:** 2026-11-01. **AUTHORITATIVE for new conversations.** Treat older `HANDOFF_CURRENT_STABLE12_TO_GOOGLE_PLAY_2026_10_31.md` and earlier stage notes as historical when they contradict this document.
+
+## 1. Latest accepted app checkpoint
+
+- **Stable13 / D-143 / versionCode37**, Android Kotlin + Jetpack Compose, `applicationId com.ateliertime.android`, targetSdk36. User's latest explicit message: **"הכל עובד כנדרש , תעד והכרז על גרסה יציבה הבאה לאחר תיקון באגים חדשים ממשתמשים"**.
+- **Official frozen checkpoint:** `stable/android-d143-qa13-user-accepted` — immutable accepted source recovery branch; branch SHA should be read directly from GitHub when needed. Do **not** commit to this branch.
+- **Previous frozen recovery:** `stable/android-d141-qa12-final-user-accepted` (Stable12), plus older Stable11, Stable10. Never rewrite them.
+- D-142/code36 resolves the terminal blocked-break leftover by three validated explicit choices (Editor recommendation, exact last Session extension with 25/5 safety consent, exact Summary extension preserving total) including saved legacy compatibility. The user said D-142 works before requesting a follow-up.
+- D-143 adds a distinct-color **Reset Editor** FIRST in ONE horizontal row with Example A and Example B; confirmation/cancel; only Editor draft resets to original starting values; saved Classes, Sounds, reports and running timer remain undisturbed. User installed and accepted D-143.
+- Evidence: screenshot of local Samsung CoGo `ARTWORK AUDIT PASS`, **256 JVM tests PASS (0 failures/errors/skips)**, including D-143 2/2 and D-142 9/9; debug APK and AndroidTest APK compilation succeeded. **AndroidTest instrumentation was not run**; manual functionality is supported by the user's acceptance statement, not an independent comprehensive phone test.
+- [Stable13 certificate](STABLE13_D143_USER_ACCEPTANCE_2026_11_01.md) · [D-143 change report](D143_RESET_EDITOR_ONE_ROW_2026_11_01.md) · [D-142 report](D142_TERMINAL_BREAK_RESOLUTION_IMPLEMENTATION_AND_QA_2026_11_01.md).
+
+## 2. Google Play — open gates, not published
+
+- Personal Google Play developer account **created and paid**. Last known from user's Play Console screenshot: **identity verification pending**, `Create app` disabled. Do not assume it has since passed; ask only for status when advancing.
+- Target initial distribution: **Internal testing with a few invited people**, not public. Future production might require separate closed-testing qualification for a new personal developer account.
+- **Privacy Policy link already present in installed app and user-verified**: https://aviy99.github.io/Atelier-Time/privacy-policy.html . Website source in `main/docs/privacy-policy.html` and `PRIVACY_POLICY.md`; do not duplicate.
+- **Data Safety**: source-based draft suggests no off-device developer collection/sharing under current audited dependencies, with user-directed export exception. This is **conditional until actual signed release AAB merged manifest / resolved dependencies / SDK are checked**; no Console declaration submitted.
+- **Foreground service `specialUse`**: existing accepted background/notification design retained; Play declaration and reviewer-accessible demonstration video remain outstanding. Document truthfully that the service handles status/cleanup, not timer/audio computation itself.
+- **Store artwork already preserved in main in verified 15.29MB ZIP** at `artwork/play-store/Atelier_Time_Google_Play_Approved_Assets_Complete_Pack.zip`. Approved icon: 512x512 derived from Stable12; locked unaltered original feature graphic 1024x500; **exact eight screenshots in order 1,3,4,5,6,8,9,10** (all ten originals also archived). Do not regenerate, revise or reupload unless actually needed for a separately approved Play action.
+- Store listing draft in `docs/ASO01_GOOGLE_PLAY_STORE_LISTING_HE_EN_2026_10_30.md`: Hebrew title `Atelier Time - טיימר לסטודיו`; English title `Atelier Time: Art Studio Timer`. No app listing created/submitted yet.
+- **No release-signed AAB, Play App Signing setup, app draft/upload, internal invitation, or publishing action completed.** Stable13 debug acceptance does not establish Play readiness. Existing approved artwork is from Stable12, so final Play presentation should be checked against the selected release app build before submission.
+
+## 3. Next tasks in recommended order
+
+1. On Play Console, confirm whether Google has completed developer identity verification and enabled `Create app`; finish any permitted account/contact/device verification there. Never ask for passwords, OTPs or card data.
+2. Under explicit user authorization, create a free draft app and complete actual Console fields using preapproved HE/EN ASO text and the approved locked media; do not upload or publish silently.
+3. Review latest chosen release code (Stable13 unless user chooses a later candidate), manifest/SDK/dependencies, Data Safety claims, foreground service `specialUse` rationale and evidence video.
+4. Designate package identity/signing strategy; **locally build and sign a release AAB on Samsung Code on the Go only after explicit separate approval**, keeping signing keys off GitHub. No paid GitHub Actions/CI.
+5. Review draft, invite limited Internal testers, and follow Google production/closed-testing rules only if/when relevant. Publishing remains approval-gated.
+
+## 4. Mandatory safeguards
+
+- No modifying frozen Stable13/Stable12 branch. Future changes on `android-native-kotlin-compose` must be given new D-number/versionCode and user permission.
+- No unapproved build/reinstall/uninstall, deleting app state, deleting user Sounds, Classes, diagnostics/history, clearing `.cg`, force/reset/rebase, signing-key export, payment or Play uploads.
+- Github `main` is the canonical **project documentation, store-art ZIP and release records**; Android DEV contains active development source; immutable `stable/android-...` refs are source restoration points.
+- Existing docs on the old Stable12 Play handoff remain useful as a **historical approved store-artwork checklist**, not as the latest Android stable status.
+
+**New-chat starting message:** `המשך Atelier Time לפי docs/HANDOFF_CURRENT_STABLE13_TO_GOOGLE_PLAY_2026_11_01.md ב־GitHub. Stable13/D-143/code37 הוכרזה יציבה לאחר אישור המשתמש, עם 256/256 בדיקות JVM וממשק Reset Editor; AndroidTest קומפל אך לא הורץ. Stable13 ו־Stable12 קפואות. אין לבנות בענן, לשנות ענפים יציבים, למחוק נתונים או להעלות ל־Play ללא אישור. המשך משלב אימות חשבון Google Play, Data Safety, FGS ובדיקת AAB.`
