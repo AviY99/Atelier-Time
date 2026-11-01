@@ -70,7 +70,7 @@ data class EditorInput(
             placement = placement,
             tailPoseExtensionSeconds = run {
                 val value = tailExtensionMinutes.toLong() * SECONDS_PER_MINUTE
-                require(value in 0..Int.MAX_VALUE.toLong()) {
+                require(value in 0L..Int.MAX_VALUE.toLong()) {
                     "Final Session extension is outside the supported range."
                 }
                 value.toInt()
