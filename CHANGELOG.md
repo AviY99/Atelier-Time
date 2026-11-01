@@ -1,3 +1,7 @@
+## 2026-11-01 — Google Play privacy/Data Safety source verification (docs only)
+
+No app changes: Stable12 About privacy link already exists and opens `https://aviy99.github.io/Atelier-Time/privacy-policy.html`. Reviewed frozen source manifest and app dependencies, local diagnostics and data export; prepared candidate Data Safety form answers and documented release-AAB/FGS-video gating. [Audit](docs/PLAY_DATA_SAFETY_STABLE12_SOURCE_AUDIT_2026_11_01.md). Play artwork ZIP previously archived/verified. No release build or Play submission.
+
 ## 2026-11-01 — Complete Google Play artwork package archived and verified
 
 User uploaded [approved 15.29MB artwork ZIP](https://github.com/AviY99/Atelier-Time/blob/main/artwork/play-store/Atelier_Time_Google_Play_Approved_Assets_Complete_Pack.zip) to GitHub main, commit `4eaa1462573c45de4c9d305acd129a932ca673fd`. Blob SHA `506a9b9e6dd27b7d4531e71d1053096de1d3e6b0` matches local ZIP; CRC passed. Inside: approved icon, original locked feature graphic, final eight screenshots in exact user order, all ten originals backup, manifest. [Receipt](https://github.com/AviY99/Atelier-Time/blob/main/artwork/play-store/GOOGLE_PLAY_APPROVED_ASSETS_ARCHIVE_VERIFIED_2026_11_01.md). No Play upload or changes to Stable12.
