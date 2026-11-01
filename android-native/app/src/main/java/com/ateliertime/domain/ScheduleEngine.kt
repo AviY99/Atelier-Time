@@ -20,7 +20,8 @@ class ScheduleEngine {
             phases: List<SchedulePhase> = emptyList(),
             shortened: Boolean = false,
             canSplit: Boolean = false,
-        ) = ScheduleCandidate(rules, phases, issues, shortened, canSplit, choice)
+            tail: TailBreakRemainder? = null,
+        ) = ScheduleCandidate(rules, phases, issues, shortened, canSplit, choice, tail)
 
         if (rules.totalSeconds <= 0) {
             error("nonpositive_session", "Full session duration must be positive.")
@@ -34,6 +35,10 @@ class ScheduleEngine {
         }
         if (rules.specialBreakCount < 0) {
             error("negative_break_count", "Special break count cannot be negative.")
+        }
+        if (rules.tailPoseExtensionSeconds < 0 ||
+            rules.tailPoseExtensionSeconds % SECONDS_PER_MINUTE != 0) {
+            error("invalid_tail_extension", "Final Session extension requires whole positive minutes.")
         }
         var openingSum = 0L
         rules.openingGroups.forEachIndexed { index, group ->
@@ -94,7 +99,7 @@ class ScheduleEngine {
         if (!attempt.valid) {
             error("unbuildable_timeline",
                 attempt.invalidReason ?: "Cannot fit requested session phases.")
-            return candidate(attempt.phases)
+            return candidate(attempt.phases, tail = attempt.tail)
         }
         var phases = attempt.phases
         val regular = phases.indices.filter {
@@ -169,6 +174,7 @@ class ScheduleEngine {
     private data class Attempt(
         val phases: List<SchedulePhase>,
         val invalidReason: String? = null,
+        val tail: TailBreakRemainder? = null,
     ) {
         val valid get() = invalidReason == null
     }
@@ -247,6 +253,7 @@ class ScheduleEngine {
         var cursor = 0
         var poseNumber = 0
         var breakOrdinal = 0
+        var tailExtensionUsed = false
         fun addPose(duration: Int, source: PoseSource, groupId: String? = null) {
             poseNumber++
             phases += SchedulePhase(
@@ -335,8 +342,26 @@ class ScheduleEngine {
                     val duration =
                         if (special) rules.specialBreakSeconds else rules.shortBreakSeconds
                     if (cursor.toLong() + duration + SECONDS_PER_MINUTE > end) {
+                        val remaining = end - cursor
+                        val last = phases.lastOrNull()
+                        // D-142: only an explicit user-approved exact remainder may
+                        // extend the preceding regular pose. Never skip a manually
+                        // designated special or a future requested ordinal.
+                        if (rules.tailPoseExtensionSeconds == remaining &&
+                            remaining > 0 && !special &&
+                            replacements.none { it >= breakOrdinal } &&
+                            last?.kind == PhaseKind.POSE &&
+                            last.poseSource == PoseSource.REGULAR) {
+                            phases[phases.lastIndex] =
+                                last.copy(endSeconds = end)
+                            cursor = end
+                            tailExtensionUsed = true
+                            break
+                        }
                         return Attempt(phases,
-                            "A break would not leave one full minute for a following pose.")
+                            "A break would not leave one full minute for a following pose.",
+                            TailBreakRemainder(remaining, duration,
+                                breakOrdinal, special))
                     }
                     phases += SchedulePhase(
                         id = "phase_" + (phases.size + 1),
@@ -359,6 +384,9 @@ class ScheduleEngine {
         }
         if (replacements.any { it > breakOrdinal }) {
             return Attempt(phases, "Manual break ordinal does not exist.")
+        }
+        if (rules.tailPoseExtensionSeconds > 0 && !tailExtensionUsed) {
+            return Attempt(phases, "The chosen final Session extension is no longer applicable.")
         }
         if (rules.summarySeconds > 0) {
             phases += SchedulePhase(
