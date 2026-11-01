@@ -852,14 +852,14 @@ fun SessionEditorScreen(
             OutlinedButton(
                 colors = atelierOutlinedColors(),
                 contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).testTag("editor_example_a_button"),
                 onClick = { applyA() },
             ) { Text("Example A", maxLines = 1,
                 style = MaterialTheme.typography.labelMedium) }
             OutlinedButton(
                 colors = atelierOutlinedColors(),
                 contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).testTag("editor_example_b_button"),
                 onClick = { applyB() },
             ) { Text("Example B", maxLines = 1,
                 style = MaterialTheme.typography.labelMedium) }
