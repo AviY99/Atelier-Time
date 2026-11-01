@@ -24,6 +24,7 @@ data class EditorInput(
     val cycleStart: CycleStart,
     val automaticPlacement: Boolean,
     val manualOrdinals: String,
+    val tailExtensionMinutes: Int = 0,
 ) {
     fun toRules(): SessionRules {
         fun read(input: String, label: String): Int =
@@ -67,6 +68,13 @@ data class EditorInput(
             specialBreakCount = count,
             cycleStart = cycleStart,
             placement = placement,
+            tailPoseExtensionSeconds = run {
+                val value = tailExtensionMinutes.toLong() * SECONDS_PER_MINUTE
+                require(value in 0..Int.MAX_VALUE.toLong()) {
+                    "Final Session extension is outside the supported range."
+                }
+                value.toInt()
+            },
         )
     }
 }
