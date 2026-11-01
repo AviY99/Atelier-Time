@@ -1341,11 +1341,12 @@ fun SessionEditorScreen(
             else null
         }
         val extended = engine.generate(rules.copy(tailPoseExtensionSeconds = residual))
-        val reallocated = engine.generate(rules.copy(
-            summarySeconds = rules.summarySeconds + residual,
-        ))
+        val newSummary = rules.summarySeconds.toLong() + residual
+        val reallocated = if (newSummary >= 0 && newSummary < rules.totalSeconds) {
+            engine.generate(rules.copy(summarySeconds = newSummary.toInt()))
+        } else null
         val validExtension = !extended.hasBlockingIssues
-        val validSummary = !reallocated.hasBlockingIssues
+        val validSummary = reallocated != null && !reallocated.hasBlockingIssues
         val selection = tailRecoveryChoice
         val preview = when (selection) {
             TailRecoveryChoice.EDITOR -> null
