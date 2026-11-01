@@ -1,3 +1,5 @@
+> **UPDATE 2026-11-01 — ZIP NOW SAVED AND VERIFIED IN GITHUB:** The approved 8 screenshot PNGs, exactly in the sequence below, and all 10 original source photos are archived **inside** [the permanent approved assets ZIP](Atelier_Time_Google_Play_Approved_Assets_Complete_Pack.zip) on branch **main**; verified Git blob `506a9b9e6dd27b7d4531e71d1053096de1d3e6b0`. [Verification document](GOOGLE_PLAY_APPROVED_ASSETS_ARCHIVE_VERIFIED_2026_11_01.md). Older 'only conversation artifacts' descriptions below refer to the pre-upload state; don't reupload or change the order. No images have been uploaded to Play Console.
+
 # Atelier Time — FINAL Google Play phone gallery: 8 selected screenshots
 
 **Authoritative user decision — 2026-10-31:** "אם נדרש לוותר על צילומים ומ 10 לרדת ל 8 אז נוותר על about ועל תחילת.סשן".
