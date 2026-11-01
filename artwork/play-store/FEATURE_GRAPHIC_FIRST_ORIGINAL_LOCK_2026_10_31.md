@@ -1,3 +1,5 @@
+> **ORIGINAL LOCKED FEATURE GRAPHIC ARCHIVED (2026-11-01):** The user's original **unchanged** 1024×500 graphic is now safely stored **inside** [the permanent GitHub main ZIP](https://github.com/AviY99/Atelier-Time/blob/main/artwork/play-store/Atelier_Time_Google_Play_Approved_Assets_Complete_Pack.zip) at `02_Locked_Feature_Graphic/Atelier_Time_Google_Play_Feature_Graphic_ORIGINAL_LOCKED_1024x500.png`. Git blob of full ZIP verified `506a9b9e6dd27b7d4531e71d1053096de1d3e6b0`; original PNG SHA-256 `c2921bdb6d61cb24619201f3c20e8ac5bb811569a84c034acf1abf14fec4c04e`. [Archive receipt](https://github.com/AviY99/Atelier-Time/blob/main/artwork/play-store/GOOGLE_PLAY_APPROVED_ASSETS_ARCHIVE_VERIFIED_2026_11_01.md). Any former 'binary not committed' statement below is historical. **The design remains locked; no icon is added.** No Play upload.
+
 # Atelier Time — FIRST ORIGINAL Google Play feature graphic: LOCKED
 
 **User instruction, 2026-10-31:** "לא לשנות כלום בתמונת קידום המקורית חזור אליה ונעל אותה".
