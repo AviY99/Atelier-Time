@@ -196,8 +196,12 @@ class ScheduleEngine {
         )
         val virtual = build(virtualRules, emptyList())
         if (!virtual.valid) {
+            // The virtual timeline subtracts only the special-break delta;
+            // its terminal residual equals the real clock residual. Surface
+            // that typed remainder for valid automatic-placement recovery.
             return Attempt(emptyList(),
-                "No feasible replacement positions: " + virtual.invalidReason)
+                "No feasible replacement positions: " + virtual.invalidReason,
+                virtual.tail)
         }
         val slots = virtual.phases.filter {
             it.kind == PhaseKind.SHORT_BREAK && it.openingGroupId == null
