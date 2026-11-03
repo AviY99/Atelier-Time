@@ -495,6 +495,19 @@ fun SessionEditorScreen(
                     beforePhases = session.phases)
                 timerView = view
                 timerError = null
+                // D-144: a quiet, short three-note sound/volume indicator
+                // starts ONLY with a user-confirmed Class, never at splash.
+                if (soundEnabled) {
+                    val runReport = currentReport
+                    melodyPlayer.playClassStartCheck(
+                        useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
+                    ) { message ->
+                        melodyError = message
+                        timerError = message
+                        try { runReport?.note("opening_audio_check_failed", message) }
+                        catch (ignored: Exception) { diagnosticError = "Audio check error not logged." }
+                    }
+                }
             } catch (error: IllegalArgumentException) {
                 val session = playingSession
                 val presetId = selectedPresetId
@@ -562,6 +575,7 @@ fun SessionEditorScreen(
                         soundSettings.secondsFor(tick.cue),
                         useAlarmVolume = soundSettings.classAlertsUseAlarmVolume) { message ->
                         melodyError = message
+                        timerError = message
                         val stamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
                             .format(Date(System.currentTimeMillis()))
                         eventHistory.add("$stamp · Audio error · $message")
