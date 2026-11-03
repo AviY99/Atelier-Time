@@ -213,6 +213,9 @@ fun SessionEditorScreen(
     var activeTab by remember { mutableStateOf(MainTab.EDITOR) }
     var soundEnabled by remember { mutableStateOf(true) }
     var keepScreenAwake by remember { mutableStateOf(false) }
+    val classVolumeControl = remember(context) { ClassVolumeControl(context) }
+    var showConfirmMaxVolume by remember { mutableStateOf(false) }
+    var classVolumeError by remember { mutableStateOf<String?>(null) }
     val freeTimer = remember { FreeCountdownTimer { SystemClock.elapsedRealtime() } }
     var freeTimerView by remember { mutableStateOf(freeTimer.view()) }
     var freeTimerError by remember { mutableStateOf<String?>(null) }
@@ -586,6 +589,7 @@ fun SessionEditorScreen(
                     }
                 }
                 if (tick.view.status == TimerStatus.FINISHED) {
+                    classVolumeControl.restoreIfUnchanged()
                     closeRunReport(if (deadlineReached) "deadline" else "natural_finish")
                     classStatusNotification.clear()
                     // Return to Timer's saved-class HOME once the class ends.
@@ -668,6 +672,7 @@ fun SessionEditorScreen(
                 }
             }
             if (event.view.status == TimerStatus.FINISHED) {
+                classVolumeControl.restoreIfUnchanged()
                 closeRunReport("natural_finish")
                 classStatusNotification.clear()
                 playingSession = null
@@ -1305,12 +1310,41 @@ fun SessionEditorScreen(
                         modifier = Modifier.testTag("keep_screen_awake"))
                 }
                 if (classAlertVolumeMuted) {
-                    Text((if (classAlertVolumeMuted)
-                        "Class alert volume is at zero. " else "") +
-                        "Raise the relevant volume if desired.",
+                    Text("Class alert volume is at zero. Check the Alarm/Media stream.",
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = atelierErrorTextColor(),
                         style = MaterialTheme.typography.bodySmall)
+                }
+                if (view != null && (view.status == TimerStatus.RUNNING ||
+                        view.status == TimerStatus.PAUSED)) {
+                    val volumes = classVolumeControl.levels()
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Class sound volume",
+                                style = MaterialTheme.typography.titleSmall)
+                            Text(
+                                "Media ${volumes.mediaPercent()}% · Alarm ${volumes.alarmPercent()}%" +
+                                    if (soundSettings.classAlertsUseAlarmVolume) " · using Alarm"
+                                    else " · using Media",
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = { showConfirmMaxVolume = true },
+                            modifier = Modifier.testTag("class_volume_max_both"),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+                            colors = atelierOutlinedColors(),
+                        ) { Text("Max both", style = MaterialTheme.typography.labelSmall) }
+                    }
+                    classVolumeError?.let {
+                        Text(it, color = atelierErrorTextColor(),
+                            modifier = Modifier.padding(horizontal = 16.dp))
+                    }
                 }
                 if (session == null || timer == null || view == null) {
                     Column(
@@ -1389,6 +1423,7 @@ fun SessionEditorScreen(
                             runTimedCue(advancedByNext = true) { timer.nextPhase() }
                         },
                         onExit = {
+                            classVolumeControl.restoreIfUnchanged()
                             recordClassEvent("Exit", timer.view(), timer.view())
                             closeRunReport("user_exit")
                             classStatusNotification.clear()
@@ -1401,6 +1436,41 @@ fun SessionEditorScreen(
                 }
             }
         }
+    }
+
+    // D-144: only a deliberate opt-in can raise system-wide media/alarm levels.
+    if (showConfirmMaxVolume) {
+        AlertDialog(
+            modifier = Modifier.testTag("class_volume_max_dialog"),
+            onDismissRequest = { showConfirmMaxVolume = false },
+            title = { Text("Set both volumes to maximum?") },
+            text = { Text("This raises the PHONE'S Media and Alarm volume to " +
+                "their device maximum, affecting other apps too. It may be very loud. " +
+                "Android volume protection or Do Not Disturb can block the change. " +
+                "When this Class ends, levels are restored only if you have not " +
+                "changed them yourself. Continue?") },
+            confirmButton = {
+                TextButton(
+                    colors = atelierTextColors(),
+                    modifier = Modifier.testTag("class_volume_max_confirm"),
+                    onClick = {
+                        showConfirmMaxVolume = false
+                        runCatching { classVolumeControl.maxBoth() }
+                            .onSuccess {
+                                classVolumeError = null
+                                recordClassEvent("Max both volumes", timerView, timerView)
+                            }
+                            .onFailure {
+                                classVolumeError = it.message ?: "Volume change not allowed."
+                            }
+                    },
+                ) { Text("Max both") }
+            },
+            dismissButton = {
+                TextButton(colors = atelierTextColors(),
+                    onClick = { showConfirmMaxVolume = false }) { Text("Cancel") }
+            },
+        )
     }
 
     // D-143: explicit confirmation protects unsaved draft edits; Saved Classes remain intact.
