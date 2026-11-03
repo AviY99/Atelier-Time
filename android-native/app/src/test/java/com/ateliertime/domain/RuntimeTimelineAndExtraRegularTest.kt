@@ -92,7 +92,7 @@ class RuntimeTimelineAndExtraRegularTest {
         val timer = MonotonicSessionTimer(session) { nowMs }
         timer.start()
         nowMs = 60_000L
-        timer.restartCurrentSegmentKeepingEndTime()
+        timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
         val projection = timer.runtimeTimeline()
         assertEquals(m(1), projection.elapsedSeconds)
         assertEquals(m(1), projection.segments.first().durationSeconds)
@@ -139,7 +139,7 @@ class RuntimeTimelineAndExtraRegularTest {
         }
         assertEquals(m(1), completedAdded.durationSeconds)
         nowMs += 60_000L
-        timer.restartCurrentSegmentKeepingEndTime()
+        timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
         val timeline = timer.runtimeTimeline()
         assertEquals(m(1), timeline.segments.last {
             it.id == "runtime-added-break-1" && it.observed
