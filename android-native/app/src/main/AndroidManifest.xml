@@ -24,7 +24,10 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Active user-initiated drawing class countdown; remove status when task is dismissed"/>
         </service>
-        <activity android:name=".MainActivity" android:exported="true">
+        <!-- Multi-window resizing changes display configuration; preserve active in-memory Class state. -->
+        <activity android:name=".MainActivity" android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|density|uiMode"
+            android:resizeableActivity="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
