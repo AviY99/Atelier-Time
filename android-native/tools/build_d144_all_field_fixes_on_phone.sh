@@ -1,29 +1,136 @@
 #!/usr/bin/env bash
-# D-144 local Samsung Code on the Go QA gate: no install, cloud, signing or app data changes.
+# D-144 all six field fixes: Samsung Code on the Go LOCAL QA / debug build only.
+# NEVER installs/uninstalls, clears app data, signs releases, pushes, or triggers paid CI.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-[[ "$(git branch --show-current)" == "android-native-kotlin-compose" ]] || { echo "STOP: wrong branch"; exit 2; }
-[[ -z "$(git status --porcelain --untracked-files=no)" ]] || { echo "STOP: dirty tracked checkout"; exit 2; }
-grep -Fq "versionCode = 38" app/build.gradle.kts
-grep -Fq 'versionName = "D-144"' app/build.gradle.kts
+
+if [[ "$(git branch --show-current)" != "android-native-kotlin-compose" ]]; then
+  echo 'STOP: checkout must be android-native-kotlin-compose.' >&2; exit 2
+fi
+# Preserve .cg and unrelated IDE caches. Refuse tracked source changes or untracked app/tools.
+if [[ -n "$(git status --porcelain --untracked-files=no)" ]] ||
+   [[ -n "$(git ls-files --others --exclude-standard -- app/src tools)" ]]; then
+  echo 'STOP: local tracked files or untracked app/tool sources require review.' >&2
+  git status --short
+  exit 2
+fi
+for setting in 'compileSdk = 36' 'targetSdk = 36' 'versionCode = 38' 'versionName = "D-144"'; do
+  if ! grep -Fq "$setting" app/build.gradle.kts; then
+    echo "STOP: missing required D-144 version setting: $setting" >&2; exit 2
+  fi
+done
+for source in \
+  app/src/main/java/com/ateliertime/domain/ScheduleEngine.kt \
+  app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt \
+  app/src/main/java/com/ateliertime/domain/PhaseDisplayNames.kt \
+  app/src/main/java/com/ateliertime/domain/MonotonicSessionTimer.kt \
+  app/src/main/java/com/ateliertime/android/ClassVolumeControl.kt \
+  app/src/test/java/com/ateliertime/domain/D144RuntimeRepeatSafetyTest.kt \
+  app/src/test/java/com/ateliertime/domain/D144PhaseDisplayNamesTest.kt \
+  app/src/main/java/com/ateliertime/domain/Models.kt \
+  app/src/test/java/com/ateliertime/domain/TailBreakRecoveryD142Test.kt \
+  app/src/test/java/com/ateliertime/android/EditorResetD143Test.kt \
+  app/src/androidTest/java/com/ateliertime/android/EditorResetD143UiTest.kt; do
+  if [[ ! -s "$source" ]]; then
+    echo "STOP: required source not found: $source" >&2; exit 2
+  fi
+done
+
+# Verify the approved splash SHA and tracked presence of the launcher/UI artwork.
 bash tools/audit_artwork_on_phone.sh
-gradle_bin="$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle"
-aapt2="${ANDROID_HOME:?}/build-tools/36.0.0/aapt2"
-log="/storage/emulated/0/Download/Atelier-Time-D144-Build.log"
-echo "D-144: full JVM suite and AndroidTest compilation (no install)."
-if ! bash "$gradle_bin" "-Pandroid.aapt2FromMavenOverride=$aapt2" :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest --rerun-tasks --console=plain --no-daemon > "$log" 2>&1; then
-  grep -E "^e: |\.kt:[0-9]+|FAILED|FAILURE:|^BUILD FAILED" "$log" | tail -n 50 || true
-  echo "FAILED; local log: $log"
+: "${ANDROID_HOME:?Code on the Go Android SDK is required}"
+gradle="$HOME/.cg/gradle-dists/gradle-9.6.1/bin/gradle"
+aapt2="$ANDROID_HOME/build-tools/36.0.0/aapt2"
+if [[ ! -f "$gradle" || ! -s "$aapt2" ]]; then
+  echo 'STOP: existing Code on the Go Gradle / ARM64 AAPT2 tools missing.' >&2; exit 2
+fi
+
+downloads='/storage/emulated/0/Download'
+mkdir -p "$downloads"
+log="$downloads/Atelier-Time-D144-API36-Build.log"
+echo 'D-144: full JVM suite, debug APK and compiled AndroidTest; NO INSTALL.'
+if ! bash "$gradle" "-Pandroid.aapt2FromMavenOverride=$aapt2" \
+    :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest \
+    --rerun-tasks --console=plain --no-daemon > "$log" 2>&1; then
+  echo 'D-144 JVM TESTS OR BUILD FAILED. Relevant local terminal diagnostics:'
+  awk '/(^|[[:space:]])e: |(^|[[:space:]])error: |\.kt:[0-9]+|^FAILURE:|^BUILD FAILED|Execution failed for task|FAILED/ {if (n++ < 60) print}' "$log"
+  echo "Complete PRIVATE log kept ONLY on phone: $log"
   exit 1
 fi
-junit="app/build/test-results/testDebugUnitTest"
-for spec in "domain.D144RuntimeRepeatSafetyTest" "domain.D144PhaseDisplayNamesTest" "android.EditorResetD143Test" "domain.TailBreakRecoveryD142Test"; do
-  [[ -s "$junit/TEST-com.ateliertime.$spec.xml" ]] || { echo "STOP: missing executed test $spec"; exit 3; }
+
+report_dir='app/build/test-results/testDebugUnitTest'
+runtime_xml="$report_dir/TEST-com.ateliertime.domain.D144RuntimeRepeatSafetyTest.xml"
+display_xml="$report_dir/TEST-com.ateliertime.domain.D144PhaseDisplayNamesTest.xml"
+d143_xml="$report_dir/TEST-com.ateliertime.android.EditorResetD143Test.xml"
+d142_xml="$report_dir/TEST-com.ateliertime.domain.TailBreakRecoveryD142Test.xml"
+for xml in "$runtime_xml" "$display_xml" "$d143_xml" "$d142_xml"; do
+  if [[ ! -s "$xml" ]]; then
+    echo "STOP: missing executed JUnit XML: $xml" >&2; exit 3
+  fi
 done
-apk="app/build/outputs/apk/debug/app-debug.apk"
-[[ -s "$apk" ]] || { echo "STOP: APK missing"; exit 3; }
-out="/storage/emulated/0/Download/Atelier-Time-D144-API36-Candidate.apk"
-cp "$apk" "$out"
-echo "D-144 JVM SUITE AND BUILD SUCCESSFUL: $out"
+if command -v python3 >/dev/null 2>&1; then
+  python3 - "$report_dir" <<'PY'
+import pathlib, sys, xml.etree.ElementTree as ET
+files = sorted(pathlib.Path(sys.argv[1]).glob("TEST-*.xml"))
+if not files: raise SystemExit("STOP: no actual executed JUnit XML.")
+totals = dict.fromkeys(("tests", "failures", "errors", "skipped"), 0)
+found = {}
+for file in files:
+    root = ET.parse(file).getroot()
+    suites = [root] if root.tag == "testsuite" else root.findall(".//testsuite")
+    for suite in suites:
+        values = {k: int(suite.attrib.get(k, "0")) for k in totals}
+        for key in totals: totals[key] += values[key]
+        found[suite.attrib.get("name", "")] = values
+for name, minimum in [
+    ("com.ateliertime.domain.D144RuntimeRepeatSafetyTest", 5),
+    ("com.ateliertime.domain.D144PhaseDisplayNamesTest", 4),
+    ("com.ateliertime.android.EditorResetD143Test", 2),
+    ("com.ateliertime.domain.TailBreakRecoveryD142Test", 9),
+]:
+    v = found.get(name)
+    print(name.split(".")[-1] + " ACTUAL:", v)
+    if not v or v["tests"] < minimum or any(v[k] for k in ("failures", "errors", "skipped")):
+        raise SystemExit("STOP: target test suite missing, skipped or failed.")
+print("ALL JVM ACTUAL: " + " ".join(f"{k}={v}" for k,v in totals.items()))
+if not totals["tests"] or any(totals[k] for k in ("failures", "errors", "skipped")):
+    raise SystemExit("STOP: incomplete or failing full JVM suite.")
+PY
+else
+  for xml in "$runtime_xml" "$display_xml" "$d143_xml" "$d142_xml"; do
+    if grep -Eq '<(failure|error|skipped)([ >])' "$xml"; then
+      echo "STOP: failing/skipped JUnit results in $xml" >&2; exit 3
+    fi
+  done
+  [[ "$(grep -c '<testcase ' "$runtime_xml" || true)" -ge 5 ]] || exit 3
+  [[ "$(grep -c '<testcase ' "$display_xml" || true)" -ge 4 ]] || exit 3
+  [[ "$(grep -c '<testcase ' "$d143_xml" || true)" -ge 2 ]] || exit 3
+  [[ "$(grep -c '<testcase ' "$d142_xml" || true)" -ge 9 ]] || exit 3
+  echo 'D-144 runtime 5/5 and labels 4/4, D-143 2/2, D-142 9/9; Gradle JVM suite PASS.'
+fi
+
+# Compile AndroidTest APK to check UI test source, but never run or install it.
+mapfile -t test_apks < <(find app/build/outputs/apk/androidTest -type f -name '*.apk' | sort)
+if [[ "${#test_apks[@]}" -ne 1 || ! -s "${test_apks[0]:-}" ]]; then
+  echo 'STOP: expected exactly one nonempty compiled AndroidTest APK.' >&2; exit 3
+fi
+apk_dir='app/build/outputs/apk/debug'
+mapfile -t apks < <(find "$apk_dir" -type f -name '*.apk' | sort)
+if [[ "${#apks[@]}" -ne 1 || ! -s "${apks[0]:-}" ]]; then
+  echo "STOP: expected exactly one nonempty debug APK, found ${#apks[@]}." >&2; exit 3
+fi
+out="$downloads/Atelier-Time-D144-API36-Candidate.apk"
+cp "${apks[0]}" "$out"
+manifest="$downloads/Atelier-Time-D144-API36-Manifest.txt"
+{
+  printf 'version=D-144\nversion_code=38\ntarget_sdk=36\n'
+  printf 'branch=android-native-kotlin-compose\n'
+  printf 'source_commit=%s\n' "$(git rev-parse HEAD)"
+  printf 'apk_sha256=%s\n' "$(sha256sum "$out" | awk '{print $1}')"
+  printf 'jvm_test_state=PASSED; D144_5_PLUS_4_D143_2_D142_9_CONFIRMED\n'
+  printf 'androidTest=COMPILED_NOT_EXECUTED\ndevice_install=NOT_PERFORMED\nphysical_device_QA=NOT_PERFORMED\n'
+} > "$manifest"
+echo "D-144 JVM TESTS AND BUILD SUCCESSFUL: $out"
+echo "Manifest: $manifest"
 echo "Private log: $log"
-echo "AndroidTest compiled, not executed. APK not installed."
+echo 'No install, device QA, cloud build, GitHub push, signing, or data clear was done.'
