@@ -429,12 +429,14 @@ class MonotonicSessionTimer(
     }
 
     /** Backwards-compatible work-Session API; never use this to restart a Break. */
-    fun restartCurrentSessionKeepingEndTime(): TimerView {
+    fun restartCurrentSessionKeepingEndTime(
+        acknowledgeRestWarning: Boolean = false,
+    ): TimerView {
         val phase = view().phase
         check(phase?.kind == PhaseKind.POSE) {
             "This method restarts work Sessions only."
         }
-        return restartCurrentSegmentKeepingEndTime()
+        return restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning)
     }
 
     fun pause(): TimerView {
