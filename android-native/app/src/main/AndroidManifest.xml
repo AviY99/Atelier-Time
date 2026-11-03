@@ -3,6 +3,8 @@
     <!-- Android 13+: optional permission for the Class status notification.
          Declining it never blocks the timer or audio cues. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- D-144: optional user-confirmed Max Both system volume control. -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <!-- Foreground status service only while a Class runs. Android 14+
          requires an explicit type; the specialUse subtype also needs
          a policy review before publication in Google Play. -->
