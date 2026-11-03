@@ -41,11 +41,13 @@ fun SessionTimerScreen(
     designPalette: DesignPalette,
     eventHistory: List<String>,
     onPauseResume: () -> Unit,
-    onRestartSession: () -> Unit,
+    onRestartSession: (Boolean) -> Unit,
+    onRepeatLast: (Boolean) -> Unit,
     onNextPhase: () -> Unit,
     onExit: () -> Unit,
 ) {
     var confirmation by remember { mutableStateOf<String?>(null) }
+    var accept25RestWarning by remember { mutableStateOf(false) }
     // Contextual help keeps the Timer compact on a phone. Nothing is hidden
     // from screen-reader users because each action has its own Help control.
     var helpFor by remember { mutableStateOf<String?>(null) }
@@ -79,6 +81,7 @@ fun SessionTimerScreen(
         label = "solidTahiniPhaseProgress",
     )
     val restartTitle = if (isBreak) "Restart break" else "Restart session"
+    val lastTarget = timer.repeatLastTarget()
     fun phaseLabel(phase: SchedulePhase?): String =
         PhaseDisplayNames.title(phase, session.rules)
     val trueClassLengthSeconds = run {
@@ -274,11 +277,19 @@ fun SessionTimerScreen(
                     }
                     OutlinedButton(colors = atelierOutlinedColors(), 
                         enabled = underway && canRestartSegment,
-                        onClick = { confirmation = "restart" },
+                        onClick = { accept25RestWarning = false; confirmation = "restart" },
                         modifier = if (largeControlText) Modifier.widthIn(min = 150.dp)
                             else Modifier.weight(1.45f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     ) { Text(restartTitle, style = MaterialTheme.typography.labelSmall) }
+                    OutlinedButton(colors = atelierOutlinedColors(),
+                        enabled = underway && lastTarget != null,
+                        onClick = { accept25RestWarning = false; confirmation = "repeat" },
+                        modifier = if (largeControlText) Modifier.widthIn(min = 150.dp)
+                            else Modifier.weight(1.2f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                    ) { Text("Repeat Last", maxLines = 1,
+                        style = MaterialTheme.typography.labelSmall) }
                     OutlinedButton(colors = atelierOutlinedColors(), 
                         enabled = underway,
                         onClick = { confirmation = "next" },
@@ -308,6 +319,10 @@ fun SessionTimerScreen(
                     TextButton(colors = atelierTextColors(), onClick = { helpFor = "restart" },
                         contentPadding = PaddingValues(horizontal = 4.dp)) {
                         Text("Restart help", style = MaterialTheme.typography.labelSmall)
+                    }
+                    TextButton(colors = atelierTextColors(), onClick = { helpFor = "repeat" },
+                        contentPadding = PaddingValues(horizontal = 4.dp)) {
+                        Text("Repeat help", style = MaterialTheme.typography.labelSmall)
                     }
                     TextButton(colors = atelierTextColors(), onClick = { helpFor = "next" },
                         contentPadding = PaddingValues(horizontal = 2.dp)) {
@@ -358,47 +373,81 @@ fun SessionTimerScreen(
 
     val choice = confirmation
     if (choice != null) {
+        val restWarning = when (choice) {
+            "restart" -> timer.restartCurrentRequiresRestWarning()
+            "repeat" -> timer.repeatLastRequiresRestWarning()
+            else -> false
+        }
         AlertDialog(
             onDismissRequest = { confirmation = null },
             title = {
-                Text(if (choice == "exit") "End class and return?"
-                    else if (choice == "next") "Skip to " +
+                Text(when (choice) {
+                    "exit" -> "End class and return?"
+                    "next" -> "Skip to " +
                         (view.nextPhase?.let(::phaseLabel) ?: "Class end") + "?"
-                    else "Restart current " + (if (isBreak) "break?" else "session?"))
+                    "repeat" -> "Repeat previous " +
+                        (lastTarget?.let(::phaseLabel) ?: "phase") + " in full?"
+                    else -> "Restart current " + (if (isBreak) "break?" else "session?")
+                })
             },
             text = {
-                Text(if (choice == "exit")
-                    "End the current run and return to your saved classes in Timer. " +
-                        "The saved approved plan is not changed."
-                else if (choice == "next")
-                    "Next immediately skips the rest of " + phaseLabel(view.phase) +
-                        " and enters " + (view.nextPhase?.let(::phaseLabel) ?: "Class end") +
-                        " when the approved Class finish can still be preserved. " +
-                        "An impossible skip is rejected without changing the timer. " +
-                        "The fixed-length Summary cannot be shortened; use Exit " +
-                        "if you explicitly want to end the Class early."
-                else
-                    "Repeat the current " + (if (isBreak) "break" else "session") +
-                        " from its beginning. Previously completed phases and Class " +
-                        "start/end are unchanged. Time spent repeating this phase is " +
-                        "deducted from the two final regular sessions when feasible; " +
-                        "if the first has already finished, only the unfinished last " +
-                        "session can be shortened. The appropriate " +
-                        (if (isBreak) "break-end melody B" else "session-end melody A") +
-                        " plays only after a successful restart.")
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(when (choice) {
+                        "exit" -> "End the current Run and return to saved Classes. " +
+                            "The saved approved Class is unchanged."
+                        "next" -> "Next immediately skips the remainder of the current " +
+                            "phase and enters the next one. It is rejected if the " +
+                            "approved fixed finish cannot be preserved."
+                        "repeat" -> "Repeat the immediately previous Session/Break for its " +
+                            "FULL original length, not just unused Next time. " +
+                            "The current phase will be entered again after the replay. " +
+                            "Time is compensated from the remaining final regular Sessions " +
+                            "if possible. Saved Classes and past real activity are unchanged."
+                        else -> "Restart the CURRENT Session/Break for its FULL length. " +
+                            "Actual time already worked remains part of the 25/5 safety " +
+                            "calculation. Future Sessions compensate where feasible."
+                    })
+                    if (restWarning) {
+                        Text(
+                            "25/5 REST WARNING: this full repeat would exceed 25 " +
+                                "accumulated work minutes without an actual break of " +
+                                "at least 5 minutes. Confirm that you want to continue.",
+                            color = atelierErrorTextColor(),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = accept25RestWarning,
+                                onCheckedChange = { accept25RestWarning = it },
+                                modifier = Modifier.testTag("runtime_25_5_acknowledge"),
+                            )
+                            Text("I understand and approve this 25/5 exception.",
+                                style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
             },
             confirmButton = {
-                TextButton(colors = atelierTextColors(), onClick = {
-                    confirmation = null
-                    when (choice) {
-                        "exit" -> onExit()
-                        "next" -> onNextPhase()
-                        else -> onRestartSession()
-                    }
-                }) { Text("Confirm") }
+                TextButton(
+                    colors = atelierTextColors(),
+                    enabled = !restWarning || accept25RestWarning,
+                    onClick = {
+                        confirmation = null
+                        when (choice) {
+                            "exit" -> onExit()
+                            "next" -> onNextPhase()
+                            "repeat" -> onRepeatLast(accept25RestWarning)
+                            else -> onRestartSession(accept25RestWarning)
+                        }
+                        accept25RestWarning = false
+                    },
+                ) { Text("Confirm") }
             },
             dismissButton = {
-                TextButton(colors = atelierTextColors(), onClick = { confirmation = null }) { Text("Cancel") }
+                TextButton(colors = atelierTextColors(), onClick = {
+                    confirmation = null
+                    accept25RestWarning = false
+                }) { Text("Cancel") }
             },
         )
     }
