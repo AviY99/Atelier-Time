@@ -456,6 +456,7 @@ fun SessionTimerScreen(
         val title = when (selectedHelp) {
             "pause" -> "Pause / Resume"
             "restart" -> restartTitle
+            "repeat" -> "Repeat previous Session/Break"
             "exit" -> "Exit class"
             else -> "Next phase"
         }
@@ -469,6 +470,14 @@ fun SessionTimerScreen(
                     "Class list in Timer. Your saved and approved Class, schedule, " +
                     "sound selections and other saved Classes are not deleted or changed. " +
                     "Exit asks for confirmation and does not play a completion melody."
+            "repeat" ->
+                "Repeat Last starts the immediately previous Session or Break from its " +
+                    "beginning for its FULL length. This is not an Undo-Next action. " +
+                    "It returns to the current phase afterward, compensating where " +
+                    "possible without moving the approved Class finish. If actual " +
+                    "consecutive work plus the repeated Session exceeds 25 minutes " +
+                    "without 5 minutes of real rest, user acknowledgement is required. " +
+                    "If compensation is impossible, no change is made."
             "restart" ->
                 "Restart only the currently active " +
                     (if (isBreak) "Break" else "Session") +
