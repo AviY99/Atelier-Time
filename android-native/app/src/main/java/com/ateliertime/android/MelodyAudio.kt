@@ -210,11 +210,23 @@ class MelodyAudioPlayer(context: Context) {
             try {
                 // Request short-lived focus; never force media volume or
                 // bypass an intentional mute / Do Not Disturb decision.
-                val focusResult = audioManager.requestAudioFocus(focusRequest)
-                if (focusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                    withContext(Dispatchers.Main) {
-                        onError("Android audio focus was not granted; the cue may be inaudible.")
+                // D-144: Poweramp / other audio apps may retain transient focus
+                // after closing. Do not claim the cue played if focus was denied.
+                // Brief bounded retry; never postpone the timer itself.
+                var granted = false
+                repeat(3) { attempt ->
+                    if (!granted) {
+                        granted = audioManager.requestAudioFocus(focusRequest) ==
+                            AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+                        if (!granted && attempt < 2) delay(180L)
                     }
+                }
+                if (!granted) {
+                    withContext(Dispatchers.Main) {
+                        onError("Class sound unavailable: Android audio focus denied. " +
+                            "Check other music apps, Alarm/Media volume and retry Test sound.")
+                    }
+                    return@launch
                 }
                 when (choice.source) {
                     SoundSource.APP -> {
@@ -277,6 +289,87 @@ class MelodyAudioPlayer(context: Context) {
                 runCatching { media?.stop() }
                 runCatching { media?.release() }
                 runCatching { audioManager.abandonAudioFocusRequest(focusRequest) }
+            }
+        }
+    }
+
+    /**
+     * D-144: an ORIGINAL 3-note, short, non-verbal sound check when a Class
+     * starts; does not shift the Class start/deadline or play on the splash.
+     * Uses exactly the same Media/Alarm output as the scheduled A/B/C cues.
+     */
+    fun playClassStartCheck(
+        useAlarmVolume: Boolean = false,
+        onError: (String) -> Unit = {},
+    ) {
+        active?.cancel()
+        active = scope.launch {
+            var track: AudioTrack? = null
+            val focus = AudioFocusRequest.Builder(
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                .setAudioAttributes(soundAttributes(useAlarmVolume))
+                .setOnAudioFocusChangeListener(
+                    { /* A short cue must never interrupt the Class timer. */ },
+                    Handler(Looper.getMainLooper()))
+                .build()
+            try {
+                var granted = false
+                repeat(3) { attempt ->
+                    if (!granted) {
+                        granted = audioManager.requestAudioFocus(focus) ==
+                            AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+                        if (!granted && attempt < 2) delay(180L)
+                    }
+                }
+                if (!granted) {
+                    withContext(Dispatchers.Main) {
+                        onError("Opening sound check failed: audio focus unavailable. " +
+                            "Close other players or use Test sound before teaching.")
+                    }
+                    return@launch
+                }
+                // Three original ascending notes with a brief pause between.
+                val notes = intArrayOf(523, 659, 784)
+                val noteFrames = SAMPLE_RATE / 5
+                val gapFrames = SAMPLE_RATE / 20
+                val totalFrames = notes.size * (noteFrames + gapFrames)
+                val samples = ShortArray(totalFrames)
+                notes.forEachIndexed { noteIndex, hz ->
+                    val offset = noteIndex * (noteFrames + gapFrames)
+                    for (i in 0 until noteFrames) {
+                        val time = i.toDouble() / SAMPLE_RATE
+                        val envelope = minOf(1.0, i.toDouble() / (SAMPLE_RATE * .012)) *
+                            minOf(1.0, (noteFrames - i - 1).toDouble() / (SAMPLE_RATE * .035))
+                        samples[offset + i] =
+                            (sin(2 * PI * hz * time) * envelope * 8_000).toInt().toShort()
+                    }
+                }
+                val output = AudioTrack.Builder()
+                    .setAudioAttributes(soundAttributes(useAlarmVolume))
+                    .setAudioFormat(AudioFormat.Builder()
+                        .setSampleRate(SAMPLE_RATE)
+                        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT).build())
+                    .setTransferMode(AudioTrack.MODE_STATIC)
+                    .setBufferSizeInBytes(samples.size * 2).build()
+                track = output
+                check(output.state != AudioTrack.STATE_UNINITIALIZED) {
+                    "Opening audio check cannot initialize."
+                }
+                check(output.write(samples, 0, samples.size,
+                    AudioTrack.WRITE_BLOCKING) == samples.size) {
+                    "Opening audio samples cannot load."
+                }
+                output.play()
+                delay(900L)
+            } catch (failure: Exception) {
+                if (failure !is CancellationException) withContext(Dispatchers.Main) {
+                    onError(failure.message ?: "Opening sound check failed.")
+                }
+            } finally {
+                runCatching { track?.stop() }
+                runCatching { track?.release() }
+                runCatching { audioManager.abandonAudioFocusRequest(focus) }
             }
         }
     }
