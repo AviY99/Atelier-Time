@@ -49,6 +49,8 @@ class MonotonicSessionTimer(
     private var lastPhaseIndex: Int? = null
     private var classFinishCueIssued = false
     private var nextHasOccurred = false
+    /** One Repeat Last per attempt; unlock on natural finish or successful Next. */
+    private var repeatLockedPhaseId: String? = null
     private val observedFragments = mutableListOf<RuntimeTimelineSegment>()
     /** Virtual position where this visible attempt started (after Next/Restart/Pause). */
     private var fragmentStartMs = 0L
@@ -111,6 +113,24 @@ class MonotonicSessionTimer(
             RuntimeTimelineSegment(phase.id, phase.kind, seconds, observed = true))
         fragmentStartMs = untilMs
     }
+
+    /** Only real Pose time, including work already spent in the current attempt. */
+    private fun performedWorkSeconds(): Long = runtimeTimeline().segments
+        .asSequence().filter { it.observed && it.kind == PhaseKind.POSE }
+        .sumOf { it.durationSeconds.toLong() }
+
+    /** A proposed, not-yet-committed timeline may only reposition FUTURE specials. */
+    private fun recenterFutureSpecials(
+        phases: List<SchedulePhase>, enteredIndex: Int,
+    ): List<SchedulePhase> = SpecialBreakRebalancer.rebalanceByWork(
+        phases = phases,
+        activeIndex = enteredIndex,
+        firstUnstartedIndex = enteredIndex + 1,
+        workedSeconds = performedWorkSeconds(),
+        ordinaryBreakSeconds = session.rules.shortBreakSeconds,
+        specialBreakSeconds = session.rules.specialBreakSeconds,
+        automatic = session.rules.placement.automatic,
+    )
 
     private fun appendPause(durationMs: Long) {
         val duration = durationMs.coerceAtLeast(0L) + pauseRemainderMs
@@ -193,6 +213,7 @@ class MonotonicSessionTimer(
         lastPhaseIndex = 0
         classFinishCueIssued = false
         nextHasOccurred = false
+        repeatLockedPhaseId = null
         observedFragments.clear()
         fragmentStartMs = 0L
         pauseRemainderMs = 0L
@@ -269,6 +290,9 @@ class MonotonicSessionTimer(
             "Start the class before restarting a Session or Break."
         }
         val current = view().phase ?: error("There is no active phase to restart.")
+        check(current.kind != PhaseKind.SPECIAL_BREAK) {
+            "A Special Break that has begun cannot be restarted."
+        }
         check(!needsRestWarningBeforeFullAttempt(current) || acknowledgeRestWarning) {
             "25/5 rest warning: restarting would exceed 25 accumulated work minutes " +
                 "without a real 5-minute break. Explicit confirmation required."
@@ -309,14 +333,16 @@ class MonotonicSessionTimer(
                 preserveExistingTail = nextHasOccurred,
                 noActiveTailRebuild = true),
         )
-        val target = revised.phases[index]
-        check(target.id == current.id && target.startSeconds == current.startSeconds) {
+        val relocated = recenterFutureSpecials(revised.phases, index)
+        val target = relocated[index]
+        check(target.id == current.id && target.startSeconds == current.startSeconds &&
+            target.kind == current.kind && target.durationSeconds == current.durationSeconds) {
             "The current phase start would change. No restart was performed."
         }
         // Atomic commit: every feasibility check has passed.
         appendFragment(current, elapsedMs())
         if (status == TimerStatus.PAUSED) appendPause(pausedMs)
-        activePhases = revised.phases
+        activePhases = relocated
         activeTotalMs = revised.totalSeconds.toLong() * 1_000L
         lostSeconds = revised.recoveredSeconds
         lostMillis = correctionMs
@@ -352,11 +378,14 @@ class MonotonicSessionTimer(
     fun repeatLastTarget(): SchedulePhase? {
         if (status != TimerStatus.RUNNING && status != TimerStatus.PAUSED) return null
         val current = view().phase ?: return null
+        // No replay of a Special Break, and no rewind across one currently running.
+        if (current.kind == PhaseKind.SPECIAL_BREAK ||
+            current.kind == PhaseKind.SUMMARY ||
+            repeatLockedPhaseId == current.id) return null
         val index = activePhases.indexOfFirst { it.id == current.id }
         val target = activePhases.getOrNull(index - 1) ?: return null
         return target.takeIf {
-            it.kind == PhaseKind.POSE || it.kind == PhaseKind.SHORT_BREAK ||
-                it.kind == PhaseKind.SPECIAL_BREAK
+            it.kind == PhaseKind.POSE || it.kind == PhaseKind.SHORT_BREAK
         }
     }
 
@@ -411,8 +440,10 @@ class MonotonicSessionTimer(
                 preserveExistingTail = false,
                 noActiveTailRebuild = true),
         )
-        val checked = revised.phases.getOrNull(targetIndex)
+        val relocated = recenterFutureSpecials(revised.phases, targetIndex)
+        val checked = relocated.getOrNull(targetIndex)
         check(checked != null && checked.id == target.id &&
+            checked.kind == target.kind &&
             checked.startSeconds == target.startSeconds &&
             checked.durationSeconds == target.durationSeconds) {
             "Repeat cannot preserve the complete previous Session/Break."
@@ -420,10 +451,11 @@ class MonotonicSessionTimer(
         // Commit only after the complete new schedule, safety, and deadline pass.
         appendFragment(current, elapsedMs())
         if (status == TimerStatus.PAUSED) appendPause(pausedMs)
-        activePhases = revised.phases
+        activePhases = relocated
         activeTotalMs = revised.totalSeconds.toLong() * 1_000L
         lostSeconds = revised.recoveredSeconds
         lostMillis = correctedMs
+        repeatLockedPhaseId = target.id
         elapsedBeforeRunMs = targetCursor
         runningFromMs = now
         suspendedFromMs = null
@@ -663,16 +695,10 @@ class MonotonicSessionTimer(
         // One constraint solver has already allocated ALL unstarted work
         // and Break cycles. Next can only apply approved automatic relocation
         // of genuine unstarted Special Breaks after that atomic plan.
-        val updatedFuture = SpecialBreakRebalancer.rebalance(
-            revision?.phases ?: activePhases,
-            firstUnstartedIndex = nextIndex,
-            actualElapsedSeconds = ((now - (originalStartMs ?: now)) / 1_000L)
-                .coerceIn(0L, Int.MAX_VALUE.toLong()).toInt(),
-            physicalClassSeconds = session.rules.totalSeconds - initialEndCorrectionSeconds,
-            automatic = session.rules.placement.automatic,
-            genuineSpecial = session.rules.specialBreakSeconds >
-                session.rules.shortBreakSeconds,
-        )
+        // The Next target has ALREADY been entered; do not move or retype it.
+        // Recompute only future automatic Specials by observed + future POSE work.
+        val updatedFuture = recenterFutureSpecials(
+            revision?.phases ?: activePhases, nextIndex)
         val target = updatedFuture[nextIndex]
         check(updatedFuture.last().endSeconds.toLong() * 1_000L -
                 target.startSeconds.toLong() * 1_000L >= 0L) {
@@ -696,6 +722,9 @@ class MonotonicSessionTimer(
         lastPhaseIndex = nextIndex
         fragmentStartMs = target.startSeconds.toLong() * 1_000L
         nextHasOccurred = true
+        // Next abandons a replay attempt, so Repeat Last is available for
+        // the phase just left (unless the previous phase was Special).
+        repeatLockedPhaseId = null
         val cue = when {
             enteringSummary -> {
                 classFinishCueIssued = true
@@ -757,6 +786,9 @@ class MonotonicSessionTimer(
             }
         } else null
         if (oldIndex != null && oldIndex != newIndex) {
+            // A naturally completed replay releases its one-shot lock.
+            if (activePhases.getOrNull(oldIndex)?.id == repeatLockedPhaseId)
+                repeatLockedPhaseId = null
             val endIndex = (newIndex ?: activePhases.size).coerceAtMost(activePhases.size)
             for (i in oldIndex until endIndex) {
                 val completed = activePhases[i]
