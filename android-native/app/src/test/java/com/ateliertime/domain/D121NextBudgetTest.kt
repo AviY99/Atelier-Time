@@ -60,7 +60,7 @@ class D121NextBudgetTest {
         timer.resume()
         now += 1001L
         val beforeRestart = timer.view()
-        val restarted = runCatching { timer.restartCurrentSegmentKeepingEndTime() }
+        val restarted = runCatching { timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true) }
         if (restarted.isFailure) assertEquals(beforeRestart, timer.view())
         val v = timer.view()
         val remaining = (v.totalSeconds - v.elapsedSeconds) * 1000L
