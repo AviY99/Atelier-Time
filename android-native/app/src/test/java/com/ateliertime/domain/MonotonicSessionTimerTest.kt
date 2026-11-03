@@ -110,7 +110,7 @@ class MonotonicSessionTimerTest {
         now = 40L * minute * 1000L // Session 2 started at virtual 30m.
         val before = timer.update().view
         assertEquals(2, before.phase?.poseNumber)
-        val restart = timer.restartCurrentSessionKeepingEndTime()
+        val restart = timer.restartCurrentSessionKeepingEndTime(acknowledgeRestWarning = true)
         assertEquals(TimerStatus.RUNNING, restart.status)
         assertEquals(before.phase?.id, restart.phase?.id)
         assertEquals(30 * minute, restart.elapsedSeconds)
@@ -130,7 +130,7 @@ class MonotonicSessionTimerTest {
         now = 31L * minute * 1000L
         timer.pause()
         now = 33L * minute * 1000L
-        val restart = timer.restartCurrentSessionKeepingEndTime()
+        val restart = timer.restartCurrentSessionKeepingEndTime(acknowledgeRestWarning = true)
         assertEquals(TimerStatus.RUNNING, restart.status)
         assertEquals(2, restart.phase?.poseNumber)
         assertEquals(30 * minute, restart.elapsedSeconds)
@@ -147,7 +147,7 @@ class MonotonicSessionTimerTest {
         now = 10L * minute * 1000L
         assertEquals(PhaseKind.SHORT_BREAK, timer.nextPhase().view.phase?.kind)
         now = 18L * minute * 1000L // Five-minute break + 3 minutes into Session 2.
-        val restart = timer.restartCurrentSessionKeepingEndTime()
+        val restart = timer.restartCurrentSessionKeepingEndTime(acknowledgeRestWarning = true)
         assertEquals(2, restart.phase?.poseNumber)
         assertEquals(30 * minute, restart.elapsedSeconds)
         assertEquals(-12 * minute, restart.recoveredSeconds)
@@ -164,7 +164,7 @@ class MonotonicSessionTimerTest {
         val before = timer.view()
         assertEquals(PhaseKind.SHORT_BREAK, before.phase?.kind)
         try {
-            timer.restartCurrentSessionKeepingEndTime()
+            timer.restartCurrentSessionKeepingEndTime(acknowledgeRestWarning = true)
             fail("Restart session cannot restart a break.")
         } catch (_: IllegalStateException) { }
         assertEquals(before, timer.view())
@@ -179,14 +179,14 @@ class MonotonicSessionTimerTest {
         val timer = MonotonicSessionTimer(session) { now }
         timer.start()
         now = (pair.first().startSeconds + minute).toLong() * 1000L
-        val restarting = timer.restartCurrentSessionKeepingEndTime()
+        val restarting = timer.restartCurrentSessionKeepingEndTime(acknowledgeRestWarning = true)
         assertEquals(pair.first().id, restarting.phase?.id)
         assertEquals(pair.first().startSeconds, restarting.elapsedSeconds)
         now = (pair.last().startSeconds + minute + 30).toLong() * 1000L
         val before = timer.view()
         assertEquals(pair.last().id, before.phase?.id)
         try {
-            timer.restartCurrentSessionKeepingEndTime()
+            timer.restartCurrentSessionKeepingEndTime(acknowledgeRestWarning = true)
             fail("Last final session cannot change completed partner.")
         } catch (_: IllegalStateException) { }
         assertEquals(before, timer.view())
@@ -200,7 +200,7 @@ class MonotonicSessionTimerTest {
         now = 26L * minute * 1000L
         val previous = timer.update().view
         assertEquals(PhaseKind.SHORT_BREAK, previous.phase?.kind)
-        val restarted = timer.restartCurrentSegmentKeepingEndTime()
+        val restarted = timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
         assertEquals(previous.phase?.id, restarted.phase?.id)
         assertEquals(25 * minute, restarted.elapsedSeconds)
         assertEquals(5 * minute, restarted.phaseRemainingSeconds)
@@ -219,7 +219,7 @@ class MonotonicSessionTimerTest {
         now = 26L * minute * 1000L
         timer.pause()
         now = 28L * minute * 1000L
-        val restarted = timer.restartCurrentSegmentKeepingEndTime()
+        val restarted = timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
         assertEquals(TimerStatus.RUNNING, restarted.status)
         assertEquals(PhaseKind.SHORT_BREAK, restarted.phase?.kind)
         assertEquals(25 * minute, restarted.elapsedSeconds)
@@ -236,7 +236,7 @@ class MonotonicSessionTimerTest {
         val timer = MonotonicSessionTimer(plan) { now }
         timer.start()
         now = (special.startSeconds.toLong() + 30L) * 1000L
-        val restarted = timer.restartCurrentSegmentKeepingEndTime()
+        val restarted = timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
         assertEquals(special.id, restarted.phase?.id)
         assertEquals(PhaseKind.SPECIAL_BREAK, restarted.phase?.kind)
         assertEquals(special.startSeconds, restarted.elapsedSeconds)
@@ -256,7 +256,7 @@ class MonotonicSessionTimerTest {
         assertEquals(PhaseKind.SHORT_BREAK, jumped.phase?.kind)
         assertEquals(-15 * minute, jumped.recoveredSeconds)
         now = 11L * minute * 1000L
-        val restarted = timer.restartCurrentSegmentKeepingEndTime()
+        val restarted = timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
         assertEquals(25 * minute, restarted.elapsedSeconds)
         assertEquals(-14 * minute, restarted.recoveredSeconds)
         assertEquals(194 * minute, restarted.totalSeconds)
@@ -277,7 +277,7 @@ class MonotonicSessionTimerTest {
         val timer = MonotonicSessionTimer(plan) { now }
         timer.start()
         now = (rest.startSeconds.toLong() + minute) * 1000L
-        val restarted = timer.restartCurrentSegmentKeepingEndTime()
+        val restarted = timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
         assertEquals(rest.id, restarted.phase?.id)
         assertEquals(rest.startSeconds, restarted.elapsedSeconds)
         assertEquals(pair.first().durationSeconds, timer.finalTwoPoseDurations()?.first)
@@ -301,7 +301,7 @@ class MonotonicSessionTimerTest {
         now = (rest.startSeconds.toLong() + consumed) * 1000L
         val before = timer.view()
         try {
-            timer.restartCurrentSegmentKeepingEndTime()
+            timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
             fail("The last Session must retain its one-minute minimum.")
         } catch (_: IllegalArgumentException) { }
         assertEquals(before, timer.view())
