@@ -229,21 +229,22 @@ class MonotonicSessionTimerTest {
             restarted.totalRemainingSeconds)
     }
 
-    @Test fun restartSpecialBreakDoesNotChangeBreakKindOrApprovedPlan() {
+    @Test fun restartEnteredSpecialBreakIsRejectedAtomicallyInD145() {
         var now = 0L
         val plan = approved()
         val special = plan.phases.first { it.kind == PhaseKind.SPECIAL_BREAK }
         val timer = MonotonicSessionTimer(plan) { now }
         timer.start()
         now = (special.startSeconds.toLong() + 30L) * 1000L
-        val restarted = timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
-        assertEquals(special.id, restarted.phase?.id)
-        assertEquals(PhaseKind.SPECIAL_BREAK, restarted.phase?.kind)
-        assertEquals(special.startSeconds, restarted.elapsedSeconds)
-        assertEquals(special.durationSeconds, restarted.phaseRemainingSeconds)
-        assertEquals(30, restarted.recoveredSeconds)
-        assertEquals(plan.rules.totalSeconds,
-            (now / 1000L + restarted.totalRemainingSeconds).toInt())
+        val before = timer.view()
+        val unchanged = timer.activePhasesSnapshot()
+        assertEquals(PhaseKind.SPECIAL_BREAK, before.phase?.kind)
+        try {
+            timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
+            fail("D-145: an entered Special Break cannot be started again")
+        } catch (_: IllegalStateException) { }
+        assertEquals(before, timer.view())
+        assertEquals(unchanged, timer.activePhasesSnapshot())
         assertEquals(special, plan.phases.first { it.id == special.id })
     }
 
