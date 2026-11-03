@@ -113,7 +113,7 @@ class D123TinyClassLateNextSplitTest {
         val before = timer.activePhasesSnapshot()
         assertEquals(PhaseKind.POSE, timer.view().phase?.kind)
         now += 4_000L
-        val restarted = timer.restartCurrentSegmentKeepingEndTime()
+        val restarted = timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
         assertEquals(before[4].id, restarted.phase?.id)
         assertEquals(before.take(5), timer.activePhasesSnapshot().take(5))
         assertEquals(before.size, timer.activePhasesSnapshot().size)
@@ -190,7 +190,7 @@ class D123TinyClassLateNextSplitTest {
         val before = timer.view()
         val phases = timer.activePhasesSnapshot()
         assertTrue(runCatching {
-            timer.restartCurrentSegmentKeepingEndTime()
+            timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
         }.isFailure)
         assertEquals(before, timer.view())
         assertEquals(phases, timer.activePhasesSnapshot())
@@ -231,7 +231,7 @@ class D123TinyClassLateNextSplitTest {
             it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
         }
         now += 5_000L
-        val restarted = timer.restartCurrentSegmentKeepingEndTime()
+        val restarted = timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
         assertEquals(PhaseKind.SHORT_BREAK, restarted.phase?.kind)
         val after = timer.activePhasesSnapshot()
         assertEquals(before.size, after.size)
