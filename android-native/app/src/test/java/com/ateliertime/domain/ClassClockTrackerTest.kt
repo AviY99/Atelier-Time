@@ -155,7 +155,10 @@ class ClassClockTrackerTest {
         assertEquals("Session 2", before.currentPhaseLabel)
         assertEquals(clockStart + 30L * 60_000L,
             before.currentPhaseStartEpochMs)
-        val view = timer.restartCurrentSessionKeepingEndTime()
+        // 10 minutes of Session 2 have already been worked; another full 25m
+        // needs explicit 25/5 acknowledgement (D-144).
+        assertTrue(timer.restartCurrentRequiresRestWarning())
+        val view = timer.restartCurrentSessionKeepingEndTime(acknowledgeRestWarning = true)
         val restarted = tracker.restartCurrentSession(view, clockStart + monotonic)
         assertEquals(clockStart, restarted.classStartEpochMs)
         assertEquals(clockStart + 180L * 60_000L, restarted.classEndEpochMs)
