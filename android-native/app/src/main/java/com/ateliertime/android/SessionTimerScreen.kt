@@ -1,6 +1,8 @@
 package com.ateliertime.android
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -61,7 +63,8 @@ fun SessionTimerScreen(
         value?.let { phaseTime.format(Date(it)) } ?: "—"
     val isBreak = view.phase?.kind == PhaseKind.SHORT_BREAK ||
         view.phase?.kind == PhaseKind.SPECIAL_BREAK
-    val canRestartSegment = view.phase?.kind == PhaseKind.POSE || isBreak
+    val canRestartSegment = view.phase?.kind == PhaseKind.POSE ||
+        view.phase?.kind == PhaseKind.SHORT_BREAK
     val isWork = view.phase?.kind == PhaseKind.POSE
     val tahini = tahiniFill(designPalette)
     val durationMs = view.phase?.durationSeconds?.toLong()?.times(1_000L) ?: 0L
@@ -248,90 +251,94 @@ fun SessionTimerScreen(
                 modifier = Modifier.fillMaxWidth().padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Text("Class controls", style = MaterialTheme.typography.titleSmall)
-                val largeControlText = LocalDensity.current.fontScale >= 1.3f
-                FlowRow(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                    verticalArrangement = Arrangement.spacedBy(5.dp),
-                    maxItemsInEachRow = 3) {
-                    val underway = view.status == TimerStatus.RUNNING ||
-                        view.status == TimerStatus.PAUSED
-                    // Run is allowed ONLY after approving its Class finish
-                    // in the saved-library dialog. Never expose a shortcut
-                    // that starts a READY timer without its chosen deadline.
-                    if (view.status == TimerStatus.READY ||
-                        view.status == TimerStatus.FINISHED) {
-                        Text(
-                            if (view.status == TimerStatus.READY)
-                                "Starting approved Class..."
-                            else "Class finished",
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    } else {
-                        Button(colors = atelierFilledColors(), onClick = onPauseResume, modifier = if (largeControlText) Modifier.widthIn(min = 150.dp)
-                                else Modifier.weight(1f),
-                            contentPadding = PaddingValues(horizontal = 5.dp, vertical = 6.dp)) {
-                            Text(if (view.status == TimerStatus.RUNNING) "Pause" else "Resume",
-                                maxLines = 1)
-                        }
-                    }
-                    OutlinedButton(colors = atelierOutlinedColors(), 
-                        enabled = underway && canRestartSegment,
-                        onClick = { accept25RestWarning = false; confirmation = "restart" },
-                        modifier = if (largeControlText) Modifier.widthIn(min = 150.dp)
-                            else Modifier.weight(1.45f),
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
-                    ) { Text(restartTitle, style = MaterialTheme.typography.labelSmall) }
-                    OutlinedButton(colors = atelierOutlinedColors(),
-                        enabled = underway && lastTarget != null,
-                        onClick = { accept25RestWarning = false; confirmation = "repeat" },
-                        modifier = if (largeControlText) Modifier.widthIn(min = 150.dp)
-                            else Modifier.weight(1.2f),
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
-                    ) { Text("Repeat Last", maxLines = 1,
-                        style = MaterialTheme.typography.labelSmall) }
-                    OutlinedButton(colors = atelierOutlinedColors(), 
-                        enabled = underway,
-                        onClick = { confirmation = "next" },
-                        modifier = if (largeControlText) Modifier.widthIn(min = 150.dp)
-                            else Modifier.weight(0.8f),
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
-                    ) { Text("Next", maxLines = 1) }
-                    Button(
-                        onClick = { confirmation = "exit" },
-                        modifier = if (largeControlText) Modifier.widthIn(min = 150.dp)
-                            else Modifier.weight(0.85f),
-                        contentPadding = PaddingValues(horizontal = 3.dp, vertical = 6.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = if (atelierNightActive()) Color.White
-                                else MaterialTheme.colorScheme.onErrorContainer,
-                        ),
-                    ) { Text("Exit", maxLines = 1, style = MaterialTheme.typography.labelSmall) }
+                Row(modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Class controls", style = MaterialTheme.typography.titleSmall)
+                    TextButton(
+                        colors = atelierTextColors(),
+                        onClick = { helpFor = "overview" },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        modifier = Modifier.heightIn(min = 36.dp),
+                    ) { Text("Help", style = MaterialTheme.typography.labelSmall) }
                 }
-                FlowRow(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    TextButton(colors = atelierTextColors(), onClick = { helpFor = "pause" },
-                        contentPadding = PaddingValues(horizontal = 4.dp)) {
-                        Text("Pause help", style = MaterialTheme.typography.labelSmall)
-                    }
-                    TextButton(colors = atelierTextColors(), onClick = { helpFor = "restart" },
-                        contentPadding = PaddingValues(horizontal = 4.dp)) {
-                        Text("Restart help", style = MaterialTheme.typography.labelSmall)
-                    }
-                    TextButton(colors = atelierTextColors(), onClick = { helpFor = "repeat" },
-                        contentPadding = PaddingValues(horizontal = 4.dp)) {
-                        Text("Repeat help", style = MaterialTheme.typography.labelSmall)
-                    }
-                    TextButton(colors = atelierTextColors(), onClick = { helpFor = "next" },
-                        contentPadding = PaddingValues(horizontal = 2.dp)) {
-                        Text("Next help", style = MaterialTheme.typography.labelSmall)
-                    }
-                    TextButton(colors = atelierTextColors(), onClick = { helpFor = "exit" },
-                        contentPadding = PaddingValues(horizontal = 2.dp)) {
-                        Text("Exit help", style = MaterialTheme.typography.labelSmall)
+                val underway = view.status == TimerStatus.RUNNING ||
+                    view.status == TimerStatus.PAUSED
+                // Five actions ALWAYS occupy one horizontal row. At very
+                // narrow widths / enlarged accessibility fonts, scroll this
+                // single row instead of wrapping or shrinking hit targets.
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                    val gap = 4.dp
+                    val minButtonWidth = if (LocalDensity.current.fontScale >= 1.3f)
+                        78.dp else 58.dp
+                    val buttonWidth = maxOf((maxWidth - gap * 4) / 5,
+                        minButtonWidth)
+                    val controlModifier = Modifier.width(buttonWidth)
+                        .heightIn(min = 48.dp)
+                    val controlPadding = PaddingValues(horizontal = 0.dp, vertical = 4.dp)
+                    val textStyle = MaterialTheme.typography.labelSmall.copy(
+                        lineHeight = 12.sp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(gap),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Button(
+                            colors = atelierFilledColors(),
+                            enabled = underway,
+                            onClick = onPauseResume,
+                            modifier = controlModifier,
+                            contentPadding = controlPadding,
+                        ) {
+                            Text(if (view.status == TimerStatus.RUNNING)
+                                "Pause" else "Resume",
+                                maxLines = 1, softWrap = false, style = textStyle)
+                        }
+                        OutlinedButton(
+                            colors = atelierOutlinedColors(),
+                            enabled = underway && canRestartSegment,
+                            onClick = {
+                                accept25RestWarning = false
+                                confirmation = "restart"
+                            },
+                            modifier = controlModifier,
+                            contentPadding = controlPadding,
+                        ) { Text("Restart", maxLines = 1,
+                            softWrap = false, style = textStyle) }
+                        OutlinedButton(
+                            colors = atelierOutlinedColors(),
+                            enabled = underway && lastTarget != null,
+                            onClick = {
+                                accept25RestWarning = false
+                                confirmation = "repeat"
+                            },
+                            modifier = controlModifier,
+                            contentPadding = controlPadding,
+                        ) {
+                            Text("Repeat\nLast", maxLines = 2,
+                                softWrap = true, textAlign = TextAlign.Center,
+                                style = textStyle)
+                        }
+                        OutlinedButton(
+                            colors = atelierOutlinedColors(),
+                            enabled = underway,
+                            onClick = { confirmation = "next" },
+                            modifier = controlModifier,
+                            contentPadding = controlPadding,
+                        ) { Text("Next", maxLines = 1,
+                            softWrap = false, style = textStyle) }
+                        Button(
+                            onClick = { confirmation = "exit" },
+                            modifier = controlModifier,
+                            contentPadding = controlPadding,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = if (atelierNightActive()) Color.White
+                                    else MaterialTheme.colorScheme.onErrorContainer,
+                            ),
+                        ) { Text("Exit", maxLines = 1,
+                            softWrap = false, style = textStyle) }
                     }
                 }
             }
@@ -455,6 +462,7 @@ fun SessionTimerScreen(
     val selectedHelp = helpFor
     if (selectedHelp != null) {
         val title = when (selectedHelp) {
+            "overview" -> "Class controls"
             "pause" -> "Pause / Resume"
             "restart" -> restartTitle
             "repeat" -> "Repeat previous Session/Break"
@@ -462,6 +470,17 @@ fun SessionTimerScreen(
             else -> "Next phase"
         }
         val explanation = when (selectedHelp) {
+            "overview" ->
+                "Pause / Resume: pause and continue the current phase.\n\n" +
+                "Restart: repeat the CURRENT regular Session/Break in full.\n\n" +
+                "Repeat Last: repeat the PREVIOUS regular Session/Break in full. " +
+                    "The button locks until the replay naturally completes or Next " +
+                    "successfully skips it; Restart does not clear that lock.\n\n" +
+                "Next: advance to the next phase and unlock Repeat Last after " +
+                    "a replay.\n\n" +
+                "Exit: end this Class with confirmation.\n\n" +
+                "An entered Special Break may never be repeated/restarted. " +
+                "25/5 warnings, the approved finish and the saved Class are protected."
             "pause" ->
                 "Pause holds the current session or break. Resume continues from the same point. " +
                     "Time spent paused is compensated, where feasible, by shortening " +
