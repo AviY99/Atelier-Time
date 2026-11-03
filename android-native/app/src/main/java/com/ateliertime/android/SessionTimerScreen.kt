@@ -252,7 +252,8 @@ fun SessionTimerScreen(
                 val largeControlText = LocalDensity.current.fontScale >= 1.3f
                 FlowRow(modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
-                    verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    verticalArrangement = Arrangement.spacedBy(5.dp),
+                    maxItemsInEachRow = 3) {
                     val underway = view.status == TimerStatus.RUNNING ||
                         view.status == TimerStatus.PAUSED
                     // Run is allowed ONLY after approving its Class finish
