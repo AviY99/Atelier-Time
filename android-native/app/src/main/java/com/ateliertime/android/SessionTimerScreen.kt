@@ -79,6 +79,8 @@ fun SessionTimerScreen(
         label = "solidTahiniPhaseProgress",
     )
     val restartTitle = if (isBreak) "Restart break" else "Restart session"
+    fun phaseLabel(phase: SchedulePhase?): String =
+        PhaseDisplayNames.title(phase, session.rules)
     val trueClassLengthSeconds = run {
         val start = classClockTimes.classStartEpochMs
         val end = classClockTimes.classEndEpochMs
@@ -229,7 +231,8 @@ fun SessionTimerScreen(
                         modifier = Modifier.fillMaxWidth().height(8.dp),
                     )
                 }
-                Text("Next: " + phaseLabel(view.nextPhase))
+                Text("Next: " + phaseLabel(view.nextPhase) +
+                    (view.nextPhase?.let { " (" + formatTime(it.durationSeconds) + ")" } ?: ""))
             }
             }
         }
@@ -509,15 +512,6 @@ private fun WallClockRow(
             softWrap = false,
         )
     }
-}
-
-private fun phaseLabel(phase: SchedulePhase?): String = when (phase?.kind) {
-    PhaseKind.POSE -> "Session " + (phase.poseNumber ?: "")
-    PhaseKind.SHORT_BREAK -> if (phase.openingGroupId != null) "Break · opening group"
-        else "Break · regular"
-    PhaseKind.SPECIAL_BREAK -> "Break · special"
-    PhaseKind.SUMMARY -> "Class summary"
-    null -> "No active phase"
 }
 
 /** Approved Class length, not the compensated live countdown (hours:minutes). */
