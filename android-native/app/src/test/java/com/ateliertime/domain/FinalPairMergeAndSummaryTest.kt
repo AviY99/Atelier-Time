@@ -122,7 +122,7 @@ class FinalPairMergeAndSummaryTest {
         timer.start(boundary)
         val ending = timer.activePhasesSnapshot().last { it.kind == PhaseKind.POSE }
         now = (ending.startSeconds + 1).toLong() * 1_000L
-        assertTrue(runCatching { timer.restartCurrentSegmentKeepingEndTime() }.isFailure)
+        assertTrue(runCatching { timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true) }.isFailure)
         assertEquals(ending.id, timer.view().phase?.id)
     }
 }
