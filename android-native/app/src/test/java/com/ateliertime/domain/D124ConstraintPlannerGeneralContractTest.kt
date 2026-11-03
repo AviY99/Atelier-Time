@@ -191,7 +191,7 @@ class D124ConstraintPlannerGeneralContractTest {
                     val action = runCatching {
                         when (operation) {
                             0 -> timer.nextPhase()
-                            1 -> timer.restartCurrentSegmentKeepingEndTime()
+                            1 -> timer.restartCurrentSegmentKeepingEndTime(acknowledgeRestWarning = true)
                             else -> {
                                 timer.pause()
                                 millis += random.nextLong(100L, 1_900L)
