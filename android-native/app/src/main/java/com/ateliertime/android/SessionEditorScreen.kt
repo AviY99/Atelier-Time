@@ -214,6 +214,10 @@ fun SessionEditorScreen(
     var soundEnabled by remember { mutableStateOf(true) }
     var keepScreenAwake by remember { mutableStateOf(false) }
     val classVolumeControl = remember(context) { ClassVolumeControl(context) }
+    // Best-effort restore if the Activity is actually disposed while an override remains.
+    DisposableEffect(classVolumeControl) {
+        onDispose { classVolumeControl.restoreIfUnchanged() }
+    }
     var showConfirmMaxVolume by remember { mutableStateOf(false) }
     var classVolumeError by remember { mutableStateOf<String?>(null) }
     val freeTimer = remember { FreeCountdownTimer { SystemClock.elapsedRealtime() } }
