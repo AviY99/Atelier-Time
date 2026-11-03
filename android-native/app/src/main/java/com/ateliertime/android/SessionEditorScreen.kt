@@ -615,10 +615,15 @@ fun SessionEditorScreen(
     /** The diagnostic report must never turn an otherwise legal Timer action into a failure. */
     fun runTimedCue(
         restartCurrentSegment: Boolean = false,
+        repeatedPrevious: Boolean = false,
         advancedByNext: Boolean = false,
         action: () -> TimerTick,
     ) {
-        val source = if (restartCurrentSegment) "Restart" else "Next"
+        val source = when {
+            repeatedPrevious -> "Repeat Last"
+            restartCurrentSegment -> "Restart"
+            else -> "Next"
+        }
         val before = liveTimer?.view()
         val phasesBefore = liveTimer?.activePhasesSnapshot()
         try {
@@ -627,7 +632,7 @@ fun SessionEditorScreen(
                 beforePhases = phasesBefore)
             timerView = event.view
             val nowEpochMs = System.currentTimeMillis()
-            classClockTimes = if (restartCurrentSegment) {
+            classClockTimes = if (restartCurrentSegment || repeatedPrevious) {
                 classClockTracker.restartCurrentSegment(event.view, nowEpochMs)
             } else if (advancedByNext) {
                 classClockTracker.afterNext(event.view, nowEpochMs)
@@ -1346,10 +1351,10 @@ fun SessionEditorScreen(
                                 else timer.pause()
                             }
                         },
-                        onRestartSession = {
+                        onRestartSession = { restAcknowledged ->
                             val currentKind = timer.view().phase?.kind
                             runTimedCue(restartCurrentSegment = true) {
-                                val updated = timer.restartCurrentSegmentKeepingEndTime()
+                                val updated = timer.restartCurrentSegmentKeepingEndTime(restAcknowledged)
                                 val cue = when (currentKind) {
                                     PhaseKind.POSE -> TimerCue.POSE_FINISHED
                                     PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK ->
@@ -1357,6 +1362,13 @@ fun SessionEditorScreen(
                                     else -> null
                                 }
                                 TimerTick(updated, cue)
+                            }
+                        },
+                        onRepeatLast = { restAcknowledged ->
+                            // No premature end-of-phase melody: repeat's cue will play
+                            // when the replay actually finishes in the normal ticker.
+                            runTimedCue(repeatedPrevious = true) {
+                                TimerTick(timer.repeatLastFullKeepingEndTime(restAcknowledged))
                             }
                         },
                         onNextPhase = {
