@@ -19,6 +19,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -313,7 +315,9 @@ fun SessionTimerScreen(
                                 accept25RestWarning = false
                                 confirmation = "repeat"
                             },
-                            modifier = controlModifier,
+                            modifier = controlModifier.semantics {
+                                contentDescription = "Repeat Last"
+                            },
                             contentPadding = controlPadding,
                         ) {
                             Text("Repeat\nLast", maxLines = 2,
