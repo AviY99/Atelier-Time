@@ -402,8 +402,13 @@ class MonotonicSessionTimer(
         val revised = FinalPairCompensation.reflow(
             session, activePhases, correctionSeconds(correctedMs),
             allowExtraRegular = nextHasOccurred,
+            // Repeat Last can need both UNSTARTED final Sessions to absorb
+            // the full replay even after Next has already inserted a future
+            // cycle. Keep the topology fixed (noActiveTailRebuild), but do not
+            // impose Restart's last-only freeze on the still-unstarted pair.
+            // The locked prefix and physical deadline remain validated.
             boundary = budgetBoundary(now, targetCursor, locked = targetIndex,
-                preserveExistingTail = nextHasOccurred,
+                preserveExistingTail = false,
                 noActiveTailRebuild = true),
         )
         val checked = revised.phases.getOrNull(targetIndex)
