@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# D-145 all six field fixes: Samsung Code on the Go LOCAL QA / debug build only.
+# D-145 net-work special breaks, one-shot Repeat Last, compact controls: LOCAL QA only.
 # NEVER installs/uninstalls, clears app data, signs releases, pushes, or triggers paid CI.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -105,7 +105,7 @@ if not totals["tests"] or any(totals[k] for k in ("failures", "errors", "skipped
     raise SystemExit("STOP: incomplete or failing full JVM suite.")
 PY
 else
-  for xml in "$runtime_xml" "$display_xml" "$d143_xml" "$d142_xml"; do
+  for xml in "$net_xml" "$repeat_once_xml" "$runtime_xml" "$display_xml" "$d143_xml" "$d142_xml"; do
     if grep -Eq '<(failure|error|skipped)([ >])' "$xml"; then
       echo "STOP: failing/skipped JUnit results in $xml" >&2; exit 3
     fi
@@ -116,7 +116,7 @@ else
   [[ "$(grep -c '<testcase ' "$display_xml" || true)" -ge 4 ]] || exit 3
   [[ "$(grep -c '<testcase ' "$d143_xml" || true)" -ge 2 ]] || exit 3
   [[ "$(grep -c '<testcase ' "$d142_xml" || true)" -ge 9 ]] || exit 3
-  echo 'D-145 runtime 5/5 and labels 4/4, D-143 2/2, D-142 9/9; Gradle JVM suite PASS.'
+  echo 'D-145 net-work 8/8 + one-shot 4/4; D-144 5/5 + 4/4; D-143 2/2; D-142 9/9. JVM suite PASS.'
 fi
 
 # Compile AndroidTest APK to check UI test source, but never run or install it.
@@ -133,7 +133,7 @@ out="$downloads/Atelier-Time-D145-API36-Candidate.apk"
 cp "${apks[0]}" "$out"
 manifest="$downloads/Atelier-Time-D145-API36-Manifest.txt"
 {
-  printf 'version=D-145\nversion_code=38\ntarget_sdk=36\n'
+  printf 'version=D-145\nversion_code=39\ntarget_sdk=36\n'
   printf 'branch=android-native-kotlin-compose\n'
   printf 'source_commit=%s\n' "$(git rev-parse HEAD)"
   printf 'apk_sha256=%s\n' "$(sha256sum "$out" | awk '{print $1}')"
