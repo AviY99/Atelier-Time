@@ -262,11 +262,17 @@ class MonotonicSessionTimer(
      * last Session can be shortened. Reject any impossible change before
      * mutating the running timer. Summary and last final Session cannot restart.
      */
-    fun restartCurrentSegmentKeepingEndTime(): TimerView {
+    fun restartCurrentSegmentKeepingEndTime(
+        acknowledgeRestWarning: Boolean = false,
+    ): TimerView {
         check(status == TimerStatus.RUNNING || status == TimerStatus.PAUSED) {
             "Start the class before restarting a Session or Break."
         }
         val current = view().phase ?: error("There is no active phase to restart.")
+        check(!needsRestWarningBeforeFullAttempt(current) || acknowledgeRestWarning) {
+            "25/5 rest warning: restarting would exceed 25 accumulated work minutes " +
+                "without a real 5-minute break. Explicit confirmation required."
+        }
         check(current.kind == PhaseKind.POSE ||
             current.kind == PhaseKind.SHORT_BREAK ||
             current.kind == PhaseKind.SPECIAL_BREAK) {
@@ -319,6 +325,105 @@ class MonotonicSessionTimer(
         suspendedFromMs = null
         lastPhaseIndex = index
         fragmentStartMs = target.startSeconds.toLong() * 1_000L
+        status = TimerStatus.RUNNING
+        return view()
+    }
+
+    /**
+     * D-144: count ACTUAL observed work since the latest REAL 5-minute Break.
+     * Planned/skipped breaks, pauses and future phases never reset this balance.
+     * Safe preview is read-only; action methods enforce it again atomically.
+     */
+    private fun needsRestWarningBeforeFullAttempt(target: SchedulePhase): Boolean {
+        if (target.kind != PhaseKind.POSE) return false
+        var work = 0L
+        runtimeTimeline().segments.takeWhile { it.observed }.forEach { fragment ->
+            when (fragment.kind) {
+                PhaseKind.POSE -> work += fragment.durationSeconds.toLong()
+                PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK ->
+                    if (fragment.durationSeconds >= 5 * SECONDS_PER_MINUTE) work = 0L
+                else -> Unit
+            }
+        }
+        return work + target.durationSeconds.toLong() > 25L * SECONDS_PER_MINUTE
+    }
+
+    /** The actual previous phase in the runtime schedule, never an Undo-Next remainder. */
+    fun repeatLastTarget(): SchedulePhase? {
+        if (status != TimerStatus.RUNNING && status != TimerStatus.PAUSED) return null
+        val current = view().phase ?: return null
+        val index = activePhases.indexOfFirst { it.id == current.id }
+        val target = activePhases.getOrNull(index - 1) ?: return null
+        return target.takeIf {
+            it.kind == PhaseKind.POSE || it.kind == PhaseKind.SHORT_BREAK ||
+                it.kind == PhaseKind.SPECIAL_BREAK
+        }
+    }
+
+    fun restartCurrentRequiresRestWarning(): Boolean =
+        view().phase?.let { needsRestWarningBeforeFullAttempt(it) } ?: false
+
+    fun repeatLastRequiresRestWarning(): Boolean =
+        repeatLastTarget()?.let { needsRestWarningBeforeFullAttempt(it) } ?: false
+
+    /**
+     * Replay the previous Session/Break IN FULL. This deliberately repeats the
+     * existing prior runtime slot (and any current work already performed is
+     * kept in observed history), NOT "undo Next" or recover unused seconds.
+     * The then-current phase is entered again after the prior phase completes.
+     *
+     * The time cursor rewinds only after compensation feasibility is checked;
+     * no phase's original schedule or saved Class is edited. The approved
+     * physical class-end remains unchanged. Early phases' repeated performance
+     * is recorded as a new observed fragment, not erased from real history.
+     */
+    fun repeatLastFullKeepingEndTime(
+        acknowledgeRestWarning: Boolean = false,
+    ): TimerView {
+        val current = view().phase ?: error("No current Session or Break.")
+        val target = repeatLastTarget()
+            ?: error("There is no previous Session or Break to repeat.")
+        check(!needsRestWarningBeforeFullAttempt(target) || acknowledgeRestWarning) {
+            "25/5 rest warning: repeat would exceed 25 accumulated work minutes " +
+                "without a real 5-minute break. Explicit confirmation required."
+        }
+        val targetIndex = activePhases.indexOfFirst { it.id == target.id }
+        val lastRegular = activePhases.indexOfLast {
+            it.kind == PhaseKind.POSE && it.poseSource == PoseSource.REGULAR
+        }
+        check(targetIndex >= 0 && targetIndex < lastRegular) {
+            "The final Session has already started or cannot absorb a replay."
+        }
+        val now = nowMillis()
+        val pausedMs = if (status == TimerStatus.PAUSED)
+            (now - (suspendedFromMs ?: now)).coerceAtLeast(0L) else 0L
+        val targetCursor = target.startSeconds.toLong() * 1_000L
+        val correctedMs = correctionAtCursor(now, targetCursor)
+        val revised = FinalPairCompensation.reflow(
+            session, activePhases, correctionSeconds(correctedMs),
+            allowExtraRegular = nextHasOccurred,
+            boundary = budgetBoundary(now, targetCursor, locked = targetIndex,
+                preserveExistingTail = nextHasOccurred,
+                noActiveTailRebuild = true),
+        )
+        val checked = revised.phases.getOrNull(targetIndex)
+        check(checked != null && checked.id == target.id &&
+            checked.startSeconds == target.startSeconds &&
+            checked.durationSeconds == target.durationSeconds) {
+            "Repeat cannot preserve the complete previous Session/Break."
+        }
+        // Commit only after the complete new schedule, safety, and deadline pass.
+        appendFragment(current, elapsedMs())
+        if (status == TimerStatus.PAUSED) appendPause(pausedMs)
+        activePhases = revised.phases
+        activeTotalMs = revised.totalSeconds.toLong() * 1_000L
+        lostSeconds = revised.recoveredSeconds
+        lostMillis = correctedMs
+        elapsedBeforeRunMs = targetCursor
+        runningFromMs = now
+        suspendedFromMs = null
+        lastPhaseIndex = targetIndex
+        fragmentStartMs = targetCursor
         status = TimerStatus.RUNNING
         return view()
     }
