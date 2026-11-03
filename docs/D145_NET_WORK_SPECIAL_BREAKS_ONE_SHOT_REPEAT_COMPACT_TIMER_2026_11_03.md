@@ -1,3 +1,5 @@
+> **SOURCE REVIEW ADDENDUM 2026-11-03:** Full development JVM-test source scan identified a legacy `MonotonicSessionTimerTest.restartSpecialBreakDoesNotChangeBreakKindOrApprovedPlan` case that expected the OLD, now disallowed special-break restart. The test was updated on DEV to `restartEnteredSpecialBreakIsRejectedAtomicallyInD145`, asserting no schedule/timer mutation; unrelated ClassClockTracker formatting-only tests were left intact. This source review is **NOT** an executed test run. The D-145 local runner's `version_code=39` manifest and new-JUnit-XML fallback checks were verified and corrected before requesting the phone build. 
+
 # D-145 / versionCode 39 — Work-weighted Specials, one-shot Repeat Last, compact controls
 
 **Date:** 2026-11-03. **Status: SOURCE COMMITTED, NOT YET COMPILED / TESTED / INSTALLED / USER ACCEPTED.** 
