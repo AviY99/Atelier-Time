@@ -1,11 +1,13 @@
 package com.ateliertime.android
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -324,8 +326,33 @@ private fun SoundPicker(
                 }
             }
         }
-        OutlinedButton(colors = atelierOutlinedColors(), onClick = { onPreview(cue) }) {
-            Text("Play ${settings.secondsFor(cue)}s", maxLines = 1)
+        // Compact triangular Play control; keep duration and cue context
+        // in accessible semantics rather than a long visible button label.
+        val previewCue = when (cue) {
+            TimerCue.POSE_FINISHED -> "session"
+            TimerCue.BREAK_FINISHED -> "break"
+            TimerCue.SESSION_FINISHED -> "class end"
+            TimerCue.FREE_TIMER_FINISHED -> "free timer"
+        }
+        val playTint = MaterialTheme.colorScheme.primary
+        OutlinedIconButton(
+            onClick = { onPreview(cue) },
+            modifier = Modifier.size(48.dp)
+                .testTag("sound_preview_${cue.name.lowercase()}")
+                .semantics {
+                    contentDescription =
+                        "Play ${settings.secondsFor(cue)} second $previewCue sound preview"
+                },
+        ) {
+            Canvas(modifier = Modifier.size(19.dp)) {
+                val triangle = Path().apply {
+                    moveTo(size.width * 0.2f, size.height * 0.08f)
+                    lineTo(size.width * 0.88f, size.height * 0.5f)
+                    lineTo(size.width * 0.2f, size.height * 0.92f)
+                    close()
+                }
+                drawPath(triangle, playTint)
+            }
         }
     }
 }
