@@ -158,6 +158,9 @@ fun SessionTimerScreen(
             classElapsedSeconds = classClockTimes.classElapsedSeconds ?: 0,
             currentPhaseId = view.phase?.id,
         )
+        // Keep timer frame and actions together: no unrelated header or
+        // controls card separating the actions from the countdown.
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.elevatedCardColors(
@@ -244,26 +247,12 @@ fun SessionTimerScreen(
             }
             }
         }
-        // The chart and current-phase clock already explain the plan.
-        // Keep scheduler internals in the Run diagnostic report only.
-        timerError?.let { Text(it, color = atelierErrorTextColor()) }
-
-        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Row(modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Class controls", style = MaterialTheme.typography.titleSmall)
-                    TextButton(
-                        colors = atelierTextColors(),
-                        onClick = { helpFor = "overview" },
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                        modifier = Modifier.heightIn(min = 36.dp),
-                    ) { Text("Help", style = MaterialTheme.typography.labelSmall) }
-                }
+        // Class controls follow immediately below the timer frame.
+        // No redundant "Class controls" title or extra framed card.
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+        ) {
                 val underway = view.status == TimerStatus.RUNNING ||
                     view.status == TimerStatus.PAUSED
                 // Five actions ALWAYS occupy one horizontal row. At very
@@ -345,8 +334,18 @@ fun SessionTimerScreen(
                             softWrap = false, style = textStyle) }
                     }
                 }
-            }
+                TextButton(
+                    colors = atelierTextColors(),
+                    onClick = { helpFor = "overview" },
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                    modifier = Modifier.align(Alignment.End).heightIn(min = 40.dp)
+                        .testTag("class_controls_help"),
+                ) { Text("Help", style = MaterialTheme.typography.labelSmall) }
         }
+        } // Timer frame + directly adjacent action row
+        // The chart and current-phase clock already explain the plan.
+        // Keep scheduler internals in the Run diagnostic report only.
+        timerError?.let { Text(it, color = atelierErrorTextColor()) }
         if (eventHistory.isNotEmpty()) {
             // Show about five recent actions without expanding the whole page.
             // All events remain available: swipe UP within this list to browse
