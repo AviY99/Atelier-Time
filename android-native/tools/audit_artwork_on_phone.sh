@@ -35,4 +35,4 @@ else
   echo "NOTE: original JPG archival optional, not required to build APK"
 fi
 echo "ARTWORK AUDIT PASS: required app images are tracked locally and approved SHA matches"
-echo "Remote GitHub presence still requires successful push, not just a local commit"
+echo "Android source art is tracked, SHA256-approved; the D-146 builder verifies exact APK inclusion."
