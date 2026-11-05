@@ -3,6 +3,28 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 [[ "$(git branch --show-current)" == "android-native-kotlin-compose" ]] || { echo "STOP: wrong branch"; exit 2; }
+# The approved splash is versioned in GitHub and already stored in the local
+# repository objects after git pull. Restore ONLY if the worktree copy is
+# missing (the user's phone showed this exact tracked deletion). Never copy
+# unrelated phone files, overwrite a modified image, or clear app data.
+art="app/src/main/assets/atelier_splash_approved_d139.png"
+expected_blob="8950a9c509bbc2c2bac02d18c0b9bfdfca06eabc"
+repo_blob="$(git rev-parse "HEAD:$art" 2>/dev/null || true)"
+if [[ "$repo_blob" != "$expected_blob" ]]; then
+  echo "STOP: expected approved splash Git blob is not in this checkout." >&2
+  exit 2
+fi
+if [[ ! -e "$art" && ! -L "$art" ]]; then
+  echo "Restoring GitHub-tracked approved splash from this commit for APK packaging..."
+  git restore --source=HEAD --worktree -- "$art"
+fi
+if [[ ! -f "$art" || -L "$art" ]] ||
+   [[ "$(git hash-object -- "$art")" != "$expected_blob" ]]; then
+  echo "STOP: splash is missing, altered or not the approved Git image; refusing to replace local edits." >&2
+  exit 2
+fi
+echo "APPROVED SPLASH: tracked original is available to Gradle assets packaging."
+
 [[ -z "$(git status --porcelain --untracked-files=no)" ]] || { echo "STOP: local source changed"; git status --short; exit 2; }
 [[ -z "$(git ls-files --others --exclude-standard -- app/src tools)" ]] || { echo "STOP: untracked source"; exit 2; }
 for setting in 'compileSdk = 36' 'targetSdk = 36' 'versionCode = 40' 'versionName = "D-146"'; do
@@ -77,6 +99,33 @@ apk=$(find "$apk_dir" -type f -name '*.apk' -print -quit)
 [[ -s "$apk" ]] || { echo "STOP: empty debug APK"; exit 3; }
 out="$dest/Atelier-Time-D146-API36-Candidate.apk"
 cp "$apk" "$out"
+# A source file alone is insufficient proof: verify the final distributed APK
+# contains the EXACT approved bytes at the Android assets path.
+python3 - "$out" "$art" <<'PY'
+import hashlib, pathlib, sys, zipfile
+apk, asset = sys.argv[1:]
+entry = "assets/atelier_splash_approved_d139.png"
+def digest(stream):
+    h = hashlib.sha256()
+    while True:
+        part = stream.read(1024 * 1024)
+        if not part:
+            break
+        h.update(part)
+    return h.hexdigest()
+with open(asset, "rb") as f:
+    source_sha = digest(f)
+with zipfile.ZipFile(apk) as package:
+    if entry not in package.namelist():
+        raise SystemExit("STOP: approved splash missing from final APK.")
+    with package.open(entry) as file:
+        packaged_sha = digest(file)
+if source_sha != "c7d69a52c53a86738cc416b4c29eb621f8792cf367539732ce0ffa3639d8460d":
+    raise SystemExit("STOP: approved original has unexpected SHA256.")
+if packaged_sha != source_sha:
+    raise SystemExit("STOP: packaged artwork differs from approved original.")
+print("APK ARTWORK INCLUDED PASS: assets/atelier_splash_approved_d139.png, SHA256 matched.")
+PY
 manifest="$dest/Atelier-Time-D146-API36-Manifest.txt"
 {
  echo "version=D-146"
