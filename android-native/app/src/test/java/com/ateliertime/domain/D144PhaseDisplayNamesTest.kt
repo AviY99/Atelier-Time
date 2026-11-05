@@ -21,15 +21,15 @@ class D144PhaseDisplayNamesTest {
 
     @Test fun firstOpeningFourSubsessionsShareOneNumber() {
         (1..4).forEach { sub ->
-            assertEquals("Session 1 · $sub/4",
+            assertEquals("Group 1 · Session $sub/4",
                 PhaseDisplayNames.title(phase(sub, PoseSource.OPENING, "g1"), rules))
         }
     }
 
     @Test fun nextOpeningGroupGetsItsOwnNumberAndFraction() {
-        assertEquals("Session 2 · 1/2",
+        assertEquals("Group 2 · Session 1/2",
             PhaseDisplayNames.title(phase(5, PoseSource.OPENING, "g2"), rules))
-        assertEquals("Session 2 · 2/2",
+        assertEquals("Group 2 · Session 2/2",
             PhaseDisplayNames.title(phase(6, PoseSource.OPENING, "g2"), rules))
     }
 
@@ -44,7 +44,11 @@ class D144PhaseDisplayNamesTest {
     @Test fun breakAndSummaryNamesPreserved() {
         val rest = SchedulePhase("r", PhaseKind.SHORT_BREAK, 0, 300,
             openingGroupId = "g1")
-        assertEquals("Break · opening group", PhaseDisplayNames.title(rest, rules))
+        assertEquals("Group 1 · Break", PhaseDisplayNames.title(rest, rules))
+        assertEquals("Group 2 · Break", PhaseDisplayNames.title(
+            rest.copy(openingGroupId = "g2"), rules))
+        assertEquals("Break · opening group", PhaseDisplayNames.title(
+            rest.copy(openingGroupId = "legacy-unknown"), rules))
         assertEquals("Class end", PhaseDisplayNames.title(null, rules))
     }
 }
