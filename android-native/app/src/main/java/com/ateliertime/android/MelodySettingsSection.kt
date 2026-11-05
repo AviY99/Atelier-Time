@@ -277,7 +277,8 @@ private fun SoundPicker(
         horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         Box(modifier = Modifier.weight(1f)) {
             OutlinedButton(colors = atelierOutlinedColors(), onClick = { expanded = true },
-                modifier = Modifier.fillMaxWidth()) {
+                modifier = Modifier.fillMaxWidth()
+                    .testTag("sound_picker_${cue.name.lowercase()}")) {
                 Text("${choice.source.title} · ${choice.title}",
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
