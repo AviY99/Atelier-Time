@@ -1301,55 +1301,25 @@ fun SessionEditorScreen(
                 val session = playingSession
                 val timer = liveTimer
                 val view = timerView
-                Column(modifier = Modifier.fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                // D-146: while the Class is running, display both quick
-                // controls in one compact row instead of two tall cards.
                 val runningClass = view != null && (
                     view.status == TimerStatus.RUNNING ||
                         view.status == TimerStatus.PAUSED)
+                Column(modifier = Modifier.fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(
+                        if (runningClass) 2.dp else 8.dp)) {
+                // D-147: full original wording; two compact adjacent control
+                // rows instead of cryptic abbreviations. No behavioral change.
                 if (runningClass) {
                     val volumes = classVolumeControl.levels()
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .heightIn(min = 48.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        Text("Screen on", style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1, softWrap = false)
-                        Switch(
-                            checked = keepScreenAwake,
-                            onCheckedChange = { keepScreenAwake = it },
-                            modifier = Modifier.testTag("keep_screen_awake")
-                                .semantics {
-                                    contentDescription =
-                                        "Keep screen awake during timers; uses more battery"
-                                },
-                        )
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(0.dp),
-                        ) {
-                            Text("M ${volumes.mediaPercent()}% · A ${volumes.alarmPercent()}%",
-                                style = MaterialTheme.typography.labelSmall,
-                                maxLines = 1, softWrap = false)
-                            Text(if (soundSettings.classAlertsUseAlarmVolume)
-                                "Using Alarm" else "Using Media",
-                                style = MaterialTheme.typography.labelSmall,
-                                maxLines = 1, softWrap = false)
-                        }
-                        OutlinedButton(
-                            onClick = { showConfirmMaxVolume = true },
-                            modifier = Modifier.testTag("class_volume_max_both")
-                                .heightIn(min = 48.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                            colors = atelierOutlinedColors(),
-                        ) { Text("Max both", style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1, softWrap = false) }
-                    }
+                    RunningClassQuickControls(
+                        keepScreenAwake = keepScreenAwake,
+                        onKeepScreenAwakeChange = { keepScreenAwake = it },
+                        mediaPercent = volumes.mediaPercent(),
+                        alarmPercent = volumes.alarmPercent(),
+                        useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
+                        onMaxBoth = { showConfirmMaxVolume = true },
+                    )
                 } else {
                     // Preserve the detailed battery warning before Class start.
                     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
