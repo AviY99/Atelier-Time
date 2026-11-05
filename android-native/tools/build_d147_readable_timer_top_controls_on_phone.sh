@@ -50,6 +50,8 @@ for label in 'Keep screen awake during timers' 'Uses more battery' 'Class sound 
   grep -Fq "$label" app/src/main/java/com/ateliertime/android/RunningClassQuickControls.kt || { echo "STOP: original text missing: $label"; exit 2; }
 done
 grep -Fq 'RunningClassQuickControls(' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt || { echo 'STOP: compact full-label controls not wired'; exit 2; }
+grep -Fq 'if (runningClass) 2.dp else 8.dp' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt || { echo 'STOP: running-parent spacing not compact'; exit 2; }
+grep -Fq 'top = 2.dp, bottom = 16.dp' app/src/main/java/com/ateliertime/android/SessionTimerScreen.kt || { echo 'STOP: timer header top gap not compact'; exit 2; }
 if grep -Fq 'Text("Class controls"' app/src/main/java/com/ateliertime/android/SessionTimerScreen.kt; then
   echo "STOP: redundant Class controls heading"; exit 2
 fi
