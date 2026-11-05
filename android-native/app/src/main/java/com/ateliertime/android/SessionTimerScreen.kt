@@ -103,7 +103,10 @@ fun SessionTimerScreen(
         null -> "No current session / break"
     }
     Column(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        // D-147: only a 2dp top inset between the two-row quick controls
+        // above and the Timer header; retain the comfortable side/bottom inset.
+        modifier = Modifier.fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top,
