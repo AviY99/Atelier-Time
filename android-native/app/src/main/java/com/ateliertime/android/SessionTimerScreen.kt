@@ -162,7 +162,7 @@ fun SessionTimerScreen(
         // controls card separating the actions from the countdown.
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("class_timer_face"),
             colors = CardDefaults.elevatedCardColors(
                 // Increase contrast against the Night canvas only in the
                 // active Timer card. White small text remains > 5:1.
@@ -258,7 +258,8 @@ fun SessionTimerScreen(
                 // Five actions ALWAYS occupy one horizontal row. At very
                 // narrow widths / enlarged accessibility fonts, scroll this
                 // single row instead of wrapping or shrinking hit targets.
-                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth()
+                    .testTag("class_controls_row")) {
                     val gap = 4.dp
                     val minButtonWidth = if (LocalDensity.current.fontScale >= 1.3f)
                         78.dp else 58.dp
