@@ -9,7 +9,9 @@ cd "$(dirname "$0")/.."
 # unrelated phone files, overwrite a modified image, or clear app data.
 art="app/src/main/assets/atelier_splash_approved_d139.png"
 expected_blob="8950a9c509bbc2c2bac02d18c0b9bfdfca06eabc"
-repo_blob="$(git rev-parse "HEAD:$art" 2>/dev/null || true)"
+# Git object path is relative to REPOSITORY ROOT, not android-native/ CWD.
+# The working-tree art path below is still relative to android-native/.
+repo_blob="$(git rev-parse "HEAD:android-native/$art" 2>/dev/null || true)"
 if [[ "$repo_blob" != "$expected_blob" ]]; then
   echo "STOP: expected approved splash Git blob is not in this checkout." >&2
   exit 2
