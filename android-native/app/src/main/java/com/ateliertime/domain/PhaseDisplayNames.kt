@@ -13,7 +13,7 @@ object PhaseDisplayNames {
                 // plus the one-based index within this opening group.
                 val preceding = groups.take(groupIndex).sumOf { it.count }
                 val subIndex = (phase.poseNumber ?: (preceding + 1)) - preceding
-                "Session ${groupIndex + 1} · ${subIndex.coerceIn(1, group.count)}/${group.count}"
+                "Group ${groupIndex + 1} · Session ${subIndex.coerceIn(1, group.count)}/${group.count}"
             } else {
                 val openingCount = groups.sumOf { it.count }
                 val adjusted = (phase.poseNumber ?: 0) - openingCount + groups.size
@@ -21,8 +21,11 @@ object PhaseDisplayNames {
                     else phase.poseNumber?.toString().orEmpty()
             }
         }
-        PhaseKind.SHORT_BREAK -> if (phase.openingGroupId != null)
-            "Break · opening group" else "Break · regular"
+        PhaseKind.SHORT_BREAK -> if (phase.openingGroupId != null) {
+            val groupIndex = rules.openingGroups.indexOfFirst { it.id == phase.openingGroupId }
+            if (groupIndex >= 0) "Group ${groupIndex + 1} · Break"
+            else "Break · opening group"
+        } else "Break · regular"
         PhaseKind.SPECIAL_BREAK -> "Break · special"
         PhaseKind.SUMMARY -> "Class summary"
         null -> "Class end"
