@@ -279,7 +279,7 @@ fun SessionTimerScreen(
                             colors = atelierFilledColors(),
                             enabled = underway,
                             onClick = onPauseResume,
-                            modifier = controlModifier,
+                            modifier = controlModifier.testTag("class_control_pause_resume"),
                             contentPadding = controlPadding,
                         ) {
                             Text(if (view.status == TimerStatus.RUNNING)
@@ -293,7 +293,7 @@ fun SessionTimerScreen(
                                 accept25RestWarning = false
                                 confirmation = "restart"
                             },
-                            modifier = controlModifier,
+                            modifier = controlModifier.testTag("class_control_restart"),
                             contentPadding = controlPadding,
                         ) { Text("Restart", maxLines = 1,
                             softWrap = false, style = textStyle) }
@@ -304,9 +304,8 @@ fun SessionTimerScreen(
                                 accept25RestWarning = false
                                 confirmation = "repeat"
                             },
-                            modifier = controlModifier.semantics {
-                                contentDescription = "Repeat Last"
-                            },
+                            modifier = controlModifier.testTag("class_control_repeat_last")
+                                .semantics { contentDescription = "Repeat Last" },
                             contentPadding = controlPadding,
                         ) {
                             Text("Repeat\nLast", maxLines = 2,
@@ -317,13 +316,13 @@ fun SessionTimerScreen(
                             colors = atelierOutlinedColors(),
                             enabled = underway,
                             onClick = { confirmation = "next" },
-                            modifier = controlModifier,
+                            modifier = controlModifier.testTag("class_control_next"),
                             contentPadding = controlPadding,
                         ) { Text("Next", maxLines = 1,
                             softWrap = false, style = textStyle) }
                         Button(
                             onClick = { confirmation = "exit" },
-                            modifier = controlModifier,
+                            modifier = controlModifier.testTag("class_control_exit"),
                             contentPadding = controlPadding,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.errorContainer,
