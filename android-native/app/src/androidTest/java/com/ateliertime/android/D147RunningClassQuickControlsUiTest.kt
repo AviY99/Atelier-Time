@@ -20,61 +20,73 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** D-147 compile-only AndroidTest source. No automatic device instrumentation. */
+/**
+ * Former D147 top-control test suite updated for D148's approved Option A.
+ * This AndroidTest is compiled by the local build, NOT automatically run.
+ */
 @RunWith(AndroidJUnit4::class)
 class D147RunningClassQuickControlsUiTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun restoredFullLabelsFitInTwoAdjacentControlRows() {
+    @Test fun compactAwakeAndVolumeCardsRemainImmediatelyAdjacent() {
         compose.setContent {
             MaterialTheme {
                 Box(Modifier.width(360.dp)) {
                     RunningClassQuickControls(
                         keepScreenAwake = true,
                         onKeepScreenAwakeChange = {},
-                        mediaPercent = 75,
-                        alarmPercent = 40,
+                        mediaPercent = 75, alarmPercent = 40,
                         useAlarmVolume = false,
+                        onChooseVolume = {},
+                        onMediaVolumeChange = {},
+                        onAlarmVolumeChange = {},
                         onMaxBoth = {},
                     )
                 }
             }
         }
-        compose.onNodeWithText("Keep screen awake during timers").assertExists()
-        compose.onNodeWithText("Uses more battery").assertExists()
-        compose.onNodeWithText("Class sound volume").assertExists()
-        compose.onNodeWithText("Media 75% · Alarm 40% · using Media").assertExists()
+        compose.onNodeWithText("Keep Screen Awake").assertExists()
+        compose.onNodeWithText("ON").assertExists()
+        compose.onNodeWithText("Volumes").assertExists()
+        compose.onNodeWithText("Media Volume").assertExists()
+        compose.onNodeWithText("Alarm Volume").assertExists()
+        compose.onNodeWithText("Selected").assertExists()
         compose.onNodeWithText("Max both").assertExists()
 
         val first = compose.onNodeWithTag("running_screen_awake_row")
             .getUnclippedBoundsInRoot()
-        val second = compose.onNodeWithTag("running_class_volume_row")
+        val second = compose.onNodeWithTag("running_volume_card")
             .getUnclippedBoundsInRoot()
-        assertTrue("Full labels must occupy two consecutive rows",
-            second.top >= first.bottom && second.top - first.bottom <= 2.dp)
-        assertTrue("Rows retain a readable touch size", first.bottom - first.top >= 48.dp &&
-            second.bottom - second.top >= 48.dp)
+        assertTrue("Cards must be in two tightly adjacent sections",
+            second.top >= first.bottom && second.top - first.bottom <= 6.dp)
+        assertTrue("Switch and Max both must remain touch-sized",
+            first.bottom - first.top >= 48.dp)
     }
 
-    @Test fun userCanStillToggleScreenAndOpenTheExistingMaxBothConfirmation() {
-        var stayAwake by mutableStateOf(false)
+    @Test fun screenToggleVolumeSelectionAndMaxBothUseRealCallbacks() {
+        var awake by mutableStateOf(false)
+        var alarmSelected by mutableStateOf(false)
         var maxRequests = 0
         compose.setContent {
             MaterialTheme {
                 Box(Modifier.width(360.dp)) {
                     RunningClassQuickControls(
-                        keepScreenAwake = stayAwake,
-                        onKeepScreenAwakeChange = { stayAwake = it },
+                        keepScreenAwake = awake,
+                        onKeepScreenAwakeChange = { awake = it },
                         mediaPercent = 20, alarmPercent = 90,
-                        useAlarmVolume = true,
+                        useAlarmVolume = alarmSelected,
+                        onChooseVolume = { alarmSelected = it },
+                        onMediaVolumeChange = {},
+                        onAlarmVolumeChange = {},
                         onMaxBoth = { maxRequests++ },
                     )
                 }
             }
         }
-        compose.onNodeWithText("Media 20% · Alarm 90% · using Alarm").assertExists()
         compose.onNodeWithTag("keep_screen_awake").performClick()
-        assertTrue(stayAwake)
+        assertTrue(awake)
+        compose.onNodeWithText("Alarm Volume").performClick()
+        assertTrue(alarmSelected)
         compose.onNodeWithTag("class_volume_max_both").performClick()
         assertEquals(1, maxRequests)
     }
