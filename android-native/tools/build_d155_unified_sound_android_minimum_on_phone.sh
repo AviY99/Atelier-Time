@@ -260,8 +260,8 @@ editor=app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt
 settings=app/src/main/java/com/ateliertime/domain/SoundSettings.kt
 [[ "$(grep -Fc 'syncSoundAfterTimerVolume(changed)' "$editor")" -eq 5 ]] ||
   { echo "STOP: all five Free/Class Mute, slider and Max sync paths required"; exit 2; }
-grep -Fq 'soundSettings.afterSelectedStreamVolumeChange(selectedLevel)' "$editor" ||
-  { echo "STOP: selected hardware level not reconciled to Sound ON/OFF"; exit 2; }
+grep -Fq 'levels.selected(soundSettings.classAlertsUseAlarmVolume)' "$editor" ||
+  { echo "STOP: selected REAL stream not reconciled to Sound ON/OFF"; exit 2; }
 grep -Fq 'fun afterSelectedStreamVolumeChange(actualLevel: Int): SoundSettings' "$settings" ||
   { echo "STOP: domain volume-to-Sound state policy missing"; exit 2; }
 if grep -Fq 'if (classAlertVolumeMuted && soundEnabled)' "$editor"; then
