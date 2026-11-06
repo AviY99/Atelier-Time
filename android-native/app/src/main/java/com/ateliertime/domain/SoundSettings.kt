@@ -63,6 +63,27 @@ data class SoundSettings(
     /** Global Sound ON/OFF for both Class and Free Timer, persisted. */
     val timerSoundsEnabled: Boolean = true,
 ) {
+    /**
+     * Alarm is the phone's alarm audio channel. Keep the app's cue switch
+     * ON while Alarm is selected; only Media mode permits app-wide Sound OFF.
+     * Neither operation changes the phone's hardware volume setting.
+     */
+    fun selectOutputAlarm(useAlarm: Boolean): SoundSettings =
+        copy(
+            classAlertsUseAlarmVolume = useAlarm,
+            timerSoundsEnabled = if (useAlarm) true else timerSoundsEnabled,
+        )
+
+    fun setTimerSoundsEnabled(enabled: Boolean): SoundSettings =
+        copy(timerSoundsEnabled =
+            if (classAlertsUseAlarmVolume) true else enabled)
+
+    /** Non-destructive migration for older saved Alarm + Sound OFF data. */
+    fun normalizedAlarmSoundOn(): SoundSettings =
+        if (classAlertsUseAlarmVolume && !timerSoundsEnabled)
+            copy(timerSoundsEnabled = true)
+        else this
+
     fun soundFor(cue: TimerCue): CueSound {
         if (assignmentMode == SoundAssignmentMode.SHARED) {
             return sharedSound ?: poseEnd
