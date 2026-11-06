@@ -44,3 +44,25 @@ Minimum visual/user QA matrix:
 5. Check saved class and sound settings survive in-place update, timed cue playback follows Sound state, and display styles remain consistent.
 
 **Google Play remains FREE with invite-only Internal Testing as initially agreed; no signed AAB or store upload.**
+
+## Final D156 acceptance matrix — user-requested unified contract
+
+This section is **authoritative** and supersedes any obsolete text above describing Max confirmation or automatic restore. One selected Android stream (Media or Alarm), and ONE shared implementation for both Class and Free:
+
+| Selection / action | Actual selected device stream target | Global Sound | 0-volume warning | Other stream / exit |
+|---|---|---|---|---|
+| Media or Alarm, supported zero, Sound OFF | 0 | OFF after actual 0 | Visible at 0 | Other untouched |
+| Media or Alarm, protected positive min, Sound OFF | OFF toggle unavailable; device min is authoritative | ON at actual min >0 | Not shown | Other untouched |
+| Sound ON at selected 0 | Last saved positive device index; else 25% (at least 1 index) | ON after actual positive level | Hidden | Other untouched |
+| Mute, zero-capable stream | 0 | OFF | Visible | Other untouched |
+| **Mute, positive-min stream** | **Android minimum >0, not unchanged maximum** | **ON** because still positive | Not shown | Other untouched |
+| Slider to 0, zero-capable | 0 | OFF | Visible | Other untouched |
+| Slider to low/positive level | Actual hardware index >=1 and >=device min | ON after actual positive | Hidden | Other untouched |
+| **Max click in either Timer** | **100% immediately, no dialog/consent/warning** | ON after actual maximum | Hidden | **Never restore previous volume** |
+| Class finish, Free finish, Exit, Activity dispose | **No change to hardware volume** | From actual selected volume | From actual 0 vs >0 | **No restoration** |
+| Route switch Media ↔ Alarm | Select which hardware stream is observed; **change neither** | Recompute from new selected stream | Recompute from new selected stream | No cross-channel change |
+| Phone hardware buttons | Android's actual selected level | Reconciled on app refresh | From actual level | No auto-level write |
+
+**Explicit regression gates built into `build_d156_minimum_mute_and_volume_touch_on_phone.sh`:** fail if `ClassVolumeControl.muteSelected` restores old D155 refusal `check(canMuteSelected(...))`; fail if VolumeSliderMath stops mapping a 0 request to actual Android minimum, if 56dp/24dp/continuous unscaled shared Timer slider is removed, or if Max consent/dialog flags or **any restore-on-exit method and Media/Alarm baseline** reappear. Enforce exactly 2 timer callbacks calling the same immediate Max function; 8 pure `D156DeviceMinimumVolumeTest` methods and prior JVM tests plus AndroidTest source compilation are required before debug APK is created. These checks do not prove on-device behavior until the user's Samsung runs them.
+
+**Phone QA must include:** Alarm at maximum → Mute → actual minimum (not red restriction); Media at zero → thumb drag from far left → audible positive Android step; Sound tab OFF → selected zero where supported; Sound ON → previous positive or 25% fallback; Max **once** in Class and **once** in Free must update immediately **without any confirmation**, and **keep 100% after leaving both timers**; both warning states reflect true zero; changing output route must not change the other physical stream. No silent restore on session completion or activity disposal. **D156 still requires local build and user test; not a stable release.**
