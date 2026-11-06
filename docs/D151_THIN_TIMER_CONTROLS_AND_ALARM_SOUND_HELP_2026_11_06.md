@@ -1,0 +1,36 @@
+# Atelier Time — D-151 / Code45 — thin timer buttons and Alarm Sound Help
+
+**Status:** **SOURCE COMMITTED ON ANDROID DEV. Samsung local build, JVM execution, AndroidTest compilation, APK/phone acceptance PENDING.**  
+**Date:** 2026-11-06  
+**Active branch:** `android-native-kotlin-compose`; versionName `D-151`, versionCode `45`, applicationId `com.ateliertime.android`, target API36.  
+**Latest immutable USER-ACCEPTED stable:** Stable15 / D147 / Code41, branch `stable/android-d147-qa15-ui-install-accepted`, SHA `c10f424c0ec000eca2dd561911934841decb4522`. Frozen Stable15 is not modified.  
+**Predecessor QA:** D150/Code44 Samsung screenshot reports **297/297 JVM tests PASS**, 0 errors/failures/skips, **`APK ARTWORK INCLUDED PASS`** (original approved Git splash SHA256 verified **inside** built APK), and `D-150 JVM TESTS AND BUILD SUCCESSFUL`. User stated functionality works but requested cosmetic refinements; D150 was **not** separately frozen stable.
+
+## Exact user-requested changes (both requests in this conversation)
+
+1. **Run + Free timer top controls in ONE row:** `Keep screen awake` text and its colored `ON/OFF` button immediately adjacent, then a compact bordered `Volume` group with `Max` and `Sounds off` actions. Visual borders of both small ON/OFF and Volume group **1dp stroke, 34dp high**, small 7dp rounding, plain design rather than tall ornate cards, 48dp interactive wrappers. On normal phone widths all fit on one row; large-font/narrow devices retain one line with horizontal scrolling rather than clipping or reducing touch targets.
+2. The **only** slim draggable bar below still shows the `Media Volume` or `Alarm Volume` chosen **exclusively in Sounds**; same real hardware stream, percentage update and Safe Max confirmation as D150. `Max` affects selected channel only; `Sounds off` brings just that channel bar to zero and **does not toggle** the saved Sound ON/OFF. No new selection on Run/Free.
+3. **Free Timer Quick presets (seconds)** now use the same visible **34dp thin stroke, 48dp click zone**. Selected presets retain tint and accessibility selection state. Free Start/Pause/Resume/Exit also match the thin frame to keep vertical space consistent; no countdown logic change.
+4. **Class Timer five action buttons** Pause/Resume, Restart, Repeat Last, Next, Exit also use a shared 34dp visual frame with 48dp hit zone; preserve original one-row scrollable order, original action/confirmation/disabled conditions and Help below the controls. Keep prominent filled Pause and distinct Exit/error tint. No timer execution changes.
+5. **NEW Sounds bottom Help** near the global `Sound` and `Use sound: Media / Alarm` rows explains Android behavior: Alarm selects the device's **alarm volume channel**, which on many devices cannot be disabled with the app-wide Sound switch. While `Alarm` is selected, **global Sound is forced ON and its OFF toggle disabled**. Switching to `Media` re-enables user control of Sound ON/OFF; a switch back to Media leaves the current ON state until the user explicitly changes it. The help clearly distinguishes `Sounds off` at Run/Free as a **one-time selected hardware volume-to-zero action**, NOT global Sound toggle. Earlier Sounds general Help at the top remains. Do not claim the system Android OS literally forbids Alarm from being muted or confuse this app rule with the phone's DND/system policies.
+6. **Persistence/migration:** `SoundSettings.selectOutputAlarm(useAlarm)`, `setTimerSoundsEnabled(enabled)`, `normalizedAlarmSoundOn()` centrally enforce the rule; `MelodyPreferences.loadSettings()` normalizes old Alarm+Sound OFF preferences to ON without clearing any prior sound/length/source selection, and `saveSettings()` forbids inconsistent values. Sound tab uses these guarded methods, persists as before. Class and Free both continue to respect the global preference and routing. All previous D149/D150 source/sounds algorithms unchanged.
+
+## Source and regression checkpoints
+
+- `RunningClassQuickControls.kt` supplies visually matched 34dp awake/Volume group row and a single slider, used by **both** Run and Free.
+- `SlimTimerAction.kt` is a new presentation-only reusable thin bordered button: 34dp visual, 48dp touch; used 5 times in `SessionTimerScreen.kt` and 4 source occurrences in `FreeCountdownSection.kt` (one inside the preset loop, one Start, one Pause/Resume, one Exit).
+- `MelodySettingsSection.kt` includes `sound_output_help` bottom button and locked Sound toggle for Alarm; `SoundSettings.kt` + `MelodyAudio.kt` enforce/persist safe mapping and migrate old data.
+- JVM regression sources `SoundSettingsTest.kt` now include **20 tests**, up from 17. New tests cover forcing Sound ON when Alarm selected, Media allowing OFF, and normalizing previously stored illegal Alarm/OFF.
+- `MelodyPreferencesTest.kt` has **11 AndroidTest methods** including isolated real SharedPreferences persistence/migration (compile-only; they are NOT executed by local phone script). Adapted `D148SharedSoundCustomUiTest.kt` and `D149GlobalSoundControlsUiTest.kt` to expect Alarm→ON. New `D151SlimControlsAlarmHelpUiTest.kt` has 3 UI methods for 34dp/48dp geometry, Sound/Alarm/Help behavior and ON/OFF lock (compiled only).
+- `android-native/tools/build_d151_thin_timer_controls_alarm_help_on_phone.sh`: local Samsung CoGo full JVM suite, D151 source guards, AndroidTest APK **compiled only**, approved-art JPEG optional / tracked splash verified SHA256 **inside final debug APK**; no paid/cloud GitHub Actions, no app install/uninstall, no data clearing, no signing/uploading to Play.
+- No new dangerous permission, change to timer schedule/state, data, sound library, app approved artwork, price or Play policy.
+
+## One local Samsung Code on the Go command
+
+```bash
+cd /storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native && git pull --ff-only && bash tools/build_d151_thin_timer_controls_alarm_help_on_phone.sh
+```
+
+After an actual successful run expect `/storage/emulated/0/Download/Atelier-Time-D151-API36-Candidate.apk` plus D151 manifest and private log. **DO NOT claim D151 compile/JVM/UI tests PASS or accept Stable16 without user evidence and approval.** Compare physical Run/Free visuals in DAY/NIGHT, quick seconds presets, five Class buttons, alarm Sound ON locking/Help, Media OFF permissibility, and in-place installation preserving saved Classes, sounds and reports.
+
+**Google Play settings already chosen:** FREE. Initial release invite-only Internal Testing only. No Play signing AAB, upload, or public publication has been authorized/performed.
