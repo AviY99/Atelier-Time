@@ -549,6 +549,15 @@ fun SessionEditorScreen(
         }
     }
 
+    // D-149: Sound OFF is immediate, even if a long Custom cue or preview
+    // is already playing. This applies to both Class and Free players.
+    LaunchedEffect(soundEnabled) {
+        if (!soundEnabled) {
+            melodyPlayer.stop()
+            freeMelodyPlayer.stop()
+        }
+    }
+
     LaunchedEffect(liveTimer, freeTimer, soundSettings, soundEnabled) {
         while (true) {
             val nowEpochMs = System.currentTimeMillis()
