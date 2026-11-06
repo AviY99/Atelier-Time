@@ -60,7 +60,7 @@ internal fun RunningClassQuickControls(
                 modifier = Modifier.heightIn(min = 48.dp)
                     .testTag("keep_screen_awake").semantics {
                         contentDescription = "Keep screen awake during timers, " +
-                            if (keepScreenAwake) "ON" else "OFF"
+                            (if (keepScreenAwake) "ON" else "OFF")
                     },
                 contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
