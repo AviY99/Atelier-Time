@@ -267,6 +267,21 @@ class SoundSettingsTest {
         assertEquals(restored, restored.normalizedAlarmSoundOn())
     }
 
+    @Test fun sharedAndSeparateModesPreserveExternalSourcesIndependently() {
+        val source = CueSound(
+            source = SoundSource.FILE, uri = "content://audio/42", displayName = "Bell")
+        val sound = SoundSettings().setSourceEnabled(SoundSource.FILE, true)
+            .choose(TimerCue.BREAK_FINISHED, source)
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .chooseForVisibleMode(TimerCue.POSE_FINISHED,
+                CueSound(melody = MelodyPattern.CELEBRATION))
+        assertEquals(MelodyPattern.CELEBRATION,
+            sound.soundFor(TimerCue.SESSION_FINISHED).melody)
+        assertEquals(source, sound.setAssignmentMode(SoundAssignmentMode.SEPARATE)
+            .soundFor(TimerCue.BREAK_FINISHED))
+    }
+
+
     @Test fun sharedModeCanDisableSourceUsedOnlyByHiddenSeparateChoices() {
         val file = CueSound(source = SoundSource.FILE, uri = "content://audio/abc")
         val settings = SoundSettings()
