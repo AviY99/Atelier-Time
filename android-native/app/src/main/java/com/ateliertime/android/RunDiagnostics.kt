@@ -272,9 +272,10 @@ private fun SoundSettings.toDiagnosticJson(): JSONObject {
     }
     return JSONObject()
         .put("mode", assignmentMode.name)
+        .put("timerSoundsEnabled", timerSoundsEnabled)
+        .put("useSoundAlarmVolume", classAlertsUseAlarmVolume)
         .put("sharedDurationMode", sharedDurationMode.name)
         .put("sharedCustomSeconds", sharedCustomSeconds)
-        .put("sharedCustomVolumePercent", sharedCustomVolumePercent)
         .put("enabledSources", JSONArray(enabledSources.map { it.name }))
         .put("alarmVolume", classAlertsUseAlarmVolume)
         .put("A", cue(TimerCue.POSE_FINISHED))
