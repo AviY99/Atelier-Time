@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
@@ -63,7 +64,7 @@ class D154TimerVolumeSoundSyncUiTest {
         assertTrue(settings.timerSoundsEnabled)
     }
 
-    @Test fun alarmAtZeroKeepsMasterSoundOnAndOffUnavailable() {
+    @Test fun alarmAtZeroIsOffWhenHardwareSupportsZero() {
         var settings by mutableStateOf(SoundSettings())
         compose.setContent {
             MaterialTheme {
@@ -84,8 +85,8 @@ class D154TimerVolumeSoundSyncUiTest {
             settings = settings.afterSelectedStreamVolumeChange(0)
         }
         compose.onNodeWithTag("sound_master_enabled")
-            .performScrollTo().assertIsOn().assertIsNotEnabled()
+            .performScrollTo().assertIsOff().assertIsEnabled()
         assertTrue(settings.classAlertsUseAlarmVolume)
-        assertTrue(settings.timerSoundsEnabled)
+        assertFalse(settings.timerSoundsEnabled)
     }
 }
