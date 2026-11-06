@@ -78,7 +78,7 @@ fun MelodySettingsSection(
         horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         listOf(
             SoundAssignmentMode.SHARED to "Same sound for all",
-            SoundAssignmentMode.SEPARATE to "Separate A/B/C/Free",
+            SoundAssignmentMode.SEPARATE to "Separate sounds",
         ).forEach { (mode, title) ->
             FilterChip(
                 colors = atelierChipColors(),
@@ -102,17 +102,86 @@ fun MelodySettingsSection(
         )
         Row(modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Class A/B/C · Length", style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.weight(1f))
-            listOf(5, 10).forEach { seconds ->
+            horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("Sound length · all", style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.weight(1f), maxLines = 1,
+                overflow = TextOverflow.Ellipsis)
+            listOf(SharedDurationMode.FIVE, SharedDurationMode.TEN,
+                SharedDurationMode.CUSTOM).forEach { mode ->
                 FilterChip(
                     colors = atelierChipColors(),
-                    selected = settings.sharedSeconds == seconds,
-                    onClick = { onSettingsChange(settings.setSharedDuration(seconds)) },
-                    label = { Text("${seconds}s") },
+                    selected = settings.sharedDurationMode == mode,
+                    onClick = {
+                        onSettingsChange(when (mode) {
+                            SharedDurationMode.FIVE -> settings.setSharedDuration(5)
+                            SharedDurationMode.TEN -> settings.setSharedDuration(10)
+                            SharedDurationMode.CUSTOM -> settings.selectSharedCustomDuration()
+                        })
+                    },
+                    modifier = Modifier.testTag("sound_shared_mode_${mode.name.lowercase()}"),
+                    label = { Text(when (mode) {
+                        SharedDurationMode.FIVE -> "5s"
+                        SharedDurationMode.TEN -> "10s"
+                        SharedDurationMode.CUSTOM -> "Custom"
+                    }) },
                 )
             }
+        }
+        if (settings.sharedDurationMode == SharedDurationMode.CUSTOM) {
+            // Custom is ONE sound for all (Class A/B/C and Free). Two settings
+            // are independent: playback LENGTH and per-sound playback VOLUME.
+            // Unlike the Run screen, this gain slider never changes the
+            // phone-wide Media or Alarm volume stream.
+            var customLengthDraft by remember(settings.sharedCustomSeconds) {
+                mutableFloatStateOf(settings.sharedCustomSeconds.toFloat())
+            }
+            Row(modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically) {
+                Text("Custom sound length", style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.weight(1f))
+                Text("${customLengthDraft.roundToInt()}s",
+                    style = MaterialTheme.typography.labelMedium)
+            }
+            AtelierSlimSlider(
+                value = customLengthDraft,
+                onValueChange = { customLengthDraft = it.roundToInt().coerceIn(5,60).toFloat() },
+                onValueChangeFinished = {
+                    onSettingsChange(settings.setSharedCustomDuration(
+                        customLengthDraft.roundToInt().coerceIn(5,60)))
+                },
+                valueRange = 5f..60f, steps = 54,
+                modifier = Modifier.fillMaxWidth()
+                    .testTag("sound_shared_custom_length_slider")
+                    .semantics {
+                        contentDescription =
+                            "Custom sound length ${customLengthDraft.roundToInt()} seconds"
+                    },
+            )
+            var customGainDraft by remember(settings.sharedCustomVolumePercent) {
+                mutableFloatStateOf(settings.sharedCustomVolumePercent.toFloat())
+            }
+            Row(modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically) {
+                Text("Custom sound volume", style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.weight(1f))
+                Text("${customGainDraft.roundToInt()}%",
+                    style = MaterialTheme.typography.labelMedium)
+            }
+            AtelierSlimSlider(
+                value = customGainDraft,
+                onValueChange = { customGainDraft = it.roundToInt().coerceIn(0,100).toFloat() },
+                onValueChangeFinished = {
+                    onSettingsChange(settings.setSharedCustomVolumePercent(
+                        customGainDraft.roundToInt().coerceIn(0,100)))
+                },
+                valueRange = 0f..100f, steps = 99,
+                modifier = Modifier.fillMaxWidth()
+                    .testTag("sound_shared_custom_volume_slider")
+                    .semantics {
+                        contentDescription =
+                            "Custom sound playback volume ${customGainDraft.roundToInt()} percent"
+                    },
+            )
         }
     } else {
         CompactCue(
@@ -168,9 +237,14 @@ fun MelodySettingsSection(
     }
 
     HorizontalDivider()
-    Text("Free countdown · completion sound",
-        style = MaterialTheme.typography.titleSmall)
-    if (settings.assignmentMode != SoundAssignmentMode.SHARED) {
+    if (settings.assignmentMode == SoundAssignmentMode.SHARED) {
+        // A single Shared sound and duration really apply to ALL four cues.
+        // Retain the dormant, independent Free choice/length for Separate.
+        Text("Free countdown uses the same sound, length and Custom volume.",
+            style = MaterialTheme.typography.labelSmall)
+    } else {
+        Text("Free countdown · completion sound",
+            style = MaterialTheme.typography.titleSmall)
         SoundPicker(
             cue = TimerCue.FREE_TIMER_FINISHED, settings = settings,
             onSettingsChange = onSettingsChange,
@@ -178,24 +252,25 @@ fun MelodySettingsSection(
             onChooseAudioFile = onChooseAudioFile,
             onPreview = onPreview,
         )
-    }
-    Row(verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Free timer sound length", style = MaterialTheme.typography.labelMedium)
-        Text("${settings.freeTimerSeconds}s")
-    }
-    AtelierSlimSlider(
-        value = settings.freeTimerSeconds.toFloat(),
-        onValueChange = {
-            onSettingsChange(settings.setDuration(TimerCue.FREE_TIMER_FINISHED,
-                it.roundToInt().coerceIn(5, 60)))
-        },
-        valueRange = 5f..60f, steps = 54,
-        modifier = Modifier.testTag("sound_free_length_slider")
-            .semantics {
-                contentDescription = "Free countdown completion sound length, ${settings.freeTimerSeconds} seconds"
+        Row(verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Free timer sound length",
+                style = MaterialTheme.typography.labelMedium)
+            Text("${settings.freeTimerSeconds}s")
+        }
+        AtelierSlimSlider(
+            value = settings.freeTimerSeconds.toFloat(),
+            onValueChange = {
+                onSettingsChange(settings.setDuration(TimerCue.FREE_TIMER_FINISHED,
+                    it.roundToInt().coerceIn(5, 60)))
             },
-    )
+            valueRange = 5f..60f, steps = 54,
+            modifier = Modifier.testTag("sound_free_length_slider")
+                .semantics {
+                    contentDescription = "Free countdown completion sound length, ${settings.freeTimerSeconds} seconds"
+                },
+        )
+    }
     HorizontalDivider()
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = Modifier.weight(1f)) {
@@ -212,18 +287,16 @@ fun MelodySettingsSection(
         onDismissRequest = { showHelp = false },
         title = { Text("Sound settings") },
         text = {
-            Text("Enable one or more libraries. Use 'Same sound for all' " +
-                "for a single A/B/C sound with one 5 or 10-second length. " +
-                "Choose 'Separate A/B/C' for independent sounds, A/B lengths " +
-                "of 5 or 10 seconds and a Class-end C length of 5–60 seconds. " +
-                "You can switch modes without losing previous choices. " +
-                "System and file choices use Android pickers; files must " +
-                "remain accessible. Short sounds repeat for the selected time. " +
-                "Same sound for all includes the Free countdown melody. " +
-                "Separate restores its individual choice. Its completion " +
-                "length remains independently adjustable. " +
-                "Class cues may optionally use the alarm volume stream. " +
-                "Changing sound preferences never changes approved Classes.")
+            Text("Enable one or more sound libraries. 'Same sound for all' " +
+                "uses one sound AND one length for Class A/B/C and Free countdown. " +
+                "Choose 5s or 10s, or Custom to adjust sound length (5–60 seconds) " +
+                "and per-sound playback volume (0–100%) with separate sliders. " +
+                "Custom sound volume does not change the phone's Media/Alarm settings. " +
+                "'Separate sounds' restores each cue's saved melody and duration. " +
+                "Switching modes never deletes your previous choices. " +
+                "System and audio-file sounds use Android pickers. " +
+                "Class alerts can use Alarm or Media volume. " +
+                "These sound settings never change approved Classes.")
         },
         confirmButton = {
             TextButton(colors = atelierTextColors(), onClick = { showHelp = false }) {
