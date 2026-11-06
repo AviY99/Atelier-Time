@@ -58,8 +58,10 @@ data class SoundSettings(
     val breakEndSeconds: Int = 5,
     val classEndSeconds: Int = 5,
     val freeTimerSeconds: Int = 5,
-    /** Opt-in: route Class A/B/C through Android's alarm volume, not media. */
+    /** Route ALL cue sounds (Class and Free Timer) via Alarm or Media. */
     val classAlertsUseAlarmVolume: Boolean = false,
+    /** Global Sound ON/OFF for both Class and Free Timer, persisted. */
+    val timerSoundsEnabled: Boolean = true,
 ) {
     fun soundFor(cue: TimerCue): CueSound {
         if (assignmentMode == SoundAssignmentMode.SHARED) {
@@ -149,12 +151,11 @@ data class SoundSettings(
         return copy(sharedCustomVolumePercent = percent)
     }
 
-    /** Custom controls sound playback gain; system stream volumes stay intact. */
-    fun playbackVolumePercentFor(cue: TimerCue): Int =
-        if (assignmentMode == SoundAssignmentMode.SHARED &&
-            sharedDurationMode == SharedDurationMode.CUSTOM) {
-            sharedCustomVolumePercent.coerceIn(0, 100)
-        } else 100
+    /** D-149: per-sound gain removed from Custom. Retained for old call sites:
+     * playback always uses the chosen Android Media/Alarm stream at full gain.
+     * Legacy saved custom-gain values remain harmless, without data loss.
+     */
+    fun playbackVolumePercentFor(cue: TimerCue): Int = 100
 
     fun choose(cue: TimerCue, choice: CueSound): SoundSettings {
         require(choice.source in enabledSources) { "Enable the sound source first." }
