@@ -929,7 +929,7 @@ fun SessionEditorScreen(
         // D-143: one compact row, Reset first with a distinct Day/Night-safe background.
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Button(
+            AtelierButton(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -939,14 +939,14 @@ fun SessionEditorScreen(
                 onClick = { showResetEditorConfirm = true },
             ) { Text("Reset Editor", maxLines = 1,
                 style = MaterialTheme.typography.labelMedium) }
-            OutlinedButton(
+            AtelierOutlinedButton(
                 colors = atelierOutlinedColors(),
                 contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
                 modifier = Modifier.weight(1f).testTag("editor_example_a_button"),
                 onClick = { applyA() },
             ) { Text("Example A", maxLines = 1,
                 style = MaterialTheme.typography.labelMedium) }
-            OutlinedButton(
+            AtelierOutlinedButton(
                 colors = atelierOutlinedColors(),
                 contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
                 modifier = Modifier.weight(1f).testTag("editor_example_b_button"),
@@ -967,7 +967,7 @@ fun SessionEditorScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Opening session groups", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
-            TextButton(colors = atelierTextColors(), onClick = {
+            AtelierTextButton(colors = atelierTextColors(), onClick = {
                 helpSection = "Opening session groups" to
                     "Each group is an ordered set of equal-duration opening sessions. " +
                     "Every group has a configurable break after it. Zero minutes is allowed " +
@@ -979,7 +979,7 @@ fun SessionEditorScreen(
         opening.toList().forEachIndexed { index, group ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Opening session group " + (index + 1), modifier = Modifier.weight(1f))
-                TextButton(colors = atelierTextColors(), onClick = {
+                AtelierTextButton(colors = atelierTextColors(), onClick = {
                     helpSection = "Opening session group " + (index + 1) to
                         "Number of sessions means how many consecutive work sessions this group contains. " +
                         "Each session duration sets the time of one work session in minutes. " +
@@ -1013,24 +1013,24 @@ fun SessionEditorScreen(
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(colors = atelierTextColors(), onClick = {
+                AtelierTextButton(colors = atelierTextColors(), onClick = {
                     if (index > 0) {
                         opening[index] = opening[index - 1].also { opening[index - 1] = group }
                         invalidate()
                     }
                 }, enabled = index > 0) { Text("Up") }
-                TextButton(colors = atelierTextColors(), onClick = {
+                AtelierTextButton(colors = atelierTextColors(), onClick = {
                     if (index < opening.lastIndex) {
                         opening[index] = opening[index + 1].also { opening[index + 1] = group }
                         invalidate()
                     }
                 }, enabled = index < opening.lastIndex) { Text("Down") }
-                TextButton(colors = atelierTextColors(), onClick = { opening.removeAt(index); invalidate() }) {
+                AtelierTextButton(colors = atelierTextColors(), onClick = { opening.removeAt(index); invalidate() }) {
                     Text("Remove")
                 }
             }
         }
-        OutlinedButton(colors = atelierOutlinedColors(), onClick = {
+        AtelierOutlinedButton(colors = atelierOutlinedColors(), onClick = {
             opening.add(OpeningDraft(nextOpeningId++, breakAfterMinutes = normal)); invalidate()
         }) { Text("Add opening session group") }
 
@@ -1038,7 +1038,7 @@ fun SessionEditorScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Regular sessions", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
-            TextButton(colors = atelierTextColors(), onClick = {
+            AtelierTextButton(colors = atelierTextColors(), onClick = {
                 helpSection = "Regular sessions" to
                     "One repeating work session lasts the configured number of minutes. " +
                     "It is separate from regular and special break settings."
@@ -1051,7 +1051,7 @@ fun SessionEditorScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Regular breaks", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
-            TextButton(colors = atelierTextColors(), onClick = {
+            AtelierTextButton(colors = atelierTextColors(), onClick = {
                 helpSection = "Regular breaks" to
                     "Regular breaks repeat between work sessions. Set their normal duration " +
                     "here, independently of special-break duration and placement. " +
@@ -1062,12 +1062,12 @@ fun SessionEditorScreen(
             { normal = it; invalidate() }, Modifier.fillMaxWidth())
         Text("Standard repeating order", style = MaterialTheme.typography.titleSmall)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(colors = atelierChipColors(), 
+            AtelierFilterChip(colors = atelierChipColors(), 
                 selected = cycle == CycleStart.POSE_FIRST,
                 onClick = { cycle = CycleStart.POSE_FIRST; invalidate() },
                 label = { Text("Session first") },
             )
-            FilterChip(colors = atelierChipColors(), 
+            AtelierFilterChip(colors = atelierChipColors(), 
                 selected = cycle == CycleStart.BREAK_FIRST,
                 onClick = { cycle = CycleStart.BREAK_FIRST; invalidate() },
                 label = { Text("Break first") },
@@ -1078,7 +1078,7 @@ fun SessionEditorScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Special breaks", style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f))
-            TextButton(colors = atelierTextColors(), onClick = {
+            AtelierTextButton(colors = atelierTextColors(), onClick = {
                 helpSection = "Special breaks" to
                     "Special breaks REPLACE selected numbered regular breaks; they are " +
                     "not extra breaks. Choose their own duration, count and automatic " +
@@ -1114,7 +1114,7 @@ fun SessionEditorScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Complete class timeline", style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f))
-            TextButton(colors = atelierTextColors(), onClick = {
+            AtelierTextButton(colors = atelierTextColors(), onClick = {
                 helpSection = "Complete class timeline" to
                     "All timestamps are elapsed time from class start, not wall-clock time. " +
                     "The total class includes the end-of-class summary. A rest advisory " +
@@ -1129,7 +1129,7 @@ fun SessionEditorScreen(
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.bodySmall,
                 )
-                TextButton(onClick = { invalidate() }) { Text("Remove") }
+                AtelierTextButton(onClick = { invalidate() }) { Text("Remove") }
             }
         }
         if (parseError != null) {
@@ -1146,7 +1146,7 @@ fun SessionEditorScreen(
                         "and another 1-min Session.",
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                OutlinedButton(
+                AtelierOutlinedButton(
                     colors = atelierOutlinedColors(),
                     modifier = Modifier.testTag("tail_remainder_options"),
                     onClick = {
@@ -1159,7 +1159,7 @@ fun SessionEditorScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Final sessions", style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.weight(1f))
-                    TextButton(colors = atelierTextColors(), onClick = {
+                    AtelierTextButton(colors = atelierTextColors(), onClick = {
                         helpSection = "Final sessions" to
                             "Last gets remaining time preserves the first Session. " +
                             "Even divides the remaining work equally; Custom lets you " +
@@ -1170,7 +1170,7 @@ fun SessionEditorScreen(
                 // The longest option deliberately occupies two text lines on phones.
                 Row(modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    FilterChip(colors = atelierChipColors(), 
+                    AtelierFilterChip(colors = atelierChipColors(), 
                         modifier = Modifier.weight(1.5f),
                         selected = ending?.mode == FinalPoseMode.REMAINDER,
                         onClick = {
@@ -1182,7 +1182,7 @@ fun SessionEditorScreen(
                                 maxLines = 2, textAlign = TextAlign.Center)
                         },
                     )
-                    FilterChip(colors = atelierChipColors(), 
+                    AtelierFilterChip(colors = atelierChipColors(), 
                         modifier = Modifier.weight(0.8f),
                         selected = (ending ?: candidate.selectedChoice)?.mode == FinalPoseMode.EVEN_SPLIT,
                         enabled = candidate.canSplitFinalTwo,
@@ -1192,7 +1192,7 @@ fun SessionEditorScreen(
                         },
                         label = { Text("Even") },
                     )
-                    FilterChip(colors = atelierChipColors(), 
+                    AtelierFilterChip(colors = atelierChipColors(), 
                         modifier = Modifier.weight(1.1f),
                         selected = ending?.mode == FinalPoseMode.CUSTOM_SPLIT,
                         enabled = candidate.canSplitFinalTwo,
@@ -1287,7 +1287,7 @@ fun SessionEditorScreen(
                 saveError?.let {
                     Text(it, color = atelierErrorTextColor())
                 }
-                Button(colors = atelierFilledColors(), 
+                AtelierButton(colors = atelierFilledColors(), 
                     onClick = { requestFinalSave() },
                     enabled = candidate.canApprove &&
                         (!candidate.needsSafetyAcknowledgement || acceptedWarning),
@@ -1560,7 +1560,7 @@ fun SessionEditorScreen(
                  else "Original volume is restored when the Class ends") +
                 ", only if you have not adjusted that channel yourself. Continue?") },
             confirmButton = {
-                TextButton(
+                AtelierTextButton(
                     colors = atelierTextColors(),
                     modifier = Modifier.testTag("class_volume_max_confirm"),
                     onClick = {
@@ -1582,7 +1582,7 @@ fun SessionEditorScreen(
                 ) { Text("Volume max") }
             },
             dismissButton = {
-                TextButton(colors = atelierTextColors(),
+                AtelierTextButton(colors = atelierTextColors(),
                     onClick = { showConfirmMaxVolume = false }) { Text("Cancel") }
             },
         )
@@ -1598,14 +1598,14 @@ fun SessionEditorScreen(
                 "values? Unsaved Editor changes will be lost. Saved Classes, Sounds " +
                 "and a running timer will not be changed.") },
             confirmButton = {
-                TextButton(
+                AtelierTextButton(
                     colors = atelierTextColors(),
                     modifier = Modifier.testTag("editor_reset_confirm"),
                     onClick = { resetEditorToStart() },
                 ) { Text("Reset Editor") }
             },
             dismissButton = {
-                TextButton(
+                AtelierTextButton(
                     colors = atelierTextColors(),
                     modifier = Modifier.testTag("editor_reset_cancel"),
                     onClick = { showResetEditorConfirm = false },
@@ -1663,7 +1663,7 @@ fun SessionEditorScreen(
                             "minutes plus at least 1 minute of Session. " +
                             "$minutes minute(s) remain. The class end time will not change."
                     )
-                    OutlinedButton(
+                    AtelierOutlinedButton(
                         colors = atelierOutlinedColors(),
                         onClick = { tailRecoveryChoice = TailRecoveryChoice.EDITOR },
                         modifier = Modifier.fillMaxWidth(),
@@ -1676,7 +1676,7 @@ fun SessionEditorScreen(
                             "Edit the settings manually and review the timeline.",
                         style = MaterialTheme.typography.bodySmall,
                     )
-                    OutlinedButton(
+                    AtelierOutlinedButton(
                         colors = atelierOutlinedColors(),
                         enabled = validExtension,
                         onClick = { tailRecoveryChoice = TailRecoveryChoice.FINAL_SESSION },
@@ -1688,7 +1688,7 @@ fun SessionEditorScreen(
                         "Last Session extension cannot preserve all selected breaks.",
                         style = MaterialTheme.typography.bodySmall,
                     )
-                    OutlinedButton(
+                    AtelierOutlinedButton(
                         colors = atelierOutlinedColors(),
                         enabled = validSummary,
                         onClick = { tailRecoveryChoice = TailRecoveryChoice.SUMMARY },
@@ -1738,7 +1738,7 @@ fun SessionEditorScreen(
                 }
             },
             confirmButton = {
-                TextButton(
+                AtelierTextButton(
                     enabled = canApply,
                     modifier = Modifier.testTag("tail_remainder_apply"),
                     onClick = {
@@ -1761,7 +1761,7 @@ fun SessionEditorScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showTailRecovery = false }) { Text("Cancel") }
+                AtelierTextButton(onClick = { showTailRecovery = false }) { Text("Cancel") }
             },
         )
     }
@@ -1831,7 +1831,7 @@ fun SessionEditorScreen(
                             color = atelierErrorTextColor(),
                             style = MaterialTheme.typography.bodySmall)
                     }
-                    TextButton(
+                    AtelierTextButton(
                         enabled = soundEnabled,
                         onClick = {
                             melodyPlayer.play(soundSettings.soundFor(TimerCue.POSE_FINISHED),
@@ -1849,7 +1849,7 @@ fun SessionEditorScreen(
                         style = MaterialTheme.typography.titleMedium,
                     )
                     if (!finishPickerVisible) {
-                        TextButton(
+                        AtelierTextButton(
                             modifier = Modifier.testTag("run_end_change_finish"),
                             colors = atelierTextColors(),
                             onClick = {
@@ -1942,7 +1942,7 @@ fun SessionEditorScreen(
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
-                        TextButton(
+                        AtelierTextButton(
                             modifier = Modifier.testTag("run_end_reset_calculated"),
                             colors = atelierTextColors(),
                             onClick = {
@@ -1987,7 +1987,7 @@ fun SessionEditorScreen(
                 }
             },
             confirmButton = {
-                TextButton(
+                AtelierTextButton(
                     modifier = Modifier.testTag("run_end_confirm"),
                     colors = atelierTextColors(),
                     enabled = isValid,
@@ -2025,7 +2025,7 @@ fun SessionEditorScreen(
                 ) { Text("Confirm & Run") }
             },
             dismissButton = {
-                TextButton(colors = atelierTextColors(), onClick = {
+                AtelierTextButton(colors = atelierTextColors(), onClick = {
                     pendingRunApproval = null
                     runApprovalError = null
                 }) { Text("Cancel") }
@@ -2041,12 +2041,12 @@ fun SessionEditorScreen(
                 "Saving now will overwrite that class and its approved timeline. " +
                 "This cannot be undone. Continue?") },
             confirmButton = {
-                TextButton(colors = atelierTextColors(), onClick = { finalSave(target.id) }) {
+                AtelierTextButton(colors = atelierTextColors(), onClick = { finalSave(target.id) }) {
                     Text("Overwrite class")
                 }
             },
             dismissButton = {
-                TextButton(colors = atelierTextColors(), onClick = { overwriteTarget = null }) {
+                AtelierTextButton(colors = atelierTextColors(), onClick = { overwriteTarget = null }) {
                     Text("Cancel")
                 }
             },
@@ -2060,7 +2060,7 @@ fun SessionEditorScreen(
             title = { Text(openHelp.first) },
             text = { Text(openHelp.second) },
             confirmButton = {
-                TextButton(colors = atelierTextColors(), onClick = { helpSection = null }) { Text("Close") }
+                AtelierTextButton(colors = atelierTextColors(), onClick = { helpSection = null }) { Text("Close") }
             },
         )
     }
