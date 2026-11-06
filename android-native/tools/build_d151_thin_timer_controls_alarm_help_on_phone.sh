@@ -147,15 +147,15 @@ grep -Fq 'Set $selectedName volume to maximum?' app/src/main/java/com/ateliertim
   { echo 'STOP: selected-channel loudness consent missing.' >&2; exit 2; }
 grep -Fq 'containerTag = "free_timer_quick_controls"' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
   { echo "STOP: Free Timer common volume controls missing"; exit 2; }
-grep -Fq 'timerSoundsEnabled = it' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt ||
-  { echo "STOP: global Sound ON/OFF selector missing"; exit 2; }
+grep -Fq 'settings.setTimerSoundsEnabled(it)' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt ||
+  { echo "STOP: global Sound ON/OFF guarded selector missing"; exit 2; }
 grep -Fq 'useAlarmVolume = soundSettings.classAlertsUseAlarmVolume' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
   { echo "STOP: global Media/Alarm audio output missing"; exit 2; }
 grep -Fq '.putBoolean("timerSoundsEnabled"' app/src/main/java/com/ateliertime/android/MelodyAudio.kt ||
   { echo "STOP: global sound enable not persisted"; exit 2; }
 # D-151: choosing Media/Alarm is allowed ONLY in Sounds, not Run/Free.
-grep -Fq 'classAlertsUseAlarmVolume = useAlarm' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt ||
-  { echo 'STOP: Sounds tab has lost Media/Alarm output selection'; exit 2; }
+grep -Fq 'settings.selectOutputAlarm(useAlarm)' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt ||
+  { echo 'STOP: Sounds tab guarded Media/Alarm selection missing'; exit 2; }
 if grep -Fq 'onChooseVolume' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt; then
   echo 'STOP: Media/Alarm is selectable outside Sounds.' >&2; exit 2
 fi
