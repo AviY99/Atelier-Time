@@ -228,6 +228,21 @@ fun SessionEditorScreen(
     // Force immediate refresh after a user releases either Android volume slider;
     // the running wall clock refresh also picks up hardware-button changes.
     var volumeRevision by remember { mutableIntStateOf(0) }
+    // D-154: after a user moves either Timer slider, presses Mute, or
+    // approves Max, persist the resulting GLOBAL Sound ON/OFF setting.
+    // Read the actual selected hardware level, not the requested percent.
+    // Alarm remains ON by SoundSettings policy even at zero volume.
+    fun syncSoundAfterTimerVolume(levels: ClassVolumeLevels) {
+        val selectedLevel = if (soundSettings.classAlertsUseAlarmVolume)
+            levels.alarm else levels.media
+        val updated = soundSettings.afterSelectedStreamVolumeChange(selectedLevel)
+        if (updated != soundSettings) {
+            saveSoundSettings(updated)
+            if (soundSettings != updated) {
+                classVolumeError = "Volume changed, but Sound ON/OFF could not be saved."
+            }
+        }
+    }
     val freeTimer = remember { FreeCountdownTimer { SystemClock.elapsedRealtime() } }
     var freeTimerView by remember { mutableStateOf(freeTimer.view()) }
     var freeTimerError by remember { mutableStateOf<String?>(null) }
@@ -867,9 +882,10 @@ fun SessionEditorScreen(
                             if (soundSettings.classAlertsUseAlarmVolume)
                                 classVolumeControl.setAlarmPercent(percent)
                             else classVolumeControl.setMediaPercent(percent)
-                        }.onSuccess {
+                        }.onSuccess { changed ->
                             volumeRevision++
                             classVolumeError = null
+                            syncSoundAfterTimerVolume(changed)
                         }.onFailure {
                             classVolumeError = it.message ?:
                                 "Could not adjust selected sound volume."
@@ -883,17 +899,21 @@ fun SessionEditorScreen(
                         runCatching {
                             classVolumeControl.muteSelected(
                                 soundSettings.classAlertsUseAlarmVolume)
-                        }.onSuccess {
+                        }.onSuccess { changed ->
                             volumeRevision++
                             classVolumeError = null
+                            syncSoundAfterTimerVolume(changed)
                         }.onFailure {
                             classVolumeError = it.message ?:
                                 "Could not mute selected sound volume."
                         }
                     },
                 )
-                if (classAlertVolumeMuted && soundEnabled)
+                // Warn whenever the selected hardware stream is truly at zero.
+                // This must NOT depend on the separate persisted Sound switch.
+                if (classAlertVolumeMuted)
                     Text("Selected sound volume is zero. Free Timer completion may be silent.",
+                        modifier = Modifier.testTag("free_selected_volume_zero_warning"),
                         color = atelierErrorTextColor())
                 classVolumeError?.let {
                     Text(it, color = atelierErrorTextColor())
@@ -1393,6 +1413,7 @@ fun SessionEditorScreen(
                             }.onSuccess { changed ->
                                 volumeRevision++
                                 classVolumeError = null
+                                syncSoundAfterTimerVolume(changed)
                                 recordClassEvent(
                                     "Selected sound volume " +
                                         (if (soundSettings.classAlertsUseAlarmVolume)
@@ -1412,11 +1433,12 @@ fun SessionEditorScreen(
                             runCatching {
                                 classVolumeControl.muteSelected(
                                     soundSettings.classAlertsUseAlarmVolume)
-                            }.onSuccess {
+                            }.onSuccess { changed ->
                                 volumeRevision++
                                 classVolumeError = null
+                                syncSoundAfterTimerVolume(changed)
                                 recordClassEvent(
-                                    "Sounds off: selected " +
+                                    "Mute: selected " +
                                         (if (soundSettings.classAlertsUseAlarmVolume)
                                             "Alarm" else "Media") + " volume zero",
                                     timerView, timerView)
@@ -1575,9 +1597,10 @@ fun SessionEditorScreen(
                         runCatching {
                             classVolumeControl.maxSelected(
                                 soundSettings.classAlertsUseAlarmVolume)
-                        }.onSuccess {
+                        }.onSuccess { changed ->
                             volumeRevision++
                             classVolumeError = null
+                            syncSoundAfterTimerVolume(changed)
                             recordClassEvent(
                                 "Volume max: selected $selectedName",
                                 timerView, timerView)
