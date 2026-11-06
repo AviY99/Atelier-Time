@@ -16,8 +16,8 @@ internal data class ClassVolumeLevels(
 
 /**
  * Phone-wide Android audio streams, changed ONLY by explicit user actions:
- * a selected stream's slider, one-shot selected-stream mute or a confirmed
- * Volume max for that selected stream. It never changes the other channel.
+ * the selected stream's slider, one-shot minimum-volume Mute or immediate
+ * Max for that selected stream. It never changes the other channel.
  *
  * D156 revised: all volume operations persist as the user's chosen Android
  * stream level. No automatic restore when a timer ends or the Activity exits.
@@ -123,8 +123,7 @@ internal class ClassVolumeControl(context: Context) {
             check((if (media) after.media else after.alarm) == target) {
                 "Android volume protection blocked this level."
             }
-            // This manual action takes precedence over any earlier Max-both
-            // override and must not be silently undone on Class exit.
+            // This change persists across Class/Free exit (no auto-restore).
             rememberPositive(!media, current)
             rememberPositive(!media, after.selected(!media))
             return after
