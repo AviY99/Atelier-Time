@@ -222,6 +222,9 @@ fun SessionEditorScreen(
     }
     var showConfirmMaxVolume by remember { mutableStateOf(false) }
     var classVolumeError by remember { mutableStateOf<String?>(null) }
+    // Force immediate refresh after a user releases either Android volume slider;
+    // the running wall clock refresh also picks up hardware-button changes.
+    var volumeRevision by remember { mutableIntStateOf(0) }
     val freeTimer = remember { FreeCountdownTimer { SystemClock.elapsedRealtime() } }
     var freeTimerView by remember { mutableStateOf(freeTimer.view()) }
     var freeTimerError by remember { mutableStateOf<String?>(null) }
@@ -1308,16 +1311,51 @@ fun SessionEditorScreen(
                     .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(
                         if (runningClass) 2.dp else 8.dp)) {
-                // D-147: full original wording; two compact adjacent control
-                // rows instead of cryptic abbreviations. No behavioral change.
+                // D-148: approved compact A cards. Tapping a volume NAME
+                // chooses the CLASS sound stream; sliders manually adjust
+                // independent Android Media and Alarm device volumes.
                 if (runningClass) {
-                    val volumes = classVolumeControl.levels()
+                    val volumes = remember(wallClockMillis / 1_000L, volumeRevision) {
+                        classVolumeControl.levels()
+                    }
                     RunningClassQuickControls(
                         keepScreenAwake = keepScreenAwake,
                         onKeepScreenAwakeChange = { keepScreenAwake = it },
                         mediaPercent = volumes.mediaPercent(),
                         alarmPercent = volumes.alarmPercent(),
                         useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
+                        onChooseVolume = { selectAlarm ->
+                            if (soundSettings.classAlertsUseAlarmVolume != selectAlarm) {
+                                saveSoundSettings(soundSettings.copy(
+                                    classAlertsUseAlarmVolume = selectAlarm))
+                            }
+                        },
+                        onMediaVolumeChange = { percent ->
+                            runCatching { classVolumeControl.setMediaPercent(percent) }
+                                .onSuccess { changed ->
+                                    volumeRevision++
+                                    classVolumeError = null
+                                    recordClassEvent(
+                                        "Media volume ${changed.mediaPercent()}%",
+                                        timerView, timerView)
+                                }.onFailure { failure ->
+                                    classVolumeError = failure.message ?:
+                                        "Could not adjust Media volume."
+                                }
+                        },
+                        onAlarmVolumeChange = { percent ->
+                            runCatching { classVolumeControl.setAlarmPercent(percent) }
+                                .onSuccess { changed ->
+                                    volumeRevision++
+                                    classVolumeError = null
+                                    recordClassEvent(
+                                        "Alarm volume ${changed.alarmPercent()}%",
+                                        timerView, timerView)
+                                }.onFailure { failure ->
+                                    classVolumeError = failure.message ?:
+                                        "Could not adjust Alarm volume."
+                                }
+                        },
                         onMaxBoth = { showConfirmMaxVolume = true },
                     )
                 } else {
@@ -1458,6 +1496,7 @@ fun SessionEditorScreen(
                         showConfirmMaxVolume = false
                         runCatching { classVolumeControl.maxBoth() }
                             .onSuccess {
+                                volumeRevision++
                                 classVolumeError = null
                                 recordClassEvent("Max both volumes", timerView, timerView)
                             }
