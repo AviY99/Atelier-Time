@@ -585,7 +585,9 @@ fun SessionEditorScreen(
                     val cueReport = currentReport
                     melodyPlayer.play(soundSettings.soundFor(tick.cue),
                         soundSettings.secondsFor(tick.cue),
-                        useAlarmVolume = soundSettings.classAlertsUseAlarmVolume) { message ->
+                        useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
+                        playbackVolumePercent =
+                            soundSettings.playbackVolumePercentFor(tick.cue)) { message ->
                         melodyError = message
                         timerError = message
                         val stamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
@@ -612,6 +614,8 @@ fun SessionEditorScreen(
                 freeMelodyPlayer.play(
                     soundSettings.soundFor(TimerCue.FREE_TIMER_FINISHED),
                     soundSettings.secondsFor(TimerCue.FREE_TIMER_FINISHED),
+                    playbackVolumePercent = soundSettings.playbackVolumePercentFor(
+                        TimerCue.FREE_TIMER_FINISHED),
                 ) { message -> freeTimerError = message }
             }
             delay(200)
@@ -671,7 +675,9 @@ fun SessionEditorScreen(
                 val cueReport = currentReport
                 melodyPlayer.play(soundSettings.soundFor(event.cue),
                     soundSettings.secondsFor(event.cue),
-                    useAlarmVolume = soundSettings.classAlertsUseAlarmVolume) { error ->
+                    useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
+                    playbackVolumePercent =
+                        soundSettings.playbackVolumePercentFor(event.cue)) { error ->
                     melodyError = error
                     val stamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
                         .format(Date(System.currentTimeMillis()))
@@ -1283,7 +1289,9 @@ fun SessionEditorScreen(
                         melodyPlayer.play(soundSettings.soundFor(cue),
                             soundSettings.secondsFor(cue),
                             useAlarmVolume = cue != TimerCue.FREE_TIMER_FINISHED &&
-                                soundSettings.classAlertsUseAlarmVolume) { message ->
+                                soundSettings.classAlertsUseAlarmVolume,
+                            playbackVolumePercent =
+                                soundSettings.playbackVolumePercentFor(cue)) { message ->
                             melodyError = message
                         }
                     },
@@ -1759,7 +1767,9 @@ fun SessionEditorScreen(
                     TextButton(onClick = {
                         melodyPlayer.play(soundSettings.soundFor(TimerCue.POSE_FINISHED),
                             soundSettings.secondsFor(TimerCue.POSE_FINISHED),
-                            useAlarmVolume = soundSettings.classAlertsUseAlarmVolume) {
+                            useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
+                            playbackVolumePercent = soundSettings.playbackVolumePercentFor(
+                                TimerCue.POSE_FINISHED)) {
                             message -> melodyError = message
                         }
                     }) { Text("Test Class alert sound") }
