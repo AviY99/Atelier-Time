@@ -148,12 +148,8 @@ class MelodyPreferences(
     }
 
     fun saveSettings(settings: SoundSettings) {
-        // D-151: callers must use the guarded SoundSettings setters.
-        // Never persist Alarm mode with application Sounds OFF.
-        require(!settings.classAlertsUseAlarmVolume ||
-            settings.timerSoundsEnabled) {
-            "Alarm sound output requires Sound ON."
-        }
+        // D155: Alarm may be OFF if Android actually allows its stream to zero.
+        // Hardware Sound capability is checked by ClassVolumeControl at runtime.
         require(settings.activeSourcesEnabled()) {
             "Select a sound from an enabled source in the current mode."
         }
