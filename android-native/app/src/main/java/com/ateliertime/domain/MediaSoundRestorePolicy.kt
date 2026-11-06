@@ -1,9 +1,10 @@
 package com.ateliertime.domain
 
 /**
- * D155 - sound ON in Media mode restores the last real, positive device
- * stream index. When no valid history exists, pick one quarter of the real
- * stream's maximum, clamped to a positive Android volume step.
+ * D155 - shared restore rule for Sound ON in the selected Media OR Alarm
+ * Android stream, if that stream can actually reach zero. Restore the last
+ * positive device index or 25% if none is remembered, never a zero step.
+ * Hardware-specific minimum volume is applied by ClassVolumeControl.
  *
  * Keep stream INDEX rather than a UI percentage to restore exact hardware
  * levels (the UI percent can be rounded by Android's volume step size).
