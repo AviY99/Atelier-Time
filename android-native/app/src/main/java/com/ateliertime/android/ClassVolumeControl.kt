@@ -19,17 +19,12 @@ internal data class ClassVolumeLevels(
  * a selected stream's slider, one-shot selected-stream mute or a confirmed
  * Volume max for that selected stream. It never changes the other channel.
  *
- * Each selected-stream Max owns an independent restorable baseline.
- * A subsequent explicit slider or mute change releases restoration ownership
- * of ONLY that stream. External volume changes prevent restoration when
- * the current level is no longer our requested maximum.
+ * D156 revised: all volume operations persist as the user's chosen Android
+ * stream level. No automatic restore when a timer ends or the Activity exits.
  */
 internal class ClassVolumeControl(context: Context) {
     private val audio = context.applicationContext
         .getSystemService(Context.AUDIO_SERVICE) as AudioManager
-    private var mediaBaseline: Int? = null
-    private var alarmBaseline: Int? = null
-
     private val history = context.applicationContext.getSharedPreferences(
         "atelier_time_selected_volume_restore_v1", Context.MODE_PRIVATE)
 
@@ -79,7 +74,6 @@ internal class ClassVolumeControl(context: Context) {
             }
             rememberPositive(useAlarm, current)
             rememberPositive(useAlarm, after.selected(useAlarm))
-            if (useAlarm) alarmBaseline = null else mediaBaseline = null
             return after
         } catch (failure: Exception) {
             runCatching {
@@ -133,7 +127,6 @@ internal class ClassVolumeControl(context: Context) {
             // override and must not be silently undone on Class exit.
             rememberPositive(!media, current)
             rememberPositive(!media, after.selected(!media))
-            if (media) mediaBaseline = null else alarmBaseline = null
             return after
         } catch (failure: Exception) {
             // If a device partially accepts a level before reporting a
@@ -151,10 +144,9 @@ internal class ClassVolumeControl(context: Context) {
     }
 
     /**
-     * D-150: maximize ONLY the Sound-selected Media/Alarm channel. A separate
-     * channel's level and baseline must never be modified by this action.
-     * Retains the original safety policy: restore our Max on exit only if
-     * nobody subsequently moved the chosen hardware channel.
+     * D156: Max immediately raises ONLY the selected Media/Alarm channel to
+     * the Android maximum. The new level persists after Class/Free completion,
+     * app navigation and disposal; no confirmation and no automatic restore.
      */
     fun maxSelected(useAlarm: Boolean): ClassVolumeLevels {
         val before = levels()
@@ -172,9 +164,6 @@ internal class ClassVolumeControl(context: Context) {
             }
             rememberPositive(useAlarm, current)
             rememberPositive(useAlarm, after.selected(useAlarm))
-            if (useAlarm) {
-                if (alarmBaseline == null) alarmBaseline = current
-            } else if (mediaBaseline == null) mediaBaseline = current
             return after
         } catch (failure: Exception) {
             runCatching { audio.setStreamVolume(stream, current, 0) }
@@ -195,27 +184,7 @@ internal class ClassVolumeControl(context: Context) {
      */
     fun muteSelected(useAlarm: Boolean): ClassVolumeLevels {
         val after = setPercent(stream(useAlarm), 0)
-        if (useAlarm) alarmBaseline = null else mediaBaseline = null
         return after
     }
 
-    /**
-     * Restore ONLY our unchanged, user-confirmed selected-stream Max on exit.
-     * A manually moved slider removes its stream's restorable baseline.
-     */
-    fun restoreIfUnchanged(): ClassVolumeLevels {
-        val savedMedia = mediaBaseline
-        val savedAlarm = alarmBaseline
-        mediaBaseline = null
-        alarmBaseline = null
-        if (savedMedia == null && savedAlarm == null) return levels()
-        val current = levels()
-        if (savedMedia != null && current.media == current.mediaMax) runCatching {
-            audio.setStreamVolume(AudioManager.STREAM_MUSIC, savedMedia, 0)
-        }
-        if (savedAlarm != null && current.alarm == current.alarmMax) runCatching {
-            audio.setStreamVolume(AudioManager.STREAM_ALARM, savedAlarm, 0)
-        }
-        return levels()
-    }
 }
