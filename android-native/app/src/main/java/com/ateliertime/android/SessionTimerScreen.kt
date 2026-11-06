@@ -269,72 +269,57 @@ fun SessionTimerScreen(
                     val buttonWidth = maxOf((maxWidth - gap * 4) / 5,
                         minButtonWidth)
                     val controlModifier = Modifier.width(buttonWidth)
-                        .heightIn(min = 48.dp)
-                    val controlPadding = PaddingValues(horizontal = 0.dp, vertical = 4.dp)
-                    val textStyle = MaterialTheme.typography.labelSmall.copy(
-                        lineHeight = 12.sp)
                     Row(
                         modifier = Modifier.fillMaxWidth()
                             .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(gap),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Button(
-                            colors = atelierFilledColors(),
-                            enabled = underway,
-                            onClick = onPauseResume,
-                            modifier = controlModifier.testTag("class_control_pause_resume"),
-                            contentPadding = controlPadding,
-                        ) {
-                            Text(if (view.status == TimerStatus.RUNNING)
+                        // All five actions share the 34dp visual outline of
+                        // Awake ON/OFF while retaining 48dp interaction height.
+                        SlimTimerAction(
+                            label = if (view.status == TimerStatus.RUNNING)
                                 "Pause" else "Resume",
-                                maxLines = 1, softWrap = false, style = textStyle)
-                        }
-                        OutlinedButton(
-                            colors = atelierOutlinedColors(),
-                            enabled = underway && canRestartSegment,
+                            onClick = onPauseResume,
+                            enabled = underway,
+                            filled = true,
+                            modifier = controlModifier,
+                            tag = "class_control_pause_resume",
+                        )
+                        SlimTimerAction(
+                            label = "Restart",
                             onClick = {
                                 accept25RestWarning = false
                                 confirmation = "restart"
                             },
-                            modifier = controlModifier.testTag("class_control_restart"),
-                            contentPadding = controlPadding,
-                        ) { Text("Restart", maxLines = 1,
-                            softWrap = false, style = textStyle) }
-                        OutlinedButton(
-                            colors = atelierOutlinedColors(),
-                            enabled = underway && lastTarget != null,
+                            enabled = underway && canRestartSegment,
+                            modifier = controlModifier,
+                            tag = "class_control_restart",
+                        )
+                        SlimTimerAction(
+                            label = "Repeat\nLast",
                             onClick = {
                                 accept25RestWarning = false
                                 confirmation = "repeat"
                             },
-                            modifier = controlModifier.testTag("class_control_repeat_last")
-                                .semantics { contentDescription = "Repeat Last" },
-                            contentPadding = controlPadding,
-                        ) {
-                            Text("Repeat\nLast", maxLines = 2,
-                                softWrap = true, textAlign = TextAlign.Center,
-                                style = textStyle)
-                        }
-                        OutlinedButton(
-                            colors = atelierOutlinedColors(),
-                            enabled = underway,
+                            enabled = underway && lastTarget != null,
+                            modifier = controlModifier,
+                            tag = "class_control_repeat_last",
+                        )
+                        SlimTimerAction(
+                            label = "Next",
                             onClick = { confirmation = "next" },
-                            modifier = controlModifier.testTag("class_control_next"),
-                            contentPadding = controlPadding,
-                        ) { Text("Next", maxLines = 1,
-                            softWrap = false, style = textStyle) }
-                        Button(
+                            enabled = underway,
+                            modifier = controlModifier,
+                            tag = "class_control_next",
+                        )
+                        SlimTimerAction(
+                            label = "Exit",
                             onClick = { confirmation = "exit" },
-                            modifier = controlModifier.testTag("class_control_exit"),
-                            contentPadding = controlPadding,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = if (atelierNightActive()) Color.White
-                                    else MaterialTheme.colorScheme.onErrorContainer,
-                            ),
-                        ) { Text("Exit", maxLines = 1,
-                            softWrap = false, style = textStyle) }
+                            danger = true,
+                            modifier = controlModifier,
+                            tag = "class_control_exit",
+                        )
                     }
                 }
                 TextButton(
