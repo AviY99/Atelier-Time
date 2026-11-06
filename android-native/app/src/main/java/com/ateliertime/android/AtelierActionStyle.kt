@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -30,6 +31,7 @@ internal object AtelierActionStyle {
     val shape = RoundedCornerShape(12.dp)
     val visibleHeight = 40.dp
     val touchHeight = 48.dp
+    val minimumWidth = 56.dp
     val stroke = 1.dp
     val buttonPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
     val compactTextPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
@@ -46,7 +48,8 @@ internal fun AtelierButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier.heightIn(min = AtelierActionStyle.visibleHeight),
+        modifier = modifier.widthIn(min = AtelierActionStyle.minimumWidth)
+            .heightIn(min = AtelierActionStyle.visibleHeight),
         enabled = enabled,
         shape = AtelierActionStyle.shape,
         colors = colors,
@@ -66,7 +69,8 @@ internal fun AtelierOutlinedButton(
 ) {
     OutlinedButton(
         onClick = onClick,
-        modifier = modifier.heightIn(min = AtelierActionStyle.visibleHeight),
+        modifier = modifier.widthIn(min = AtelierActionStyle.minimumWidth)
+            .heightIn(min = AtelierActionStyle.visibleHeight),
         enabled = enabled,
         shape = AtelierActionStyle.shape,
         colors = colors,
@@ -87,7 +91,8 @@ internal fun AtelierTonalButton(
 ) {
     FilledTonalButton(
         onClick = onClick,
-        modifier = modifier.heightIn(min = AtelierActionStyle.visibleHeight),
+        modifier = modifier.widthIn(min = AtelierActionStyle.minimumWidth)
+            .heightIn(min = AtelierActionStyle.visibleHeight),
         enabled = enabled,
         shape = AtelierActionStyle.shape,
         colors = colors,
@@ -109,7 +114,8 @@ internal fun AtelierTextButton(
     // padding, height and corner geometry with framed action buttons.
     TextButton(
         onClick = onClick,
-        modifier = modifier.heightIn(min = AtelierActionStyle.visibleHeight),
+        modifier = modifier.widthIn(min = AtelierActionStyle.minimumWidth)
+            .heightIn(min = AtelierActionStyle.visibleHeight),
         enabled = enabled,
         shape = AtelierActionStyle.shape,
         colors = colors,
@@ -131,7 +137,8 @@ internal fun AtelierFilterChip(
         selected = selected,
         onClick = onClick,
         label = label,
-        modifier = modifier.heightIn(min = AtelierActionStyle.visibleHeight),
+        modifier = modifier.widthIn(min = AtelierActionStyle.minimumWidth)
+            .heightIn(min = AtelierActionStyle.visibleHeight),
         enabled = enabled,
         shape = AtelierActionStyle.shape,
         colors = colors,
