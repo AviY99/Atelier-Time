@@ -13,6 +13,9 @@ enum class SoundSource(val title: String) {
 /** Shared mode selects one sound for ALL four cues; lengths remain cue-specific. */
 enum class SoundAssignmentMode { SEPARATE, SHARED }
 
+/** Shared Class/Free sound can use a fixed preset or user-adjusted length/volume. */
+enum class SharedDurationMode { FIVE, TEN, CUSTOM }
+
 /** A single sound used for one cue; source options are enabled independently. */
 data class CueSound(
     val source: SoundSource = SoundSource.APP,
@@ -46,6 +49,11 @@ data class SoundSettings(
     // Retained separately so switching modes never erases A/B/C selections.
     val sharedSound: CueSound? = null,
     val sharedSeconds: Int = 5,
+    /** Stored independently so switching to a preset does not erase Custom. */
+    val sharedDurationMode: SharedDurationMode = SharedDurationMode.FIVE,
+    val sharedCustomSeconds: Int = 15,
+    /** Per-sound gain, NOT the phone-wide Android Media/Alarm stream volume. */
+    val sharedCustomVolumePercent: Int = 100,
     val poseEndSeconds: Int = 5,
     val breakEndSeconds: Int = 5,
     val classEndSeconds: Int = 5,
@@ -99,8 +107,9 @@ data class SoundSettings(
     }
 
     fun secondsFor(cue: TimerCue): Int {
-        if (cue == TimerCue.FREE_TIMER_FINISHED) return freeTimerSeconds
+        // "Same sound for all" means SAME sound AND duration for A/B/C + Free.
         if (assignmentMode == SoundAssignmentMode.SHARED) return sharedSeconds
+        if (cue == TimerCue.FREE_TIMER_FINISHED) return freeTimerSeconds
         return when (cue) {
             TimerCue.POSE_FINISHED -> poseEndSeconds
             TimerCue.BREAK_FINISHED -> breakEndSeconds
@@ -111,10 +120,41 @@ data class SoundSettings(
 
     fun setSharedDuration(seconds: Int): SoundSettings {
         require(seconds == 5 || seconds == 10) {
-            "Shared sound length must be 5 or 10 seconds."
+            "Preset shared sound length must be 5 or 10 seconds."
         }
-        return copy(sharedSeconds = seconds)
+        return copy(
+            sharedSeconds = seconds,
+            sharedDurationMode = if (seconds == 5) SharedDurationMode.FIVE
+                else SharedDurationMode.TEN,
+        )
     }
+
+    /** Switch into Custom without discarding the last explicitly chosen length. */
+    fun selectSharedCustomDuration(): SoundSettings = copy(
+        sharedDurationMode = SharedDurationMode.CUSTOM,
+        sharedSeconds = sharedCustomSeconds.coerceIn(5, 60),
+    )
+
+    fun setSharedCustomDuration(seconds: Int): SoundSettings {
+        require(seconds in 5..60) { "Custom sound length must be 5–60 seconds." }
+        return copy(
+            sharedDurationMode = SharedDurationMode.CUSTOM,
+            sharedCustomSeconds = seconds,
+            sharedSeconds = seconds,
+        )
+    }
+
+    fun setSharedCustomVolumePercent(percent: Int): SoundSettings {
+        require(percent in 0..100) { "Custom sound volume must be 0–100%." }
+        return copy(sharedCustomVolumePercent = percent)
+    }
+
+    /** Custom controls sound playback gain; system stream volumes stay intact. */
+    fun playbackVolumePercentFor(cue: TimerCue): Int =
+        if (assignmentMode == SoundAssignmentMode.SHARED &&
+            sharedDurationMode == SharedDurationMode.CUSTOM) {
+            sharedCustomVolumePercent.coerceIn(0, 100)
+        } else 100
 
     fun choose(cue: TimerCue, choice: CueSound): SoundSettings {
         require(choice.source in enabledSources) { "Enable the sound source first." }
