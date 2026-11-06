@@ -405,7 +405,7 @@ fun DesignSettingsPanel(
                 modifier = Modifier.weight(1f),
             )
         }
-        FilterChip(
+        AtelierFilterChip(
             modifier = Modifier.fillMaxWidth(),
             colors = atelierChipColors(),
             selected = settings.mode == DesignMode.AUTO,
@@ -665,7 +665,7 @@ private fun AtelierAboutExternalLinkCard(
                     if (verifiedScheme) description else pendingLabel,
                     style = MaterialTheme.typography.bodySmall,
                 )
-                TextButton(
+                AtelierTextButton(
                     modifier = Modifier.testTag(linkTag),
                     colors = linkColors,
                     enabled = verifiedScheme,
@@ -692,7 +692,7 @@ private fun AtelierAboutExternalLinkCard(
                             if (verifiedScheme) description else pendingLabel,
                             style = MaterialTheme.typography.bodySmall,
                         )
-                        TextButton(
+                        AtelierTextButton(
                             modifier = Modifier.testTag(linkTag),
                             colors = linkColors,
                             enabled = verifiedScheme,
