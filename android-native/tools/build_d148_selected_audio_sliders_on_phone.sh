@@ -39,9 +39,13 @@ for file in \
   app/src/main/java/com/ateliertime/android/RunningClassQuickControls.kt \
   app/src/main/java/com/ateliertime/android/ClassVolumeControl.kt \
   app/src/main/java/com/ateliertime/domain/VolumeSliderMath.kt \
+  app/src/main/java/com/ateliertime/domain/SoundSettings.kt \
+  app/src/main/java/com/ateliertime/android/MelodyAudio.kt \
   app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt \
   app/src/test/java/com/ateliertime/domain/D146GroupTimerLabelsTest.kt \
   app/src/test/java/com/ateliertime/domain/D148VolumeSliderMathTest.kt \
+  app/src/test/java/com/ateliertime/domain/SoundSettingsTest.kt \
+  app/src/androidTest/java/com/ateliertime/android/MelodyPreferencesTest.kt \
   app/src/androidTest/java/com/ateliertime/android/D146CompactUserFeedbackUiTest.kt \
   app/src/androidTest/java/com/ateliertime/android/D147RunningClassQuickControlsUiTest.kt \
   app/src/androidTest/java/com/ateliertime/android/D148OptionAControlsUiTest.kt; do
@@ -64,6 +68,19 @@ for method in 'setMediaPercent' 'setAlarmPercent' 'restoreIfUnchanged'; do
   grep -Fq "$method" app/src/main/java/com/ateliertime/android/ClassVolumeControl.kt ||
     { echo "STOP: missing device volume control: $method"; exit 2; }
 done
+# Sounds tab: shorter button; shared Class A/B/C + Free 5s/10s/Custom.
+grep -Fq 'Separate sounds' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt ||
+  { echo 'STOP: compact Separate sounds label missing'; exit 2; }
+for control in 'Same sound for all' 'sound_shared_mode_' 'sound_shared_custom_length_slider' 'sound_shared_custom_volume_slider' 'Custom sound volume'; do
+  grep -Fq "$control" app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt ||
+    { echo "STOP: shared 5/10/Custom UI missing: $control"; exit 2; }
+done
+for method in 'selectSharedCustomDuration' 'setSharedCustomDuration' 'setSharedCustomVolumePercent' 'playbackVolumePercentFor'; do
+  grep -Fq "$method" app/src/main/java/com/ateliertime/domain/SoundSettings.kt ||
+    { echo "STOP: shared Custom model missing: $method"; exit 2; }
+done
+grep -Fq 'playbackVolumePercent = soundSettings.playbackVolumePercentFor(' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
+  { echo 'STOP: Custom playback volume not wired'; exit 2; }
 grep -Fq 'classAlertsUseAlarmVolume = selectAlarm' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
   { echo 'STOP: audio stream selected row is not persisted'; exit 2; }
 grep -Fq 'if (runningClass) 2.dp else 8.dp' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
@@ -102,6 +119,7 @@ for p in pathlib.Path(sys.argv[1]).glob('TEST-*.xml'):
         found[x.attrib.get('name','')] = data
         for k in totals: totals[k] += data[k]
 required = {
+ 'com.ateliertime.domain.SoundSettingsTest':15,
  'com.ateliertime.domain.D148VolumeSliderMathTest':8,
  'com.ateliertime.domain.D146GroupTimerLabelsTest':6,
  'com.ateliertime.domain.D145NetWorkSpecialBreakTest':8,
