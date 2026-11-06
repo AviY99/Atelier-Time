@@ -351,7 +351,7 @@ PY
 manifest="$dest/Atelier-Time-D154-API36-Manifest.txt"
 {
  echo "version=D-154"
- echo "version_code=46"
+ echo "version_code=48"
  echo "branch=android-native-kotlin-compose"
  echo "source_commit=$(git rev-parse HEAD)"
  echo "apk_sha256=$(sha256sum "$out" | awk '{print $1}')"
