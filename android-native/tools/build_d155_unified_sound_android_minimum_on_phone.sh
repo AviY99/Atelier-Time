@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# D-155 / Code48: Samsung Code on the Go LOCAL build only. No cloud, install, signing, deletion.
+# D-155 / Code49: Samsung Code on the Go LOCAL build only. No cloud, install, signing, deletion.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 [[ "$(git branch --show-current)" == "android-native-kotlin-compose" ]] || { echo "STOP: wrong branch"; exit 2; }
