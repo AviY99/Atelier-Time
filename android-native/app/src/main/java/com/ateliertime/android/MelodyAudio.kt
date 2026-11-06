@@ -16,6 +16,7 @@ import com.ateliertime.domain.MelodySelections
 import com.ateliertime.domain.SoundSettings
 import com.ateliertime.domain.SoundSource
 import com.ateliertime.domain.SoundAssignmentMode
+import com.ateliertime.domain.SharedDurationMode
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -106,6 +107,17 @@ class MelodyPreferences(
             return if (isClass && value in 5..60 ||
                 !isClass && (value == 5 || value == 10)) value else fallback
         }
+        val persistedSharedSeconds = seconds("sharedSeconds", 5, true)
+        val durationMode = runCatching {
+            SharedDurationMode.valueOf(prefs.getString(
+                "sharedDurationMode",
+                if (persistedSharedSeconds == 10) SharedDurationMode.TEN.name
+                else if (persistedSharedSeconds == 5) SharedDurationMode.FIVE.name
+                else SharedDurationMode.CUSTOM.name)!!)
+        }.getOrDefault(SharedDurationMode.FIVE)
+        val customLength = seconds("sharedCustomSeconds", 15, true)
+        val customGain = prefs.getInt("sharedCustomVolumePercent", 100)
+            .coerceIn(0, 100)
         return SoundSettings(
             // A dormant mode may retain sounds from a disabled library.
             // Restore only libraries required by the CURRENT mode on load.
@@ -115,7 +127,14 @@ class MelodyPreferences(
                 .ifEmpty { defaults.enabledSources },
             poseEnd = a, breakEnd = b, classEnd = c, freeTimer = free,
             assignmentMode = mode, sharedSound = shared,
-            sharedSeconds = seconds("sharedSeconds", 5, false),
+            sharedSeconds = when (durationMode) {
+                SharedDurationMode.FIVE -> 5
+                SharedDurationMode.TEN -> 10
+                SharedDurationMode.CUSTOM -> customLength
+            },
+            sharedDurationMode = durationMode,
+            sharedCustomSeconds = customLength,
+            sharedCustomVolumePercent = customGain,
             poseEndSeconds = seconds("poseEndSeconds", 5, false),
             breakEndSeconds = seconds("breakEndSeconds", 5, false),
             classEndSeconds = seconds("classEndSeconds", 5, true),
@@ -134,11 +153,19 @@ class MelodyPreferences(
             listOfNotNull(settings.sharedSound)).all { it.isPlayable }) {
             "A saved sound selection is missing its audio file."
         }
-        require(settings.sharedSeconds in setOf(5, 10) &&
+        require(settings.sharedSeconds in 5..60 &&
+            settings.sharedCustomSeconds in 5..60 &&
+            settings.sharedCustomVolumePercent in 0..100 &&
+            (when (settings.sharedDurationMode) {
+                SharedDurationMode.FIVE -> settings.sharedSeconds == 5
+                SharedDurationMode.TEN -> settings.sharedSeconds == 10
+                SharedDurationMode.CUSTOM ->
+                    settings.sharedSeconds == settings.sharedCustomSeconds
+            }) &&
             settings.poseEndSeconds in setOf(5, 10) &&
             settings.breakEndSeconds in setOf(5, 10) &&
             settings.classEndSeconds in 5..60 &&
-            settings.freeTimerSeconds in 5..60) { "Invalid sound duration." }
+            settings.freeTimerSeconds in 5..60) { "Invalid sound duration/volume." }
         val edit = prefs.edit()
             // Save legacy keys so previously selected application melodies remain.
             .putString("poseEnd", settings.poseEnd.melody.name)
@@ -148,6 +175,9 @@ class MelodyPreferences(
                 .filter { it in settings.enabledSources }.joinToString(",") { it.name })
             .putString("soundAssignmentMode", settings.assignmentMode.name)
             .putInt("sharedSeconds", settings.sharedSeconds)
+            .putString("sharedDurationMode", settings.sharedDurationMode.name)
+            .putInt("sharedCustomSeconds", settings.sharedCustomSeconds)
+            .putInt("sharedCustomVolumePercent", settings.sharedCustomVolumePercent)
             .putInt("poseEndSeconds", settings.poseEndSeconds)
             .putInt("breakEndSeconds", settings.breakEndSeconds)
             .putInt("classEndSeconds", settings.classEndSeconds)
@@ -192,9 +222,11 @@ class MelodyAudioPlayer(context: Context) {
         choice: CueSound,
         durationSeconds: Int,
         useAlarmVolume: Boolean = false,
+        playbackVolumePercent: Int = 100,
         onError: (String) -> Unit = {},
     ) {
         require(durationSeconds in 5..60)
+        require(playbackVolumePercent in 0..100)
         active?.cancel()
         active = scope.launch {
             var track: AudioTrack? = null
@@ -261,6 +293,9 @@ class MelodyAudioPlayer(context: Context) {
                         check(output.state == AudioTrack.STATE_INITIALIZED) {
                             "Audio track did not initialize after PCM write."
                         }
+                        // Custom Shared gain applies to THIS sound only.
+                        // Never change the phone's Media/Alarm hardware volume.
+                        output.setVolume(playbackVolumePercent / 100f)
                         output.play()
                     }
                     SoundSource.SYSTEM, SoundSource.FILE -> {
@@ -272,6 +307,8 @@ class MelodyAudioPlayer(context: Context) {
                         player.setDataSource(appContext, Uri.parse(uri))
                         player.isLooping = true
                         player.prepare()
+                        val gain = playbackVolumePercent / 100f
+                        player.setVolume(gain, gain)
                         player.start()
                     }
                 }
