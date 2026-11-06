@@ -81,6 +81,7 @@ class D149GlobalSoundControlsUiTest {
         compose.onNodeWithTag("sound_output_alarm")
             .performScrollTo().performClick()
         assertEquals(true, settings.classAlertsUseAlarmVolume)
+        assertEquals(true, settings.timerSoundsEnabled)
         compose.onNodeWithText("Same sound for all")
             .performScrollTo().performClick()
         assertEquals(SoundAssignmentMode.SHARED, settings.assignmentMode)
@@ -89,7 +90,8 @@ class D149GlobalSoundControlsUiTest {
         compose.onNodeWithTag("sound_shared_custom_length_slider")
             .performScrollTo().assertExists()
         compose.onNodeWithTag("sound_shared_custom_volume_slider").assertDoesNotExist()
-        assertEquals(false, settings.timerSoundsEnabled)
+        assertEquals(true, settings.timerSoundsEnabled)
         assertEquals(true, settings.classAlertsUseAlarmVolume)
+        compose.onNodeWithTag("sound_master_enabled").assertIsNotEnabled()
     }
 }
