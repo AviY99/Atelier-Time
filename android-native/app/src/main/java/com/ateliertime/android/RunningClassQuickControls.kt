@@ -34,13 +34,14 @@ internal fun RunningClassQuickControls(
     onMediaVolumeChange: (Int) -> Unit,
     onAlarmVolumeChange: (Int) -> Unit,
     onMaxBoth: () -> Unit,
+    containerTag: String = "running_class_quick_controls",
     modifier: Modifier = Modifier,
 ) {
     val palette = MaterialTheme.colorScheme
     Column(
         modifier = modifier.fillMaxWidth()
             .padding(horizontal = 10.dp)
-            .testTag("running_class_quick_controls"),
+            .testTag(containerTag),
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         Row(
