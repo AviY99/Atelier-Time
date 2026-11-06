@@ -1485,7 +1485,9 @@ fun SessionEditorScreen(
                                 recordClassEvent(
                                     "Mute: selected " +
                                         (if (soundSettings.classAlertsUseAlarmVolume)
-                                            "Alarm" else "Media") + " volume zero",
+                                            "Alarm" else "Media") + " volume " +
+                                        changed.selected(soundSettings.classAlertsUseAlarmVolume) +
+                                        " (Android permitted minimum)",
                                     timerView, timerView)
                             }.onFailure { failure ->
                                 classVolumeError = failure.message ?:
