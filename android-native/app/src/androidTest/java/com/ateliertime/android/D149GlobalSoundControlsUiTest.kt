@@ -39,26 +39,27 @@ class D149GlobalSoundControlsUiTest {
                     containerTag = "free_timer_quick_controls",
                     keepScreenAwake = awake,
                     onKeepScreenAwakeChange = { awake = it },
-                    mediaPercent = 62, alarmPercent = 30,
+                    selectedVolumePercent = 62,
                     useAlarmVolume = alarm,
-                    onChooseVolume = { alarm = it },
-                    onMediaVolumeChange = {},
-                    onAlarmVolumeChange = {},
-                    onMaxBoth = {},
+                    onSelectedVolumeChange = {},
+                    onVolumeMax = {},
+                    onSoundsOff = {},
                 )
             }
         }
         compose.onNodeWithTag("free_timer_quick_controls").assertExists()
-        compose.onNodeWithText("Keep Screen Awake").assertExists()
-        compose.onNodeWithText("Volumes").assertExists()
+        compose.onNodeWithText("Keep screen awake").assertExists()
+        compose.onNodeWithText("Volumes").assertDoesNotExist()
         compose.onNodeWithTag("running_media_volume_slider").assertExists()
-        compose.onNodeWithTag("running_alarm_volume_slider").assertExists()
-        compose.onNodeWithText("Selected").assertExists()
+        compose.onNodeWithTag("running_alarm_volume_slider").assertDoesNotExist()
+        compose.onNodeWithTag("class_volume_sounds_off").assertExists()
         compose.onNodeWithTag("class_volume_max_both").assertExists()
         compose.onNodeWithTag("keep_screen_awake").performClick()
         assertEquals(true, awake)
-        compose.onNodeWithText("Alarm Volume").performClick()
-        assertEquals(true, alarm)
+        compose.runOnUiThread { alarm = true }
+        compose.waitForIdle()
+        compose.onNodeWithText("Alarm Volume").assertExists()
+        compose.onNodeWithTag("running_media_volume_slider").assertDoesNotExist()
     }
 
     @Test fun soundsTabHasGlobalOnOffAndOutputRouteWithoutCustomGainSlider() {
