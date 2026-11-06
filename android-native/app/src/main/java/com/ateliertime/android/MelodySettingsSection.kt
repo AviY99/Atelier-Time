@@ -256,12 +256,17 @@ fun MelodySettingsSection(
         Text(if (settings.timerSoundsEnabled) "ON" else "OFF",
             style = MaterialTheme.typography.labelSmall)
         Switch(
-            checked = settings.timerSoundsEnabled,
+            checked = settings.timerSoundsEnabled || settings.classAlertsUseAlarmVolume,
+            enabled = !settings.classAlertsUseAlarmVolume,
             onCheckedChange = {
-                onSettingsChange(settings.copy(timerSoundsEnabled = it))
+                onSettingsChange(settings.setTimerSoundsEnabled(it))
             },
             modifier = Modifier.testTag("sound_master_enabled")
-                .semantics { contentDescription = "Sound ON or OFF for all timers" },
+                .semantics {
+                    contentDescription = if (settings.classAlertsUseAlarmVolume)
+                        "Sound ON. Cannot turn off while Alarm output is selected"
+                    else "Sound ON or OFF for all timers"
+                },
         )
     }
     Row(
@@ -276,13 +281,25 @@ fun MelodySettingsSection(
                 colors = atelierChipColors(),
                 selected = settings.classAlertsUseAlarmVolume == useAlarm,
                 onClick = {
-                    onSettingsChange(settings.copy(
-                        classAlertsUseAlarmVolume = useAlarm))
+                    onSettingsChange(settings.selectOutputAlarm(useAlarm))
                 },
                 modifier = Modifier.testTag(
                     if (useAlarm) "sound_output_alarm" else "sound_output_media"),
                 label = { Text(label, maxLines = 1) },
             )
+        }
+    }
+
+    // Keep a dedicated Help at the bottom, next to the GLOBAL output
+    // controls, not only the old general Help at the top of the sound picker.
+    Row(modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End) {
+        TextButton(
+            colors = atelierTextColors(),
+            modifier = Modifier.testTag("sound_output_help"),
+            onClick = { showHelp = true },
+        ) {
+            Text("Help", style = MaterialTheme.typography.labelSmall)
         }
     }
 
@@ -293,9 +310,14 @@ fun MelodySettingsSection(
             Text("Enable one or more sound libraries. 'Same sound for all' " +
                 "uses one sound AND one length for Class A/B/C and Free countdown. " +
                 "Choose 5s or 10s, or Custom for a sound length of 5–60 seconds. " +
-                "Sound ON/OFF enables or disables every Class and Free Timer cue. " +
+                "Sound ON/OFF enables or disables Class and Free Timer cues when " +
+                "Media output is selected. Alarm uses the phone's default alarm " +
+                "sound channel, which on many phones cannot be turned off using " +
+                "the app Sound switch. Selecting Alarm automatically sets Sound " +
+                "to ON and disables the OFF choice until Media is selected again. " +
                 "Use sound Media/Alarm selects the system volume channel for ALL cues. " +
-                "Adjust actual volume using the slim sliders on Run or Free Timer. " +
+                "The Volume max and Sounds off buttons in Run/Free affect only " +
+                "the chosen channel's volume bar; they do not change Sound ON/OFF. " +
                 "'Separate sounds' restores each cue's saved melody and duration. " +
                 "Switching modes never deletes your previous choices. " +
                 "System and audio-file sounds use Android pickers. " +
