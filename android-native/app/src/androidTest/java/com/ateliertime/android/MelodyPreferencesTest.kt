@@ -9,6 +9,7 @@ import com.ateliertime.domain.CueSound
 import com.ateliertime.domain.SoundSource
 import com.ateliertime.domain.TimerCue
 import com.ateliertime.domain.SoundAssignmentMode
+import com.ateliertime.domain.SharedDurationMode
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -90,8 +91,7 @@ class MelodyPreferencesTest {
         val restored = MelodyPreferences(context, isolatedName).loadSettings()
         assertEquals(shared, restored)
         TimerCue.entries.forEach { cue ->
-            assertEquals(if (cue == TimerCue.FREE_TIMER_FINISHED) 5 else 10,
-                restored.secondsFor(cue))
+            assertEquals(10, restored.secondsFor(cue))
             assertEquals(MelodyPattern.CELEBRATION, restored.soundFor(cue).melody)
         }
         val separateAgain = restored.setAssignmentMode(SoundAssignmentMode.SEPARATE)
@@ -118,13 +118,53 @@ class MelodyPreferencesTest {
         assertEquals(original.freeTimer, restored
             .setAssignmentMode(SoundAssignmentMode.SEPARATE)
             .soundFor(TimerCue.FREE_TIMER_FINISHED))
-        assertEquals(17, restored.secondsFor(TimerCue.FREE_TIMER_FINISHED))
+        assertEquals(5, restored.secondsFor(TimerCue.FREE_TIMER_FINISHED))
+        assertEquals(17, restored.setAssignmentMode(SoundAssignmentMode.SEPARATE)
+            .secondsFor(TimerCue.FREE_TIMER_FINISHED))
         assertEquals(original.poseEnd, restored.poseEnd)
         assertEquals(original.breakEnd, restored.breakEnd)
         assertEquals(original.classEnd, restored.classEnd)
         assertEquals(true, restored.classAlertsUseAlarmVolume)
     }
 
+
+    @Test fun customSharedLengthAndSoundGainSurviveRestartWithoutTouchingSeparate() {
+        val store = MelodyPreferences(context, isolatedName)
+        val before = store.loadSettings()
+            .setDuration(TimerCue.SESSION_FINISHED, 49)
+            .setDuration(TimerCue.FREE_TIMER_FINISHED, 36)
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .selectSharedCustomDuration()
+            .setSharedCustomDuration(28)
+            .setSharedCustomVolumePercent(35)
+        store.saveSettings(before)
+        val after = MelodyPreferences(context, isolatedName).loadSettings()
+        assertEquals(before, after)
+        assertEquals(SharedDurationMode.CUSTOM, after.sharedDurationMode)
+        TimerCue.entries.forEach { cue ->
+            assertEquals(28, after.secondsFor(cue))
+            assertEquals(35, after.playbackVolumePercentFor(cue))
+        }
+        val separate = after.setAssignmentMode(SoundAssignmentMode.SEPARATE)
+        assertEquals(49, separate.secondsFor(TimerCue.SESSION_FINISHED))
+        assertEquals(36, separate.secondsFor(TimerCue.FREE_TIMER_FINISHED))
+    }
+
+    @Test fun customChoiceRestoresAfterPresetAndReloadWithoutErasingUserVolume() {
+        val store = MelodyPreferences(context, isolatedName)
+        val first = store.loadSettings()
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .selectSharedCustomDuration().setSharedCustomDuration(43)
+            .setSharedCustomVolumePercent(25)
+            .setSharedDuration(5)
+        store.saveSettings(first)
+        val resumed = MelodyPreferences(context, isolatedName).loadSettings()
+        assertEquals(SharedDurationMode.FIVE, resumed.sharedDurationMode)
+        assertEquals(5, resumed.sharedSeconds)
+        val restored = resumed.selectSharedCustomDuration()
+        assertEquals(43, restored.sharedSeconds)
+        assertEquals(25, restored.sharedCustomVolumePercent)
+    }
 
     @Test fun sharedModeDisabledDormantSourceStaysDisabledAfterRestart() {
         val store = MelodyPreferences(context, isolatedName)
