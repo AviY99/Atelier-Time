@@ -123,7 +123,7 @@ class D152UnifiedButtonsUiTest {
         }
         val clickable = compose.onNodeWithTag("sound_preview_pose_finished")
             .performScrollTo().getUnclippedBoundsInRoot()
-        val outline = compose.onNodeWithTag("sound_preview_visual_pose_finished")
+        val outline = compose.onNodeWithTag("sound_preview_visual_pose_finished", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
         assertEquals(AtelierActionStyle.visibleHeight,
             outline.bottom - outline.top)
