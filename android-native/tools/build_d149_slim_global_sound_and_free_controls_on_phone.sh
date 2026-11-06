@@ -96,7 +96,7 @@ fi
 if grep -Fq 'sound_shared_custom_volume_slider' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt; then
   echo "STOP: removed Custom gain slider reintroduced"; exit 2
 fi
-grep -Fq '.testTag("free_timer_quick_controls")' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
+grep -Fq 'containerTag = "free_timer_quick_controls"' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
   { echo "STOP: Free Timer common volume controls missing"; exit 2; }
 grep -Fq 'timerSoundsEnabled = it' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt ||
   { echo "STOP: global Sound ON/OFF selector missing"; exit 2; }
