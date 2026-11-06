@@ -110,9 +110,11 @@ internal class ClassVolumeControl(context: Context) {
     }
 
     /**
-     * D-150: Sounds off is NOT the Sounds tab's global ON/OFF setting.
-     * It only lowers the selected Media/Alarm bar to zero; the unselected
-     * hardware stream and source selection stay unchanged.
+     * D-154: Mute lowers ONLY the selected Media/Alarm hardware stream
+     * to zero. The calling Timer screen separately synchronizes this
+     * successful change into the global Sounds ON/OFF preference (Media
+     * becomes OFF, Alarm keeps ON). This class never alters saved app prefs.
+     * The other hardware stream and selected output route stay unchanged.
      * Explicit mute releases any previously owned Max restoration for
      * THIS stream, even if the level had already reached zero.
      */
