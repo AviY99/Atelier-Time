@@ -223,7 +223,7 @@ fun SessionEditorScreen(
         onDispose { classVolumeControl.restoreIfUnchanged() }
     }
     var showConfirmMaxVolume by remember { mutableStateOf(false) }
-    var maxBothFromFreeTimer by remember { mutableStateOf(false) }
+    var maxVolumeFromFreeTimer by remember { mutableStateOf(false) }
     var classVolumeError by remember { mutableStateOf<String?>(null) }
     // Force immediate refresh after a user releases either Android volume slider;
     // the running wall clock refresh also picks up hardware-button changes.
@@ -876,7 +876,7 @@ fun SessionEditorScreen(
                         }
                     },
                     onVolumeMax = {
-                        maxBothFromFreeTimer = true
+                        maxVolumeFromFreeTimer = true
                         showConfirmMaxVolume = true
                     },
                     onSoundsOff = {
@@ -1402,7 +1402,7 @@ fun SessionEditorScreen(
                             }
                         },
                         onVolumeMax = {
-                            maxBothFromFreeTimer = false
+                            maxVolumeFromFreeTimer = false
                             showConfirmMaxVolume = true
                         },
                         onSoundsOff = {
@@ -1555,7 +1555,7 @@ fun SessionEditorScreen(
                 "to its device maximum. Other apps using that channel may be very loud. " +
                 "The other channel will NOT change. Android volume protection or " +
                 "Do Not Disturb can block this action. " +
-                (if (maxBothFromFreeTimer)
+                (if (maxVolumeFromFreeTimer)
                     "Original volume is restored when you exit the Free Timer"
                  else "Original volume is restored when the Class ends") +
                 ", only if you have not adjusted that channel yourself. Continue?") },
