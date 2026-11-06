@@ -1,5 +1,8 @@
 # Atelier Time — D-152 / Code46 — one consistent design language for buttons
 
+> **2026-11-06 LOCAL SAMSUNG BUILD EVIDENCE — D152/Code46 PASS (screenshot).** `ANDROIDTEST IMPORT PREFLIGHT PASS`, `ARTWORK AUDIT PASS`, **300/300 JVM tests passed, 0 errors/failures/skipped**, `APK ARTWORK INCLUDED PASS` with exact approved splash SHA256 inside final APK, and `D-152 JVM TESTS AND BUILD SUCCESSFUL` producing `/storage/emulated/0/Download/Atelier-Time-D152-API36-Candidate.apk`. AndroidTest **compiled only, not executed**. No installation or user visual acceptance proved by the screenshot; frozen Stable15/D147/code41 unchanged. Next gate is in-place install and hands-on Day/Night visual/behavior/data-preservation acceptance before any Stable16 promotion. Historical 'build pending' text below is superseded by this verified status.
+
+
 **Date:** 2026-11-06  
 **Status:** **SOURCE CHANGES COMMITTED on `android-native-kotlin-compose`; Samsung local build, instrumented Android UI tests and device visual acceptance PENDING.**  
 **Frozen accepted stable:** Stable15 / D147 / code41 `stable/android-d147-qa15-ui-install-accepted` at `c10f424c0ec000eca2dd561911934841decb4522` — **untouched**.  
