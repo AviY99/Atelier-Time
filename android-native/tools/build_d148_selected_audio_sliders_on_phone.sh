@@ -48,7 +48,8 @@ for file in \
   app/src/androidTest/java/com/ateliertime/android/MelodyPreferencesTest.kt \
   app/src/androidTest/java/com/ateliertime/android/D146CompactUserFeedbackUiTest.kt \
   app/src/androidTest/java/com/ateliertime/android/D147RunningClassQuickControlsUiTest.kt \
-  app/src/androidTest/java/com/ateliertime/android/D148OptionAControlsUiTest.kt; do
+  app/src/androidTest/java/com/ateliertime/android/D148OptionAControlsUiTest.kt \
+  app/src/androidTest/java/com/ateliertime/android/D148SharedSoundCustomUiTest.kt; do
   [[ -s "$file" ]] || { echo "STOP: missing $file"; exit 2; }
 done
 grep -Fq 'class_controls_row' app/src/main/java/com/ateliertime/android/SessionTimerScreen.kt
