@@ -856,7 +856,7 @@ fun SessionEditorScreen(
                     classVolumeControl.levels()
                 }
                 RunningClassQuickControls(
-                    modifier = Modifier.testTag("free_timer_quick_controls"),
+                    containerTag = "free_timer_quick_controls",
                     keepScreenAwake = keepScreenAwake,
                     onKeepScreenAwakeChange = { keepScreenAwake = it },
                     mediaPercent = freeVolumes.mediaPercent(),
