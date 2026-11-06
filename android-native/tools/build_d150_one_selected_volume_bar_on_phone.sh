@@ -57,15 +57,15 @@ done
 grep -Fq 'class_controls_row' app/src/main/java/com/ateliertime/android/SessionTimerScreen.kt
 grep -Fq 'class_controls_help' app/src/main/java/com/ateliertime/android/SessionTimerScreen.kt
 grep -Fq 'OutlinedIconButton(' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt
-# D-150 approved option A: two independent sliders, selected alert-source
-# row and right-aligned Max both. Keep the compact 2dp gap to the Timer.
+# D-150: ONE selected audio stream bar, no duplicate Volumes header,
+# separate Volume max and Sounds off buttons. Keep 2dp gap to Timer.
 for label in 'Keep screen awake' 'Media Volume' 'Alarm Volume' 'Volume' 'Sounds' 'ON' 'OFF'; do
   grep -Fq "$label" app/src/main/java/com/ateliertime/android/RunningClassQuickControls.kt ||
-    { echo "STOP: approved A control text missing: $label"; exit 2; }
+    { echo "STOP: D150 selected-bar UI text missing: $label"; exit 2; }
 done
 for control in 'running_media_volume_slider' 'running_alarm_volume_slider' 'running_volume_card' 'class_volume_max' 'class_volume_sounds_off' 'onSelectedVolumeChange: (Int) -> Unit' 'onVolumeMax: () -> Unit' 'onSoundsOff: () -> Unit'; do
   grep -Fq "$control" app/src/main/java/com/ateliertime/android/RunningClassQuickControls.kt ||
-    { echo "STOP: approved A slider/control contract missing: $control"; exit 2; }
+    { echo "STOP: D150 selected-bar action contract missing: $control"; exit 2; }
 done
 for method in 'setMediaPercent' 'setAlarmPercent' 'maxSelected' 'muteSelected' 'restoreIfUnchanged'; do
   grep -Fq "$method" app/src/main/java/com/ateliertime/android/ClassVolumeControl.kt ||
@@ -83,7 +83,7 @@ for method in 'selectSharedCustomDuration' 'setSharedCustomDuration' 'setSharedC
     { echo "STOP: shared Custom model missing: $method"; exit 2; }
 done
 grep -Fq 'playbackVolumePercent = soundSettings.playbackVolumePercentFor(' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
-  { echo 'STOP: Custom playback volume not wired'; exit 2; }
+  { echo 'STOP: sound playback gain call sites missing'; exit 2; }
 # D-150: no decorative filled cards or thick native sliders; the exact
 # same thin sound-style control is available in Free Timer and in Class Run.
 for fragment in 'AtelierSlimSlider(' 'Keep screen awake' 'running_media_volume_slider' 'running_alarm_volume_slider' 'onVolumeMax' 'onSoundsOff'; do
@@ -121,8 +121,12 @@ grep -Fq 'useAlarmVolume = soundSettings.classAlertsUseAlarmVolume' app/src/main
   { echo "STOP: global Media/Alarm audio output missing"; exit 2; }
 grep -Fq '.putBoolean("timerSoundsEnabled"' app/src/main/java/com/ateliertime/android/MelodyAudio.kt ||
   { echo "STOP: global sound enable not persisted"; exit 2; }
-grep -Fq 'classAlertsUseAlarmVolume = selectAlarm' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
-  { echo 'STOP: audio stream selected row is not persisted'; exit 2; }
+# D-150: choosing Media/Alarm is allowed ONLY in Sounds, not Run/Free.
+grep -Fq 'classAlertsUseAlarmVolume = useAlarm' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt ||
+  { echo 'STOP: Sounds tab has lost Media/Alarm output selection'; exit 2; }
+if grep -Fq 'onChooseVolume' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt; then
+  echo 'STOP: Media/Alarm is selectable outside Sounds.' >&2; exit 2
+fi
 grep -Fq 'if (runningClass) 2.dp else 8.dp' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
   { echo 'STOP: running-parent spacing not compact'; exit 2; }
 grep -Fq 'top = 2.dp, bottom = 16.dp' app/src/main/java/com/ateliertime/android/SessionTimerScreen.kt ||
