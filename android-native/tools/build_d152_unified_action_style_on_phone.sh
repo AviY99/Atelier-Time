@@ -116,7 +116,7 @@ for button in AtelierButton AtelierOutlinedButton AtelierTonalButton AtelierText
     { echo "STOP: unified action wrapper missing: $button"; exit 2; }
 done
 for layout in SessionEditorScreen.kt MelodySettingsSection.kt PresetLibrarySection.kt AtelierDesign.kt; do
-  grep -Eq '\bAtelier(Button|OutlinedButton|TonalButton|TextButton|FilterChip)\(' "app/src/main/java/com/ateliertime/android/$layout" ||
+  grep -Eq 'Atelier(Button|OutlinedButton|TonalButton|TextButton|FilterChip)\(' "app/src/main/java/com/ateliertime/android/$layout" ||
     { echo "STOP: $layout not using shared action wrappers"; exit 2; }
 done
 if grep -Eq '(^|[^A-Za-z])(Button|OutlinedButton|FilledTonalButton|TextButton|FilterChip)\('   app/src/main/java/com/ateliertime/android/{SessionEditorScreen,MelodySettingsSection,PresetLibrarySection,AtelierDesign}.kt; then
