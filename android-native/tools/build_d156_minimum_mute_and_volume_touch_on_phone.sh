@@ -191,7 +191,7 @@ for control in 'running_media_volume_slider' 'running_alarm_volume_slider' 'runn
   grep -Fq "$control" app/src/main/java/com/ateliertime/android/RunningClassQuickControls.kt ||
     { echo "STOP: D150 selected-bar action contract missing: $control"; exit 2; }
 done
-for method in 'setMediaPercent' 'setAlarmPercent' 'maxSelected' 'muteSelected' 'restoreIfUnchanged'; do
+for method in 'setMediaPercent' 'setAlarmPercent' 'maxSelected' 'muteSelected' 'setSelectedSoundEnabled'; do
   grep -Fq "$method" app/src/main/java/com/ateliertime/android/ClassVolumeControl.kt ||
     { echo "STOP: missing device volume control: $method"; exit 2; }
 done
@@ -235,8 +235,21 @@ fi
   { echo 'STOP: selected sound mute missing in Run/Free.' >&2; exit 2; }
 grep -Fq 'classVolumeControl.maxSelected(' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
   { echo 'STOP: Volume max must only raise selected stream.' >&2; exit 2; }
-grep -Fq 'Set $selectedName volume to maximum?' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
-  { echo 'STOP: selected-channel loudness consent missing.' >&2; exit 2; }
+# D156 updated user requirement: Max acts immediately and persists, NO warning.
+[[ "$(grep -Fc 'onVolumeMax = { applySelectedVolumeMax() }' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt)" -eq 2 ]] ||
+  { echo 'STOP: both Timers must invoke the SAME immediate Max action'; exit 2; }
+grep -Fq 'fun applySelectedVolumeMax()' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
+  { echo 'STOP: shared immediate Max handler missing'; exit 2; }
+for banned in 'restoreIfUnchanged' 'showConfirmMaxVolume' 'class_volume_max_dialog' 'class_volume_max_confirm' 'maxVolumeFromFreeTimer'; do
+  if grep -Fq "$banned" app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
+     grep -Fq "$banned" app/src/main/java/com/ateliertime/android/ClassVolumeControl.kt; then
+    echo "STOP: obsolete Max confirmation or restore rule remains: $banned"; exit 2
+  fi
+done
+if grep -Fq 'mediaBaseline' app/src/main/java/com/ateliertime/android/ClassVolumeControl.kt ||
+   grep -Fq 'alarmBaseline' app/src/main/java/com/ateliertime/android/ClassVolumeControl.kt; then
+  echo 'STOP: automatic Max restoration baselines must not survive'; exit 2
+fi
 grep -Fq 'containerTag = "free_timer_quick_controls"' app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt ||
   { echo "STOP: Free Timer common volume controls missing"; exit 2; }
 grep -Fq 'settings.setTimerSoundsEnabled(it)' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt ||
@@ -265,6 +278,10 @@ volcontrol=app/src/main/java/com/ateliertime/android/ClassVolumeControl.kt
 mathsrc=app/src/main/java/com/ateliertime/domain/VolumeSliderMath.kt
 runner=app/src/main/java/com/ateliertime/android/RunningClassQuickControls.kt
 slim=app/src/main/java/com/ateliertime/android/AtelierSlimSlider.kt
+# Both Mute and Sound-tab OFF must request the Android minimum without
+# throwing when the phone protects Alarm at a positive minimum.
+grep -Fq 'val requested = if (!enabled) minimum' "$volcontrol" ||
+  { echo 'STOP: Sound-tab OFF must target Android minimum'; exit 2; }
 grep -Fq 'val after = setPercent(stream(useAlarm), 0)' "$volcontrol" ||
   { echo "STOP: Mute does not request selected Android stream minimum"; exit 2; }
 if grep -Fq 'check(canMuteSelected(useAlarm))' "$volcontrol"; then
