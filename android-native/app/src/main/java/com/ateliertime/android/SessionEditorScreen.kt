@@ -840,15 +840,54 @@ fun SessionEditorScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text("Free timer", style = MaterialTheme.typography.headlineSmall)
-                Row(modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Text("Keep screen awake during timers", modifier = Modifier.weight(1f))
-                    Switch(checked = keepScreenAwake,
-                        onCheckedChange = { keepScreenAwake = it },
-                        modifier = Modifier.testTag("free_keep_screen_awake"))
+                // D-149: Free uses the SAME three lightweight controls as
+                // Run: keep awake, independent Media and Alarm volume bars,
+                // plus the existing confirmation-protected Max both.
+                val freeVolumes = remember(wallClockMillis / 1_000L, volumeRevision) {
+                    classVolumeControl.levels()
                 }
-                if (mediaVolumeMuted) Text("Media volume is at zero. Free timer " +
-                    "completion may be silent.", color = atelierErrorTextColor())
+                RunningClassQuickControls(
+                    modifier = Modifier.testTag("free_timer_quick_controls"),
+                    keepScreenAwake = keepScreenAwake,
+                    onKeepScreenAwakeChange = { keepScreenAwake = it },
+                    mediaPercent = freeVolumes.mediaPercent(),
+                    alarmPercent = freeVolumes.alarmPercent(),
+                    useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
+                    onChooseVolume = { selectAlarm ->
+                        if (soundSettings.classAlertsUseAlarmVolume != selectAlarm) {
+                            saveSoundSettings(soundSettings.copy(
+                                classAlertsUseAlarmVolume = selectAlarm))
+                        }
+                    },
+                    onMediaVolumeChange = { percent ->
+                        runCatching { classVolumeControl.setMediaPercent(percent) }
+                            .onSuccess {
+                                volumeRevision++
+                                classVolumeError = null
+                            }
+                            .onFailure { classVolumeError =
+                                it.message ?: "Cannot change Media volume." }
+                    },
+                    onAlarmVolumeChange = { percent ->
+                        runCatching { classVolumeControl.setAlarmPercent(percent) }
+                            .onSuccess {
+                                volumeRevision++
+                                classVolumeError = null
+                            }
+                            .onFailure { classVolumeError =
+                                it.message ?: "Cannot change Alarm volume." }
+                    },
+                    onMaxBoth = {
+                        maxBothFromFreeTimer = true
+                        showConfirmMaxVolume = true
+                    },
+                )
+                if (classAlertVolumeMuted && soundEnabled)
+                    Text("Selected sound volume is zero. Free Timer completion may be silent.",
+                        color = atelierErrorTextColor())
+                classVolumeError?.let {
+                    Text(it, color = atelierErrorTextColor())
+                }
                 FreeCountdownSection(
                     view = freeTimerView,
                     onStart = { hours, minutes, seconds ->
@@ -863,6 +902,8 @@ fun SessionEditorScreen(
                     },
                     onExit = {
                         freeMelodyPlayer.stop()
+                        classVolumeControl.restoreIfUnchanged()
+                        volumeRevision++
                         freeTimerView = freeTimer.exit()
                         freeTimerError = null
                     },
