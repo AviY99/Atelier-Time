@@ -160,41 +160,34 @@ class SoundSettingsTest {
         assertEquals(31, separate.secondsFor(TimerCue.FREE_TIMER_FINISHED))
     }
 
-    @Test fun sharedCustomModeRestoresLengthAndGainAfterUsingFiveOrTenPresets() {
+    @Test fun sharedCustomLengthRestoresAfterUsingFiveOrTenPresets() {
         val start = SoundSettings().setAssignmentMode(SoundAssignmentMode.SHARED)
             .selectSharedCustomDuration()
             .setSharedCustomDuration(37)
-            .setSharedCustomVolumePercent(42)
         assertEquals(37, start.sharedSeconds)
-        assertEquals(42, start.playbackVolumePercentFor(TimerCue.POSE_FINISHED))
         val five = start.setSharedDuration(5)
         assertEquals(SharedDurationMode.FIVE, five.sharedDurationMode)
         assertEquals(5, five.sharedSeconds)
-        assertEquals(100, five.playbackVolumePercentFor(TimerCue.FREE_TIMER_FINISHED))
         val ten = five.setSharedDuration(10)
         assertEquals(SharedDurationMode.TEN, ten.sharedDurationMode)
         assertEquals(10, ten.secondsFor(TimerCue.FREE_TIMER_FINISHED))
         val restored = ten.selectSharedCustomDuration()
         assertEquals(37, restored.sharedSeconds)
-        assertEquals(42, restored.playbackVolumePercentFor(TimerCue.FREE_TIMER_FINISHED))
         assertEquals(37, restored.sharedCustomSeconds)
     }
 
-    @Test fun sharedCustomGainDoesNotAlterIndependentSoundSettings() {
+    @Test fun legacyCustomGainIsIgnoredAndCannotMuteSoundAfterUpgrade() {
         val original = SoundSettings().setAssignmentMode(SoundAssignmentMode.SHARED)
             .selectSharedCustomDuration()
         for (percent in listOf(0, 1, 45, 100)) {
-            val next = original.setSharedCustomVolumePercent(percent)
-            assertEquals(percent, next.playbackVolumePercentFor(TimerCue.SESSION_FINISHED))
-            assertEquals(100, next.setAssignmentMode(SoundAssignmentMode.SEPARATE)
-                .playbackVolumePercentFor(TimerCue.SESSION_FINISHED))
-            assertEquals(original.poseEnd, next.poseEnd)
-            assertEquals(original.freeTimer, next.freeTimer)
-        }
-        for (invalid in listOf(-1, 101)) {
-            assertThrows(IllegalArgumentException::class.java) {
-                original.setSharedCustomVolumePercent(invalid)
+            val legacy = original.setSharedCustomVolumePercent(percent)
+            TimerCue.entries.forEach { cue ->
+                assertEquals(100, legacy.playbackVolumePercentFor(cue))
+                assertEquals(100, legacy.setAssignmentMode(SoundAssignmentMode.SEPARATE)
+                    .playbackVolumePercentFor(cue))
             }
+            assertEquals(original.poseEnd, legacy.poseEnd)
+            assertEquals(original.freeTimer, legacy.freeTimer)
         }
     }
 
@@ -211,6 +204,34 @@ class SoundSettingsTest {
                 initial.setSharedCustomDuration(invalid)
             }
         }
+    }
+
+    @Test fun globalSoundOnOffDoesNotDeleteSelectionsOrChangeOtherMode() {
+        val original = SoundSettings()
+            .setDuration(TimerCue.SESSION_FINISHED, 30)
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .selectSharedCustomDuration().setSharedCustomDuration(23)
+        assertTrue(original.timerSoundsEnabled)
+        val off = original.copy(timerSoundsEnabled = false)
+        assertFalse(off.timerSoundsEnabled)
+        assertEquals(23, off.secondsFor(TimerCue.POSE_FINISHED))
+        assertEquals(23, off.secondsFor(TimerCue.FREE_TIMER_FINISHED))
+        assertFalse(off.setAssignmentMode(SoundAssignmentMode.SEPARATE).timerSoundsEnabled)
+        val on = off.copy(timerSoundsEnabled = true)
+        assertTrue(on.timerSoundsEnabled)
+        assertEquals(original.poseEnd, on.poseEnd)
+        assertEquals(original.classEnd, on.classEnd)
+    }
+
+    @Test fun mediaAlarmSelectionIsSharedByAllTimerCuesWithoutChangingSoundSettings() {
+        val configured = SoundSettings()
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .copy(classAlertsUseAlarmVolume = true)
+        assertTrue(configured.classAlertsUseAlarmVolume)
+        assertTrue(configured.setAssignmentMode(SoundAssignmentMode.SEPARATE)
+            .classAlertsUseAlarmVolume)
+        assertEquals(5, configured.secondsFor(TimerCue.FREE_TIMER_FINISHED))
+        assertEquals(100, configured.playbackVolumePercentFor(TimerCue.FREE_TIMER_FINISHED))
     }
 
     @Test fun sharedAndSeparateModesPreserveExternalSourcesIndependently() {
