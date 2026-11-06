@@ -63,7 +63,7 @@ internal fun RunningClassQuickControls(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
             ) {
-                Text("▣", color = scheme.onSurface, style = MaterialTheme.typography.titleSmall)
+                Text("🔒", fontSize = 16.sp, color = scheme.onSurface)
                 Text(
                     "Keep Screen Awake",
                     modifier = Modifier.weight(1f),
