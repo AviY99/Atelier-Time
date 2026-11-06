@@ -100,14 +100,17 @@ PY
 grep -Fq 'class_controls_row' app/src/main/java/com/ateliertime/android/SessionTimerScreen.kt
 grep -Fq 'class_controls_help' app/src/main/java/com/ateliertime/android/SessionTimerScreen.kt
 
-# D-153 unified 40dp visual action height and 48dp touch wrappers.
-for file in app/src/main/java/com/ateliertime/android/RunningClassQuickControls.kt \
+# D153 uses ONE shared toggle face plus SlimTimerAction faces;
+# RunningClassQuickControls owns the scroll row and delegates face geometry.
+for file in app/src/main/java/com/ateliertime/android/AtelierActionStyle.kt \
             app/src/main/java/com/ateliertime/android/SlimTimerAction.kt; do
   grep -Fq 'AtelierActionStyle.visibleHeight' "$file" ||
-    { echo "STOP: unified 40dp visual height missing in $file"; exit 2; }
+    { echo "STOP: unified 40dp visible button height missing in $file"; exit 2; }
   grep -Fq 'AtelierActionStyle.touchHeight' "$file" ||
-    { echo "STOP: 48dp hit zone missing in $file"; exit 2; }
+    { echo "STOP: 48dp touch target missing in $file"; exit 2; }
 done
+grep -Fq 'AtelierActionStyle.touchHeight' app/src/main/java/com/ateliertime/android/RunningClassQuickControls.kt ||
+  { echo "STOP: timer row lost full 48dp touch height"; exit 2; }
 for token in 'RoundedCornerShape(12.dp)' 'visibleHeight = 40.dp' 'touchHeight = 48.dp' 'minimumWidth = 56.dp' 'stroke = 1.dp'; do
   grep -Fq "$token" app/src/main/java/com/ateliertime/android/AtelierActionStyle.kt ||
     { echo "STOP: action token missing: $token"; exit 2; }
@@ -161,7 +164,7 @@ grep -Fq '.size(AtelierActionStyle.visibleHeight)' app/src/main/java/com/atelier
 grep -Fq 'Modifier.size(AtelierActionStyle.touchHeight)' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt ||
   { echo 'STOP: Sound Preview has lost 48dp touch area.'; exit 2; }
 # D-153: ONE selected audio stream bar, no duplicate Volumes header,
-# separate Volume max and Sounds off buttons. Keep 2dp gap to Timer.
+# a plain Volume label and two independent Max / Mute buttons. Keep 2dp gap.
 for label in 'Keep screen awake' 'Media Volume' 'Alarm Volume' 'Volume' 'Mute' 'ON' 'OFF'; do
   grep -Fq "$label" app/src/main/java/com/ateliertime/android/RunningClassQuickControls.kt ||
     { echo "STOP: D150 selected-bar UI text missing: $label"; exit 2; }
