@@ -339,4 +339,48 @@ class SoundSettingsTest {
         }
     }
 
+    @Test fun timerMuteAtMediaZeroSetsGlobalSoundOffWithoutErasingCues() {
+        val configured = SoundSettings()
+            .setDuration(TimerCue.FREE_TIMER_FINISHED, 17)
+            .setAssignmentMode(SoundAssignmentMode.SHARED)
+            .selectSharedCustomDuration().setSharedCustomDuration(26)
+        val off = configured.afterSelectedStreamVolumeChange(0)
+        assertFalse(off.timerSoundsEnabled)
+        assertFalse(off.classAlertsUseAlarmVolume)
+        assertEquals(configured.sharedSeconds, off.sharedSeconds)
+        assertEquals(configured.poseEnd, off.poseEnd)
+        assertEquals(configured.freeTimer, off.freeTimer)
+    }
+
+    @Test fun timerMediaSliderAndMaxRaiseSoundOnFromPreviouslyOff() {
+        val off = SoundSettings().setTimerSoundsEnabled(false)
+        for (actualHardwareLevel in listOf(1, 3, 15)) {
+            val resumed = off.afterSelectedStreamVolumeChange(actualHardwareLevel)
+            assertTrue(resumed.timerSoundsEnabled)
+            assertEquals(off.classAlertsUseAlarmVolume, resumed.classAlertsUseAlarmVolume)
+            assertEquals(off.classEnd, resumed.classEnd)
+        }
+        assertFalse(off.afterSelectedStreamVolumeChange(0).timerSoundsEnabled)
+    }
+
+    @Test fun alarmAtZeroStillForcesOnAndNonzeroNeverAltersOutputRoute() {
+        val alarm = SoundSettings().setTimerSoundsEnabled(false)
+            .selectOutputAlarm(true)
+        assertTrue(alarm.afterSelectedStreamVolumeChange(0).timerSoundsEnabled)
+        assertTrue(alarm.afterSelectedStreamVolumeChange(5).timerSoundsEnabled)
+        assertTrue(alarm.afterSelectedStreamVolumeChange(0).classAlertsUseAlarmVolume)
+        val media = alarm.selectOutputAlarm(false)
+        assertFalse(media.afterSelectedStreamVolumeChange(0).timerSoundsEnabled)
+    }
+
+    @Test fun timerVolumeStateRejectsInvalidHardwareLevelAndIsIdempotent() {
+        val selected = SoundSettings().afterSelectedStreamVolumeChange(7)
+        assertEquals(selected, selected.afterSelectedStreamVolumeChange(7))
+        val off = selected.afterSelectedStreamVolumeChange(0)
+        assertEquals(off, off.afterSelectedStreamVolumeChange(0))
+        assertThrows(IllegalArgumentException::class.java) {
+            selected.afterSelectedStreamVolumeChange(-1)
+        }
+    }
+
 }
