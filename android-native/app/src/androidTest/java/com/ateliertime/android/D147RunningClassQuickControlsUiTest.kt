@@ -79,7 +79,7 @@ class D147RunningClassQuickControlsUiTest {
         compose.onNodeWithTag("running_media_volume_slider").assertDoesNotExist()
         compose.onNodeWithTag("keep_screen_awake").performClick()
         assertTrue(awake)
-        compose.onNodeWithTag("class_volume_max_both").performClick()
+        compose.onNodeWithTag("class_volume_max").performClick()
         compose.onNodeWithTag("class_volume_sounds_off").performClick()
         assertEquals(1, maxClicks)
         assertEquals(1, muteClicks)
