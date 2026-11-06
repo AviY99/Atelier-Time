@@ -27,7 +27,8 @@ import kotlin.math.roundToInt
  * buttons, with plain Keep screen awake / Volume labels and 48dp hits.
  *
  * Sounds is the ONLY location to choose Media vs Alarm. Volume max and
- * Sounds off change only the selected Android stream, not Sound ON/OFF.
+ * A successful selected-channel change is also synced with the global
+ * Sound ON/OFF preference by the parent Timer screen (D154).
  */
 @Composable
 internal fun RunningClassQuickControls(
