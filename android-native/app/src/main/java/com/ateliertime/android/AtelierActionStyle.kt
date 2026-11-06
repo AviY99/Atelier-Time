@@ -1,6 +1,13 @@
 package com.ateliertime.android
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.heightIn
@@ -14,7 +21,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SelectableChipColors
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -148,4 +163,50 @@ internal fun AtelierFilterChip(
             if (enabled) MaterialTheme.colorScheme.outline
             else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
     )
+}
+
+/**
+ * D-153 common ON/OFF control for Editor, Sounds and the two timers.
+ * One 12dp round / 40dp visual / 1dp frame within a 48dp touch target.
+ */
+@Composable
+internal fun AtelierOnOffButton(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    description: String? = null,
+    visualTag: String? = null,
+) {
+    val palette = MaterialTheme.colorScheme
+    val shape = AtelierActionStyle.shape
+    Box(
+        modifier = modifier.width(48.dp).height(AtelierActionStyle.touchHeight)
+            .clip(shape)
+            .toggleable(value = checked, enabled = enabled, role = Role.Switch,
+                onValueChange = onCheckedChange)
+            .semantics {
+                if (description != null) contentDescription = description
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth().height(AtelierActionStyle.visibleHeight)
+                .background(if (checked) palette.primaryContainer else palette.surface, shape)
+                .border(AtelierActionStyle.stroke,
+                    if (enabled) palette.outline
+                    else palette.outlineVariant.copy(alpha = 0.6f), shape)
+                .then(if (visualTag != null) Modifier.testTag(visualTag) else Modifier),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                if (checked) "ON" else "OFF",
+                style = MaterialTheme.typography.labelSmall,
+                color = if (!enabled) palette.onSurface.copy(alpha = 0.45f)
+                    else if (checked) palette.onPrimaryContainer
+                    else palette.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+    }
 }
