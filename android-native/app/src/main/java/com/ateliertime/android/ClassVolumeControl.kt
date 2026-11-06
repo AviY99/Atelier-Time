@@ -72,6 +72,39 @@ internal class ClassVolumeControl(context: Context) {
         }
     }
 
+    /**
+     * D-150: Sounds off is a one-shot volume action, NOT the saved Sound
+     * ON/OFF mode. It sets BOTH hardware streams to zero; the two sliders
+     * then reflect zero. It does not change the alert-stream selection.
+     * On success the explicit user's mute supersedes earlier Max-both
+     * auto-restoration ownership. Revert both streams on partial failure.
+     */
+    fun muteBoth(): ClassVolumeLevels {
+        val before = levels()
+        try {
+            audio.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0)
+            audio.setStreamVolume(AudioManager.STREAM_ALARM, 0, 0)
+            val after = levels()
+            check(after.media == 0 && after.alarm == 0) {
+                "Android volume protection blocked muting one of the channels."
+            }
+            mediaBaseline = null
+            alarmBaseline = null
+            return after
+        } catch (failure: Exception) {
+            runCatching {
+                audio.setStreamVolume(AudioManager.STREAM_MUSIC, before.media, 0)
+            }
+            runCatching {
+                audio.setStreamVolume(AudioManager.STREAM_ALARM, before.alarm, 0)
+            }
+            throw IllegalStateException(
+                "Could not mute both Media and Alarm volumes. " +
+                    "Check Android Do Not Disturb and volume restrictions. " +
+                    (failure.message ?: ""), failure)
+        }
+    }
+
     /** User-confirmed Max both. A DND restriction causes a visible failure. */
     fun maxBoth(): ClassVolumeLevels {
         val before = levels()
