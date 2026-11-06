@@ -1,6 +1,8 @@
 package com.ateliertime.android
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,6 +12,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.ateliertime.domain.*
@@ -434,23 +437,36 @@ private fun SoundPicker(
             TimerCue.FREE_TIMER_FINISHED -> "free timer"
         }
         val playTint = MaterialTheme.colorScheme.primary
-        OutlinedIconButton(
-            onClick = { onPreview(cue) },
-            modifier = Modifier.size(48.dp)
+        // D-152: same 12dp corner and 40dp visual outline as every
+        // action button, inside a full 48dp accessible touch target.
+        Box(
+            modifier = Modifier.size(AtelierActionStyle.touchHeight)
                 .testTag("sound_preview_${cue.name.lowercase()}")
+                .clickable(role = Role.Button) { onPreview(cue) }
                 .semantics {
                     contentDescription =
                         "Play ${settings.secondsFor(cue)} second $previewCue sound preview"
                 },
+            contentAlignment = Alignment.Center,
         ) {
-            Canvas(modifier = Modifier.size(19.dp)) {
+            Box(
+                modifier = Modifier.size(AtelierActionStyle.visibleHeight)
+                    .border(
+                        AtelierActionStyle.stroke,
+                        MaterialTheme.colorScheme.outline,
+                        AtelierActionStyle.shape,
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Canvas(modifier = Modifier.size(19.dp)) {
                 val triangle = Path().apply {
                     moveTo(size.width * 0.2f, size.height * 0.08f)
                     lineTo(size.width * 0.88f, size.height * 0.5f)
                     lineTo(size.width * 0.2f, size.height * 0.92f)
                     close()
                 }
-                drawPath(triangle, playTint)
+                    drawPath(triangle, playTint)
+                }
             }
         }
     }
