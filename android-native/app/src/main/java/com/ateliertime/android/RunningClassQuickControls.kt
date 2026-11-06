@@ -23,9 +23,8 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
 /**
- * D-151: one slim top row shared by Run + Free Timer. 34dp VISUAL buttons,
- * but 48dp interactive wrappers. The Volume group has the same border
- * weight/visible height as the ON/OFF button; no cartoonish cards.
+ * D-153: Run + Free Timer share the same ON/OFF and 40dp framed Max/Mute
+ * buttons, with plain Keep screen awake / Volume labels and 48dp hits.
  *
  * Sounds is the ONLY location to choose Media vs Alarm. Volume max and
  * Sounds off change only the selected Android stream, not Sound ON/OFF.
@@ -42,8 +41,6 @@ internal fun RunningClassQuickControls(
     containerTag: String = "running_class_quick_controls",
     modifier: Modifier = Modifier,
 ) {
-    val colors = MaterialTheme.colorScheme
-    val controlShape = AtelierActionStyle.shape
     var dragging by remember(useAlarmVolume) { mutableStateOf<Float?>(null) }
     val percent = (dragging ?: selectedVolumePercent.toFloat())
         .roundToInt().coerceIn(0, 100)
@@ -53,123 +50,50 @@ internal fun RunningClassQuickControls(
             .testTag(containerTag),
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
-        // Single horizontal row even at increased fonts: scroll horizontally
-        // rather than wrap or squeeze the interactive target below 48dp.
+        // Plain labels like "Keep screen awake"; ONLY Max and Mute are
+        // two separate, matching action buttons. 48dp touch targets.
         Row(
             modifier = Modifier.fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                .heightIn(min = 48.dp)
+                .heightIn(min = AtelierActionStyle.touchHeight)
                 .testTag("running_screen_awake_row"),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
         ) {
             Text(
                 "Keep screen awake",
-                modifier = Modifier.width(83.dp),
+                modifier = Modifier.widthIn(max = 72.dp)
+                    .testTag("keep_screen_awake_label"),
                 style = MaterialTheme.typography.labelSmall,
                 maxLines = 2,
             )
-            // ON/OFF label is immediately next to its explanatory text.
-            Box(
-                modifier = Modifier.width(48.dp).height(AtelierActionStyle.touchHeight)
-                    .testTag("keep_screen_awake")
-                    .clip(controlShape)
-                    .clickable(
-                        role = Role.Button,
-                        onClick = { onKeepScreenAwakeChange(!keepScreenAwake) },
-                    )
-                    .semantics {
-                        contentDescription = "Keep screen awake during timers, " +
-                            (if (keepScreenAwake) "ON" else "OFF") +
-                            "; uses more battery"
-                    },
-                contentAlignment = Alignment.Center,
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(AtelierActionStyle.visibleHeight)
-                        .background(if (keepScreenAwake) colors.primaryContainer
-                            else colors.surface, controlShape)
-                        .border(AtelierActionStyle.stroke, colors.outline, controlShape)
-                        .testTag("keep_screen_awake_visual"),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        if (keepScreenAwake) "ON" else "OFF",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (keepScreenAwake) colors.onPrimaryContainer
-                            else colors.onSurfaceVariant,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                }
-            }
-            // One thin frame holds "Volume" and both independent commands.
-            // Only these two segments are clickable. Same visible 34dp
-            // height and 1dp outline as the ON/OFF button.
-            Box(
-                modifier = Modifier.width(171.dp).height(AtelierActionStyle.touchHeight)
-                    .testTag("running_volume_actions"),
-                contentAlignment = Alignment.Center,
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(AtelierActionStyle.visibleHeight)
-                        .border(AtelierActionStyle.stroke, colors.outline, controlShape)
-                        .testTag("running_volume_actions_border"),
-                )
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        "Volume",
-                        modifier = Modifier.padding(start = 6.dp, end = 5.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
-                    )
-                    Box(
-                        modifier = Modifier.width(1.dp).height(22.dp)
-                            .background(colors.outlineVariant),
-                    )
-                    Box(
-                        modifier = Modifier.weight(0.85f).fillMaxHeight()
-                            .testTag("class_volume_max")
-                            .clickable(role = Role.Button, onClick = onVolumeMax)
-                            .semantics {
-                                contentDescription =
-                                    "Volume max: maximize selected $streamName"
-                            },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            "Max",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 1,
-                        )
-                    }
-                    Box(
-                        modifier = Modifier.width(1.dp).height(22.dp)
-                            .background(colors.outlineVariant),
-                    )
-                    Box(
-                        modifier = Modifier.weight(1.4f).fillMaxHeight()
-                            .testTag("class_volume_sounds_off")
-                            .clickable(role = Role.Button, onClick = onSoundsOff)
-                            .semantics {
-                                contentDescription =
-                                    "Sounds off: set selected $streamName to zero"
-                            },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            "Sounds off",
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 2,
-                            textAlign = TextAlign.Center,
-                            lineHeight = MaterialTheme.typography.labelSmall.lineHeight,
-                        )
-                    }
-                }
-            }
+            AtelierOnOffButton(
+                checked = keepScreenAwake,
+                onCheckedChange = onKeepScreenAwakeChange,
+                modifier = Modifier.testTag("keep_screen_awake"),
+                visualTag = "keep_screen_awake_visual",
+                description = "Keep screen awake during timers, " +
+                    (if (keepScreenAwake) "ON" else "OFF") + "; uses more battery",
+            )
+            Text(
+                "Volume",
+                modifier = Modifier.padding(start = 3.dp, end = 1.dp)
+                    .testTag("running_volume_label"),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+            )
+            SlimTimerAction(
+                label = "Max",
+                tag = "class_volume_max",
+                modifier = Modifier.width(56.dp),
+                onClick = onVolumeMax,
+            )
+            SlimTimerAction(
+                label = "Mute",
+                tag = "class_volume_sounds_off",
+                modifier = Modifier.width(62.dp),
+                onClick = onSoundsOff,
+            )
         }
         // Exactly ONE Sound-selected volume bar; keep its label close to it.
         Column(
