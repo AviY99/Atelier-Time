@@ -89,7 +89,8 @@ internal fun RunningClassQuickControls(
                     modifier = Modifier.fillMaxWidth().height(34.dp)
                         .background(if (keepScreenAwake) colors.primaryContainer
                             else colors.surface, controlShape)
-                        .border(1.dp, colors.outline, controlShape),
+                        .border(1.dp, colors.outline, controlShape)
+                        .testTag("keep_screen_awake_visual"),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -111,7 +112,8 @@ internal fun RunningClassQuickControls(
             ) {
                 Box(
                     modifier = Modifier.fillMaxWidth().height(34.dp)
-                        .border(1.dp, colors.outline, controlShape),
+                        .border(1.dp, colors.outline, controlShape)
+                        .testTag("running_volume_actions_border"),
                 )
                 Row(
                     modifier = Modifier.fillMaxSize(),
