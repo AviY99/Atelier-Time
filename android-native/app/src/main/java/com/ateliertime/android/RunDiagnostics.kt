@@ -268,9 +268,13 @@ private fun SoundSettings.toDiagnosticJson(): JSONObject {
             .put("displayName", sound.displayName ?: JSONObject.NULL)
             // No content URI: may reveal unrelated user documents.
             .put("durationSeconds", secondsFor(c))
+            .put("playbackGainPercent", playbackVolumePercentFor(c))
     }
     return JSONObject()
         .put("mode", assignmentMode.name)
+        .put("sharedDurationMode", sharedDurationMode.name)
+        .put("sharedCustomSeconds", sharedCustomSeconds)
+        .put("sharedCustomVolumePercent", sharedCustomVolumePercent)
         .put("enabledSources", JSONArray(enabledSources.map { it.name }))
         .put("alarmVolume", classAlertsUseAlarmVolume)
         .put("A", cue(TimerCue.POSE_FINISHED))
