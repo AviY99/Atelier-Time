@@ -10,8 +10,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 
 /**
  * A visually slim slider using the stable value-based Material3 API already
- * exercised elsewhere in Atelier Time. Scaling the drawing only preserves the
- * unscaled touch/accessibility area, range, steps and end-of-drag callback.
+ * exercised elsewhere in Atelier Time. Ordinary controls keep the compact
+ * visual; the Class/Free volume bar opts OUT of vertical shrinking so the
+ * thumb can actually be grabbed at zero, with a >=56dp hit strip.
  */
 @Composable
 internal fun AtelierSlimSlider(
@@ -21,6 +22,7 @@ internal fun AtelierSlimSlider(
     steps: Int,
     modifier: Modifier = Modifier,
     onValueChangeFinished: (() -> Unit)? = null,
+    compactVisual: Boolean = true,
 ) {
     Slider(
         value = value,
@@ -28,7 +30,8 @@ internal fun AtelierSlimSlider(
         valueRange = valueRange,
         steps = steps,
         onValueChangeFinished = onValueChangeFinished,
-        modifier = modifier.graphicsLayer(scaleY = 0.55f),
+        modifier = if (compactVisual) modifier.graphicsLayer(scaleY = 0.55f)
+            else modifier,
         colors = SliderDefaults.colors(
             thumbColor = MaterialTheme.colorScheme.secondary,
             activeTrackColor = MaterialTheme.colorScheme.secondary,
