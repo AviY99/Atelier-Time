@@ -313,7 +313,8 @@ fun MelodySettingsSection(
                 "Choose 5s or 10s, or Custom for a sound length of 5–60 seconds. " +
                 "Sound ON/OFF and the slider, Max and Mute in both Timers " +
                 "control the SAME Android volume channel chosen here. " +
-                "OFF and Mute request zero; ON restores the last positive volume " +
+                "OFF and Mute request the device's lowest permitted volume; " +
+                "ON restores the last positive volume " +
                 "or 25 percent if none is saved. " +
                 "Media and Alarm follow the same rules when Android allows zero. " +
                 "Some devices enforce a positive Alarm minimum and will not mute " +
