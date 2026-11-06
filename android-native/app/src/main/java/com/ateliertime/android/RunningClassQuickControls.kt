@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -164,6 +165,9 @@ private fun VolumeChoiceRow(
     sliderTag: String,
 ) {
     val colors = MaterialTheme.colorScheme
+    // Night mode must also make Selected clearly darker than an unfilled row.
+    val darkSelection = if (colors.background.luminance() < 0.3f)
+        Color(0xFF233E5A) else colors.primary
     val foreground = if (selected) colors.onPrimary else colors.onSurface
     val secondaryText = if (selected) colors.onPrimary else colors.onSurfaceVariant
     var dragPercent by remember { mutableStateOf<Float?>(null) }
@@ -172,7 +176,7 @@ private fun VolumeChoiceRow(
     Column(
         modifier = Modifier.fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
-            .background(if (selected) colors.primary else Color.Transparent)
+            .background(if (selected) darkSelection else Color.Transparent)
             .testTag(rowTag)
             .padding(start = 7.dp, end = 7.dp, top = 2.dp, bottom = 0.dp),
         verticalArrangement = Arrangement.spacedBy(0.dp),
