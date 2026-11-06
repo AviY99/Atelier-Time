@@ -78,6 +78,22 @@ data class SoundSettings(
         copy(timerSoundsEnabled =
             if (classAlertsUseAlarmVolume) true else enabled)
 
+    /**
+     * D-154: the Run/Free slider, Mute and confirmed Max are additional
+     * controls of the SAME global Sound ON/OFF preference in Sounds.
+     * Read actual hardware level AFTER a successful change rather than
+     * trusting a requested percent (Android may quantize to zero).
+     *
+     * Media at zero -> Sound OFF; Media above zero -> Sound ON.
+     * Alarm preserves the existing mandatory ON lock, even at zero;
+     * the zero-volume warning must still be visible in that case.
+     * This changes no other audio stream, selected route, or saved cue.
+     */
+    fun afterSelectedStreamVolumeChange(actualLevel: Int): SoundSettings {
+        require(actualLevel >= 0) { "Actual stream volume cannot be negative." }
+        return setTimerSoundsEnabled(actualLevel > 0)
+    }
+
     /** Non-destructive migration for older saved Alarm + Sound OFF data. */
     fun normalizedAlarmSoundOn(): SoundSettings =
         if (classAlertsUseAlarmVolume && !timerSoundsEnabled)
