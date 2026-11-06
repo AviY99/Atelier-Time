@@ -18,7 +18,7 @@ import kotlin.math.roundToInt
 /**
  * Compact Sound tab: library checkboxes in one row, two explicit sound modes.
  * SHARED offers one sound and unified 5s / 10s / Custom duration for
- * Class A/B/C and Free, with per-sound gain in Custom; Separate restores
+ * Class A/B/C and Free, with a duration bar in Custom; Separate restores
  * original A/B/C/Free pickers and saved lengths.
  */
 @Composable
@@ -129,10 +129,8 @@ fun MelodySettingsSection(
             }
         }
         if (settings.sharedDurationMode == SharedDurationMode.CUSTOM) {
-            // Custom is ONE sound for all (Class A/B/C and Free). Two settings
-            // are independent: playback LENGTH and per-sound playback VOLUME.
-            // Unlike the Run screen, this gain slider never changes the
-            // phone-wide Media or Alarm volume stream.
+            // D-149: Custom changes only the sound duration (5–60 seconds).
+            // Sound volume is controlled exclusively by Media/Alarm on Run/Free.
             var customLengthDraft by remember(settings.sharedCustomSeconds) {
                 mutableFloatStateOf(settings.sharedCustomSeconds.toFloat())
             }
@@ -156,31 +154,6 @@ fun MelodySettingsSection(
                     .semantics {
                         contentDescription =
                             "Custom sound length ${customLengthDraft.roundToInt()} seconds"
-                    },
-            )
-            var customGainDraft by remember(settings.sharedCustomVolumePercent) {
-                mutableFloatStateOf(settings.sharedCustomVolumePercent.toFloat())
-            }
-            Row(modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically) {
-                Text("Custom sound volume", style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.weight(1f))
-                Text("${customGainDraft.roundToInt()}%",
-                    style = MaterialTheme.typography.labelMedium)
-            }
-            AtelierSlimSlider(
-                value = customGainDraft,
-                onValueChange = { customGainDraft = it.roundToInt().coerceIn(0,100).toFloat() },
-                onValueChangeFinished = {
-                    onSettingsChange(settings.setSharedCustomVolumePercent(
-                        customGainDraft.roundToInt().coerceIn(0,100)))
-                },
-                valueRange = 0f..100f, steps = 99,
-                modifier = Modifier.fillMaxWidth()
-                    .testTag("sound_shared_custom_volume_slider")
-                    .semantics {
-                        contentDescription =
-                            "Custom sound playback volume ${customGainDraft.roundToInt()} percent"
                     },
             )
         }
@@ -241,7 +214,7 @@ fun MelodySettingsSection(
     if (settings.assignmentMode == SoundAssignmentMode.SHARED) {
         // A single Shared sound and duration really apply to ALL four cues.
         // Retain the dormant, independent Free choice/length for Separate.
-        Text("Free countdown uses the same sound, length and Custom volume.",
+        Text("Free countdown uses the same sound and duration.",
             style = MaterialTheme.typography.labelSmall)
     } else {
         Text("Free countdown · completion sound",
@@ -273,15 +246,44 @@ fun MelodySettingsSection(
         )
     }
     HorizontalDivider()
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text("Use alarm volume for Class A/B/C",
-                style = MaterialTheme.typography.titleSmall)
-        }
-        Switch(checked = settings.classAlertsUseAlarmVolume,
+    // D-149: these two global Sound controls apply identically to Class and Free.
+    Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("Sound", modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.titleSmall)
+        Text(if (settings.timerSoundsEnabled) "ON" else "OFF",
+            style = MaterialTheme.typography.labelSmall)
+        Switch(
+            checked = settings.timerSoundsEnabled,
             onCheckedChange = {
-                onSettingsChange(settings.copy(classAlertsUseAlarmVolume = it))
-            })
+                onSettingsChange(settings.copy(timerSoundsEnabled = it))
+            },
+            modifier = Modifier.testTag("sound_master_enabled")
+                .semantics { contentDescription = "Sound ON or OFF for all timers" },
+        )
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text("Use sound", modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.titleSmall)
+        listOf(false to "Media", true to "Alarm").forEach { (useAlarm, label) ->
+            FilterChip(
+                colors = atelierChipColors(),
+                selected = settings.classAlertsUseAlarmVolume == useAlarm,
+                onClick = {
+                    onSettingsChange(settings.copy(
+                        classAlertsUseAlarmVolume = useAlarm))
+                },
+                modifier = Modifier.testTag(
+                    if (useAlarm) "sound_output_alarm" else "sound_output_media"),
+                label = { Text(label, maxLines = 1) },
+            )
+        }
     }
 
     if (showHelp) AlertDialog(
@@ -290,13 +292,13 @@ fun MelodySettingsSection(
         text = {
             Text("Enable one or more sound libraries. 'Same sound for all' " +
                 "uses one sound AND one length for Class A/B/C and Free countdown. " +
-                "Choose 5s or 10s, or Custom to adjust sound length (5–60 seconds) " +
-                "and per-sound playback volume (0–100%) with separate sliders. " +
-                "Custom sound volume does not change the phone's Media/Alarm settings. " +
+                "Choose 5s or 10s, or Custom for a sound length of 5–60 seconds. " +
+                "Sound ON/OFF enables or disables every Class and Free Timer cue. " +
+                "Use sound Media/Alarm selects the system volume channel for ALL cues. " +
+                "Adjust actual volume using the slim sliders on Run or Free Timer. " +
                 "'Separate sounds' restores each cue's saved melody and duration. " +
                 "Switching modes never deletes your previous choices. " +
                 "System and audio-file sounds use Android pickers. " +
-                "Class alerts can use Alarm or Media volume. " +
                 "These sound settings never change approved Classes.")
         },
         confirmButton = {
