@@ -128,7 +128,7 @@ class MelodyPreferencesTest {
     }
 
 
-    @Test fun customSharedLengthAndSoundGainSurviveRestartWithoutTouchingSeparate() {
+    @Test fun legacySavedGainSurvivesMigrationButNoLongerAttenuatesCustomSound() {
         val store = MelodyPreferences(context, isolatedName)
         val before = store.loadSettings()
             .setDuration(TimerCue.SESSION_FINISHED, 49)
@@ -143,7 +143,7 @@ class MelodyPreferencesTest {
         assertEquals(SharedDurationMode.CUSTOM, after.sharedDurationMode)
         TimerCue.entries.forEach { cue ->
             assertEquals(28, after.secondsFor(cue))
-            assertEquals(35, after.playbackVolumePercentFor(cue))
+            assertEquals(100, after.playbackVolumePercentFor(cue))
         }
         val separate = after.setAssignmentMode(SoundAssignmentMode.SEPARATE)
         assertEquals(49, separate.secondsFor(TimerCue.SESSION_FINISHED))
@@ -164,6 +164,22 @@ class MelodyPreferencesTest {
         val restored = resumed.selectSharedCustomDuration()
         assertEquals(43, restored.sharedSeconds)
         assertEquals(25, restored.sharedCustomVolumePercent)
+    }
+
+    @Test fun soundEnableAndOutputChannelPersistGloballyAcrossRestart() {
+        val store = MelodyPreferences(context, isolatedName)
+        val initial = store.loadSettings()
+        assertEquals(true, initial.timerSoundsEnabled)
+        val changed = initial.copy(
+            timerSoundsEnabled = false, classAlertsUseAlarmVolume = true)
+        store.saveSettings(changed)
+        val restored = MelodyPreferences(context, isolatedName).loadSettings()
+        assertEquals(false, restored.timerSoundsEnabled)
+        assertEquals(true, restored.classAlertsUseAlarmVolume)
+        store.saveSettings(restored.copy(timerSoundsEnabled = true))
+        val enabled = MelodyPreferences(context, isolatedName).loadSettings()
+        assertEquals(true, enabled.timerSoundsEnabled)
+        assertEquals(true, enabled.classAlertsUseAlarmVolume)
     }
 
     @Test fun sharedModeDisabledDormantSourceStaysDisabledAfterRestart() {
