@@ -35,7 +35,7 @@ fun MelodySettingsSection(
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text("Sound choices", style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f))
-        TextButton(colors = atelierTextColors(), onClick = { showHelp = true }) {
+        AtelierTextButton(colors = atelierTextColors(), onClick = { showHelp = true }) {
             Text("Help")
         }
     }
@@ -81,7 +81,7 @@ fun MelodySettingsSection(
             SoundAssignmentMode.SHARED to "Same sound for all",
             SoundAssignmentMode.SEPARATE to "Separate sounds",
         ).forEach { (mode, title) ->
-            FilterChip(
+            AtelierFilterChip(
                 colors = atelierChipColors(),
                 modifier = Modifier.weight(1f),
                 selected = settings.assignmentMode == mode,
@@ -109,7 +109,7 @@ fun MelodySettingsSection(
                 overflow = TextOverflow.Ellipsis)
             listOf(SharedDurationMode.FIVE, SharedDurationMode.TEN,
                 SharedDurationMode.CUSTOM).forEach { mode ->
-                FilterChip(
+                AtelierFilterChip(
                     colors = atelierChipColors(),
                     selected = settings.sharedDurationMode == mode,
                     onClick = {
@@ -277,7 +277,7 @@ fun MelodySettingsSection(
         Text("Use sound", modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.titleSmall)
         listOf(false to "Media", true to "Alarm").forEach { (useAlarm, label) ->
-            FilterChip(
+            AtelierFilterChip(
                 colors = atelierChipColors(),
                 selected = settings.classAlertsUseAlarmVolume == useAlarm,
                 onClick = {
@@ -294,7 +294,7 @@ fun MelodySettingsSection(
     // controls, not only the old general Help at the top of the sound picker.
     Row(modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End) {
-        TextButton(
+        AtelierTextButton(
             colors = atelierTextColors(),
             modifier = Modifier.testTag("sound_output_help"),
             onClick = { showHelp = true },
@@ -324,7 +324,7 @@ fun MelodySettingsSection(
                 "These sound settings never change approved Classes.")
         },
         confirmButton = {
-            TextButton(colors = atelierTextColors(), onClick = { showHelp = false }) {
+            AtelierTextButton(colors = atelierTextColors(), onClick = { showHelp = false }) {
                 Text("Close")
             }
         },
@@ -347,7 +347,7 @@ private fun CompactCue(
         Text(title, style = MaterialTheme.typography.titleSmall,
             modifier = Modifier.weight(1f), maxLines = 1)
         listOf(5, 10).forEach { seconds ->
-            FilterChip(
+            AtelierFilterChip(
                 colors = atelierChipColors(),
                 selected = settings.secondsFor(cue) == seconds,
                 onClick = { onSettingsChange(settings.setDuration(cue, seconds)) },
@@ -374,7 +374,7 @@ private fun SoundPicker(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         Box(modifier = Modifier.weight(1f)) {
-            OutlinedButton(colors = atelierOutlinedColors(), onClick = { expanded = true },
+            AtelierOutlinedButton(colors = atelierOutlinedColors(), onClick = { expanded = true },
                 modifier = Modifier.fillMaxWidth()
                     .testTag("sound_picker_${cue.name.lowercase()}")) {
                 Text("${choice.source.title} · ${choice.title}",
