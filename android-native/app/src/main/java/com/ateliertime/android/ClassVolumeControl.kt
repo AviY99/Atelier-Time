@@ -61,12 +61,10 @@ internal class ClassVolumeControl(context: Context) {
         val maxIndex = if (useAlarm) before.alarmMax else before.mediaMax
         check(maxIndex > 0) { "Selected device audio stream is unavailable." }
         val minimum = minIndex(useAlarm)
-        if (!enabled && minimum > 0) {
-            throw IllegalStateException(
-                "Android enforces a positive minimum for this sound channel.")
-        }
+        // OFF requests the lowest level Android permits. On a protected
+        // Alarm stream it will remain positive, so Sound stays ON.
         val lastPositive = history.getInt(key(useAlarm), -1)
-        val requested = if (!enabled) 0 else if (current > 0) current else
+        val requested = if (!enabled) minimum else if (current > 0) current else
             MediaSoundRestorePolicy.restoreLevel(lastPositive, maxIndex)
                 .coerceAtLeast(minimum).coerceAtMost(maxIndex)
         if (requested == current) {
@@ -120,8 +118,7 @@ internal class ClassVolumeControl(context: Context) {
         val max = if (media) before.mediaMax else before.alarmMax
         val current = if (media) before.media else before.alarm
         check(max > 0) { "The Android volume stream is unavailable." }
-        val target = VolumeSliderMath.level(percent, max).coerceAtLeast(
-            minIndex(!media)).coerceAtMost(max)
+        val target = VolumeSliderMath.selectedTarget(percent, minIndex(!media), max)
         if (target == current) {
             rememberPositive(!media, current)
             return before
@@ -190,22 +187,14 @@ internal class ClassVolumeControl(context: Context) {
     }
 
     /**
-     * D-154: Mute lowers ONLY the selected Media/Alarm hardware stream
-     * to zero. The calling Timer screen separately synchronizes this
-     * successful change into the global Sounds ON/OFF preference (Media
-     * becomes OFF when Android allows zero, regardless of channel).
-     * The other hardware stream and selected output route stay unchanged.
-     * Explicit mute releases any previously owned Max restoration for
-     * THIS stream, even if the level had already reached zero.
+     * D156: Mute sets the selected Android stream to the LOWEST volume that
+     * the phone permits. A protected Alarm channel may have a positive
+     * minimum: Mute MUST lower it to that minimum rather than throw.
+     * The screen synchronizes global Sound from the ACTUAL resulting level:
+     * zero => OFF, Android-positive minimum => ON. The other stream is intact.
      */
     fun muteSelected(useAlarm: Boolean): ClassVolumeLevels {
-        check(canMuteSelected(useAlarm)) {
-            "Android enforces a positive minimum on this sound channel."
-        }
-        val after = setPercent(
-            if (useAlarm) AudioManager.STREAM_ALARM else AudioManager.STREAM_MUSIC,
-            0,
-        )
+        val after = setPercent(stream(useAlarm), 0)
         if (useAlarm) alarmBaseline = null else mediaBaseline = null
         return after
     }
