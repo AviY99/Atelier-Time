@@ -256,20 +256,17 @@ fun MelodySettingsSection(
     ) {
         Text("Sound", modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.titleSmall)
-        Text(if (settings.timerSoundsEnabled) "ON" else "OFF",
-            style = MaterialTheme.typography.labelSmall)
-        Switch(
+        AtelierOnOffButton(
             checked = settings.timerSoundsEnabled || settings.classAlertsUseAlarmVolume,
             enabled = !settings.classAlertsUseAlarmVolume,
             onCheckedChange = {
                 onSettingsChange(settings.setTimerSoundsEnabled(it))
             },
-            modifier = Modifier.testTag("sound_master_enabled")
-                .semantics {
-                    contentDescription = if (settings.classAlertsUseAlarmVolume)
-                        "Sound ON. Cannot turn off while Alarm output is selected"
-                    else "Sound ON or OFF for all timers"
-                },
+            modifier = Modifier.testTag("sound_master_enabled"),
+            visualTag = "sound_master_enabled_visual",
+            description = if (settings.classAlertsUseAlarmVolume)
+                "Sound ON. Cannot turn off while Alarm output is selected"
+            else "Sound ON or OFF for all timers",
         )
     }
     Row(
@@ -319,7 +316,7 @@ fun MelodySettingsSection(
                 "the app Sound switch. Selecting Alarm automatically sets Sound " +
                 "to ON and disables the OFF choice until Media is selected again. " +
                 "Use sound Media/Alarm selects the system volume channel for ALL cues. " +
-                "The Volume max and Sounds off buttons in Run/Free affect only " +
+                "The Max and Mute buttons in Run/Free affect only " +
                 "the chosen channel's volume bar; they do not change Sound ON/OFF. " +
                 "'Separate sounds' restores each cue's saved melody and duration. " +
                 "Switching modes never deletes your previous choices. " +
