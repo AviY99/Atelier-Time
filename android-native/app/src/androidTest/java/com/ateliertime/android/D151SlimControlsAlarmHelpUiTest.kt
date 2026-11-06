@@ -48,7 +48,7 @@ class D151SlimControlsAlarmHelpUiTest {
             .getUnclippedBoundsInRoot()
         val volumeHit = compose.onNodeWithTag("running_volume_actions")
             .getUnclippedBoundsInRoot()
-        val awakeVisual = compose.onNodeWithTag("keep_screen_awake_visual")
+        val awakeVisual = compose.onNodeWithTag("keep_screen_awake_visual", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
         val volumeVisual = compose.onNodeWithTag("running_volume_actions_border")
             .getUnclippedBoundsInRoot()
