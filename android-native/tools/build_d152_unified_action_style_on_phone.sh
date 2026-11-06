@@ -39,6 +39,7 @@ for file in \
   app/src/main/java/com/ateliertime/android/RunningClassQuickControls.kt \
   app/src/main/java/com/ateliertime/android/AtelierActionStyle.kt \
   app/src/main/java/com/ateliertime/android/AtelierDesign.kt \
+  app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt \
   app/src/main/java/com/ateliertime/android/PresetLibrarySection.kt \
   app/src/main/java/com/ateliertime/android/SlimTimerAction.kt \
   app/src/main/java/com/ateliertime/android/FreeCountdownSection.kt \
@@ -46,7 +47,6 @@ for file in \
   app/src/main/java/com/ateliertime/domain/VolumeSliderMath.kt \
   app/src/main/java/com/ateliertime/domain/SoundSettings.kt \
   app/src/main/java/com/ateliertime/android/MelodyAudio.kt \
-  app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt \
   app/src/test/java/com/ateliertime/domain/D146GroupTimerLabelsTest.kt \
   app/src/test/java/com/ateliertime/domain/D148VolumeSliderMathTest.kt \
   app/src/test/java/com/ateliertime/domain/SoundSettingsTest.kt \
@@ -143,7 +143,10 @@ done
 grep -Fq ').normalizedAlarmSoundOn()' app/src/main/java/com/ateliertime/android/MelodyAudio.kt ||
   { echo 'STOP: legacy Alarm OFF preferences migration missing'; exit 2; }
 
-grep -Fq 'OutlinedIconButton(' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt
+grep -Fq '.size(AtelierActionStyle.visibleHeight)' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt ||
+  { echo 'STOP: Sound Preview icon no longer uses shared 40dp frame.'; exit 2; }
+grep -Fq 'Modifier.size(AtelierActionStyle.touchHeight)' app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt ||
+  { echo 'STOP: Sound Preview has lost 48dp touch area.'; exit 2; }
 # D-152: ONE selected audio stream bar, no duplicate Volumes header,
 # separate Volume max and Sounds off buttons. Keep 2dp gap to Timer.
 for label in 'Keep screen awake' 'Media Volume' 'Alarm Volume' 'Volume' 'Sounds' 'ON' 'OFF'; do
