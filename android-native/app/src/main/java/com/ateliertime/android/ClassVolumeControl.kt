@@ -13,12 +13,13 @@ internal data class ClassVolumeLevels(
 
 /**
  * Phone-wide Android audio streams, changed ONLY by explicit user actions:
- * an individual D-148 slider release, or the existing confirmed Max both.
+ * a selected stream's slider, one-shot selected-stream mute or a confirmed
+ * Volume max for that selected stream. It never changes the other channel.
  *
- * Each Max-both override owns an independent restorable pre-override baseline.
- * A subsequent explicit slider change releases restoration ownership of ONLY
- * that stream, even if the user chooses maximum again. Hardware/other-app
- * changes also prevent restoration if the stream no longer equals our target.
+ * Each selected-stream Max owns an independent restorable baseline.
+ * A subsequent explicit slider or mute change releases restoration ownership
+ * of ONLY that stream. External volume changes prevent restoration when
+ * the current level is no longer our requested maximum.
  */
 internal class ClassVolumeControl(context: Context) {
     private val audio = context.applicationContext
@@ -125,66 +126,7 @@ internal class ClassVolumeControl(context: Context) {
     }
 
     /**
-     * D-150: Sounds off is a one-shot volume action, NOT the saved Sound
-     * ON/OFF mode. It sets BOTH hardware streams to zero; the two sliders
-     * then reflect zero. It does not change the alert-stream selection.
-     * On success the explicit user's mute supersedes earlier Max-both
-     * auto-restoration ownership. Revert both streams on partial failure.
-     */
-    fun muteBoth(): ClassVolumeLevels {
-        val before = levels()
-        try {
-            audio.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0)
-            audio.setStreamVolume(AudioManager.STREAM_ALARM, 0, 0)
-            val after = levels()
-            check(after.media == 0 && after.alarm == 0) {
-                "Android volume protection blocked muting one of the channels."
-            }
-            mediaBaseline = null
-            alarmBaseline = null
-            return after
-        } catch (failure: Exception) {
-            runCatching {
-                audio.setStreamVolume(AudioManager.STREAM_MUSIC, before.media, 0)
-            }
-            runCatching {
-                audio.setStreamVolume(AudioManager.STREAM_ALARM, before.alarm, 0)
-            }
-            throw IllegalStateException(
-                "Could not mute both Media and Alarm volumes. " +
-                    "Check Android Do Not Disturb and volume restrictions. " +
-                    (failure.message ?: ""), failure)
-        }
-    }
-
-    /** User-confirmed Max both. A DND restriction causes a visible failure. */
-    fun maxBoth(): ClassVolumeLevels {
-        val before = levels()
-        try {
-            audio.setStreamVolume(AudioManager.STREAM_MUSIC, before.mediaMax, 0)
-            audio.setStreamVolume(AudioManager.STREAM_ALARM, before.alarmMax, 0)
-            val after = levels()
-            check(after.media == after.mediaMax && after.alarm == after.alarmMax) {
-                "Android did not allow full Media and Alarm volume."
-            }
-            if (mediaBaseline == null) mediaBaseline = before.media
-            if (alarmBaseline == null) alarmBaseline = before.alarm
-            return after
-        } catch (failure: Exception) {
-            runCatching {
-                if (levels().media == before.mediaMax)
-                    audio.setStreamVolume(AudioManager.STREAM_MUSIC, before.media, 0)
-                if (levels().alarm == before.alarmMax)
-                    audio.setStreamVolume(AudioManager.STREAM_ALARM, before.alarm, 0)
-            }
-            throw IllegalStateException(
-                "Could not set both volumes. Check Android volume/DND settings. " +
-                    (failure.message ?: ""), failure)
-        }
-    }
-
-    /**
-     * Restore ONLY our unchanged Max-both overrides on Class exit/finish.
+     * Restore ONLY our unchanged, user-confirmed selected-stream Max on exit.
      * A manually moved slider removes its stream's restorable baseline.
      */
     fun restoreIfUnchanged() {
