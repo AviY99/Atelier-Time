@@ -890,6 +890,19 @@ fun SessionEditorScreen(
                         maxBothFromFreeTimer = true
                         showConfirmMaxVolume = true
                     },
+                    // One-shot hardware mute. Does NOT change Sounds tab's
+                    // persisted Sound ON/OFF nor the Media/Alarm cue route.
+                    onSoundsOff = {
+                        runCatching { classVolumeControl.muteBoth() }
+                            .onSuccess {
+                                volumeRevision++
+                                classVolumeError = null
+                            }
+                            .onFailure {
+                                classVolumeError = it.message ?:
+                                    "Could not mute both volumes."
+                            }
+                    },
                 )
                 if (classAlertVolumeMuted && soundEnabled)
                     Text("Selected sound volume is zero. Free Timer completion may be silent.",
@@ -1416,6 +1429,20 @@ fun SessionEditorScreen(
                         onMaxBoth = {
                             maxBothFromFreeTimer = false
                             showConfirmMaxVolume = true
+                        },
+                        onSoundsOff = {
+                            runCatching { classVolumeControl.muteBoth() }
+                                .onSuccess {
+                                    volumeRevision++
+                                    classVolumeError = null
+                                    recordClassEvent(
+                                        "Sounds off: both volumes zero",
+                                        timerView, timerView)
+                                }
+                                .onFailure { failure ->
+                                    classVolumeError = failure.message ?:
+                                        "Could not mute both volumes."
+                                }
                         },
                     )
                 } else {
