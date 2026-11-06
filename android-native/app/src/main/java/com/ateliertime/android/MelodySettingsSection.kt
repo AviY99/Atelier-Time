@@ -32,6 +32,7 @@ fun MelodySettingsSection(
     onChooseAudioFile: (TimerCue) -> Unit,
     onPreview: (TimerCue) -> Unit,
     onError: (String) -> Unit,
+    canMuteSelectedAudio: Boolean = true,
 ) {
     var showHelp by remember { mutableStateOf(false) }
     HorizontalDivider()
@@ -257,16 +258,16 @@ fun MelodySettingsSection(
         Text("Sound", modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.titleSmall)
         AtelierOnOffButton(
-            checked = settings.timerSoundsEnabled || settings.classAlertsUseAlarmVolume,
-            enabled = !settings.classAlertsUseAlarmVolume,
+            checked = settings.timerSoundsEnabled,
+            enabled = canMuteSelectedAudio,
             onCheckedChange = {
                 onSettingsChange(settings.setTimerSoundsEnabled(it))
             },
             modifier = Modifier.testTag("sound_master_enabled"),
             visualTag = "sound_master_enabled_visual",
-            description = if (settings.classAlertsUseAlarmVolume)
-                "Sound ON. Cannot turn off while Alarm output is selected"
-            else "Sound ON or OFF for all timers",
+            description = if (!canMuteSelectedAudio)
+                "Android enforces a minimum volume for the selected audio channel"
+            else "Sound ON or OFF for Class and Free Timer",
         )
     }
     Row(
@@ -310,18 +311,15 @@ fun MelodySettingsSection(
             Text("Enable one or more sound libraries. 'Same sound for all' " +
                 "uses one sound AND one length for Class A/B/C and Free countdown. " +
                 "Choose 5s or 10s, or Custom for a sound length of 5–60 seconds. " +
-                "Sound ON/OFF enables or disables Class and Free Timer cues when " +
-                "Media output is selected. Alarm uses the phone's default alarm " +
-                "sound channel, which on many phones cannot be turned off using " +
-                "the app Sound switch. Selecting Alarm automatically sets Sound " +
-                "to ON and disables the OFF choice until Media is selected again. " +
-                "Use sound Media/Alarm selects the system volume channel for ALL cues. " +
-                "The Max, Mute and volume slider in Run/Free adjust only " +
-                "the selected device volume channel, and also sync Sound ON/OFF: " +
-                "Media zero turns Sound OFF; Media above zero turns Sound ON. " +
-                "Alarm always keeps Sound ON even at volume zero. " +
-                "The low-volume warning appears whenever the selected channel " +
-                "is zero, regardless of the global Sound switch. " +
+                "Sound ON/OFF and the slider, Max and Mute in both Timers " +
+                "control the SAME Android volume channel chosen here. " +
+                "OFF and Mute request zero; ON restores the last positive volume " +
+                "or 25 percent if none is saved. " +
+                "Media and Alarm follow the same rules when Android allows zero. " +
+                "Some devices enforce a positive Alarm minimum and will not mute " +
+                "that channel; in that case Sound stays ON and zero is unavailable. " +
+                "Sound state and zero-volume warnings reflect the actual " +
+                "hardware level; the other channel is never modified. " +
                 "'Separate sounds' restores each cue's saved melody and duration. " +
                 "Switching modes never deletes your previous choices. " +
                 "System and audio-file sounds use Android pickers. " +
