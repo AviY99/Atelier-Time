@@ -31,26 +31,21 @@ class D148OptionAControlsUiTest {
                 Box(Modifier.width(340.dp)) {
                     RunningClassQuickControls(
                         keepScreenAwake = true, onKeepScreenAwakeChange = {},
-                        mediaPercent = 75, alarmPercent = 40,
-                        useAlarmVolume = false, onChooseVolume = {},
-                        onMediaVolumeChange = {}, onAlarmVolumeChange = {},
-                        onMaxBoth = {},
+                        selectedVolumePercent = 75,
+                        useAlarmVolume = false,
+                        onSelectedVolumeChange = {},
+                        onVolumeMax = {},
+                        onSoundsOff = {},
                     )
                 }
             }
         }
-        compose.onNodeWithText("Keep Screen Awake").assertExists()
-        compose.onNodeWithText("Volumes").assertExists()
+        compose.onNodeWithText("Keep screen awake").assertExists()
+        compose.onNodeWithText("Volumes").assertDoesNotExist()
         compose.onNodeWithTag("running_media_volume_slider").assertExists()
-        compose.onNodeWithTag("running_alarm_volume_slider").assertExists()
-        compose.onNodeWithText("Selected").assertExists()
-        val card = compose.onNodeWithTag("running_volume_card")
-            .getUnclippedBoundsInRoot()
-        val max = compose.onNodeWithTag("class_volume_max_both")
-            .getUnclippedBoundsInRoot()
-        assertTrue("Max both should sit toward the right side of the volume card",
-            max.left > card.left + (card.right - card.left) / 2f)
-        assertTrue("Max both must remain inside card", max.right <= card.right)
+        compose.onNodeWithTag("running_alarm_volume_slider").assertDoesNotExist()
+        compose.onNodeWithTag("class_volume_sounds_off").assertExists()
+
     }
 
     @Test fun headerTapChoosesAlarmForCuesWithoutChangingEitherVolume() {
@@ -62,18 +57,21 @@ class D148OptionAControlsUiTest {
                 Box(Modifier.width(340.dp)) {
                     RunningClassQuickControls(
                         keepScreenAwake = false, onKeepScreenAwakeChange = {},
-                        mediaPercent = 75, alarmPercent = 40,
+                        selectedVolumePercent = 75,
                         useAlarmVolume = selectedAlarm,
-                        onChooseVolume = { selectedAlarm = it },
-                        onMediaVolumeChange = { mediaChanges++ },
-                        onAlarmVolumeChange = { alarmChanges++ },
-                        onMaxBoth = {},
+                        onSelectedVolumeChange = { mediaChanges++ },
+                        onVolumeMax = {},
+                        onSoundsOff = {},
                     )
                 }
             }
         }
-        compose.onNodeWithText("Alarm Volume").performClick()
-        assertTrue("Alarm stream must now be selected for Class cues", selectedAlarm)
+        compose.onNodeWithText("Media Volume").assertExists()
+        compose.onNodeWithTag("running_alarm_volume_slider").assertDoesNotExist()
+        compose.runOnUiThread { selectedAlarm = true }
+        compose.waitForIdle()
+        compose.onNodeWithText("Alarm Volume").assertExists()
+        compose.onNodeWithTag("running_media_volume_slider").assertDoesNotExist()
         assertEquals(0, mediaChanges)
         assertEquals(0, alarmChanges)
     }
