@@ -141,6 +141,9 @@ class MelodyPreferences(
             classEndSeconds = seconds("classEndSeconds", 5, true),
             freeTimerSeconds = seconds("freeTimerSeconds", 5, true),
             classAlertsUseAlarmVolume = prefs.getBoolean("classAlertsUseAlarmVolume", false),
+            timerSoundsEnabled = runCatching {
+                prefs.getBoolean("timerSoundsEnabled", true)
+            }.getOrDefault(true),
         )
     }
 
@@ -184,6 +187,7 @@ class MelodyPreferences(
             .putInt("classEndSeconds", settings.classEndSeconds)
             .putInt("freeTimerSeconds", settings.freeTimerSeconds)
             .putBoolean("classAlertsUseAlarmVolume", settings.classAlertsUseAlarmVolume)
+            .putBoolean("timerSoundsEnabled", settings.timerSoundsEnabled)
         fun write(key: String, value: CueSound) {
             edit.putString("${key}Source", value.source.name)
                 .putString("${key}Uri", value.uri)
