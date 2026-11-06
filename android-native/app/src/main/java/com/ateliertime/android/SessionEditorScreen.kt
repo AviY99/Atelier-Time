@@ -1096,9 +1096,12 @@ fun SessionEditorScreen(
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Place special breaks automatically", modifier = Modifier.weight(1f))
-            Text(if (automatic) "ON" else "OFF", style = MaterialTheme.typography.labelMedium)
-            Switch(checked = automatic,
-                onCheckedChange = { automatic = it; invalidate() })
+            AtelierOnOffButton(
+                checked = automatic,
+                onCheckedChange = { automatic = it; invalidate() },
+                modifier = Modifier.testTag("editor_auto_special_break_toggle"),
+                description = "Place special breaks automatically",
+            )
         }
         if (!automatic && count.toIntOrNull() != 0) {
             OutlinedTextField(colors = atelierInputColors(), 
@@ -1433,9 +1436,13 @@ fun SessionEditorScreen(
                             Text("Uses more battery",
                                 style = MaterialTheme.typography.labelSmall)
                         }
-                        Switch(checked = keepScreenAwake,
+                        AtelierOnOffButton(
+                            checked = keepScreenAwake,
                             onCheckedChange = { keepScreenAwake = it },
-                            modifier = Modifier.testTag("keep_screen_awake"))
+                            modifier = Modifier.testTag("keep_screen_awake"),
+                            visualTag = "keep_screen_awake_visual",
+                            description = "Keep screen awake during timers; uses more battery",
+                        )
                     }
                 }
                 if (classAlertVolumeMuted) {
