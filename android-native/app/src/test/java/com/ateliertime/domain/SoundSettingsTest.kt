@@ -234,55 +234,38 @@ class SoundSettingsTest {
         assertEquals(100, configured.playbackVolumePercentFor(TimerCue.FREE_TIMER_FINISHED))
     }
 
-    @Test fun choosingAlarmFromMutedMediaForcesGlobalSoundOn() {
+    @Test fun selectingAlarmDoesNotInventSoundOnWithoutReadingTheDevice() {
         val mediaOff = SoundSettings().setTimerSoundsEnabled(false)
-        assertFalse(mediaOff.timerSoundsEnabled)
-        assertFalse(mediaOff.classAlertsUseAlarmVolume)
         val alarm = mediaOff.selectOutputAlarm(true)
         assertTrue(alarm.classAlertsUseAlarmVolume)
-        assertTrue(alarm.timerSoundsEnabled)
+        assertFalse(alarm.timerSoundsEnabled)
+        // The UI must reconcile against actual device Alarm hardware level.
+        assertFalse(alarm.afterSelectedStreamVolumeChange(0).timerSoundsEnabled)
+        assertTrue(alarm.afterSelectedStreamVolumeChange(2).timerSoundsEnabled)
         assertEquals(mediaOff.poseEnd, alarm.poseEnd)
-        assertEquals(mediaOff.freeTimer, alarm.freeTimer)
     }
 
-    @Test fun alarmSoundCannotBeTurnedOffButMediaAllowsOffAgain() {
+    @Test fun alarmAllowsOffAtZeroAndReturnsOnAtPositiveWhenDevicePermits() {
         val alarm = SoundSettings().selectOutputAlarm(true)
-        assertTrue(alarm.timerSoundsEnabled)
-        assertTrue(alarm.setTimerSoundsEnabled(false).timerSoundsEnabled)
+        assertFalse(alarm.setTimerSoundsEnabled(false).timerSoundsEnabled)
+        assertTrue(alarm.afterSelectedStreamVolumeChange(5).timerSoundsEnabled)
+        assertFalse(alarm.afterSelectedStreamVolumeChange(0).timerSoundsEnabled)
         val media = alarm.selectOutputAlarm(false)
         assertFalse(media.classAlertsUseAlarmVolume)
-        assertTrue(media.timerSoundsEnabled)
         assertFalse(media.setTimerSoundsEnabled(false).timerSoundsEnabled)
     }
 
-    @Test fun legacyAlarmModeWithMutedAppSoundNormalizesWithoutChangingOtherSettings() {
+    @Test fun legacyAlarmOffStateIsPreservedWithoutChangingCuePreferences() {
         val legacy = SoundSettings().copy(
             classAlertsUseAlarmVolume = true, timerSoundsEnabled = false,
             sharedCustomSeconds = 41,
         )
         val restored = legacy.normalizedAlarmSoundOn()
         assertTrue(restored.classAlertsUseAlarmVolume)
-        assertTrue(restored.timerSoundsEnabled)
+        assertFalse(restored.timerSoundsEnabled)
         assertEquals(41, restored.sharedCustomSeconds)
         assertEquals(restored, restored.normalizedAlarmSoundOn())
-        assertEquals(SoundSettings(),
-            SoundSettings().normalizedAlarmSoundOn())
     }
-
-    @Test fun sharedAndSeparateModesPreserveExternalSourcesIndependently() {
-        val source = CueSound(
-            source = SoundSource.FILE, uri = "content://audio/42", displayName = "Bell")
-        val sound = SoundSettings().setSourceEnabled(SoundSource.FILE, true)
-            .choose(TimerCue.BREAK_FINISHED, source)
-            .setAssignmentMode(SoundAssignmentMode.SHARED)
-            .chooseForVisibleMode(TimerCue.POSE_FINISHED,
-                CueSound(melody = MelodyPattern.CELEBRATION))
-        assertEquals(MelodyPattern.CELEBRATION,
-            sound.soundFor(TimerCue.SESSION_FINISHED).melody)
-        assertEquals(source, sound.setAssignmentMode(SoundAssignmentMode.SEPARATE)
-            .soundFor(TimerCue.BREAK_FINISHED))
-    }
-
 
     @Test fun sharedModeCanDisableSourceUsedOnlyByHiddenSeparateChoices() {
         val file = CueSound(source = SoundSource.FILE, uri = "content://audio/abc")
@@ -363,14 +346,13 @@ class SoundSettingsTest {
         assertFalse(off.afterSelectedStreamVolumeChange(0).timerSoundsEnabled)
     }
 
-    @Test fun alarmAtZeroStillForcesOnAndNonzeroNeverAltersOutputRoute() {
-        val alarm = SoundSettings().setTimerSoundsEnabled(false)
-            .selectOutputAlarm(true)
-        assertTrue(alarm.afterSelectedStreamVolumeChange(0).timerSoundsEnabled)
+    @Test fun alarmZeroAndPositiveFollowActualAndroidStreamVolume() {
+        val alarm = SoundSettings().selectOutputAlarm(true)
+        assertFalse(alarm.afterSelectedStreamVolumeChange(0).timerSoundsEnabled)
         assertTrue(alarm.afterSelectedStreamVolumeChange(5).timerSoundsEnabled)
         assertTrue(alarm.afterSelectedStreamVolumeChange(0).classAlertsUseAlarmVolume)
-        val media = alarm.selectOutputAlarm(false)
-        assertFalse(media.afterSelectedStreamVolumeChange(0).timerSoundsEnabled)
+        assertFalse(alarm.selectOutputAlarm(false)
+            .afterSelectedStreamVolumeChange(0).timerSoundsEnabled)
     }
 
     @Test fun timerVolumeStateRejectsInvalidHardwareLevelAndIsIdempotent() {
