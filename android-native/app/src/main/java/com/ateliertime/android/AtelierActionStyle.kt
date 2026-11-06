@@ -74,7 +74,9 @@ internal fun AtelierOutlinedButton(
         enabled = enabled,
         shape = AtelierActionStyle.shape,
         colors = colors,
-        border = BorderStroke(AtelierActionStyle.stroke, MaterialTheme.colorScheme.outline),
+        border = BorderStroke(AtelierActionStyle.stroke,
+            if (enabled) MaterialTheme.colorScheme.outline
+            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
         contentPadding = contentPadding,
         content = content,
     )
@@ -142,6 +144,8 @@ internal fun AtelierFilterChip(
         enabled = enabled,
         shape = AtelierActionStyle.shape,
         colors = colors,
-        border = BorderStroke(AtelierActionStyle.stroke, MaterialTheme.colorScheme.outline),
+        border = BorderStroke(AtelierActionStyle.stroke,
+            if (enabled) MaterialTheme.colorScheme.outline
+            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
     )
 }
