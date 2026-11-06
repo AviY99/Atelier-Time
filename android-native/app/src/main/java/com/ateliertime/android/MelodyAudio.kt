@@ -144,10 +144,16 @@ class MelodyPreferences(
             timerSoundsEnabled = runCatching {
                 prefs.getBoolean("timerSoundsEnabled", true)
             }.getOrDefault(true),
-        )
+        ).normalizedAlarmSoundOn()
     }
 
     fun saveSettings(settings: SoundSettings) {
+        // D-151: callers must use the guarded SoundSettings setters.
+        // Never persist Alarm mode with application Sounds OFF.
+        require(!settings.classAlertsUseAlarmVolume ||
+            settings.timerSoundsEnabled) {
+            "Alarm sound output requires Sound ON."
+        }
         require(settings.activeSourcesEnabled()) {
             "Select a sound from an enabled source in the current mode."
         }
