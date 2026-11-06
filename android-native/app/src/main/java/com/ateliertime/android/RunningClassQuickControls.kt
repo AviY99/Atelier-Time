@@ -123,9 +123,13 @@ internal fun RunningClassQuickControls(
                     onSelectedVolumeChange(target)
                 },
                 valueRange = 0f..100f,
-                steps = 99,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
-                    .heightIn(min = 32.dp)
+                // D156: thumb at 0 must have a reachable touch area, not
+                // sit flush against the left edge in a scaled 32dp strip.
+                // Continuous drag follows Android's real discrete audio steps.
+                steps = 0,
+                compactVisual = false,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                    .heightIn(min = 56.dp)
                     .testTag(if (useAlarmVolume) "running_alarm_volume_slider"
                         else "running_media_volume_slider")
                     .semantics {
