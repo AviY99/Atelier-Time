@@ -79,48 +79,53 @@ fun FreeCountdownSection(
                             choices.forEach { preset ->
                                 val selected = hours == preset.hours &&
                                     minutes == preset.minutes && seconds == preset.seconds
-                                OutlinedButton(
+                                SlimTimerAction(
+                                    label = preset.label,
                                     onClick = {
                                         hours = preset.hours
                                         minutes = preset.minutes
                                         seconds = preset.seconds
                                     },
-                                    modifier = Modifier.weight(1f).heightIn(min = 48.dp)
-                                        .testTag("free_preset_${preset.durationSeconds}")
-                                        .semantics { this.selected = selected },
-                                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(
-                                        containerColor = if (selected)
-                                            MaterialTheme.colorScheme.secondaryContainer
-                                        else MaterialTheme.colorScheme.surface,
-                                    ),
-                                ) { Text(preset.label,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    textAlign = TextAlign.Center, maxLines = 2) }
+                                    modifier = Modifier.weight(1f),
+                                    tag = "free_preset_${preset.durationSeconds}",
+                                    selected = selected,
+                                )
                             }
                         }
                     }
                 }
             }
+            // Same 34dp visible height / 48dp touch area as Awake ON/OFF
+            // and the Run action row, without changing countdown behavior.
             Row(modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 if (editable) {
-                    Button(
+                    SlimTimerAction(
+                        label = "Start",
                         onClick = { onStart(hours, minutes, seconds) },
                         enabled = hours + minutes + seconds > 0,
-                        modifier = Modifier.weight(1f).testTag("free_timer_start"),
-                    ) { Text("Start") }
+                        filled = true,
+                        modifier = Modifier.weight(1f),
+                        tag = "free_timer_start",
+                    )
                 } else {
-                    Button(onClick = onPauseResume, modifier = Modifier.weight(1f)
-                        .testTag("free_timer_pause_resume")) {
-                        Text(if (view.status == FreeTimerStatus.RUNNING) "Pause" else "Resume")
-                    }
+                    SlimTimerAction(
+                        label = if (view.status == FreeTimerStatus.RUNNING)
+                            "Pause" else "Resume",
+                        onClick = onPauseResume,
+                        filled = true,
+                        modifier = Modifier.weight(1f),
+                        tag = "free_timer_pause_resume",
+                    )
                 }
-                OutlinedButton(onClick = onExit,
+                SlimTimerAction(
+                    label = "Exit",
+                    onClick = onExit,
                     enabled = view.status != FreeTimerStatus.READY,
-                    modifier = Modifier.weight(1f).testTag("free_timer_exit")) {
-                    Text("Exit")
-                }
+                    danger = true,
+                    modifier = Modifier.weight(1f),
+                    tag = "free_timer_exit",
+                )
             }
         }
     }
