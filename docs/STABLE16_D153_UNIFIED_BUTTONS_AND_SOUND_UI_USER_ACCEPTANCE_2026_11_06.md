@@ -8,7 +8,7 @@
 ## Immutable recovery checkpoint
 
 - Freeze branch: [`stable/android-d153-qa16-ui-sound-user-accepted`](https://github.com/AviY99/Atelier-Time/tree/stable/android-d153-qa16-ui-sound-user-accepted).
-- The **exact stable commit SHA is the immutable HEAD of that branch once created** and is separately verified and recorded in the `main` README / current handoff. Do not modify its contents after freeze.
+- **Exact verified immutable Stable16 HEAD:** `04270365f330af78861d54f3710048d65dadc462`. The stable branch was created from the final Android DEV accepted source plus documentation and independently read back via GitHub; do not modify its contents after freeze.
 - Prior approved **Stable 15 / D147 / code41** is preserved unchanged on `stable/android-d147-qa15-ui-install-accepted` at `c10f424c0ec000eca2dd561911934841decb4522`.
 - Last substantive DEV D153 app / build helper change: `0df7f6f757ca62fd13a70951baa8418964b8b754`; GitHub compare between that commit and the D153 verified source shows **only documentation changes** (README, CHANGELOG, D153 spec, index and handoff), no Android Kotlin, tests, assets, Gradle or scripts changed. Freeze captures that verified source + acceptance documentation.
 - No new feature development, force-push, merges or edits on the stable branch. Continue future work on DEV; central documentation and Play assets on main.
