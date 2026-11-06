@@ -10,7 +10,7 @@ enum class SoundSource(val title: String) {
     FILE("Audio file"),
 }
 
-/** Shared mode selects one sound for ALL four cues; lengths remain cue-specific. */
+/** Shared mode uses one sound and duration for all four cues; Separate retains each setting. */
 enum class SoundAssignmentMode { SEPARATE, SHARED }
 
 /** Shared Class/Free sound can use a fixed preset or user-adjusted length/volume. */
