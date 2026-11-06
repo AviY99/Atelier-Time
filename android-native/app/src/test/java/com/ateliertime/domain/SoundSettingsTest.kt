@@ -103,7 +103,7 @@ class SoundSettingsTest {
         assertEquals(file, mixed.soundFor(TimerCue.BREAK_FINISHED))
     }
 
-    @Test fun sharedSoundUsesOneFiveOrTenSecondLengthForAllThreeEvents() {
+    @Test fun sharedSoundUsesOneFiveOrTenSecondLengthForAllFourEvents() {
         val original = SoundSettings()
             .setDuration(TimerCue.POSE_FINISHED, 10)
             .setDuration(TimerCue.BREAK_FINISHED, 5)
