@@ -75,7 +75,7 @@ internal fun RunningClassQuickControls(
             OutlinedButton(
                 onClick = onVolumeMax,
                 modifier = Modifier.heightIn(min = 48.dp)
-                    .testTag("class_volume_max_both"),
+                    .testTag("class_volume_max"),
                 contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                 colors = atelierOutlinedColors(),
             ) {
