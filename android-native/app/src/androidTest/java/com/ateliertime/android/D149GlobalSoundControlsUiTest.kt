@@ -36,7 +36,7 @@ class D149GlobalSoundControlsUiTest {
         compose.setContent {
             MaterialTheme {
                 RunningClassQuickControls(
-                    modifier = Modifier.testTag("free_timer_quick_controls"),
+                    containerTag = "free_timer_quick_controls",
                     keepScreenAwake = awake,
                     onKeepScreenAwakeChange = { awake = it },
                     mediaPercent = 62, alarmPercent = 30,
