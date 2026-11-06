@@ -24,8 +24,10 @@ class SoundSettingsTest {
         val shared = separate.setAssignmentMode(SoundAssignmentMode.SHARED)
             .setSharedDuration(10)
         assertEquals(separate.poseEnd, shared.soundFor(TimerCue.FREE_TIMER_FINISHED))
-        assertEquals(37, shared.secondsFor(TimerCue.FREE_TIMER_FINISHED))
+        assertEquals(10, shared.secondsFor(TimerCue.FREE_TIMER_FINISHED))
         assertEquals(10, shared.secondsFor(TimerCue.SESSION_FINISHED))
+        assertEquals(37, shared.setAssignmentMode(SoundAssignmentMode.SEPARATE)
+            .secondsFor(TimerCue.FREE_TIMER_FINISHED))
         val changedFromFreePicker = shared.chooseForVisibleMode(
             TimerCue.FREE_TIMER_FINISHED, CueSound(melody = MelodyPattern.WARM_BELLS))
         TimerCue.entries.forEach { cue ->
@@ -112,15 +114,13 @@ class SoundSettingsTest {
             .setSharedDuration(10)
         TimerCue.entries.forEach { cue ->
             assertEquals(original.poseEnd, shared.soundFor(cue))
-            assertEquals(if (cue == TimerCue.FREE_TIMER_FINISHED) 5 else 10,
-                shared.secondsFor(cue))
+            assertEquals(10, shared.secondsFor(cue))
         }
         val newSound = CueSound(melody = MelodyPattern.WARM_BELLS)
         val updated = shared.chooseForVisibleMode(TimerCue.SESSION_FINISHED, newSound)
         TimerCue.entries.forEach { cue ->
             assertEquals(newSound, updated.soundFor(cue))
-            assertEquals(if (cue == TimerCue.FREE_TIMER_FINISHED) 5 else 10,
-                updated.secondsFor(cue))
+            assertEquals(10, updated.secondsFor(cue))
         }
         val restored = updated.setAssignmentMode(SoundAssignmentMode.SEPARATE)
         assertEquals(original.poseEnd, restored.poseEnd)
@@ -134,7 +134,7 @@ class SoundSettingsTest {
         assertEquals(5, restored.freeTimerSeconds)
     }
 
-    @Test fun sharedLengthIsRestrictedToFiveOrTenSecondsEvenForClassEnd() {
+    @Test fun sharedPresetLengthStillOnlyAcceptsFiveOrTenSeconds() {
         for (length in listOf(4, 6, 11, 30, 60)) {
             assertThrows(IllegalArgumentException::class.java) {
                 SoundSettings().setSharedDuration(length)
@@ -142,6 +142,75 @@ class SoundSettingsTest {
         }
         assertEquals(5, SoundSettings().setSharedDuration(5).sharedSeconds)
         assertEquals(10, SoundSettings().setSharedDuration(10).sharedSeconds)
+    }
+
+    @Test fun sharedCustomLengthAppliesToEveryCueAndPreservesSeparateDurations() {
+        val original = SoundSettings()
+            .setDuration(TimerCue.SESSION_FINISHED, 47)
+            .setDuration(TimerCue.FREE_TIMER_FINISHED, 31)
+        val custom = original.setAssignmentMode(SoundAssignmentMode.SHARED)
+            .selectSharedCustomDuration()
+            .setSharedCustomDuration(26)
+        assertEquals(SharedDurationMode.CUSTOM, custom.sharedDurationMode)
+        TimerCue.entries.forEach { cue ->
+            assertEquals(26, custom.secondsFor(cue))
+        }
+        val separate = custom.setAssignmentMode(SoundAssignmentMode.SEPARATE)
+        assertEquals(47, separate.secondsFor(TimerCue.SESSION_FINISHED))
+        assertEquals(31, separate.secondsFor(TimerCue.FREE_TIMER_FINISHED))
+    }
+
+    @Test fun sharedCustomModeRestoresLengthAndGainAfterUsingFiveOrTenPresets() {
+        val start = SoundSettings().setAssignmentMode(SoundAssignmentMode.SHARED)
+            .selectSharedCustomDuration()
+            .setSharedCustomDuration(37)
+            .setSharedCustomVolumePercent(42)
+        assertEquals(37, start.sharedSeconds)
+        assertEquals(42, start.playbackVolumePercentFor(TimerCue.POSE_FINISHED))
+        val five = start.setSharedDuration(5)
+        assertEquals(SharedDurationMode.FIVE, five.sharedDurationMode)
+        assertEquals(5, five.sharedSeconds)
+        assertEquals(100, five.playbackVolumePercentFor(TimerCue.FREE_TIMER_FINISHED))
+        val ten = five.setSharedDuration(10)
+        assertEquals(SharedDurationMode.TEN, ten.sharedDurationMode)
+        assertEquals(10, ten.secondsFor(TimerCue.FREE_TIMER_FINISHED))
+        val restored = ten.selectSharedCustomDuration()
+        assertEquals(37, restored.sharedSeconds)
+        assertEquals(42, restored.playbackVolumePercentFor(TimerCue.FREE_TIMER_FINISHED))
+        assertEquals(37, restored.sharedCustomSeconds)
+    }
+
+    @Test fun sharedCustomGainDoesNotAlterIndependentSoundSettings() {
+        val original = SoundSettings().setAssignmentMode(SoundAssignmentMode.SHARED)
+            .selectSharedCustomDuration()
+        for (percent in listOf(0, 1, 45, 100)) {
+            val next = original.setSharedCustomVolumePercent(percent)
+            assertEquals(percent, next.playbackVolumePercentFor(TimerCue.SESSION_FINISHED))
+            assertEquals(100, next.setAssignmentMode(SoundAssignmentMode.SEPARATE)
+                .playbackVolumePercentFor(TimerCue.SESSION_FINISHED))
+            assertEquals(original.poseEnd, next.poseEnd)
+            assertEquals(original.freeTimer, next.freeTimer)
+        }
+        for (invalid in listOf(-1, 101)) {
+            assertThrows(IllegalArgumentException::class.java) {
+                original.setSharedCustomVolumePercent(invalid)
+            }
+        }
+    }
+
+    @Test fun sharedCustomDurationBoundariesAndPresetBehaviorStayValid() {
+        val initial = SoundSettings().setAssignmentMode(SoundAssignmentMode.SHARED)
+            .selectSharedCustomDuration()
+        for (seconds in 5..60) {
+            val next = initial.setSharedCustomDuration(seconds)
+            assertEquals(SharedDurationMode.CUSTOM, next.sharedDurationMode)
+            assertEquals(seconds, next.secondsFor(TimerCue.FREE_TIMER_FINISHED))
+        }
+        for (invalid in listOf(4, 61)) {
+            assertThrows(IllegalArgumentException::class.java) {
+                initial.setSharedCustomDuration(invalid)
+            }
+        }
     }
 
     @Test fun sharedAndSeparateModesPreserveExternalSourcesIndependently() {
