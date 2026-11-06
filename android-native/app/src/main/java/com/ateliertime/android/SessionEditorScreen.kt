@@ -218,12 +218,8 @@ fun SessionEditorScreen(
     val soundEnabled = soundSettings.timerSoundsEnabled
     var keepScreenAwake by remember { mutableStateOf(false) }
     val classVolumeControl = remember(context) { ClassVolumeControl(context) }
-    // Best-effort restore if the Activity is actually disposed while an override remains.
-    DisposableEffect(classVolumeControl) {
-        onDispose { classVolumeControl.restoreIfUnchanged() }
-    }
-    var showConfirmMaxVolume by remember { mutableStateOf(false) }
-    var maxVolumeFromFreeTimer by remember { mutableStateOf(false) }
+    // D156: timer volume choices remain in Android until the user changes them.
+    // No restore-on-exit/dispose, and Max no longer needs a confirmation.
     var classVolumeError by remember { mutableStateOf<String?>(null) }
     // Force immediate refresh after a user releases either Android volume slider;
     // the running wall clock refresh also picks up hardware-button changes.
@@ -339,6 +335,27 @@ fun SessionEditorScreen(
         currentReport = null
     }
     var timerView by remember(liveTimer) { mutableStateOf(liveTimer?.view()) }
+
+    // D156: ONE immediate Max action for Programmed/Class and Free timers.
+    // It affects only the currently selected device audio channel, reads back
+    // the actual level and preserves that level on every Timer exit.
+    fun applySelectedVolumeMax() {
+        val useAlarm = soundSettings.classAlertsUseAlarmVolume
+        runCatching {
+            classVolumeControl.maxSelected(useAlarm)
+        }.onSuccess { changed ->
+            volumeRevision++
+            classVolumeError = null
+            syncSoundAfterTimerVolume(changed)
+            if (playingSession != null) {
+                recordClassEvent("Volume max: selected " +
+                    (if (useAlarm) "Alarm" else "Media"), timerView, timerView)
+            }
+        }.onFailure {
+            classVolumeError = it.message ?: "Could not set selected sound volume to Max."
+        }
+    }
+
     var wallClockMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
     // Recover from older versions where a saved Sound OFF did not change
     // hardware volume, and from device volume-button adjustments. Never move
@@ -656,7 +673,7 @@ fun SessionEditorScreen(
                     }
                 }
                 if (tick.view.status == TimerStatus.FINISHED) {
-                    syncSoundAfterTimerVolume(classVolumeControl.restoreIfUnchanged())
+                    volumeRevision++
                     closeRunReport(if (deadlineReached) "deadline" else "natural_finish")
                     classStatusNotification.clear()
                     // Return to Timer's saved-class HOME once the class ends.
@@ -744,7 +761,7 @@ fun SessionEditorScreen(
                 }
             }
             if (event.view.status == TimerStatus.FINISHED) {
-                syncSoundAfterTimerVolume(classVolumeControl.restoreIfUnchanged())
+                volumeRevision++
                 closeRunReport("natural_finish")
                 classStatusNotification.clear()
                 playingSession = null
@@ -897,9 +914,8 @@ fun SessionEditorScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text("Free timer", style = MaterialTheme.typography.headlineSmall)
-                // D-149: Free uses the SAME three lightweight controls as
-                // Run: keep awake, independent Media and Alarm volume bars,
-                // plus the existing confirmation-protected Max both.
+                // Class and Free share the selected-stream slider, immediate Max
+                // and Mute; volume never automatically reverts on exit.
                 val freeVolumes = remember(wallClockMillis / 1_000L, volumeRevision) {
                     classVolumeControl.levels()
                 }
@@ -924,10 +940,7 @@ fun SessionEditorScreen(
                                 "Could not adjust selected sound volume."
                         }
                     },
-                    onVolumeMax = {
-                        maxVolumeFromFreeTimer = true
-                        showConfirmMaxVolume = true
-                    },
+                    onVolumeMax = { applySelectedVolumeMax() },
                     onSoundsOff = {
                         runCatching {
                             classVolumeControl.muteSelected(
@@ -965,7 +978,7 @@ fun SessionEditorScreen(
                     },
                     onExit = {
                         freeMelodyPlayer.stop()
-                        syncSoundAfterTimerVolume(classVolumeControl.restoreIfUnchanged())
+                        volumeRevision++
                         volumeRevision++
                         freeTimerView = freeTimer.exit()
                         freeTimerError = null
@@ -1460,10 +1473,7 @@ fun SessionEditorScreen(
                                     "Could not adjust selected sound volume."
                             }
                         },
-                        onVolumeMax = {
-                            maxVolumeFromFreeTimer = false
-                            showConfirmMaxVolume = true
-                        },
+                        onVolumeMax = { applySelectedVolumeMax() },
                         onSoundsOff = {
                             runCatching {
                                 classVolumeControl.muteSelected(
@@ -1591,7 +1601,7 @@ fun SessionEditorScreen(
                             runTimedCue(advancedByNext = true) { timer.nextPhase() }
                         },
                         onExit = {
-                            syncSoundAfterTimerVolume(classVolumeControl.restoreIfUnchanged())
+                            volumeRevision++
                             recordClassEvent("Exit", timer.view(), timer.view())
                             closeRunReport("user_exit")
                             classStatusNotification.clear()
@@ -1606,52 +1616,8 @@ fun SessionEditorScreen(
         }
     }
 
-    // D-150: Volume max affects ONLY the Media/Alarm channel selected in
-    // Sounds, never the nonselected channel. Keep loudness confirmation.
-    if (showConfirmMaxVolume) {
-        val selectedName = if (soundSettings.classAlertsUseAlarmVolume)
-            "Alarm" else "Media"
-        AlertDialog(
-            modifier = Modifier.testTag("class_volume_max_dialog"),
-            onDismissRequest = { showConfirmMaxVolume = false },
-            title = { Text("Set $selectedName volume to maximum?") },
-            text = { Text("This raises the PHONE'S selected $selectedName channel " +
-                "to its device maximum. Other apps using that channel may be very loud. " +
-                "The other channel will NOT change. Android volume protection or " +
-                "Do Not Disturb can block this action. " +
-                (if (maxVolumeFromFreeTimer)
-                    "Original volume is restored when you exit the Free Timer"
-                 else "Original volume is restored when the Class ends") +
-                ", only if you have not adjusted that channel yourself. Continue?") },
-            confirmButton = {
-                AtelierTextButton(
-                    colors = atelierTextColors(),
-                    modifier = Modifier.testTag("class_volume_max_confirm"),
-                    onClick = {
-                        showConfirmMaxVolume = false
-                        runCatching {
-                            classVolumeControl.maxSelected(
-                                soundSettings.classAlertsUseAlarmVolume)
-                        }.onSuccess { changed ->
-                            volumeRevision++
-                            classVolumeError = null
-                            syncSoundAfterTimerVolume(changed)
-                            recordClassEvent(
-                                "Volume max: selected $selectedName",
-                                timerView, timerView)
-                        }.onFailure {
-                            classVolumeError = it.message ?:
-                                "Selected volume change not allowed."
-                        }
-                    },
-                ) { Text("Volume max") }
-            },
-            dismissButton = {
-                AtelierTextButton(colors = atelierTextColors(),
-                    onClick = { showConfirmMaxVolume = false }) { Text("Cancel") }
-            },
-        )
-    }
+    // D156: the Max action runs immediately from either shared Timer control,
+    // without an alert dialog and without restoring the prior volume.
 
     // D-143: explicit confirmation protects unsaved draft edits; Saved Classes remain intact.
     if (showResetEditorConfirm) {
