@@ -34,70 +34,94 @@ internal fun RunningClassQuickControls(
     onMediaVolumeChange: (Int) -> Unit,
     onAlarmVolumeChange: (Int) -> Unit,
     onMaxBoth: () -> Unit,
+    onSoundsOff: () -> Unit,
     containerTag: String = "running_class_quick_controls",
     modifier: Modifier = Modifier,
 ) {
     val palette = MaterialTheme.colorScheme
     Column(
         modifier = modifier.fillMaxWidth()
-            .padding(horizontal = 10.dp)
+            .padding(horizontal = 8.dp)
             .testTag(containerTag),
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
+        // One plain, compact action row in Class Run AND Free Timer.
+        // Neither Volume max nor Sounds off changes the saved Sound switch
+        // or the selected Media/Alarm cue route.
         Row(
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
                 .testTag("running_screen_awake_row"),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Column(
+            Text(
+                "Keep screen awake",
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(0.dp),
-            ) {
-                Text("Keep Screen Awake",
-                    style = MaterialTheme.typography.titleSmall, maxLines = 1,
-                    overflow = TextOverflow.Ellipsis)
-                Text("Uses more battery",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = palette.onSurfaceVariant)
-            }
-            Text(if (keepScreenAwake) "ON" else "OFF",
                 style = MaterialTheme.typography.labelSmall,
-                color = if (keepScreenAwake) palette.primary else palette.onSurfaceVariant,
-                fontWeight = FontWeight.SemiBold)
-            Switch(
-                checked = keepScreenAwake,
-                onCheckedChange = onKeepScreenAwakeChange,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            OutlinedButton(
+                onClick = { onKeepScreenAwakeChange(!keepScreenAwake) },
                 modifier = Modifier.testTag("keep_screen_awake")
+                    .heightIn(min = 48.dp)
                     .semantics {
                         contentDescription =
-                            "Keep screen awake during timers; uses more battery"
+                            "Keep screen awake during timers, " +
+                            (if (keepScreenAwake) "ON" else "OFF") +
+                            "; uses more battery"
                     },
-                colors = SwitchDefaults.colors(checkedTrackColor = palette.primary),
-            )
+                contentPadding = PaddingValues(horizontal = 7.dp, vertical = 0.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = if (keepScreenAwake) palette.primaryContainer
+                        else palette.surface,
+                    contentColor = if (keepScreenAwake) palette.onPrimaryContainer
+                        else palette.onSurfaceVariant,
+                ),
+            ) {
+                Text(if (keepScreenAwake) "ON" else "OFF",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold)
+            }
+            OutlinedButton(
+                onClick = onMaxBoth,
+                modifier = Modifier.testTag("class_volume_max_both")
+                    .heightIn(min = 48.dp),
+                contentPadding = PaddingValues(horizontal = 7.dp, vertical = 0.dp),
+                colors = atelierOutlinedColors(),
+            ) {
+                Text("Volume\\nmax".replace("\\n", "\n"),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 2)
+            }
+            OutlinedButton(
+                onClick = onSoundsOff,
+                modifier = Modifier.testTag("class_volume_sounds_off")
+                    .heightIn(min = 48.dp)
+                    .semantics {
+                        contentDescription =
+                            "Sounds off, set both Media and Alarm volumes to zero"
+                    },
+                contentPadding = PaddingValues(horizontal = 7.dp, vertical = 0.dp),
+                colors = atelierOutlinedColors(),
+            ) {
+                Text("Sounds\\noff".replace("\\n", "\n"),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 2)
+            }
         }
-        HorizontalDivider(color = palette.outlineVariant)
         Column(
             modifier = Modifier.fillMaxWidth().testTag("running_volume_card"),
             verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
+            // No redundant "Volumes" heading. Labels sit immediately
+            // above narrower Sound-style bars, with no decorative card.
             Row(
-                modifier = Modifier.fillMaxWidth().heightIn(min = 44.dp)
+                modifier = Modifier.fillMaxWidth().height(0.dp)
                     .testTag("running_class_volume_row"),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text("Volumes",
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleSmall)
-                OutlinedButton(
-                    colors = atelierOutlinedColors(),
-                    onClick = onMaxBoth,
-                    modifier = Modifier.testTag("class_volume_max_both")
-                        .heightIn(min = 48.dp),
-                    contentPadding = PaddingValues(horizontal = 9.dp, vertical = 0.dp),
-                ) { Text("Max both", style = MaterialTheme.typography.labelSmall) }
-            }
+            ) {}
             SimpleVolumeRow(
                 name = "Media Volume",
                 percent = mediaPercent,
@@ -138,7 +162,7 @@ private fun SimpleVolumeRow(
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().heightIn(min = 28.dp)
+            modifier = Modifier.fillMaxWidth().heightIn(min = 22.dp)
                 .clickable(onClick = onSelect)
                 .semantics {
                     contentDescription = "$name, " +
@@ -167,7 +191,8 @@ private fun SimpleVolumeRow(
             },
             valueRange = 0f..100f,
             steps = 99,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp)
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 9.dp)
+                .heightIn(min = 32.dp).offset(y = (-4).dp)
                 .testTag(sliderTag)
                 .semantics {
                     contentDescription = "$name slider, $current percent"
