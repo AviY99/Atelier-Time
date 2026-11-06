@@ -116,8 +116,9 @@ class MelodyPreferences(
                 else SharedDurationMode.CUSTOM.name)!!)
         }.getOrDefault(SharedDurationMode.FIVE)
         val customLength = seconds("sharedCustomSeconds", 15, true)
-        val customGain = prefs.getInt("sharedCustomVolumePercent", 100)
-            .coerceIn(0, 100)
+        val customGain = runCatching {
+            prefs.getInt("sharedCustomVolumePercent", 100)
+        }.getOrDefault(100).coerceIn(0, 100)
         return SoundSettings(
             // A dormant mode may retain sounds from a disabled library.
             // Restore only libraries required by the CURRENT mode on load.
