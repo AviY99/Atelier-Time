@@ -90,9 +90,9 @@ class D152UnifiedButtonsUiTest {
                 }
             }
         }
-        val awake = compose.onNodeWithTag("keep_screen_awake_visual")
+        val awake = compose.onNodeWithTag("keep_screen_awake_visual", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
-        val volume = compose.onNodeWithTag("running_volume_actions_border")
+        val volume = compose.onNodeWithTag("class_volume_max_visual", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
         val timer = compose.onNodeWithTag("a_timer_visual")
             .getUnclippedBoundsInRoot()
