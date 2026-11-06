@@ -30,7 +30,7 @@ import org.junit.runner.RunWith
 class D151SlimControlsAlarmHelpUiTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun awakeAndVolumeActionsSame34dpVisualHeightAnd48dpTouch() {
+    @Test fun awakeAndVolumeActionsShareUnified40dpVisualHeightAnd48dpTouch() {
         compose.setContent {
             MaterialTheme {
                 RunningClassQuickControls(
@@ -54,8 +54,8 @@ class D151SlimControlsAlarmHelpUiTest {
             .getUnclippedBoundsInRoot()
         assertTrue(awakeHit.bottom - awakeHit.top >= 48.dp)
         assertTrue(volumeHit.bottom - volumeHit.top >= 48.dp)
-        assertEquals(34.dp, awakeVisual.bottom - awakeVisual.top)
-        assertEquals(34.dp, volumeVisual.bottom - volumeVisual.top)
+        assertEquals(AtelierActionStyle.visibleHeight, awakeVisual.bottom - awakeVisual.top)
+        assertEquals(AtelierActionStyle.visibleHeight, volumeVisual.bottom - volumeVisual.top)
         assertTrue("Awake label and Volume actions occupy one horizontal row",
             (awakeVisual.top - volumeVisual.top).value in -1f..1f)
         compose.onNodeWithText("Volume").assertExists()
@@ -63,7 +63,7 @@ class D151SlimControlsAlarmHelpUiTest {
         compose.onNodeWithText("Sounds off").assertExists()
     }
 
-    @Test fun slimTimerButtonIsVisually34dpAndTouch48dp() {
+    @Test fun timerButtonHasShared40dpVisualAnd48dpTouch() {
         var presses = 0
         compose.setContent {
             MaterialTheme {
@@ -78,7 +78,7 @@ class D151SlimControlsAlarmHelpUiTest {
         val visible = compose.onNodeWithTag("slim_repeat_visual")
             .getUnclippedBoundsInRoot()
         assertTrue(pressArea.bottom - pressArea.top >= 48.dp)
-        assertEquals(34.dp, visible.bottom - visible.top)
+        assertEquals(AtelierActionStyle.visibleHeight, visible.bottom - visible.top)
         compose.onNodeWithTag("slim_repeat").performClick()
         assertEquals(1, presses)
     }
