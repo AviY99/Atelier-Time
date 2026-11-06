@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -82,13 +83,13 @@ class D148SharedSoundCustomUiTest {
         compose.onNodeWithTag("sound_output_alarm")
             .performScrollTo().performClick()
         assertEquals(true, settings.classAlertsUseAlarmVolume)
-        assertEquals(true, settings.timerSoundsEnabled)
+        assertEquals(false, settings.timerSoundsEnabled)
         compose.onNodeWithText("Same sound for all")
             .performScrollTo().performClick()
         assertEquals(SoundAssignmentMode.SHARED, settings.assignmentMode)
-        assertEquals(true, settings.timerSoundsEnabled)
+        assertEquals(false, settings.timerSoundsEnabled)
         assertEquals(true, settings.classAlertsUseAlarmVolume)
-        compose.onNodeWithTag("sound_master_enabled").assertIsNotEnabled()
+        compose.onNodeWithTag("sound_master_enabled").assertIsEnabled()
         compose.onNodeWithTag("sound_output_media")
             .performScrollTo().performClick()
         assertEquals(false, settings.classAlertsUseAlarmVolume)
