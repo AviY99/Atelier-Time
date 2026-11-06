@@ -228,20 +228,52 @@ fun SessionEditorScreen(
     // Force immediate refresh after a user releases either Android volume slider;
     // the running wall clock refresh also picks up hardware-button changes.
     var volumeRevision by remember { mutableIntStateOf(0) }
-    // D-154: after a user moves either Timer slider, presses Mute, or
-    // approves Max, persist the resulting GLOBAL Sound ON/OFF setting.
-    // Read the actual selected hardware level, not the requested percent.
-    // Alarm remains ON by SoundSettings policy even at zero volume.
+    // D155: one device-volume source of truth for Class, Free and Sounds,
+    // regardless of which stream the user selected. Android alone controls
+    // whether the selected Media/Alarm channel can actually reach zero.
     fun syncSoundAfterTimerVolume(levels: ClassVolumeLevels) {
-        val selectedLevel = if (soundSettings.classAlertsUseAlarmVolume)
-            levels.alarm else levels.media
-        val updated = soundSettings.afterSelectedStreamVolumeChange(selectedLevel)
+        val updated = soundSettings.afterSelectedStreamVolumeChange(
+            levels.selected(soundSettings.classAlertsUseAlarmVolume))
         if (updated != soundSettings) {
             saveSoundSettings(updated)
-            if (soundSettings != updated) {
-                classVolumeError = "Volume changed, but Sound ON/OFF could not be saved."
-            }
+            if (soundSettings != updated)
+                classVolumeError = "Volume changed, but Sound state was not saved."
         }
+    }
+
+    fun onSoundTabChange(updated: SoundSettings) {
+        val selectedAlarm = updated.classAlertsUseAlarmVolume
+        if (selectedAlarm != soundSettings.classAlertsUseAlarmVolume) {
+            // Changing output route never changes either phone stream.
+            // The Sound toggle reflects the NEW route's actual hardware level.
+            volumeRevision++
+            saveSoundSettings(updated.afterSelectedStreamVolumeChange(
+                classVolumeControl.levels().selected(selectedAlarm)))
+        } else if (updated.timerSoundsEnabled != soundSettings.timerSoundsEnabled) {
+            // Sound ON/OFF has EXACTLY the same volume effect as slider/Mute.
+            // Do not save a false ON/OFF when Android rejects the volume.
+            runCatching {
+                classVolumeControl.setSelectedSoundEnabled(
+                    selectedAlarm, updated.timerSoundsEnabled)
+            }.onSuccess { actual ->
+                volumeRevision++
+                classVolumeError = null
+                saveSoundSettings(updated.afterSelectedStreamVolumeChange(
+                    actual.selected(selectedAlarm)))
+            }.onFailure {
+                melodyError = it.message ?: "Android did not change selected volume."
+            }
+        } else {
+            saveSoundSettings(updated)
+        }
+    }
+
+    // Recover from older versions where a saved Sound OFF did not change
+    // hardware volume, and from device volume-button adjustments. Never move
+    // either hardware stream without a direct user tap on an app control.
+    LaunchedEffect(soundSettings.classAlertsUseAlarmVolume,
+        wallClockMillis / 1_000L) {
+        syncSoundAfterTimerVolume(classVolumeControl.levels())
     }
     val freeTimer = remember { FreeCountdownTimer { SystemClock.elapsedRealtime() } }
     var freeTimerView by remember { mutableStateOf(freeTimer.view()) }
@@ -623,7 +655,7 @@ fun SessionEditorScreen(
                     }
                 }
                 if (tick.view.status == TimerStatus.FINISHED) {
-                    classVolumeControl.restoreIfUnchanged()
+                    syncSoundAfterTimerVolume(classVolumeControl.restoreIfUnchanged())
                     closeRunReport(if (deadlineReached) "deadline" else "natural_finish")
                     classStatusNotification.clear()
                     // Return to Timer's saved-class HOME once the class ends.
@@ -711,7 +743,7 @@ fun SessionEditorScreen(
                 }
             }
             if (event.view.status == TimerStatus.FINISHED) {
-                classVolumeControl.restoreIfUnchanged()
+                syncSoundAfterTimerVolume(classVolumeControl.restoreIfUnchanged())
                 closeRunReport("natural_finish")
                 classStatusNotification.clear()
                 playingSession = null
@@ -932,7 +964,7 @@ fun SessionEditorScreen(
                     },
                     onExit = {
                         freeMelodyPlayer.stop()
-                        classVolumeControl.restoreIfUnchanged()
+                        syncSoundAfterTimerVolume(classVolumeControl.restoreIfUnchanged())
                         volumeRevision++
                         freeTimerView = freeTimer.exit()
                         freeTimerError = null
@@ -1328,7 +1360,9 @@ fun SessionEditorScreen(
             ) {
                 MelodySettingsSection(
                     settings = soundSettings,
-                    onSettingsChange = { updated -> saveSoundSettings(updated) },
+                    onSettingsChange = { updated -> onSoundTabChange(updated) },
+                    canMuteSelectedAudio = classVolumeControl.canMuteSelected(
+                        soundSettings.classAlertsUseAlarmVolume),
                     onChooseSystemSound = { cue ->
                         pickingCue = cue
                         val selected = soundSettings.soundFor(cue)
@@ -1556,7 +1590,7 @@ fun SessionEditorScreen(
                             runTimedCue(advancedByNext = true) { timer.nextPhase() }
                         },
                         onExit = {
-                            classVolumeControl.restoreIfUnchanged()
+                            syncSoundAfterTimerVolume(classVolumeControl.restoreIfUnchanged())
                             recordClassEvent("Exit", timer.view(), timer.view())
                             closeRunReport("user_exit")
                             classStatusNotification.clear()
