@@ -83,7 +83,7 @@ class D151SlimControlsAlarmHelpUiTest {
         assertEquals(1, presses)
     }
 
-    @Test fun alarmForcesSoundOnShowsBottomHelpAndDisablesOff() {
+    @Test fun alarmAllowsSoundOnWhenDevicePermitsZeroAndShowsHelp() {
         var settings by mutableStateOf(SoundSettings().setTimerSoundsEnabled(false))
         compose.setContent {
             MaterialTheme {
@@ -99,14 +99,15 @@ class D151SlimControlsAlarmHelpUiTest {
         compose.onNodeWithTag("sound_output_alarm")
             .performScrollTo().performClick()
         assertEquals(true, settings.classAlertsUseAlarmVolume)
-        assertEquals(true, settings.timerSoundsEnabled)
+        assertEquals(false, settings.timerSoundsEnabled)
         compose.onNodeWithTag("sound_master_enabled")
-            .performScrollTo().assertIsNotEnabled()
+            .performScrollTo().assertIsEnabled().performClick()
+        assertEquals(true, settings.timerSoundsEnabled)
         compose.onNodeWithTag("sound_output_help")
             .performScrollTo().performClick()
         compose.onNodeWithText("Sound settings").assertExists()
         compose.onNodeWithText(
-            "Alarm uses the phone's default alarm", substring = true
+            "Some devices enforce a positive Alarm minimum", substring = true
         ).assertExists()
         compose.onNodeWithText("Close").performClick()
         compose.onNodeWithTag("sound_output_media")
