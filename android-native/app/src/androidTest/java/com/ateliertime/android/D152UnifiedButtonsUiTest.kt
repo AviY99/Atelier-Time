@@ -1,6 +1,8 @@
 package com.ateliertime.android
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -14,8 +16,10 @@ import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.ateliertime.domain.SoundSettings
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -101,4 +105,32 @@ class D152UnifiedButtonsUiTest {
         compose.onNodeWithTag("running_media_volume_slider").assertExists()
         compose.onNodeWithTag("running_alarm_volume_slider").assertDoesNotExist()
     }
+
+    @Test fun soundsPreviewTriangleSharesSameRounded40dpFrameAnd48dpHitArea() {
+        compose.setContent {
+            MaterialTheme {
+                Column(Modifier.width(350.dp).verticalScroll(rememberScrollState())) {
+                    MelodySettingsSection(
+                        settings = SoundSettings(),
+                        onSettingsChange = {},
+                        onChooseSystemSound = {},
+                        onChooseAudioFile = {},
+                        onPreview = {},
+                        onError = {},
+                    )
+                }
+            }
+        }
+        val clickable = compose.onNodeWithTag("sound_preview_pose_finished")
+            .performScrollTo().getUnclippedBoundsInRoot()
+        val outline = compose.onNodeWithTag("sound_preview_visual_pose_finished")
+            .getUnclippedBoundsInRoot()
+        assertEquals(AtelierActionStyle.visibleHeight,
+            outline.bottom - outline.top)
+        assertEquals(AtelierActionStyle.touchHeight,
+            clickable.bottom - clickable.top)
+        assertEquals(AtelierActionStyle.visibleHeight,
+            outline.right - outline.left)
+    }
+
 }
