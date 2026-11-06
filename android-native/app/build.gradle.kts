@@ -17,8 +17,8 @@ android {
         // Android versionCode is the monotonic package-upgrade integer.
         // versionName is the real development iteration shown verbatim in About.
         // Keep this D-identifier synchronized with each future APK build.
-        versionCode = 41
-        versionName = "D-147"
+        versionCode = 42
+        versionName = "D-148"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
