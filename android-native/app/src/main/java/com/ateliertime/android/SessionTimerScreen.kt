@@ -322,7 +322,7 @@ fun SessionTimerScreen(
                         )
                     }
                 }
-                TextButton(
+                AtelierTextButton(
                     colors = atelierTextColors(),
                     onClick = { helpFor = "overview" },
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
@@ -427,7 +427,7 @@ fun SessionTimerScreen(
                 }
             },
             confirmButton = {
-                TextButton(
+                AtelierTextButton(
                     colors = atelierTextColors(),
                     enabled = !restWarning || accept25RestWarning,
                     onClick = {
@@ -443,7 +443,7 @@ fun SessionTimerScreen(
                 ) { Text("Confirm") }
             },
             dismissButton = {
-                TextButton(colors = atelierTextColors(), onClick = {
+                AtelierTextButton(colors = atelierTextColors(), onClick = {
                     confirmation = null
                     accept25RestWarning = false
                 }) { Text("Cancel") }
@@ -518,7 +518,7 @@ fun SessionTimerScreen(
             title = { Text(title) },
             text = { Text(explanation) },
             confirmButton = {
-                TextButton(colors = atelierTextColors(), onClick = { helpFor = null }) { Text("Close") }
+                AtelierTextButton(colors = atelierTextColors(), onClick = { helpFor = null }) { Text("Close") }
             },
         )
     }
