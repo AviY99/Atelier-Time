@@ -41,7 +41,7 @@ internal fun SlimTimerAction(
     danger: Boolean = false,
 ) {
     val palette = MaterialTheme.colorScheme
-    val shape = RoundedCornerShape(7.dp)
+    val shape = AtelierActionStyle.shape
     val fill = when {
         danger -> palette.errorContainer
         filled -> palette.primary
@@ -56,7 +56,7 @@ internal fun SlimTimerAction(
         else -> palette.onSurface
     }
     Box(
-        modifier = modifier.height(48.dp)
+        modifier = modifier.height(AtelierActionStyle.touchHeight)
             .testTag(tag)
             .clip(shape)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
@@ -67,9 +67,9 @@ internal fun SlimTimerAction(
         contentAlignment = Alignment.Center,
     ) {
         Box(
-            modifier = Modifier.fillMaxWidth().height(34.dp)
+            modifier = Modifier.fillMaxWidth().height(AtelierActionStyle.visibleHeight)
                 .background(fill, shape)
-                .border(1.dp, if (enabled) palette.outline else
+                .border(AtelierActionStyle.stroke, if (enabled) palette.outline else
                     palette.outlineVariant.copy(alpha = 0.55f), shape)
                 .testTag(tag + "_visual"),
             contentAlignment = Alignment.Center,
