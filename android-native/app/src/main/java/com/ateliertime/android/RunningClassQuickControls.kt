@@ -43,7 +43,7 @@ internal fun RunningClassQuickControls(
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
-    val controlShape = RoundedCornerShape(7.dp)
+    val controlShape = AtelierActionStyle.shape
     var dragging by remember(useAlarmVolume) { mutableStateOf<Float?>(null) }
     val percent = (dragging ?: selectedVolumePercent.toFloat())
         .roundToInt().coerceIn(0, 100)
@@ -71,7 +71,7 @@ internal fun RunningClassQuickControls(
             )
             // ON/OFF label is immediately next to its explanatory text.
             Box(
-                modifier = Modifier.width(42.dp).height(48.dp)
+                modifier = Modifier.width(48.dp).height(AtelierActionStyle.touchHeight)
                     .testTag("keep_screen_awake")
                     .clip(controlShape)
                     .clickable(
@@ -86,10 +86,10 @@ internal fun RunningClassQuickControls(
                 contentAlignment = Alignment.Center,
             ) {
                 Box(
-                    modifier = Modifier.fillMaxWidth().height(34.dp)
+                    modifier = Modifier.fillMaxWidth().height(AtelierActionStyle.visibleHeight)
                         .background(if (keepScreenAwake) colors.primaryContainer
                             else colors.surface, controlShape)
-                        .border(1.dp, colors.outline, controlShape)
+                        .border(AtelierActionStyle.stroke, colors.outline, controlShape)
                         .testTag("keep_screen_awake_visual"),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -106,13 +106,13 @@ internal fun RunningClassQuickControls(
             // Only these two segments are clickable. Same visible 34dp
             // height and 1dp outline as the ON/OFF button.
             Box(
-                modifier = Modifier.width(171.dp).height(48.dp)
+                modifier = Modifier.width(171.dp).height(AtelierActionStyle.touchHeight)
                     .testTag("running_volume_actions"),
                 contentAlignment = Alignment.Center,
             ) {
                 Box(
-                    modifier = Modifier.fillMaxWidth().height(34.dp)
-                        .border(1.dp, colors.outline, controlShape)
+                    modifier = Modifier.fillMaxWidth().height(AtelierActionStyle.visibleHeight)
+                        .border(AtelierActionStyle.stroke, colors.outline, controlShape)
                         .testTag("running_volume_actions_border"),
                 )
                 Row(
