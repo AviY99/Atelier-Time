@@ -166,20 +166,43 @@ class MelodyPreferencesTest {
         assertEquals(25, restored.sharedCustomVolumePercent)
     }
 
-    @Test fun soundEnableAndOutputChannelPersistGloballyAcrossRestart() {
+    @Test fun soundEnableAndAlarmLockedOnPersistGloballyAcrossRestart() {
         val store = MelodyPreferences(context, isolatedName)
         val initial = store.loadSettings()
         assertEquals(true, initial.timerSoundsEnabled)
-        val changed = initial.copy(
-            timerSoundsEnabled = false, classAlertsUseAlarmVolume = true)
-        store.saveSettings(changed)
+        val mediaOff = initial.setTimerSoundsEnabled(false)
+        store.saveSettings(mediaOff)
+        assertEquals(false, MelodyPreferences(context, isolatedName)
+            .loadSettings().timerSoundsEnabled)
+        val alarm = mediaOff.selectOutputAlarm(true)
+        store.saveSettings(alarm)
         val restored = MelodyPreferences(context, isolatedName).loadSettings()
-        assertEquals(false, restored.timerSoundsEnabled)
+        assertEquals(true, restored.timerSoundsEnabled)
         assertEquals(true, restored.classAlertsUseAlarmVolume)
-        store.saveSettings(restored.copy(timerSoundsEnabled = true))
-        val enabled = MelodyPreferences(context, isolatedName).loadSettings()
-        assertEquals(true, enabled.timerSoundsEnabled)
-        assertEquals(true, enabled.classAlertsUseAlarmVolume)
+        assertEquals(true, restored.setTimerSoundsEnabled(false).timerSoundsEnabled)
+        val backToMedia = restored.selectOutputAlarm(false)
+            .setTimerSoundsEnabled(false)
+        store.saveSettings(backToMedia)
+        val mediaAgain = MelodyPreferences(context, isolatedName).loadSettings()
+        assertEquals(false, mediaAgain.timerSoundsEnabled)
+        assertEquals(false, mediaAgain.classAlertsUseAlarmVolume)
+    }
+
+    @Test fun legacyAlarmOffPreferencesNormalizeWithoutErasingUserData() {
+        // Older app versions could persist an Alarm output + global Sound OFF
+        // combination. Load restores Sound ON while preserving other settings.
+        val store = MelodyPreferences(context, isolatedName)
+        val initial = store.loadSettings().setSharedCustomDuration(29)
+        store.saveSettings(initial)
+        val prefs = context.getSharedPreferences(isolatedName, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean("classAlertsUseAlarmVolume", true)
+            .putBoolean("timerSoundsEnabled", false)
+            .commit()
+        val updated = MelodyPreferences(context, isolatedName).loadSettings()
+        assertEquals(true, updated.classAlertsUseAlarmVolume)
+        assertEquals(true, updated.timerSoundsEnabled)
+        assertEquals(29, updated.sharedCustomSeconds)
     }
 
     @Test fun sharedModeDisabledDormantSourceStaysDisabledAfterRestart() {
