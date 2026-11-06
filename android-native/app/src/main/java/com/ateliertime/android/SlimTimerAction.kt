@@ -70,7 +70,8 @@ internal fun SlimTimerAction(
             modifier = Modifier.fillMaxWidth().height(34.dp)
                 .background(fill, shape)
                 .border(1.dp, if (enabled) palette.outline else
-                    palette.outlineVariant.copy(alpha = 0.55f), shape),
+                    palette.outlineVariant.copy(alpha = 0.55f), shape)
+                .testTag(tag + "_visual"),
             contentAlignment = Alignment.Center,
         ) {
             Text(
