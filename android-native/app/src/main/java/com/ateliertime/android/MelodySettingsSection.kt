@@ -316,8 +316,12 @@ fun MelodySettingsSection(
                 "the app Sound switch. Selecting Alarm automatically sets Sound " +
                 "to ON and disables the OFF choice until Media is selected again. " +
                 "Use sound Media/Alarm selects the system volume channel for ALL cues. " +
-                "The Max and Mute buttons in Run/Free affect only " +
-                "the chosen channel's volume bar; they do not change Sound ON/OFF. " +
+                "The Max, Mute and volume slider in Run/Free adjust only " +
+                "the selected device volume channel, and also sync Sound ON/OFF: " +
+                "Media zero turns Sound OFF; Media above zero turns Sound ON. " +
+                "Alarm always keeps Sound ON even at volume zero. " +
+                "The low-volume warning appears whenever the selected channel " +
+                "is zero, regardless of the global Sound switch. " +
                 "'Separate sounds' restores each cue's saved melody and duration. " +
                 "Switching modes never deletes your previous choices. " +
                 "System and audio-file sounds use Android pickers. " +
