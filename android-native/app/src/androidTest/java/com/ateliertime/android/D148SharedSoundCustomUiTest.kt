@@ -26,7 +26,7 @@ import org.junit.runner.RunWith
 class D148SharedSoundCustomUiTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun customShowsLengthAndVolumeBarsOnlyWhileSharedCustomIsSelected() {
+    @Test fun customShowsOnlySoundLengthSliderWithoutCustomGain() {
         var settings by mutableStateOf(
             SoundSettings().setAssignmentMode(SoundAssignmentMode.SHARED))
         compose.setContent {
@@ -50,16 +50,45 @@ class D148SharedSoundCustomUiTest {
         compose.onNodeWithTag("sound_shared_custom_volume_slider").assertDoesNotExist()
         compose.onNodeWithTag("sound_shared_mode_custom")
             .performScrollTo().performClick()
-        compose.onNodeWithText("Custom sound volume").assertExists()
+        compose.onNodeWithText("Custom sound volume").assertDoesNotExist()
         compose.onNodeWithTag("sound_shared_custom_length_slider")
             .performScrollTo().assertExists()
-        compose.onNodeWithTag("sound_shared_custom_volume_slider")
-            .performScrollTo().assertExists()
+        compose.onNodeWithTag("sound_shared_custom_volume_slider").assertDoesNotExist()
         assertEquals(15, settings.sharedSeconds)
         compose.onNodeWithTag("sound_shared_mode_ten")
             .performScrollTo().performClick()
         assertEquals(10, settings.sharedSeconds)
         compose.onNodeWithTag("sound_shared_custom_volume_slider").assertDoesNotExist()
+    }
+
+    @Test fun soundGlobalMasterAndMediaAlarmSelectorsApplyToSharedAndSeparate() {
+        var settings by mutableStateOf(SoundSettings())
+        compose.setContent {
+            MaterialTheme {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    MelodySettingsSection(
+                        settings = settings,
+                        onSettingsChange = { settings = it },
+                        onChooseSystemSound = {}, onChooseAudioFile = {},
+                        onPreview = {}, onError = {},
+                    )
+                }
+            }
+        }
+        compose.onNodeWithTag("sound_master_enabled")
+            .performScrollTo().performClick()
+        assertEquals(false, settings.timerSoundsEnabled)
+        compose.onNodeWithTag("sound_output_alarm")
+            .performScrollTo().performClick()
+        assertEquals(true, settings.classAlertsUseAlarmVolume)
+        compose.onNodeWithText("Same sound for all")
+            .performScrollTo().performClick()
+        assertEquals(SoundAssignmentMode.SHARED, settings.assignmentMode)
+        assertEquals(false, settings.timerSoundsEnabled)
+        assertEquals(true, settings.classAlertsUseAlarmVolume)
+        compose.onNodeWithTag("sound_output_media")
+            .performScrollTo().performClick()
+        assertEquals(false, settings.classAlertsUseAlarmVolume)
     }
 
     @Test fun switchingBackToSeparateRetainsOriginalIndependentDurationControls() {
