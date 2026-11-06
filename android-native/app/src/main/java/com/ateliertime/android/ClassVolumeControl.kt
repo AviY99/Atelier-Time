@@ -73,6 +73,58 @@ internal class ClassVolumeControl(context: Context) {
     }
 
     /**
+     * D-150: maximize ONLY the Sound-selected Media/Alarm channel. A separate
+     * channel's level and baseline must never be modified by this action.
+     * Retains the original safety policy: restore our Max on exit only if
+     * nobody subsequently moved the chosen hardware channel.
+     */
+    fun maxSelected(useAlarm: Boolean): ClassVolumeLevels {
+        val before = levels()
+        val stream = if (useAlarm) AudioManager.STREAM_ALARM
+            else AudioManager.STREAM_MUSIC
+        val current = if (useAlarm) before.alarm else before.media
+        val maximum = if (useAlarm) before.alarmMax else before.mediaMax
+        check(maximum > 0) { "The selected volume channel is unavailable." }
+        if (current == maximum) return before
+        try {
+            audio.setStreamVolume(stream, maximum, 0)
+            val after = levels()
+            check((if (useAlarm) after.alarm else after.media) == maximum) {
+                "Android volume protection blocked maximum volume."
+            }
+            if (useAlarm) {
+                if (alarmBaseline == null) alarmBaseline = current
+            } else if (mediaBaseline == null) {
+                mediaBaseline = current
+            }
+            return after
+        } catch (failure: Exception) {
+            runCatching { audio.setStreamVolume(stream, current, 0) }
+            throw IllegalStateException(
+                "Could not maximize selected " +
+                    (if (useAlarm) "Alarm" else "Media") +
+                    " volume. Check Android restrictions. " +
+                    (failure.message ?: ""), failure)
+        }
+    }
+
+    /**
+     * D-150: Sounds off is NOT the Sounds tab's global ON/OFF setting.
+     * It only lowers the selected Media/Alarm bar to zero; the unselected
+     * hardware stream and source selection stay unchanged.
+     * Explicit mute releases any previously owned Max restoration for
+     * THIS stream, even if the level had already reached zero.
+     */
+    fun muteSelected(useAlarm: Boolean): ClassVolumeLevels {
+        val after = setPercent(
+            if (useAlarm) AudioManager.STREAM_ALARM else AudioManager.STREAM_MUSIC,
+            0,
+        )
+        if (useAlarm) alarmBaseline = null else mediaBaseline = null
+        return after
+    }
+
+    /**
      * D-150: Sounds off is a one-shot volume action, NOT the saved Sound
      * ON/OFF mode. It sets BOTH hardware streams to zero; the two sliders
      * then reflect zero. It does not change the alert-stream selection.
