@@ -57,6 +57,41 @@ for file in \
   app/src/androidTest/java/com/ateliertime/android/D151SlimControlsAlarmHelpUiTest.kt; do
   [[ -s "$file" ]] || { echo "STOP: missing $file"; exit 2; }
 done
+# Guard against missing Compose UI-test Kotlin extension imports before
+# running costly Gradle builds (D151 encountered this in three test sources).
+python3 - <<'PY'
+from pathlib import Path
+import re, sys
+root = Path("app/src/androidTest")
+required = {
+    "assertIsNotEnabled": r"\.assertIsNotEnabled\s*\(",
+    "assertIsEnabled": r"\.assertIsEnabled\s*\(",
+    "getUnclippedBoundsInRoot": r"\.getUnclippedBoundsInRoot\s*\(",
+    "performScrollTo": r"\.performScrollTo\s*\(",
+    "performClick": r"\.performClick\s*\(",
+    "onNodeWithTag": r"\.onNodeWithTag\s*\(",
+    "onNodeWithText": r"\.onNodeWithText\s*\(",
+    "dp": r"\b\d+\.dp\b",
+}
+issues = []
+for p in root.rglob("*.kt"):
+    source = p.read_text(encoding="utf-8")
+    for method, pattern in required.items():
+        if not re.search(pattern, source):
+            continue
+        imp = ("androidx.compose.ui.unit.dp" if method == "dp"
+               else "androidx.compose.ui.test." + method)
+        if not re.search(r"^import\s+" + re.escape(imp) + r"\s*$",
+                         source, re.MULTILINE):
+            issues.append(f"{p}: missing import {imp}")
+if issues:
+    print("STOP: AndroidTest Compose Kotlin imports missing:", file=sys.stderr)
+    for issue in issues:
+        print(issue, file=sys.stderr)
+    sys.exit(2)
+print("ANDROIDTEST IMPORT PREFLIGHT PASS")
+PY
+
 grep -Fq 'class_controls_row' app/src/main/java/com/ateliertime/android/SessionTimerScreen.kt
 grep -Fq 'class_controls_help' app/src/main/java/com/ateliertime/android/SessionTimerScreen.kt
 
