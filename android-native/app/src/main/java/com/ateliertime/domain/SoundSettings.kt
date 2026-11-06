@@ -64,41 +64,28 @@ data class SoundSettings(
     val timerSoundsEnabled: Boolean = true,
 ) {
     /**
-     * Alarm is the phone's alarm audio channel. Keep the app's cue switch
-     * ON while Alarm is selected; only Media mode permits app-wide Sound OFF.
-     * Neither operation changes the phone's hardware volume setting.
+     * D155: the Android device, not the app, determines whether Alarm (or
+     * Media) permits a zero volume. Changing route does not forcibly enable
+     * Sound; the UI reads the actual newly selected stream and reconciles it.
      */
     fun selectOutputAlarm(useAlarm: Boolean): SoundSettings =
-        copy(
-            classAlertsUseAlarmVolume = useAlarm,
-            timerSoundsEnabled = if (useAlarm) true else timerSoundsEnabled,
-        )
+        copy(classAlertsUseAlarmVolume = useAlarm)
 
     fun setTimerSoundsEnabled(enabled: Boolean): SoundSettings =
-        copy(timerSoundsEnabled =
-            if (classAlertsUseAlarmVolume) true else enabled)
+        copy(timerSoundsEnabled = enabled)
 
     /**
-     * D-154: the Run/Free slider, Mute and confirmed Max are additional
-     * controls of the SAME global Sound ON/OFF preference in Sounds.
-     * Read actual hardware level AFTER a successful change rather than
-     * trusting a requested percent (Android may quantize to zero).
-     *
-     * Media at zero -> Sound OFF; Media above zero -> Sound ON.
-     * Alarm preserves the existing mandatory ON lock, even at zero;
-     * the zero-volume warning must still be visible in that case.
-     * This changes no other audio stream, selected route, or saved cue.
+     * Both Run and Free, regardless of Media/Alarm route:
+     * actual selected volume 0 -> global Sound OFF, above 0 -> ON.
+     * A device-enforced nonzero minimum therefore naturally keeps ON.
      */
     fun afterSelectedStreamVolumeChange(actualLevel: Int): SoundSettings {
         require(actualLevel >= 0) { "Actual stream volume cannot be negative." }
         return setTimerSoundsEnabled(actualLevel > 0)
     }
 
-    /** Non-destructive migration for older saved Alarm + Sound OFF data. */
-    fun normalizedAlarmSoundOn(): SoundSettings =
-        if (classAlertsUseAlarmVolume && !timerSoundsEnabled)
-            copy(timerSoundsEnabled = true)
-        else this
+    /** Compatibility for older call sites; no forced Alarm ON migration. */
+    fun normalizedAlarmSoundOn(): SoundSettings = this
 
     fun soundFor(cue: TimerCue): CueSound {
         if (assignmentMode == SoundAssignmentMode.SHARED) {
