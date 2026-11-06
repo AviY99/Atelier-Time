@@ -859,49 +859,37 @@ fun SessionEditorScreen(
                     containerTag = "free_timer_quick_controls",
                     keepScreenAwake = keepScreenAwake,
                     onKeepScreenAwakeChange = { keepScreenAwake = it },
-                    mediaPercent = freeVolumes.mediaPercent(),
-                    alarmPercent = freeVolumes.alarmPercent(),
+                    selectedVolumePercent = if (soundSettings.classAlertsUseAlarmVolume)
+                        freeVolumes.alarmPercent() else freeVolumes.mediaPercent(),
                     useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
-                    onChooseVolume = { selectAlarm ->
-                        if (soundSettings.classAlertsUseAlarmVolume != selectAlarm) {
-                            saveSoundSettings(soundSettings.copy(
-                                classAlertsUseAlarmVolume = selectAlarm))
+                    onSelectedVolumeChange = { percent ->
+                        runCatching {
+                            if (soundSettings.classAlertsUseAlarmVolume)
+                                classVolumeControl.setAlarmPercent(percent)
+                            else classVolumeControl.setMediaPercent(percent)
+                        }.onSuccess {
+                            volumeRevision++
+                            classVolumeError = null
+                        }.onFailure {
+                            classVolumeError = it.message ?:
+                                "Could not adjust selected sound volume."
                         }
                     },
-                    onMediaVolumeChange = { percent ->
-                        runCatching { classVolumeControl.setMediaPercent(percent) }
-                            .onSuccess {
-                                volumeRevision++
-                                classVolumeError = null
-                            }
-                            .onFailure { classVolumeError =
-                                it.message ?: "Cannot change Media volume." }
-                    },
-                    onAlarmVolumeChange = { percent ->
-                        runCatching { classVolumeControl.setAlarmPercent(percent) }
-                            .onSuccess {
-                                volumeRevision++
-                                classVolumeError = null
-                            }
-                            .onFailure { classVolumeError =
-                                it.message ?: "Cannot change Alarm volume." }
-                    },
-                    onMaxBoth = {
+                    onVolumeMax = {
                         maxBothFromFreeTimer = true
                         showConfirmMaxVolume = true
                     },
-                    // One-shot hardware mute. Does NOT change Sounds tab's
-                    // persisted Sound ON/OFF nor the Media/Alarm cue route.
                     onSoundsOff = {
-                        runCatching { classVolumeControl.muteBoth() }
-                            .onSuccess {
-                                volumeRevision++
-                                classVolumeError = null
-                            }
-                            .onFailure {
-                                classVolumeError = it.message ?:
-                                    "Could not mute both volumes."
-                            }
+                        runCatching {
+                            classVolumeControl.muteSelected(
+                                soundSettings.classAlertsUseAlarmVolume)
+                        }.onSuccess {
+                            volumeRevision++
+                            classVolumeError = null
+                        }.onFailure {
+                            classVolumeError = it.message ?:
+                                "Could not mute selected sound volume."
+                        }
                     },
                 )
                 if (classAlertVolumeMuted && soundEnabled)
@@ -1391,58 +1379,48 @@ fun SessionEditorScreen(
                     RunningClassQuickControls(
                         keepScreenAwake = keepScreenAwake,
                         onKeepScreenAwakeChange = { keepScreenAwake = it },
-                        mediaPercent = volumes.mediaPercent(),
-                        alarmPercent = volumes.alarmPercent(),
+                        selectedVolumePercent = if (soundSettings.classAlertsUseAlarmVolume)
+                            volumes.alarmPercent() else volumes.mediaPercent(),
                         useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
-                        onChooseVolume = { selectAlarm ->
-                            if (soundSettings.classAlertsUseAlarmVolume != selectAlarm) {
-                                saveSoundSettings(soundSettings.copy(
-                                    classAlertsUseAlarmVolume = selectAlarm))
+                        onSelectedVolumeChange = { percent ->
+                            runCatching {
+                                if (soundSettings.classAlertsUseAlarmVolume)
+                                    classVolumeControl.setAlarmPercent(percent)
+                                else classVolumeControl.setMediaPercent(percent)
+                            }.onSuccess { changed ->
+                                volumeRevision++
+                                classVolumeError = null
+                                recordClassEvent(
+                                    "Selected sound volume " +
+                                        (if (soundSettings.classAlertsUseAlarmVolume)
+                                            changed.alarmPercent().toString() + "% Alarm"
+                                        else changed.mediaPercent().toString() + "% Media"),
+                                    timerView, timerView)
+                            }.onFailure { failure ->
+                                classVolumeError = failure.message ?:
+                                    "Could not adjust selected sound volume."
                             }
                         },
-                        onMediaVolumeChange = { percent ->
-                            runCatching { classVolumeControl.setMediaPercent(percent) }
-                                .onSuccess { changed ->
-                                    volumeRevision++
-                                    classVolumeError = null
-                                    recordClassEvent(
-                                        "Media volume ${changed.mediaPercent()}%",
-                                        timerView, timerView)
-                                }.onFailure { failure ->
-                                    classVolumeError = failure.message ?:
-                                        "Could not adjust Media volume."
-                                }
-                        },
-                        onAlarmVolumeChange = { percent ->
-                            runCatching { classVolumeControl.setAlarmPercent(percent) }
-                                .onSuccess { changed ->
-                                    volumeRevision++
-                                    classVolumeError = null
-                                    recordClassEvent(
-                                        "Alarm volume ${changed.alarmPercent()}%",
-                                        timerView, timerView)
-                                }.onFailure { failure ->
-                                    classVolumeError = failure.message ?:
-                                        "Could not adjust Alarm volume."
-                                }
-                        },
-                        onMaxBoth = {
+                        onVolumeMax = {
                             maxBothFromFreeTimer = false
                             showConfirmMaxVolume = true
                         },
                         onSoundsOff = {
-                            runCatching { classVolumeControl.muteBoth() }
-                                .onSuccess {
-                                    volumeRevision++
-                                    classVolumeError = null
-                                    recordClassEvent(
-                                        "Sounds off: both volumes zero",
-                                        timerView, timerView)
-                                }
-                                .onFailure { failure ->
-                                    classVolumeError = failure.message ?:
-                                        "Could not mute both volumes."
-                                }
+                            runCatching {
+                                classVolumeControl.muteSelected(
+                                    soundSettings.classAlertsUseAlarmVolume)
+                            }.onSuccess {
+                                volumeRevision++
+                                classVolumeError = null
+                                recordClassEvent(
+                                    "Sounds off: selected " +
+                                        (if (soundSettings.classAlertsUseAlarmVolume)
+                                            "Alarm" else "Media") + " volume zero",
+                                    timerView, timerView)
+                            }.onFailure { failure ->
+                                classVolumeError = failure.message ?:
+                                    "Could not mute selected sound volume."
+                            }
                         },
                     )
                 } else {
@@ -1564,36 +1542,44 @@ fun SessionEditorScreen(
         }
     }
 
-    // D-144: only a deliberate opt-in can raise system-wide media/alarm levels.
+    // D-150: Volume max affects ONLY the Media/Alarm channel selected in
+    // Sounds, never the nonselected channel. Keep loudness confirmation.
     if (showConfirmMaxVolume) {
+        val selectedName = if (soundSettings.classAlertsUseAlarmVolume)
+            "Alarm" else "Media"
         AlertDialog(
             modifier = Modifier.testTag("class_volume_max_dialog"),
             onDismissRequest = { showConfirmMaxVolume = false },
-            title = { Text("Set both volumes to maximum?") },
-            text = { Text("This raises the PHONE'S Media and Alarm volume to " +
-                "their device maximum, affecting other apps too. It may be very loud. " +
-                "Android volume protection or Do Not Disturb can block the change. " +
+            title = { Text("Set $selectedName volume to maximum?") },
+            text = { Text("This raises the PHONE'S selected $selectedName channel " +
+                "to its device maximum. Other apps using that channel may be very loud. " +
+                "The other channel will NOT change. Android volume protection or " +
+                "Do Not Disturb can block this action. " +
                 (if (maxBothFromFreeTimer)
-                    "Original levels are restored when you exit the Free Timer"
-                 else "Original levels are restored when the Class ends") +
-                ", only if you have not changed them yourself. Continue?") },
+                    "Original volume is restored when you exit the Free Timer"
+                 else "Original volume is restored when the Class ends") +
+                ", only if you have not adjusted that channel yourself. Continue?") },
             confirmButton = {
                 TextButton(
                     colors = atelierTextColors(),
                     modifier = Modifier.testTag("class_volume_max_confirm"),
                     onClick = {
                         showConfirmMaxVolume = false
-                        runCatching { classVolumeControl.maxBoth() }
-                            .onSuccess {
-                                volumeRevision++
-                                classVolumeError = null
-                                recordClassEvent("Max both volumes", timerView, timerView)
-                            }
-                            .onFailure {
-                                classVolumeError = it.message ?: "Volume change not allowed."
-                            }
+                        runCatching {
+                            classVolumeControl.maxSelected(
+                                soundSettings.classAlertsUseAlarmVolume)
+                        }.onSuccess {
+                            volumeRevision++
+                            classVolumeError = null
+                            recordClassEvent(
+                                "Volume max: selected $selectedName",
+                                timerView, timerView)
+                        }.onFailure {
+                            classVolumeError = it.message ?:
+                                "Selected volume change not allowed."
+                        }
                     },
-                ) { Text("Max both") }
+                ) { Text("Volume max") }
             },
             dismissButton = {
                 TextButton(colors = atelierTextColors(),
