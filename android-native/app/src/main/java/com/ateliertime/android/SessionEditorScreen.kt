@@ -1327,12 +1327,17 @@ fun SessionEditorScreen(
                             }
                     },
                     onPreview = { cue ->
-                        melodyPlayer.play(soundSettings.soundFor(cue),
-                            soundSettings.secondsFor(cue),
-                            useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
-                            playbackVolumePercent =
-                                soundSettings.playbackVolumePercentFor(cue)) { message ->
-                            melodyError = message
+                        if (!soundEnabled) {
+                            melodyError = "Sound is OFF. Enable Sound to hear a preview."
+                        } else {
+                            melodyError = null
+                            melodyPlayer.play(soundSettings.soundFor(cue),
+                                soundSettings.secondsFor(cue),
+                                useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
+                                playbackVolumePercent =
+                                    soundSettings.playbackVolumePercentFor(cue)) { message ->
+                                melodyError = message
+                            }
                         }
                     },
                     onError = { message -> melodyError = message },
@@ -1354,9 +1359,9 @@ fun SessionEditorScreen(
                     .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(
                         if (runningClass) 2.dp else 8.dp)) {
-                // D-148: approved compact A cards. Tapping a volume NAME
-                // chooses the CLASS sound stream; sliders manually adjust
-                // independent Android Media and Alarm device volumes.
+                // D-149: compact Sound-style controls. Class and Free Timer
+                // share one audio output route; each slider changes just
+                // the matching Android Media/Alarm volume.
                 if (runningClass) {
                     val volumes = remember(wallClockMillis / 1_000L, volumeRevision) {
                         classVolumeControl.levels()
@@ -1532,8 +1537,10 @@ fun SessionEditorScreen(
             text = { Text("This raises the PHONE'S Media and Alarm volume to " +
                 "their device maximum, affecting other apps too. It may be very loud. " +
                 "Android volume protection or Do Not Disturb can block the change. " +
-                "Original levels are restored when the Class ends or you exit " +
-                "the Free Timer, only if you have not changed them yourself. Continue?") },
+                (if (maxBothFromFreeTimer)
+                    "Original levels are restored when you exit the Free Timer"
+                 else "Original levels are restored when the Class ends") +
+                ", only if you have not changed them yourself. Continue?") },
             confirmButton = {
                 TextButton(
                     colors = atelierTextColors(),
@@ -1802,15 +1809,18 @@ fun SessionEditorScreen(
                             color = atelierErrorTextColor(),
                             style = MaterialTheme.typography.bodySmall)
                     }
-                    TextButton(onClick = {
-                        melodyPlayer.play(soundSettings.soundFor(TimerCue.POSE_FINISHED),
-                            soundSettings.secondsFor(TimerCue.POSE_FINISHED),
-                            useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
-                            playbackVolumePercent = soundSettings.playbackVolumePercentFor(
-                                TimerCue.POSE_FINISHED)) {
-                            message -> melodyError = message
-                        }
-                    }) { Text("Test Class alert sound") }
+                    TextButton(
+                        enabled = soundEnabled,
+                        onClick = {
+                            melodyPlayer.play(soundSettings.soundFor(TimerCue.POSE_FINISHED),
+                                soundSettings.secondsFor(TimerCue.POSE_FINISHED),
+                                useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
+                                playbackVolumePercent = soundSettings.playbackVolumePercentFor(
+                                    TimerCue.POSE_FINISHED)) { message ->
+                                melodyError = message
+                            }
+                        },
+                    ) { Text("Test Class alert sound") }
                     Text(
                         "Calculated finish: " + clockFormat.format(Date(calculatedFinish)),
                         modifier = Modifier.testTag("run_end_calculated"),
