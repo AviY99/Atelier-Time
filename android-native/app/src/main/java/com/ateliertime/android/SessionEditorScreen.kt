@@ -268,13 +268,6 @@ fun SessionEditorScreen(
         }
     }
 
-    // Recover from older versions where a saved Sound OFF did not change
-    // hardware volume, and from device volume-button adjustments. Never move
-    // either hardware stream without a direct user tap on an app control.
-    LaunchedEffect(soundSettings.classAlertsUseAlarmVolume,
-        wallClockMillis / 1_000L) {
-        syncSoundAfterTimerVolume(classVolumeControl.levels())
-    }
     val freeTimer = remember { FreeCountdownTimer { SystemClock.elapsedRealtime() } }
     var freeTimerView by remember { mutableStateOf(freeTimer.view()) }
     var freeTimerError by remember { mutableStateOf<String?>(null) }
@@ -347,6 +340,14 @@ fun SessionEditorScreen(
     }
     var timerView by remember(liveTimer) { mutableStateOf(liveTimer?.view()) }
     var wallClockMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    // Recover from older versions where a saved Sound OFF did not change
+    // hardware volume, and from device volume-button adjustments. Never move
+    // either hardware stream without a direct user tap on an app control.
+    LaunchedEffect(soundSettings.classAlertsUseAlarmVolume,
+        wallClockMillis / 1_000L) {
+        syncSoundAfterTimerVolume(classVolumeControl.levels())
+    }
+
     val hourOfDay = remember(wallClockMillis / 60_000L) {
         Calendar.getInstance().apply { timeInMillis = wallClockMillis }
             .get(Calendar.HOUR_OF_DAY)
