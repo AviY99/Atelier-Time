@@ -455,7 +455,8 @@ private fun SoundPicker(
                         AtelierActionStyle.stroke,
                         MaterialTheme.colorScheme.outline,
                         AtelierActionStyle.shape,
-                    ),
+                    )
+                    .testTag("sound_preview_visual_${cue.name.lowercase()}"),
                 contentAlignment = Alignment.Center,
             ) {
                 Canvas(modifier = Modifier.size(19.dp)) {
