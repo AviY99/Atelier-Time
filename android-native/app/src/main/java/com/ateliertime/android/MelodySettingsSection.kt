@@ -17,8 +17,9 @@ import kotlin.math.roundToInt
 
 /**
  * Compact Sound tab: library checkboxes in one row, two explicit sound modes.
- * SHARED shows only one picker and one 5/10s duration; separate mode alone
- * exposes the original independent A/B/C pickers and lengths.
+ * SHARED offers one sound and unified 5s / 10s / Custom duration for
+ * Class A/B/C and Free, with per-sound gain in Custom; Separate restores
+ * original A/B/C/Free pickers and saved lengths.
  */
 @Composable
 fun MelodySettingsSection(
