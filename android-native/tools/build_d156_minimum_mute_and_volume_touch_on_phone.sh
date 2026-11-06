@@ -84,6 +84,7 @@ required = {
     "performScrollTo": r"\.performScrollTo\s*\(",
     "performClick": r"\.performClick\s*\(",
     "performTouchInput": r"\.performTouchInput\s*\(",
+    "swipe": r"\.swipe\s*\(",
     "onNodeWithTag": r"\.onNodeWithTag\s*\(",
     "onNodeWithText": r"\.onNodeWithText\s*\(",
     "dp": r"\b\d+\.dp\b",
