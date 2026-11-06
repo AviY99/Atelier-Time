@@ -213,7 +213,9 @@ fun SessionEditorScreen(
     var runFinishBlockedReason by remember { mutableStateOf<String?>(null) }
     var playingSession by remember { mutableStateOf<ApprovedSession?>(null) }
     var activeTab by remember { mutableStateOf(MainTab.EDITOR) }
-    var soundEnabled by remember { mutableStateOf(true) }
+    // D-149: Sound ON/OFF comes from persisted SoundSettings, shared by
+    // Class, Free Timer, previews and the main Sounds tab.
+    val soundEnabled = soundSettings.timerSoundsEnabled
     var keepScreenAwake by remember { mutableStateOf(false) }
     val classVolumeControl = remember(context) { ClassVolumeControl(context) }
     // Best-effort restore if the Activity is actually disposed while an override remains.
@@ -221,6 +223,7 @@ fun SessionEditorScreen(
         onDispose { classVolumeControl.restoreIfUnchanged() }
     }
     var showConfirmMaxVolume by remember { mutableStateOf(false) }
+    var maxBothFromFreeTimer by remember { mutableStateOf(false) }
     var classVolumeError by remember { mutableStateOf<String?>(null) }
     // Force immediate refresh after a user releases either Android volume slider;
     // the running wall clock refresh also picks up hardware-button changes.
@@ -352,12 +355,8 @@ fun SessionEditorScreen(
             activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
-    val mediaVolumeMuted = remember(wallClockMillis / 1_000L) {
-        val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audio.getStreamVolume(AudioManager.STREAM_MUSIC) == 0
-    }
     val classAlertVolumeMuted = remember(wallClockMillis / 1_000L,
-        soundSettings.classAlertsUseAlarmVolume) {
+        soundSettings.classAlertsUseAlarmVolume, volumeRevision) {
         val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val stream = if (soundSettings.classAlertsUseAlarmVolume)
             AudioManager.STREAM_ALARM else AudioManager.STREAM_MUSIC
@@ -614,6 +613,7 @@ fun SessionEditorScreen(
                 freeMelodyPlayer.play(
                     soundSettings.soundFor(TimerCue.FREE_TIMER_FINISHED),
                     soundSettings.secondsFor(TimerCue.FREE_TIMER_FINISHED),
+                    useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
                     playbackVolumePercent = soundSettings.playbackVolumePercentFor(
                         TimerCue.FREE_TIMER_FINISHED),
                 ) { message -> freeTimerError = message }
@@ -1288,8 +1288,7 @@ fun SessionEditorScreen(
                     onPreview = { cue ->
                         melodyPlayer.play(soundSettings.soundFor(cue),
                             soundSettings.secondsFor(cue),
-                            useAlarmVolume = cue != TimerCue.FREE_TIMER_FINISHED &&
-                                soundSettings.classAlertsUseAlarmVolume,
+                            useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
                             playbackVolumePercent =
                                 soundSettings.playbackVolumePercentFor(cue)) { message ->
                             melodyError = message
@@ -1300,12 +1299,7 @@ fun SessionEditorScreen(
                 if (melodyError != null) {
                     Text(melodyError ?: "", color = atelierErrorTextColor())
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Timer sounds " + if (soundEnabled) "ON" else "OFF", modifier = Modifier.weight(1f))
-                    Switch(checked = soundEnabled,
-                        onCheckedChange = { soundEnabled = it })
-                }
-                if (!soundEnabled) Text("Timer sounds are OFF — no timer completion sounds will play.",
+                if (!soundEnabled) Text("Sound is OFF for all timers.",
                     style = MaterialTheme.typography.bodySmall)
             }
             MainTab.TIMER -> {
@@ -1364,7 +1358,10 @@ fun SessionEditorScreen(
                                         "Could not adjust Alarm volume."
                                 }
                         },
-                        onMaxBoth = { showConfirmMaxVolume = true },
+                        onMaxBoth = {
+                            maxBothFromFreeTimer = false
+                            showConfirmMaxVolume = true
+                        },
                     )
                 } else {
                     // Preserve the detailed battery warning before Class start.
@@ -1494,8 +1491,8 @@ fun SessionEditorScreen(
             text = { Text("This raises the PHONE'S Media and Alarm volume to " +
                 "their device maximum, affecting other apps too. It may be very loud. " +
                 "Android volume protection or Do Not Disturb can block the change. " +
-                "When this Class ends, levels are restored only if you have not " +
-                "changed them yourself. Continue?") },
+                "Original levels are restored when the Class ends or you exit " +
+                "the Free Timer, only if you have not changed them yourself. Continue?") },
             confirmButton = {
                 TextButton(
                     colors = atelierTextColors(),
