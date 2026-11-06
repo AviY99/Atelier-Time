@@ -15,7 +15,7 @@ The user also reported the shared volume slider is hard to grip when it displays
 
 ## Implemented changes
 
-- `android-native/app/src/main/java/com/ateliertime/android/ClassVolumeControl.kt`: `muteSelected` no longer exits on Android positive minimum; instead invokes `setPercent(stream(useAlarm), 0)` and checks actual Android readback. `setSelectedSoundEnabled` OFF also targets real selected stream minimum. Slider calls shared minimum-aware pure mapping, including first positive step. Existing Max explicit user consent, saved positive history/25% fallback, ability to select only Media OR Alarm, and unchanged other hardware stream retained.
+- `android-native/app/src/main/java/com/ateliertime/android/ClassVolumeControl.kt`: `muteSelected` no longer exits on Android positive minimum; instead invokes `setPercent(stream(useAlarm), 0)` and checks actual Android readback. `setSelectedSoundEnabled` OFF also targets real selected stream minimum. Slider calls shared minimum-aware pure mapping, including first positive step. Immediate Max WITHOUT any confirmation or warning, no volume restoration on Timer exit, saved positive history/25% ON fallback, one selected Media OR Alarm stream, and no changes to the other hardware stream.
 - `android-native/app/src/main/java/com/ateliertime/domain/VolumeSliderMath.kt`: new `selectedTarget(percent, min, max)`, rejecting invalid device range, clamping zero to the real device min and any positive percent to at least 1 or device min. Pure mapping has eight dedicated tests in `android-native/app/src/test/java/com/ateliertime/domain/D156DeviceMinimumVolumeTest.kt`.
 - `android-native/app/src/main/java/com/ateliertime/android/AtelierSlimSlider.kt`: new `compactVisual = true` default to preserve all previous slim slider visuals; the volume slider opts out only.
 - `android-native/app/src/main/java/com/ateliertime/android/RunningClassQuickControls.kt`: shared Class/Free slider gets `compactVisual = false`, `heightIn(min = 56.dp)`, `padding(horizontal = 24.dp)`, `steps = 0`. New Compose UI tests in `D156VolumeHitTargetUiTest.kt` check >=56dp touch strip, attempt to drag up from 0%, and verify Free Alarm uses same touch target. **AndroidTest compiled only on local helper, not executed automatically.**
@@ -40,14 +40,14 @@ Minimum visual/user QA matrix:
 1. In Sounds, choose **Alarm**; enter Programmed Timer with Alarm at 100%; tap **Mute** → actual Alarm level must drop to the Android-permitted minimum (it may remain positive), without the previous red blocker message. Sound remains ON if minimum >0; zero warning only if actually 0. Do the same in Free Timer.
 2. From Media at 0%, grab/drag the thumb from the LEFT end in each Timer → it should move easily and reach a positive Android level and turn Sound ON; warning disappears. Verify a tiny positive drag is not quantized back to zero. Tap Mute → actual Media 0, Sound OFF, warning returns. Test both timer views.
 3. Repeat Alarm drag at low end; slider cannot request below device minimum; show actual level/percentage rather than misleading 0. If device allows Alarm 0, mirror Media completely.
-4. Sound tab ON restores the last positive selected-stream level, or 25% with no prior value. Sound OFF lowers zero-capable stream to zero; protected channel respects Android minimum. Route selection does not change the other channel. Confirm Max warning still precedes the selected-channel maximum.
+4. Sound tab ON restores the last positive selected-stream level, or 25% with no prior value. Sound OFF lowers zero-capable stream to zero; protected channel respects Android minimum. Route selection does not change the other channel. Max immediately sets the selected stream to maximum with no confirmation and no subsequent automatic restoration.
 5. Check saved class and sound settings survive in-place update, timed cue playback follows Sound state, and display styles remain consistent.
 
 **Google Play remains FREE with invite-only Internal Testing as initially agreed; no signed AAB or store upload.**
 
 ## Final D156 acceptance matrix — user-requested unified contract
 
-This section is **authoritative** and supersedes any obsolete text above describing Max confirmation or automatic restore. One selected Android stream (Media or Alarm), and ONE shared implementation for both Class and Free:
+This table is authoritative: Max has NO dialog/warning/confirmation and NO auto-restore. One selected Android stream (Media or Alarm), and ONE shared implementation for both Class and Free:
 
 | Selection / action | Actual selected device stream target | Global Sound | 0-volume warning | Other stream / exit |
 |---|---|---|---|---|
@@ -70,3 +70,7 @@ This section is **authoritative** and supersedes any obsolete text above describ
 ## Independent pre-build check (not an Android APK build)
 
 On 2026-11-06, an **isolated native Kotlin compiler smoke check** was run in the assistant's container on copied equivalent pure implementations of `VolumeSliderMath` and `MediaSoundRestorePolicy` (not a clone/build of the Android Gradle project). It compiled successfully with `kotlinc` and printed `D156 pure Kotlin smoke: PASS (12 volume mappings, 3 invalid ranges, 5 restoration checks)`. This validates representative 0→device minimum, first positive step, Max=100% math and last-positive/25%-fallback cases. It **does not** run the repository's JUnit suite, compile Android Compose sources, execute Compose instrumentation, validate Android's `AudioManager` acceptance on Samsung, or verify the packaged APK. The official complete Gradle/JVM and APK audit still requires the one Samsung command above, and subsequent user visual/functional acceptance.
+
+## Additional independent mathematical regression check — 2026-11-06
+
+In a separate isolated local Kotlin compilation, copied source-equivalent `VolumeSliderMath.selectedTarget` and `MediaSoundRestorePolicy.restoreLevel` were compiled with `kotlinc` and exercised across every integer Android max in **1–100**, every min in **0–max**, the 0% and 100% boundaries, positive requests, 5%-step grid values, and history restoration. **133,902 pure Kotlin assertions passed**. This does NOT exercise Android AudioManager, Compose UI, Gradle/JUnit integration, or the user's actual Samsung device. The D156 Samsung script remains the required build and APK check; in-app operation remains unverified until user tests it.
