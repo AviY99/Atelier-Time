@@ -25,7 +25,7 @@ import org.junit.runner.RunWith
 class D148OptionAControlsUiTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun maxBothIsAtTheRightOfVolumeCardAndBothSlidersAreVisible() {
+    @Test fun oneMediaSliderAndBothVolumeButtonsAreVisible() {
         compose.setContent {
             MaterialTheme {
                 Box(Modifier.width(340.dp)) {
@@ -48,10 +48,9 @@ class D148OptionAControlsUiTest {
 
     }
 
-    @Test fun headerTapChoosesAlarmForCuesWithoutChangingEitherVolume() {
+    @Test fun soundsTabSelectionSwitchesDisplayedBarWithoutAdjustingLevel() {
         var selectedAlarm by mutableStateOf(false)
         var mediaChanges = 0
-        var alarmChanges = 0
         compose.setContent {
             MaterialTheme {
                 Box(Modifier.width(340.dp)) {
@@ -73,6 +72,5 @@ class D148OptionAControlsUiTest {
         compose.onNodeWithText("Alarm Volume").assertExists()
         compose.onNodeWithTag("running_media_volume_slider").assertDoesNotExist()
         assertEquals(0, mediaChanges)
-        assertEquals(0, alarmChanges)
     }
 }
