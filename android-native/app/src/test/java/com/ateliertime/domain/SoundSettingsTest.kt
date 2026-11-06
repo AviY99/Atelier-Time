@@ -234,6 +234,41 @@ class SoundSettingsTest {
         assertEquals(100, configured.playbackVolumePercentFor(TimerCue.FREE_TIMER_FINISHED))
     }
 
+    @Test fun choosingAlarmFromMutedMediaForcesGlobalSoundOn() {
+        val mediaOff = SoundSettings().setTimerSoundsEnabled(false)
+        assertFalse(mediaOff.timerSoundsEnabled)
+        assertFalse(mediaOff.classAlertsUseAlarmVolume)
+        val alarm = mediaOff.selectOutputAlarm(true)
+        assertTrue(alarm.classAlertsUseAlarmVolume)
+        assertTrue(alarm.timerSoundsEnabled)
+        assertEquals(mediaOff.poseEnd, alarm.poseEnd)
+        assertEquals(mediaOff.freeTimer, alarm.freeTimer)
+    }
+
+    @Test fun alarmSoundCannotBeTurnedOffButMediaAllowsOffAgain() {
+        val alarm = SoundSettings().selectOutputAlarm(true)
+        assertTrue(alarm.timerSoundsEnabled)
+        assertTrue(alarm.setTimerSoundsEnabled(false).timerSoundsEnabled)
+        val media = alarm.selectOutputAlarm(false)
+        assertFalse(media.classAlertsUseAlarmVolume)
+        assertTrue(media.timerSoundsEnabled)
+        assertFalse(media.setTimerSoundsEnabled(false).timerSoundsEnabled)
+    }
+
+    @Test fun legacyAlarmModeWithMutedAppSoundNormalizesWithoutChangingOtherSettings() {
+        val legacy = SoundSettings().copy(
+            classAlertsUseAlarmVolume = true, timerSoundsEnabled = false,
+            sharedCustomSeconds = 41,
+        )
+        val restored = legacy.normalizedAlarmSoundOn()
+        assertTrue(restored.classAlertsUseAlarmVolume)
+        assertTrue(restored.timerSoundsEnabled)
+        assertEquals(41, restored.sharedCustomSeconds)
+        assertEquals(restored, restored.normalizedAlarmSoundOn())
+        assertEquals(SoundSettings(),
+            SoundSettings().normalizedAlarmSoundOn())
+    }
+
     @Test fun sharedAndSeparateModesPreserveExternalSourcesIndependently() {
         val source = CueSound(
             source = SoundSource.FILE, uri = "content://audio/42", displayName = "Bell")
