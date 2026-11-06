@@ -46,11 +46,11 @@ class D151SlimControlsAlarmHelpUiTest {
         }
         val awakeHit = compose.onNodeWithTag("keep_screen_awake")
             .getUnclippedBoundsInRoot()
-        val volumeHit = compose.onNodeWithTag("running_volume_actions")
+        val volumeHit = compose.onNodeWithTag("class_volume_max")
             .getUnclippedBoundsInRoot()
         val awakeVisual = compose.onNodeWithTag("keep_screen_awake_visual", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
-        val volumeVisual = compose.onNodeWithTag("running_volume_actions_border")
+        val volumeVisual = compose.onNodeWithTag("class_volume_max_visual", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
         assertTrue(awakeHit.bottom - awakeHit.top >= 48.dp)
         assertTrue(volumeHit.bottom - volumeHit.top >= 48.dp)
@@ -60,7 +60,7 @@ class D151SlimControlsAlarmHelpUiTest {
             (awakeVisual.top - volumeVisual.top).value in -1f..1f)
         compose.onNodeWithText("Volume").assertExists()
         compose.onNodeWithText("Max").assertExists()
-        compose.onNodeWithText("Sounds off").assertExists()
+        compose.onNodeWithText("Mute").assertExists()
     }
 
     @Test fun timerButtonHasShared40dpVisualAnd48dpTouch() {
