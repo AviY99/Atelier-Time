@@ -310,7 +310,7 @@ for token in 'running_volume_stream_label' 'running_volume_percent' 'typography.
   grep -Fq "$token" "$runner" ||
     { echo "STOP: D157 common compact volume row missing: $token"; exit 2; }
 done
-grep -Fq 'Canvas(Modifier.fillMaxWidth().height(12.dp))' "$slim" ||
+grep -Fq 'Canvas(Modifier.fillMaxWidth().height(12.dp)' "$slim" ||
   { echo "STOP: D157 volume track must be 12dp (three quarters of previous 16dp)"; exit 2; }
 grep -Fq 'thumb = {' "$slim" ||
   { echo "STOP: D157 single true thumb must replace confusing end-stop dot"; exit 2; }
