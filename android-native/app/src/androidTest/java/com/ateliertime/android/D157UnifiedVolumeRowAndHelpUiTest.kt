@@ -46,7 +46,7 @@ class D157UnifiedVolumeRowAndHelpUiTest {
         compose.onNodeWithTag("running_volume_card").assertExists()
         compose.onNodeWithTag("running_class_volume_row").assertExists()
         compose.onNodeWithText("Media").assertExists()
-        compose.onNodeWithText("Volume").assertExists()
+        compose.onNodeWithTag("running_volume_stream_label").assertExists()
         compose.onNodeWithText("6%").assertExists()
         val label = compose.onNodeWithTag("running_volume_stream_label")
             .getUnclippedBoundsInRoot()
