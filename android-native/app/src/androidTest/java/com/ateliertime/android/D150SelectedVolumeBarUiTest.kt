@@ -36,8 +36,8 @@ class D150SelectedVolumeBarUiTest {
             }
         }
         compose.onNodeWithText("Keep screen awake").assertExists()
-        compose.onNodeWithText("Media Volume").assertExists()
-        compose.onNodeWithText("Alarm Volume").assertDoesNotExist()
+        compose.onNodeWithText("Media").assertExists()
+        compose.onNodeWithText("Alarm").assertDoesNotExist()
         compose.onNodeWithText("Volumes").assertDoesNotExist()
         compose.onNodeWithTag("running_media_volume_slider").assertExists()
         compose.onNodeWithTag("running_alarm_volume_slider").assertDoesNotExist()
@@ -68,7 +68,7 @@ class D150SelectedVolumeBarUiTest {
         compose.waitForIdle()
         compose.onNodeWithTag("running_media_volume_slider").assertDoesNotExist()
         compose.onNodeWithTag("running_alarm_volume_slider").assertExists()
-        compose.onNodeWithText("Alarm Volume").assertExists()
+        compose.onNodeWithText("Alarm").assertExists()
         assertEquals(0, sliderAction)
     }
 
