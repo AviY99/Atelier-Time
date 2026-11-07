@@ -334,7 +334,17 @@ ui=app/src/androidTest/java/com/ateliertime/android/D157UnifiedVolumeRowAndHelpU
 # Fail BEFORE Gradle if D157 uses non-existent Compose UI test imports or
 # DpRect fields. These caused the actual Samsung :compileDebugAndroidTestKotlin
 # failure after the first source-only build script passed.
-if grep -Eq '^import androidx\.compose\.ui\.test\.(assertDoesNotExist|assertExists)
+if grep -Eq '^import androidx[.]compose[.]ui[.]test[.](assertDoesNotExist|assertExists)$' "$ui"; then
+  echo "STOP: invalid Compose assertExists/DoesNotExist imports in D157 UI test"; exit 2
+fi
+if grep -Fq 'track.width' "$ui" || grep -Fq 'thumb.center' "$ui"; then
+  echo "STOP: DpRect does not expose width/center; use its left/right fields"; exit 2
+fi
+grep -Fq 'val trackWidth = track.right - track.left' "$ui" ||
+  { echo "STOP: D157 DpRect trackWidth calculation missing"; exit 2; }
+grep -Fq 'thumb.left >= track.left - trackWidth * 0.08f' "$ui" ||
+  { echo "STOP: D157 left-thumb position regression assertion missing"; exit 2; }
+
 grep -Fq 'fun programmedTimerUsesTheSameSingleLineZeroWarningAsFree()' "$ui" ||
   { echo "STOP: Class and Free need separate shared-warning regression tests"; exit 2; }
 
