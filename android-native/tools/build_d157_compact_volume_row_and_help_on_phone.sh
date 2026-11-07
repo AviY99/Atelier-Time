@@ -305,6 +305,7 @@ grep -Fq 'class D156VolumeHitTargetUiTest' app/src/androidTest/java/com/ateliert
 # D157: source-level guard for one compact horizontal volume row in BOTH
 # Timers, 12dp track, ~2x percent, true percent-aligned thumb, and no
 # default Material end-stop indicator. Independent upper/lower Helps.
+editor=app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt
 for token in 'running_volume_stream_label' 'running_volume_percent' 'typography.titleLarge' 'Text("Volume"' 'Text(if (useAlarmVolume) "Alarm" else "Media"' 'showZeroVolumeWarning' 'TimerVolumeZeroWarning('; do
   grep -Fq "$token" "$runner" ||
     { echo "STOP: D157 common compact volume row missing: $token"; exit 2; }
