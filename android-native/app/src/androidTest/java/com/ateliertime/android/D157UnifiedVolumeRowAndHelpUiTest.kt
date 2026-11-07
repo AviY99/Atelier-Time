@@ -118,6 +118,24 @@ class D157UnifiedVolumeRowAndHelpUiTest {
             "Sound volume is zero. Timer alert may be silent.").assertExists()
     }
 
+    @Test fun programmedTimerUsesTheSameSingleLineZeroWarningAsFree() {
+        compose.setContent {
+            MaterialTheme {
+                RunningClassQuickControls(
+                    containerTag = "running_class_quick_controls",
+                    keepScreenAwake = false, onKeepScreenAwakeChange = {},
+                    selectedVolumePercent = 0, useAlarmVolume = false,
+                    onSelectedVolumeChange = {}, onVolumeMax = {},
+                    onSoundsOff = {}, showZeroVolumeWarning = true,
+                )
+            }
+        }
+        compose.onNodeWithTag("class_selected_volume_zero_warning").assertExists()
+        compose.onNodeWithText(
+            "Sound volume is zero. Timer alert may be silent.").assertExists()
+        compose.onNodeWithTag("free_selected_volume_zero_warning").assertDoesNotExist()
+    }
+
     @Test fun lowerHelpOnlyExplainsMediaAlarmNotSoundLibraries() {
         var settings by mutableStateOf(SoundSettings())
         compose.setContent {
