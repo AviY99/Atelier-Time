@@ -60,7 +60,7 @@ class D149GlobalSoundControlsUiTest {
         assertEquals(true, awake)
         compose.runOnUiThread { alarm = true }
         compose.waitForIdle()
-        compose.onNodeWithText("Alarm Volume").assertExists()
+        compose.onNodeWithText("Alarm").assertExists()
         compose.onNodeWithTag("running_media_volume_slider").assertDoesNotExist()
     }
 
