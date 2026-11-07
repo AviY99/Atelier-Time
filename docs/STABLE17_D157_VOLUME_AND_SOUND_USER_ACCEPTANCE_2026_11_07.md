@@ -36,6 +36,6 @@ D154–D157 refinements on top of Stable16: bidirectional selected Media/Alarm h
 
 The stability designation is a **recovery and user-acceptance checkpoint**, **not** a Google Play release. Commercial choice stays **FREE**; initial distribution **invite-only Internal Testing**. No cloud/paid GitHub Android build, uninstall/clear data, locally signed release AAB, Play Console submission, or public release has been initiated by this documentation. Next, when separately authorized: confirm Console eligibility, Privacy/Data Safety, foreground-service specialUse documentation, approved store assets, build/sign/inspect a release AAB locally for the approved Code51 (or a later explicitly accepted version), then invite testers.
 
-**Canonical continuation:** [Stable17 handoff](docs/HANDOFF_CURRENT_STABLE17_TO_GOOGLE_PLAY_2026_11_07.md).  
+**Canonical continuation:** [Stable17 handoff](HANDOFF_CURRENT_STABLE17_TO_GOOGLE_PLAY_2026_11_07.md).  
 **D157 QA and implementation:** [D157 details](D157_COMPACT_VOLUME_ROW_UNIFIED_WARNING_AND_HELP_2026_11_07.md).  
 **Predecessor:** [Stable16 acceptance](STABLE16_D153_UNIFIED_BUTTONS_AND_SOUND_UI_USER_ACCEPTANCE_2026_11_06.md).
