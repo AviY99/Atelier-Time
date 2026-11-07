@@ -57,6 +57,7 @@ class D157UnifiedVolumeRowAndHelpUiTest {
         assertTrue("Channel label must be left of the bar", label.right <= slider.left)
         assertTrue("Percent must be to right of the bar", slider.right <= percent.left)
         assertTrue("Full slider hit area preserved", slider.bottom - slider.top >= 56.dp)
+        assertSixPercentThumbNearTrackStart()
     }
 
     @Test fun freeAlarmUsesIdenticalRowAndCorrectSixPercent() {
@@ -84,6 +85,20 @@ class D157UnifiedVolumeRowAndHelpUiTest {
         assertTrue(label.right <= slider.left)
         assertTrue(slider.right <= percent.left)
         assertTrue(slider.bottom - slider.top >= 56.dp)
+        assertSixPercentThumbNearTrackStart()
+    }
+
+    private fun assertSixPercentThumbNearTrackStart() {
+        val track = compose.onNodeWithTag("running_volume_track_visual",
+            useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val thumb = compose.onNodeWithTag("running_volume_thumb_visual",
+            useUnmergedTree = true).getUnclippedBoundsInRoot()
+        assertTrue("Volume track width must be positive", track.width > 0f)
+        val fraction = (thumb.center.x - track.left) / track.width
+        assertTrue(
+            "6% thumb must be at the LEFT of its track, not at right end: $fraction",
+            fraction >= -0.08f && fraction <= 0.22f,
+        )
     }
 
     @Test fun zeroWarningIsTheSameSingleCenteredLineInBothTimers() {
