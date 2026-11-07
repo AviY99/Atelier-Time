@@ -926,6 +926,7 @@ fun SessionEditorScreen(
                     selectedVolumePercent = if (soundSettings.classAlertsUseAlarmVolume)
                         freeVolumes.alarmPercent() else freeVolumes.mediaPercent(),
                     useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
+                    showZeroVolumeWarning = classAlertVolumeMuted,
                     onSelectedVolumeChange = { percent ->
                         runCatching {
                             if (soundSettings.classAlertsUseAlarmVolume)
@@ -955,12 +956,6 @@ fun SessionEditorScreen(
                         }
                     },
                 )
-                // Warn whenever the selected hardware stream is truly at zero.
-                // This must NOT depend on the separate persisted Sound switch.
-                if (classAlertVolumeMuted)
-                    Text("Selected sound volume is zero. Free Timer completion may be silent.",
-                        modifier = Modifier.testTag("free_selected_volume_zero_warning"),
-                        color = atelierErrorTextColor())
                 classVolumeError?.let {
                     Text(it, color = atelierErrorTextColor())
                 }
@@ -1453,6 +1448,7 @@ fun SessionEditorScreen(
                         selectedVolumePercent = if (soundSettings.classAlertsUseAlarmVolume)
                             volumes.alarmPercent() else volumes.mediaPercent(),
                         useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
+                        showZeroVolumeWarning = classAlertVolumeMuted,
                         onSelectedVolumeChange = { percent ->
                             runCatching {
                                 if (soundSettings.classAlertsUseAlarmVolume)
@@ -1514,11 +1510,13 @@ fun SessionEditorScreen(
                         )
                     }
                 }
-                if (classAlertVolumeMuted) {
-                    Text("Class alert volume is at zero. Check the Alarm/Media stream.",
+                // During a Class run the warning is rendered right under the
+                // shared slider. Before starting, retain the same one-line text.
+                if (!runningClass && classAlertVolumeMuted) {
+                    TimerVolumeZeroWarning(
+                        tag = "class_selected_volume_zero_warning",
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        color = atelierErrorTextColor(),
-                        style = MaterialTheme.typography.bodySmall)
+                    )
                 }
                 if (runningClass) {
                     classVolumeError?.let {
