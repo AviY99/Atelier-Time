@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
  * visual; the Class/Free volume bar opts OUT of vertical shrinking so the
  * thumb can actually be grabbed at zero, with a >=56dp hit strip.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AtelierSlimSlider(
     value: Float,
