@@ -10,7 +10,7 @@
 
 **Evidence:** Existing 2026-11-07 Samsung screenshot reports **318/318 full executed JVM tests PASS**, no errors/failures/skips; Gradle debug APK built; AndroidTest compiled (not run); approved splash SHA256 matched *inside* APK; private manifest saved locally. Candidate debug APK `/storage/emulated/0/Download/Atelier-Time-D157-API36-Candidate.apk`. Following success, a duplicate/truncated shell block emitted `line 480` error; subsequently removed from DEV without app source changes. User now confirms APK installation + general device functionality; do not claim device instrumentation or exact APK binary hash/source_commit without the private manifest. This is a recovery checkpoint, **not a Play signing or submission**.
 
-**Accepted functional scope:** D154–D157 Sound and volume improvements; Android real Media/Alarm stream minimum, synchronized Sound ON/OFF and timer volume, Mute honoring allowed minimum, immediate Max without auto restore, compact unified Free/Class volume row (two-line left label, 12dp track, 24sp percent, accessible touch area), identical centered selected-stream-zero warning, separate Sounds upper and lower Help. Existing class timer logic and saved data preserved by user acceptance. [Full certificate](docs/STABLE17_D157_VOLUME_AND_SOUND_USER_ACCEPTANCE_2026_11_07.md); [D157 details](D157_COMPACT_VOLUME_ROW_UNIFIED_WARNING_AND_HELP_2026_11_07.md).
+**Accepted functional scope:** D154–D157 Sound and volume improvements; Android real Media/Alarm stream minimum, synchronized Sound ON/OFF and timer volume, Mute honoring allowed minimum, immediate Max without auto restore, compact unified Free/Class volume row (two-line left label, 12dp track, 24sp percent, accessible touch area), identical centered selected-stream-zero warning, separate Sounds upper and lower Help. Existing class timer logic and saved data preserved by user acceptance. [Full certificate](STABLE17_D157_VOLUME_AND_SOUND_USER_ACCEPTANCE_2026_11_07.md); [D157 details](D157_COMPACT_VOLUME_ROW_UNIFIED_WARNING_AND_HELP_2026_11_07.md).
 
 ## 2. Working model for next conversation
 
@@ -33,7 +33,7 @@ Proceed in order and verify current external conditions separately:
 
 ## 4. Evidence pointers and integrity
 
-- [Stable17 acceptance](docs/STABLE17_D157_VOLUME_AND_SOUND_USER_ACCEPTANCE_2026_11_07.md)
+- [Stable17 acceptance](STABLE17_D157_VOLUME_AND_SOUND_USER_ACCEPTANCE_2026_11_07.md)
 - [D157 implementation and Samsung build evidence](D157_COMPACT_VOLUME_ROW_UNIFIED_WARNING_AND_HELP_2026_11_07.md)
 - [Stable16 handoff (historical)](HANDOFF_CURRENT_STABLE16_TO_GOOGLE_PLAY_2026_11_06.md)
 - [Documentation/branch policy](DOCUMENTATION_INDEX_AND_BRANCH_POLICY.md)
