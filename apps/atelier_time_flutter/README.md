@@ -1,3 +1,5 @@
+> **HISTORICAL / NON-ACTIVE PLATFORM (2026-10-31):** The current accepted Atelier Time application is **native Android Kotlin/Jetpack Compose Stable12/D-141**, built from `android-native/` on the Android DEV branch. This older Flutter project is retained as design/architecture history, **not** the Play release source. No Flutter build/migration now. [Current handoff](../../docs/HANDOFF_CURRENT_STABLE12_TO_GOOGLE_PLAY_2026_10_31.md).
+
 # Atelier Time — Stage 2 Flutter session editor (unverified source)
 
 **Status:** This is a first **code-only** responsive Flutter session editor / full timeline-preview shell. **Flutter was not compiled, analyzed, widget-tested, or built in this environment**, and no native platform folders are generated. It is **NOT an Android APK**.

@@ -1,0 +1,10 @@
+# Never commit generated binaries, SDK paths, tokens or local build files.
+.gradle/
+**/build/
+local.properties
+*.apk
+*.aab
+*.keystore
+*.jks
+.idea/
+captures/

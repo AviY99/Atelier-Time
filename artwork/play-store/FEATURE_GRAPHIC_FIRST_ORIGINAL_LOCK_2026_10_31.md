@@ -1,0 +1,27 @@
+> **2026-11-01 ARCHIVE STATUS UPDATE (authoritative):** All approved Google Play artwork binaries are **now stored inside the user's verified ZIP on GitHub `main`**, at [`Atelier_Time_Google_Play_Approved_Assets_Complete_Pack.zip`](https://github.com/AviY99/Atelier-Time/blob/main/artwork/play-store/Atelier_Time_Google_Play_Approved_Assets_Complete_Pack.zip). Remote Git blob SHA-1 `506a9b9e6dd27b7d4531e71d1053096de1d3e6b0` matches the original ZIP byte-for-byte; 13 entries, CRC PASS. [Full file-by-file archive receipt](https://github.com/AviY99/Atelier-Time/blob/main/artwork/play-store/GOOGLE_PLAY_APPROVED_ASSETS_ARCHIVE_VERIFIED_2026_11_01.md). Older statements below that image binaries are *not yet committed* refer only to the earlier preparation date and are superseded. The individual images remain ZIP members (not separate GitHub files). No Play Console upload or frozen Stable12 code change.
+
+> **ORIGINAL LOCKED FEATURE GRAPHIC ARCHIVED (2026-11-01):** The user's original **unchanged** 1024×500 graphic is now safely stored **inside** [the permanent GitHub main ZIP](https://github.com/AviY99/Atelier-Time/blob/main/artwork/play-store/Atelier_Time_Google_Play_Approved_Assets_Complete_Pack.zip) at `02_Locked_Feature_Graphic/Atelier_Time_Google_Play_Feature_Graphic_ORIGINAL_LOCKED_1024x500.png`. Git blob of full ZIP verified `506a9b9e6dd27b7d4531e71d1053096de1d3e6b0`; original PNG SHA-256 `c2921bdb6d61cb24619201f3c20e8ac5bb811569a84c034acf1abf14fec4c04e`. [Archive receipt](https://github.com/AviY99/Atelier-Time/blob/main/artwork/play-store/GOOGLE_PLAY_APPROVED_ASSETS_ARCHIVE_VERIFIED_2026_11_01.md). Any former 'binary not committed' statement below is historical. **The design remains locked; no icon is added.** No Play upload.
+
+# Atelier Time — FIRST ORIGINAL Google Play feature graphic: LOCKED
+
+**User instruction, 2026-10-31:** "לא לשנות כלום בתמונת קידום המקורית חזור אליה ונעל אותה".
+
+## Authoritative artistic decision
+- **Use the first image exactly as originally shown**, before the later proposal that added the app icon in the upper corner.
+- The second/modified image with an icon is **rejected** and must not replace this original.
+- Do **not** change any element in the first image — subject, clock, brushes/easel, sculpture, lettering, typography, composition, lighting, colors, texture, size or aspect ratio.
+- Do **not** add an icon to the original, in any corner or elsewhere.
+- Treat this exact original graphic as **locked design master**. A future alternative must have a separate filename and requires the user's explicit consent; never overwrite or regenerate this master.
+- This is an **artwork/design lock, not authorization for Play Console upload or publication**. The final store-upload procedure remains separately approval-gated.
+
+## Source and fingerprint (verified from bytes in current artifact session)
+- Original preview: `Atelier_Time_Google_Play_Feature_Graphic_DRAFT_1024x500.png`.
+- Locked byte-identical copy: `Atelier_Time_Google_Play_Feature_Graphic_ORIGINAL_LOCKED_1024x500.png`.
+- Pixel dimensions: **1024 × 500**; format: PNG; original file 867,586 bytes.
+- SHA-256 of the exact original AND byte-for-byte locked copy: `c2921bdb6d61cb24619201f3c20e8ac5bb811569a84c034acf1abf14fec4c04e`.
+- Original and locked copy have been marked filesystem read-only in the current artifact workspace; changing that workspace elsewhere is not blocked by GitHub. Verify SHA-256 before use.
+- **IMPORTANT:** This GitHub markdown records the checksum, decision and provenance. The actual PNG file is available in the conversation artifact workspace; **the PNG binary has not yet been committed to GitHub**. Do NOT assert that the image file is stored in the GitHub repository or reference a nonexistent repository PNG. Preserve/download the supplied original file until it is archived properly.
+
+## Relationship to app
+- This is a **Google Play store feature graphic only**, not the Android app launcher icon or startup image.
+- Frozen `stable/android-d141-qa12-final-user-accepted` (Stable 12/D-141) is unchanged; no app code, application art, build, installation or store upload was performed.
