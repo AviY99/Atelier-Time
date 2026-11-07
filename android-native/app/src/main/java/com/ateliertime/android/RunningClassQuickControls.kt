@@ -102,10 +102,10 @@ internal fun RunningClassQuickControls(
         // output label, 3/4-thickness bar, double-size percentage.
         // Using one real Slider with a custom track removes the misleading
         // stop-indicator dot; both timers receive the same hardware percentage.
+        Column(modifier = Modifier.fillMaxWidth().testTag("running_volume_card")) {
         Row(
             modifier = Modifier.fillMaxWidth()
                 .heightIn(min = 56.dp)
-                .testTag("running_volume_card")
                 .testTag("running_class_volume_row"),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -162,6 +162,7 @@ internal fun RunningClassQuickControls(
                     "free_selected_volume_zero_warning"
                 else "class_selected_volume_zero_warning",
             )
+        }
         }
     }
 }
