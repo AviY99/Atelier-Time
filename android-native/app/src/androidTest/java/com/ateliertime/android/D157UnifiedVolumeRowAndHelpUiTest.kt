@@ -93,7 +93,7 @@ class D157UnifiedVolumeRowAndHelpUiTest {
             useUnmergedTree = true).getUnclippedBoundsInRoot()
         val thumb = compose.onNodeWithTag("running_volume_thumb_visual",
             useUnmergedTree = true).getUnclippedBoundsInRoot()
-        assertTrue("Volume track width must be positive", track.width > 0f)
+        assertTrue("Volume track width must be positive", track.width > 0.dp)
         val fraction = (thumb.center.x - track.left) / track.width
         assertTrue(
             "6% thumb must be at the LEFT of its track, not at right end: $fraction",
