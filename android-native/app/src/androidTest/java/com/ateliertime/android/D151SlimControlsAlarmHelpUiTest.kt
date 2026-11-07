@@ -58,7 +58,7 @@ class D151SlimControlsAlarmHelpUiTest {
         assertEquals(AtelierActionStyle.visibleHeight, volumeVisual.bottom - volumeVisual.top)
         assertTrue("Awake label and Volume actions occupy one horizontal row",
             (awakeVisual.top - volumeVisual.top).value in -1f..1f)
-        compose.onNodeWithText("Volume").assertExists()
+        compose.onNodeWithTag("running_volume_label").assertExists()
         compose.onNodeWithText("Max").assertExists()
         compose.onNodeWithText("Mute").assertExists()
     }
@@ -105,7 +105,7 @@ class D151SlimControlsAlarmHelpUiTest {
         assertEquals(true, settings.timerSoundsEnabled)
         compose.onNodeWithTag("sound_output_help")
             .performScrollTo().performClick()
-        compose.onNodeWithText("Sound settings").assertExists()
+        compose.onNodeWithText("Media and Alarm").assertExists()
         compose.onNodeWithText(
             "Some devices enforce a positive Alarm minimum", substring = true
         ).assertExists()
