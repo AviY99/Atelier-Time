@@ -334,16 +334,14 @@ fun MelodySettingsSection(
         text = {
             Text("Media uses the phone's Media volume channel. " +
                 "Alarm uses the phone's Alarm volume channel. " +
-                "On many phones Alarm is protected by a positive minimum " +
-                "volume in the default device settings; Android, not this app, " +
-                "determines whether Alarm may reach zero. " +
-                "Some devices enforce a positive Alarm minimum. " +
-                "Mute and Sound OFF lower the selected channel to the lowest " +
-                "level the phone allows. If that minimum is above zero, " +
-                "Sound stays ON; if the channel reaches zero, Sound is OFF. " +
-                "Sound ON restores the last positive volume, otherwise 25%. " +
-                "The other channel is never changed. Both timers follow the " +
-                "same selected Media or Alarm channel.")
+                "On many phones the default Alarm settings protect it from " +
+                "reaching zero: Some devices enforce a positive Alarm minimum. " +
+                "Android, not Atelier Time, determines that minimum. " +
+                "Mute or Sound OFF lowers the selected channel only as far as " +
+                "the device allows. At a positive minimum Sound remains ON; " +
+                "when the device allows zero, Alarm behaves like Media. " +
+                "Choosing Media or Alarm affects both Timers, never the " +
+                "other channel's volume.")
         },
         confirmButton = {
             AtelierTextButton(colors = atelierTextColors(),
