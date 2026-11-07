@@ -1,5 +1,8 @@
 # Atelier Time — D157 / Code51 — compact one-row volume control, shared zero warning, separate Media/Alarm Help
 
+> **FINAL SOURCE PREFLIGHT UPDATE 2026-11-07:** Reopened current GitHub D157/code51 rather than repeating previously committed work. Fixed a genuine AndroidTest compile issue in `D157UnifiedVolumeRowAndHelpUiTest.kt`: Compose's `DpRect.width` was compared with `0f`; now correctly compares against `0.dp`. Added a dedicated Class warning UI test, complementing the existing Free warning test, and strengthened the Samsung local build script to refuse reintroduction of these mistakes. Verified source-level contract checks for 12dp shared track/no end-stop dot, left two-line stream+Volume labels, right enlarged percentage, both 56dp hit areas, two independent Helps, same one-line warning, versionCode51, immediate Max/no restoration, approved-art-in-APK check. **Static checks PASS; Android/Kotlin/Gradle build and actual device display NOT yet run on D157.** D156 user's supplied phone log independently confirms **318/318 JVM tests, no failures**, and working D156 functional behavior, but this must not be misreported as D157's test result.
+
+
 **Date:** 2026-11-07. **DEV branch:** `android-native-kotlin-compose`. **D157 status:** source committed; static inspections completed; **NO Samsung Gradle build or device verification yet**. Do not declare stable before explicit user acceptance.
 
 **Latest frozen user-accepted stable:** Stable16 / D153 / Code47, unchanged branch `stable/android-d153-qa16-ui-sound-user-accepted`, SHA `04270365f330af78861d54f3710048d65dadc462`.
