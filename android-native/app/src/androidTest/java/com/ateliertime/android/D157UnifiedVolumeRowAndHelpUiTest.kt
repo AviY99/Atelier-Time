@@ -8,8 +8,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.assertDoesNotExist
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -93,11 +91,14 @@ class D157UnifiedVolumeRowAndHelpUiTest {
             useUnmergedTree = true).getUnclippedBoundsInRoot()
         val thumb = compose.onNodeWithTag("running_volume_thumb_visual",
             useUnmergedTree = true).getUnclippedBoundsInRoot()
-        assertTrue("Volume track width must be positive", track.width > 0.dp)
-        val fraction = (thumb.center.x - track.left) / track.width
+        // getUnclippedBoundsInRoot() returns DpRect: it has left/right,
+        // NOT width or center fields (those exist on other rect types).
+        val trackWidth = track.right - track.left
+        assertTrue("Volume track width must be positive", trackWidth > 0.dp)
         assertTrue(
-            "6% thumb must be at the LEFT of its track, not at right end: $fraction",
-            fraction >= -0.08f && fraction <= 0.22f,
+            "6% thumb must be close to the LEFT end of the actual track",
+            thumb.left >= track.left - trackWidth * 0.08f &&
+                thumb.right <= track.left + trackWidth * 0.22f,
         )
     }
 
