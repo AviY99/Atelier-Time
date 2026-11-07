@@ -42,7 +42,7 @@ class D147RunningClassQuickControlsUiTest {
             }
         }
         compose.onNodeWithText("Keep screen awake").assertExists()
-        compose.onNodeWithText("Media Volume").assertExists()
+        compose.onNodeWithText("Media").assertExists()
         compose.onNodeWithText("Volumes").assertDoesNotExist()
         compose.onNodeWithTag("running_media_volume_slider").assertExists()
         compose.onNodeWithTag("running_alarm_volume_slider").assertDoesNotExist()
