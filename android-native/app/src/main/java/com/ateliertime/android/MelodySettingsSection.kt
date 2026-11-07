@@ -34,12 +34,15 @@ fun MelodySettingsSection(
     onError: (String) -> Unit,
     canMuteSelectedAudio: Boolean = true,
 ) {
-    var showHelp by remember { mutableStateOf(false) }
+    var showChoicesHelp by remember { mutableStateOf(false) }
+    var showOutputHelp by remember { mutableStateOf(false) }
     HorizontalDivider()
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text("Sound choices", style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f))
-        AtelierTextButton(colors = atelierTextColors(), onClick = { showHelp = true }) {
+        AtelierTextButton(colors = atelierTextColors(),
+            modifier = Modifier.testTag("sound_choices_help"),
+            onClick = { showChoicesHelp = true }) {
             Text("Help")
         }
     }
@@ -298,38 +301,53 @@ fun MelodySettingsSection(
         AtelierTextButton(
             colors = atelierTextColors(),
             modifier = Modifier.testTag("sound_output_help"),
-            onClick = { showHelp = true },
+            onClick = { showOutputHelp = true },
         ) {
             Text("Help", style = MaterialTheme.typography.labelSmall)
         }
     }
 
-    if (showHelp) AlertDialog(
-        onDismissRequest = { showHelp = false },
-        title = { Text("Sound settings") },
+    // D157: two DIFFERENT Help topics. Upper = libraries/assignments,
+    // lower = Media and Alarm hardware output policy ONLY.
+    if (showChoicesHelp) AlertDialog(
+        onDismissRequest = { showChoicesHelp = false },
+        title = { Text("Sound choices") },
         text = {
-            Text("Enable one or more sound libraries. 'Same sound for all' " +
-                "uses one sound AND one length for Class A/B/C and Free countdown. " +
-                "Choose 5s or 10s, or Custom for a sound length of 5–60 seconds. " +
-                "Sound ON/OFF and the slider, Max and Mute in both Timers " +
-                "control the SAME Android volume channel chosen here. " +
-                "OFF and Mute request the device's lowest permitted volume; " +
-                "ON restores the last positive volume " +
-                "or 25 percent if none is saved. " +
-                "Media and Alarm follow the same rules when Android allows zero. " +
-                "Some devices enforce a positive Alarm minimum and will not mute " +
-                "that channel; in that case Sound stays ON and zero is unavailable. " +
-                "Sound state and zero-volume warnings reflect the actual " +
-                "hardware level; the other channel is never modified. " +
-                "'Separate sounds' restores each cue's saved melody and duration. " +
-                "Switching modes never deletes your previous choices. " +
-                "System and audio-file sounds use Android pickers. " +
-                "These sound settings never change approved Classes.")
+            Text("Enable one or more sound libraries: Atelier Time, OS sounds, " +
+                "or audio files. 'Same sound for all' uses one selected sound " +
+                "and one length for Class A/B/C and Free countdown. " +
+                "Choose 5s or 10s, or Custom for 5–60 seconds. " +
+                "'Separate sounds' restores each cue's independently saved " +
+                "sound and duration without deleting previous choices. " +
+                "System sounds and audio files use Android's pickers. " +
+                "Changing sounds never changes approved Classes.")
         },
         confirmButton = {
-            AtelierTextButton(colors = atelierTextColors(), onClick = { showHelp = false }) {
-                Text("Close")
-            }
+            AtelierTextButton(colors = atelierTextColors(),
+                onClick = { showChoicesHelp = false }) { Text("Close") }
+        },
+    )
+
+    if (showOutputHelp) AlertDialog(
+        onDismissRequest = { showOutputHelp = false },
+        title = { Text("Media and Alarm") },
+        text = {
+            Text("Media uses the phone's Media volume channel. " +
+                "Alarm uses the phone's Alarm volume channel. " +
+                "On many phones Alarm is protected by a positive minimum " +
+                "volume in the default device settings; Android, not this app, " +
+                "determines whether Alarm may reach zero. " +
+                "Some devices enforce a positive Alarm minimum. " +
+                "Mute and Sound OFF lower the selected channel to the lowest " +
+                "level the phone allows. If that minimum is above zero, " +
+                "Sound stays ON; if the channel reaches zero, Sound is OFF. " +
+                "Sound ON restores the last positive volume, otherwise 25%. " +
+                "The other channel is never changed. Both timers follow the " +
+                "same selected Media or Alarm channel.")
+        },
+        confirmButton = {
+            AtelierTextButton(colors = atelierTextColors(),
+                onClick = { showOutputHelp = false }) { Text("Close") }
         },
     )
 }
