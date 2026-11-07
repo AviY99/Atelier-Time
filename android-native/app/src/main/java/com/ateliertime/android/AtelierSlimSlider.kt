@@ -17,6 +17,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 
 /**
@@ -62,6 +63,7 @@ internal fun AtelierSlimSlider(
             thumb = {
                 Box(
                     Modifier.size(width = 10.dp, height = 24.dp)
+                        .testTag("running_volume_thumb_visual")
                         .background(activeColor, RoundedCornerShape(6.dp))
                 )
             },
@@ -70,7 +72,8 @@ internal fun AtelierSlimSlider(
                     state.valueRange.start).coerceAtLeast(0.001f)
                 val fraction = ((state.value - state.valueRange.start) / span)
                     .coerceIn(0f, 1f)
-                Canvas(Modifier.fillMaxWidth().height(12.dp)) {
+                Canvas(Modifier.fillMaxWidth().height(12.dp)
+                    .testTag("running_volume_track_visual")) {
                     val radius = CornerRadius(size.height / 2f)
                     drawRoundRect(color = inactiveColor, cornerRadius = radius)
                     if (fraction > 0f) {
