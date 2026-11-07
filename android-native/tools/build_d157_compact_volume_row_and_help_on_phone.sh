@@ -329,6 +329,13 @@ for token in 'showChoicesHelp' 'showOutputHelp' 'sound_choices_help' 'sound_outp
 done
 grep -Fq 'class D157UnifiedVolumeRowAndHelpUiTest' app/src/androidTest/java/com/ateliertime/android/D157UnifiedVolumeRowAndHelpUiTest.kt ||
   { echo "STOP: D157 UI regression source missing"; exit 2; }
+# D157 verify both timer warnings and dimension-safe Compose UI assertions.
+ui=app/src/androidTest/java/com/ateliertime/android/D157UnifiedVolumeRowAndHelpUiTest.kt
+grep -Fq 'track.width > 0.dp' "$ui" ||
+  { echo "STOP: D157 Compose Dp comparison must use 0.dp (not 0f)"; exit 2; }
+grep -Fq 'fun programmedTimerUsesTheSameSingleLineZeroWarningAsFree()' "$ui" ||
+  { echo "STOP: Class and Free need separate shared-warning regression tests"; exit 2; }
+
 
 # D155/D157 regression guard: every user-initiated Timer volume change syncs
 # the persisted global Sound ON/OFF using the REAL selected hardware level.
