@@ -148,10 +148,10 @@ internal fun RunningClassQuickControls(
             )
             Text(
                 "$percent%",
-                modifier = Modifier.widthIn(min = 58.dp)
+                modifier = Modifier.widthIn(min = 65.dp)
                     .testTag("running_volume_percent"),
                 textAlign = TextAlign.End,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
             )
