@@ -343,9 +343,9 @@ grep -Fq 'fun afterSelectedStreamVolumeChange(actualLevel: Int): SoundSettings' 
 if grep -Fq 'if (classAlertVolumeMuted && soundEnabled)' "$editor"; then
   echo 'STOP: Free Timer low-volume warning incorrectly depends on Sound toggle'; exit 2
 fi
-grep -Fq 'free_selected_volume_zero_warning' "$editor" ||
+grep -Fq 'free_selected_volume_zero_warning' "$runner" ||
   { echo "STOP: Free Timer zero-volume warning missing"; exit 2; }
-grep -Fq 'Media and Alarm follow the same rules when Android allows zero.' \
+grep -Fq 'Some devices enforce a positive Alarm minimum.' \
   app/src/main/java/com/ateliertime/android/MelodySettingsSection.kt ||
   { echo "STOP: Sounds help does not explain device minimum"; exit 2; }
 for marker in 'class D154TimerVolumeSoundSyncUiTest' 'class D155SelectedStreamSoundUiTest'; do
