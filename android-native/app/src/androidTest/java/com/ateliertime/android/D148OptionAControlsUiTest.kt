@@ -65,11 +65,11 @@ class D148OptionAControlsUiTest {
                 }
             }
         }
-        compose.onNodeWithText("Media Volume").assertExists()
+        compose.onNodeWithText("Media").assertExists()
         compose.onNodeWithTag("running_alarm_volume_slider").assertDoesNotExist()
         compose.runOnUiThread { selectedAlarm = true }
         compose.waitForIdle()
-        compose.onNodeWithText("Alarm Volume").assertExists()
+        compose.onNodeWithText("Alarm").assertExists()
         compose.onNodeWithTag("running_media_volume_slider").assertDoesNotExist()
         assertEquals(0, mediaChanges)
     }
