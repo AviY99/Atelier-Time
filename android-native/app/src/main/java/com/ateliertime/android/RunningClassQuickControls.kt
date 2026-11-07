@@ -19,6 +19,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
@@ -39,6 +40,7 @@ internal fun RunningClassQuickControls(
     onSelectedVolumeChange: (Int) -> Unit,
     onVolumeMax: () -> Unit,
     onSoundsOff: () -> Unit,
+    showZeroVolumeWarning: Boolean = false,
     containerTag: String = "running_class_quick_controls",
     modifier: Modifier = Modifier,
 ) {
@@ -96,22 +98,31 @@ internal fun RunningClassQuickControls(
                 onClick = onSoundsOff,
             )
         }
-        // Exactly ONE Sound-selected volume bar; keep its label close to it.
-        Column(
-            modifier = Modifier.fillMaxWidth().testTag("running_volume_card"),
-            verticalArrangement = Arrangement.spacedBy(0.dp),
+        // D157: ONE horizontal row shared by Class and Free: two-line
+        // output label, 3/4-thickness bar, double-size percentage.
+        // Using one real Slider with a custom track removes the misleading
+        // stop-indicator dot; both timers receive the same hardware percentage.
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .heightIn(min = 56.dp)
+                .testTag("running_volume_card")
+                .testTag("running_class_volume_row"),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().heightIn(min = 23.dp)
-                    .testTag("running_class_volume_row"),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            Column(
+                modifier = Modifier.width(52.dp)
+                    .testTag("running_volume_stream_label"),
+                verticalArrangement = Arrangement.spacedBy(0.dp),
             ) {
-                Text(streamName, modifier = Modifier.weight(1f),
+                Text(if (useAlarmVolume) "Alarm" else "Media",
                     style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold)
-                Text("$percent%", style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold)
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1)
+                Text("Volume",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1)
             }
             AtelierSlimSlider(
                 value = percent.toFloat(),
@@ -123,12 +134,11 @@ internal fun RunningClassQuickControls(
                     onSelectedVolumeChange(target)
                 },
                 valueRange = 0f..100f,
-                // D156: thumb at 0 must have a reachable touch area, not
-                // sit flush against the left edge in a scaled 32dp strip.
-                // Continuous drag follows Android's real discrete audio steps.
                 steps = 0,
                 compactVisual = false,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                volumeVisual = true,
+                // The whole slider still has a >=56dp touch target at 0%.
+                modifier = Modifier.weight(1f).padding(horizontal = 7.dp)
                     .heightIn(min = 56.dp)
                     .testTag(if (useAlarmVolume) "running_alarm_volume_slider"
                         else "running_media_volume_slider")
@@ -136,6 +146,42 @@ internal fun RunningClassQuickControls(
                         contentDescription = "$streamName slider, $percent percent"
                     },
             )
+            Text(
+                "$percent%",
+                modifier = Modifier.widthIn(min = 58.dp)
+                    .testTag("running_volume_percent"),
+                textAlign = TextAlign.End,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+            )
+        }
+        if (showZeroVolumeWarning) {
+            TimerVolumeZeroWarning(
+                tag = if (containerTag == "free_timer_quick_controls")
+                    "free_selected_volume_zero_warning"
+                else "class_selected_volume_zero_warning",
+            )
         }
     }
+}
+
+/**
+ * The identical zero-volume message directly BELOW the one-line slider in
+ * Class and Free. Kept short to fit one centered phone-width line.
+ */
+@Composable
+internal fun TimerVolumeZeroWarning(
+    tag: String,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        "Sound volume is zero. Timer alert may be silent.",
+        modifier = modifier.fillMaxWidth().testTag(tag),
+        color = atelierErrorTextColor(),
+        style = MaterialTheme.typography.labelSmall,
+        textAlign = TextAlign.Center,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
