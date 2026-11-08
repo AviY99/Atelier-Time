@@ -53,6 +53,21 @@ cd /storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/and
 
 If successful, output in Downloads: `Atelier-Time-D157-Code51-InternalTest-SIGNED.aab`, with release build and signature-verification logs. Actual user screenshot/log required before any claim of PASS or before instructions to upload. Google Play Internal Testing has a selected list of 2 invitees (confirmed user screenshot); Play App Signing active; Automatic Protection / auto-translation optional and not enabled. Public About WhatsApp share still points to Instagram, tracked separately as a **pre-PRODUCTION** task, not a blocker for Internal Testing.
 
+### 2026-11-08 — ACTUAL Samsung D157/Code51 signed Play AAB build SUCCESS (user screenshot)
+
+**The previous “not yet built” note below is historical and superseded by this update.** After the user confirmed an off-device backup of their private PKCS12 upload key, they ran the locally guarded \`android-native/tools/build_d157_signed_aab_for_internal_test_on_phone.sh\` on Samsung Code on the Go. Their 22:57 screenshot directly reports:
+
+- \`D157 Code51 exact frozen app source verified. Building release AAB locally...\`
+- \`AAB ARTWORK INCLUDED PASS\` with the original approved splash inside the AAB.
+- First interactive jarsigner attempt ended \`you must enter key password\`; **the user retried and successfully signed**. This earlier attempt is **not the final build status**.
+- Second attempt: \`jar signed.\`, then \`AAB STRUCTURE AND SIGNATURE ENTRIES PASS\`, then \`SIGNED AAB READY FOR REVIEW — NOT UPLOADED:\` in phone Downloads.
+- Signed local artifact: \`/storage/emulated/0/Download/Atelier-Time-D157-Code51-InternalTest-SIGNED.aab\`; screenshot reports about **11 MB** and printed SHA256 (private local artifact; not uploaded to GitHub). Local build and signature verification logs are in Downloads; \`jarsigner -verify\` passed according to the guarded script's successful termination.
+- The JAR signer emits the standard self-signed certificate warning, expected for a new private upload key; Google Play App Signing remains enabled for delivery. No signing key or password has been exposed in documentation.
+- **Boundary:** Build, local signing and structural validation **PASS based on user screenshot**. No independent inspection of the actual AAB bytes, Google Play bundle acceptance, app signing certificate, release rollout, or tester install has yet been reported. Do **not** claim Play approved or published the AAB. No paid CI or app uninstall/data wipe.
+
+**Next:** return to the already-open Google Play Console **Internal testing > Create release > App bundles > Upload** and select that one signed AAB, then inspect Google validation (package \`com.ateliertime.android\`, versionCode \`51\`, SDK, signatures, policy errors). Upload to the release draft is not rollout. Release name may be \`D-157 / Stable 17 — Internal Test\`; add English release notes when requested. **Do not press Review/Confirm rollout** until Play validation and any compliance/setup actions are reviewed. Existing installed debug APK may have a different signing certificate from Play-delivered APK; do not uninstall it or try to replace it in place without preserving user data first. Test on a second consenting device if necessary. Public About WhatsApp listing-link replacement remains a separate pre-Production requirement.
+
+
 ## 4. Evidence pointers and integrity
 
 - [Stable17 acceptance](STABLE17_D157_VOLUME_AND_SOUND_USER_ACCEPTANCE_2026_11_07.md)
