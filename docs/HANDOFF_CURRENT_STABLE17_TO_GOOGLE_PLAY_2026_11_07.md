@@ -68,6 +68,14 @@ If successful, output in Downloads: `Atelier-Time-D157-Code51-InternalTest-SIGNE
 **Next:** return to the already-open Google Play Console **Internal testing > Create release > App bundles > Upload** and select that one signed AAB, then inspect Google validation (package \`com.ateliertime.android\`, versionCode \`51\`, SDK, signatures, policy errors). Upload to the release draft is not rollout. Release name may be \`D-157 / Stable 17 — Internal Test\`; add English release notes when requested. **Do not press Review/Confirm rollout** until Play validation and any compliance/setup actions are reviewed. Existing installed debug APK may have a different signing certificate from Play-delivered APK; do not uninstall it or try to replace it in place without preserving user data first. Test on a second consenting device if necessary. Public About WhatsApp listing-link replacement remains a separate pre-Production requirement.
 
 
+## 2026-11-09 — Google Play installed and two background notification fixes awaiting approval
+
+The user **installed** the D157/Code51 Google Play Internal Testing build on their own Samsung and explicitly confirmed full working parity with the former locally installed stable debug APK. This is **successful user field QA for Play delivery**, not public Production launch. The first tester's install is confirmed; independent second tester QA remains open.
+
+Two **pre-existing** source issues were then reported: (A) Class background notifications use obsolete sequential Session numbers while the app shows Group labels and group-local numbering; (B) Free Timer lacks background notification and must be visible separately **even when Class and Free run concurrently**. Initial source read confirms the Class notification formatter hardcodes poseNumber while the screen uses group-aware `PhaseDisplayNames`; only Class notification ID 107/service is wired. **No code has been edited for these issues**. Full scope, test matrix, Android permissions/FGS compliance considerations and explicit approval gate are in [D158 proposed fixes](D158_PROPOSED_BACKGROUND_NOTIFICATIONS_GROUP_LABELS_AND_PARALLEL_FREE_TIMER_2026_11_09.md).
+
+**Next:** request and receive explicit user approval **before** implementing both fixes together on Android DEV; likely subsequent D158/Code52 candidate. Preserve frozen Stable17, the currently published Internal Testing build and app user data. Do not auto-upload another AAB or start production rollout.
+
 ## 4. Evidence pointers and integrity
 
 - [Stable17 acceptance](STABLE17_D157_VOLUME_AND_SOUND_USER_ACCEPTANCE_2026_11_07.md)
