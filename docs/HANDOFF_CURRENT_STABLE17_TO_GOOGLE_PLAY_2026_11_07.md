@@ -41,6 +41,18 @@ Proceed in order and verify current external conditions separately:
 
 **Required checkpoint BEFORE first public Production distribution:** Replace About WhatsApp share text/destination with a verified, accessible public Google Play product listing link, using package `com.ateliertime.android`; expected URL pattern `https://play.google.com/store/apps/details?id=com.ateliertime.android` but **do not treat it as currently public/live or blindly deploy an unverified link**. Consider a permanent project-controlled landing URL that can be redirected to the verified Play listing later, if user approves. Update accompanying About text (currently says `For now, share the developer's Instagram link.`), regression-test WhatsApp+Business+fallback, rerun on-device QA and prepare a new versionCode signed AAB **only with user authorization**. Do not edit immutable Stable17. This is a **public-release checklist gate, not a blocker to current Internal Testing**, and no source change or Play action has occurred.
 
+### 2026-11-08 — Phone-local signed AAB preparation (NOT YET BUILT OR UPLOADED)
+
+User completed local generation and verification of the private PKCS12 upload key `atelier-upload` (RSA 3072) on Samsung Code on the Go, and user reports that an off-device backup has been made. **Never request passwords or the private keystore via chat; never add secrets or keystores to GitHub.** The current app on the phone is a debug-signed D157 APK; Play-signed builds will have a different certificate and **may not update in-place**, so avoid uninstalling / wiping installed Saved Classes and diagnostic data without an accepted preservation plan.
+
+Prepared **script only**, on Android DEV `android-native/tools/build_d157_signed_aab_for_internal_test_on_phone.sh`. It verifies that Android app source tree equals frozen Stable17, exact D157/code51 Gradle settings and original splash, runs local `:app:bundleRelease` using CoGo Gradle 9.6.1 + Android SDK36 aapt2 override, checks original art inside AAB, signs with the **private, already backed-up** upload key using interactive `jarsigner`, then verifies the signed JAR and app bundle structure. It never changes app code, overwrites an existing signed AAB, runs paid CI, installs the app, or uploads to Play. **No release AAB build, signing or phone execution of this helper is confirmed yet.** Source-level validation completed; command includes `bash -n` phone syntax check before execution:
+
+```bash
+cd /storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native && git pull --ff-only && bash -n tools/build_d157_signed_aab_for_internal_test_on_phone.sh && bash tools/build_d157_signed_aab_for_internal_test_on_phone.sh
+```
+
+If successful, output in Downloads: `Atelier-Time-D157-Code51-InternalTest-SIGNED.aab`, with release build and signature-verification logs. Actual user screenshot/log required before any claim of PASS or before instructions to upload. Google Play Internal Testing has a selected list of 2 invitees (confirmed user screenshot); Play App Signing active; Automatic Protection / auto-translation optional and not enabled. Public About WhatsApp share still points to Instagram, tracked separately as a **pre-PRODUCTION** task, not a blocker for Internal Testing.
+
 ## 4. Evidence pointers and integrity
 
 - [Stable17 acceptance](STABLE17_D157_VOLUME_AND_SOUND_USER_ACCEPTANCE_2026_11_07.md)
