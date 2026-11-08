@@ -31,6 +31,10 @@ Proceed in order and verify current external conditions separately:
 
 **No Play submission, new AAB build, account mutation, notification, data wipe, cloud paid workflow, source-code change, or automatic deployment was performed during Stable17 freeze/documentation.**
 
+## 3A. Optional upgrades AFTER initial release (not a blocker)
+
+**Decision recorded 2026-11-08:** Two future optional upgrade tracks were accepted **for further research only**: (1) external screen mirroring or a dedicated **Studio Display** for desktop/TV/projector/second phone; (2) a paired, explicitly authorized **Remote Control** of the *primary-phone timer* from a desktop/second phone. First examine no-code screen mirroring with the currently approved APK; later consider view-only large-screen browser displays with QR/session pairing, and separately control rights. Network reliability, single timer authority, security, audio routing and app policy impact require design/QA before any coding. **Not implemented, no development version assigned, not required for the first Play Internal Testing release.** [Detailed optional upgrades plan](OPTIONAL_POST_RELEASE_STUDIO_DISPLAY_AND_REMOTE_CONTROL_2026_11_08.md).
+
 ## 4. Evidence pointers and integrity
 
 - [Stable17 acceptance](STABLE17_D157_VOLUME_AND_SOUND_USER_ACCEPTANCE_2026_11_07.md)
