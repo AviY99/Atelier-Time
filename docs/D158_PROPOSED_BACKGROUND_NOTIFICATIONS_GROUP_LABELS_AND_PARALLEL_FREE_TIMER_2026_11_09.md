@@ -1,3 +1,5 @@
+> **FINAL STATUS 2026-11-10: STABLE18 / D-158 / CODE52 ACCEPTED.** After the documented Samsung **326/326 JVM PASS** and APK artwork checks, the user installed the D158 `.dev` candidate and explicitly confirmed everything works, designating a new stable version for background-notification bug fixes. Frozen branch [`stable/android-d158-qa18-background-notifications-user-accepted`](https://github.com/AviY99/Atelier-Time/tree/stable/android-d158-qa18-background-notifications-user-accepted) at `7994dcfc2d077e68d72800400fa2086dacdc4132`. [Stable18 acceptance](STABLE18_D158_BACKGROUND_NOTIFICATIONS_USER_ACCEPTANCE_2026_11_10.md) · [current handoff](HANDOFF_CURRENT_STABLE18_TO_GOOGLE_PLAY_2026_11_10.md). Play Internal Testing remains D157/Code51; no Code52 Play AAB or rollout. This newer statement supersedes QA-pending sections below, retained for historical evidence.
+
 # Atelier Time — proposed background notification fixes after first Google Play Internal Test
 
 **Reported:** 2026-11-09, Asia/Jerusalem.  
