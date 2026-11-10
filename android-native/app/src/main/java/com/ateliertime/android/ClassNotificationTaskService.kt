@@ -33,6 +33,11 @@ class ClassNotificationTaskService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    override fun onCreate() {
+        super.onCreate()
+        serviceAlive = true
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (taskClosed) {
             stopSelf()
@@ -125,6 +130,7 @@ class ClassNotificationTaskService : Service() {
     }
 
     override fun onDestroy() {
+        serviceAlive = false
         removeAllNotifications()
         super.onDestroy()
     }
@@ -152,6 +158,7 @@ class ClassNotificationTaskService : Service() {
         private const val EXTRA_DETAIL = "notification_detail"
 
         @Volatile private var taskClosed = false
+        @Volatile private var serviceAlive = false
 
         fun isTaskClosed(): Boolean = taskClosed
 
@@ -174,7 +181,10 @@ class ClassNotificationTaskService : Service() {
         }
 
         private fun sendEnd(context: Context, action: String, id: Int) {
-            if (!taskClosed) {
+            // Never launch a new service solely to cancel one timer. Doing so
+            // could inadvertently cancel the other normal notification when
+            // Android has already stopped the foreground service.
+            if (!taskClosed && serviceAlive) {
                 try {
                     context.startService(Intent(context, ClassNotificationTaskService::class.java)
                         .apply { this.action = action })
