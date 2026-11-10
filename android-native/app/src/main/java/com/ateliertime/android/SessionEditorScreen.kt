@@ -75,6 +75,7 @@ fun SessionEditorScreen(
     val engine = remember { ScheduleEngine() }
     val context = LocalContext.current
     val classStatusNotification = remember(context) { ActiveClassStatusNotification(context) }
+    val freeStatusNotification = remember(context) { ActiveFreeStatusNotification(context) }
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { /* If accepted, the live Timer tick posts the status notification. */ }
@@ -88,8 +89,11 @@ fun SessionEditorScreen(
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
-    DisposableEffect(classStatusNotification) {
-        onDispose { classStatusNotification.clear() }
+    DisposableEffect(classStatusNotification, freeStatusNotification) {
+        onDispose {
+            classStatusNotification.clear()
+            freeStatusNotification.clear()
+        }
     }
     val catalog = remember(context, presetStoreOverride) {
         PresetCatalog(presetStoreOverride ?: AndroidPresetStore(context), engine) {
@@ -651,6 +655,7 @@ fun SessionEditorScreen(
                     tick.view,
                     classClockTimes.classRemainingSeconds ?: tick.view.totalRemainingSeconds,
                     nowEpochMs,
+                    playingSession?.rules,
                 )
                 if (soundEnabled && tick.cue != null) {
                     // Capture the recorder for an asynchronous audio error:
@@ -683,6 +688,7 @@ fun SessionEditorScreen(
             }
             val freeTick = freeTimer.update()
             freeTimerView = freeTick.view
+            freeStatusNotification.update(freeTick.view, nowEpochMs)
             if (freeTick.completedNow && soundEnabled) {
                 freeMelodyPlayer.play(
                     soundSettings.soundFor(TimerCue.FREE_TIMER_FINISHED),
@@ -962,20 +968,27 @@ fun SessionEditorScreen(
                 FreeCountdownSection(
                     view = freeTimerView,
                     onStart = { hours, minutes, seconds ->
+                        requestClassStatusNotificationPermission()
                         freeMelodyPlayer.stop()
                         runCatching { freeTimer.start(hours, minutes, seconds) }
-                            .onSuccess { freeTimerView = it; freeTimerError = null }
+                            .onSuccess {
+                                freeTimerView = it
+                                freeStatusNotification.update(it, System.currentTimeMillis())
+                                freeTimerError = null
+                            }
                             .onFailure { freeTimerError = it.message }
                     },
                     onPauseResume = {
                         freeTimerView = if (freeTimerView.status == FreeTimerStatus.RUNNING)
                             freeTimer.pause() else freeTimer.resume()
+                        freeStatusNotification.update(freeTimerView, System.currentTimeMillis())
                     },
                     onExit = {
                         freeMelodyPlayer.stop()
                         volumeRevision++
                         volumeRevision++
                         freeTimerView = freeTimer.exit()
+                        freeStatusNotification.clear()
                         freeTimerError = null
                     },
                 )
