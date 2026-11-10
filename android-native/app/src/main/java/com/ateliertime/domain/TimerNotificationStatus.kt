@@ -86,3 +86,19 @@ object FreeTimerNotificationFormatter {
     }
 }
 
+/**
+ * Stable independent notification identities: Class keeps its historical 107.
+ * Free receives 109, so finishing or dismissing one never cancels the other.
+ * A single foreground service chooses Class as foreground when both run.
+ */
+object ActiveTimerNotificationSlots {
+    const val CLASS_ID = 107
+    const val FREE_ID = 109
+
+    fun foregroundId(classActive: Boolean, freeActive: Boolean): Int? = when {
+        classActive -> CLASS_ID
+        freeActive -> FREE_ID
+        else -> null
+    }
+}
+
