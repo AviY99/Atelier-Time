@@ -69,3 +69,21 @@ cd /storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/and
 **Next gates:** Get actual Samsung build/JVM screenshot, then separately approve installing the new debug **DEV** app, verify Class-only, Free-only, simultaneous timers and independent cancel/lock screen behavior. Only after user-confirmed runtime tests consider a new Stable18 checkpoint and separately signed Code52 release AAB for a Play Internal Testing update. No production/public release, data wipe, signed upload, or unrelated features authorized by this approval. Frozen Stable17 remains available unchanged.
 
 **Working documents:** [Current Stable17 → Play handoff](HANDOFF_CURRENT_STABLE17_TO_GOOGLE_PLAY_2026_11_07.md) · [Frozen Stable17 acceptance](STABLE17_D157_VOLUME_AND_SOUND_USER_ACCEPTANCE_2026_11_07.md).
+
+## Samsung local QA evidence — user screenshot, 2026-11-10 20:44 Israel time
+
+**D-158 / Code52 Samsung compile and JVM PASS (not physical notification acceptance yet).** User ran `tools/build_d158_group_and_parallel_notifications_on_phone.sh` after a Git pull on the `android-native-kotlin-compose` branch. Terminal explicitly reported:
+
+```text
+D158 ALL JVM ACTUAL: tests=326 failures=0 errors=0 skipped=0
+D158 BACKGROUND REGRESSIONS: {'tests': 8, 'failures': 0, 'errors': 0, 'skipped': 0}
+D158 FULL JVM PASS
+D158 APK ARTWORK INCLUDED PASS
+D158 JVM TESTS AND BUILD SUCCESSFUL: /storage/emulated/0/Download/Atelier-Time-D158-Code52-DEV-QA.apk
+AndroidTest COMPILED, NOT EXECUTED; no APK install, Play upload or cloud CI.
+Debug package com.ateliertime.android.dev preserves installed Play data.
+```
+
+Private local log: `/storage/emulated/0/Download/Atelier-Time-D158-Code52-QA-20261110-204211.log`. Terminal printed a SHA256 for the APK, but assistant has not independently read that artifact or its bytes. Successful local build is supported by the screenshot; notification and lifecycle behavior **remain to be confirmed by on-device user QA**. **Do not mark Stable18 or Play Code52 released.**
+
+**Next device QA:** Install `Atelier-Time-D158-Code52-DEV-QA.apk` from Downloads without uninstalling the Play app. Confirm separate **Atelier Time DEV** icon, correct Group/session labels in the Class notification, Free Running and Paused notification, **two simultaneous Class and Free notifications**, independent stopping/completion of either, Home/lock screen/return, sound cues. Android notification permission must be granted if user wants visible status; denied permission must not stop either timer. Any real-device errors require source correction and rerunning the suite before a new candidate.
