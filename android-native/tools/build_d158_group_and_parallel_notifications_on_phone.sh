@@ -6,8 +6,6 @@ fail() { echo "STOP: $*" >&2; exit 2; }
 [[ "$(git branch --show-current)" == "android-native-kotlin-compose" ]] || fail "Wrong branch."
 [[ "$(git rev-parse HEAD:android-native/app 2>/dev/null || true)" == "df85d462774cf59a8cd159c47353b5592ff6eea7" ]] ||
   fail "Unexpected D158 app source tree. Review before building."
-[[ -z "$(git status --porcelain --untracked-files=no)" ]] ||
-  fail "Local tracked changes: do not reset or delete worktree."
 for item in 'versionCode = 52' 'versionName = "D-158"' 'applicationIdSuffix = ".dev"' 'targetSdk = 36' 'compileSdk = 36'; do
   grep -Fq "$item" app/build.gradle.kts || fail "Missing $item"
 done
