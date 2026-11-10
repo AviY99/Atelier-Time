@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import com.ateliertime.domain.ActiveTimerNotificationSlots
 import com.ateliertime.domain.FreeTimerNotificationFormatter
 import com.ateliertime.domain.FreeTimerStatus
 import com.ateliertime.domain.FreeTimerView
@@ -119,6 +120,6 @@ class ActiveFreeStatusNotification(context: Context) {
 
     companion object {
         internal const val CHANNEL_ID = "atelier_free_timer_v1"
-        internal const val NOTIFICATION_ID = 109
+        internal const val NOTIFICATION_ID = ActiveTimerNotificationSlots.FREE_ID
     }
 }
