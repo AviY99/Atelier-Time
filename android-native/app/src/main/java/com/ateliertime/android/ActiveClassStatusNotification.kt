@@ -14,6 +14,7 @@ import com.ateliertime.domain.TimerNotificationStatus
 import com.ateliertime.domain.TimerStatus
 import com.ateliertime.domain.TimerView
 import com.ateliertime.domain.SessionRules
+import com.ateliertime.domain.ActiveTimerNotificationSlots
 
 /**
  * D-107 — quiet, permission-aware ongoing Class status notification.
@@ -131,7 +132,8 @@ class ActiveClassStatusNotification(context: Context) {
 
     fun clear() {
         if (posted || serviceStarted) {
-            // stopService also removes its foreground notification. Cancel
+            // End the Class slot only. The Free foreground notification, if active,
+            // must remain visible. Cancel
             // unconditionally: a stale item can survive while this instance
             // has lost its in-memory posted flag.
             ClassNotificationTaskService.dismissClass(appContext)
@@ -144,6 +146,6 @@ class ActiveClassStatusNotification(context: Context) {
 
     companion object {
         internal const val CHANNEL_ID = "atelier_active_class_v1"
-        internal const val NOTIFICATION_ID = 107
+        internal const val NOTIFICATION_ID = ActiveTimerNotificationSlots.CLASS_ID
     }
 }
