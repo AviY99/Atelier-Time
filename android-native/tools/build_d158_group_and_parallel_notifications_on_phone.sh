@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 fail() { echo "STOP: $*" >&2; exit 2; }
 [[ "$(git branch --show-current)" == "android-native-kotlin-compose" ]] || fail "Wrong branch."
-[[ "$(git rev-parse HEAD:android-native/app 2>/dev/null || true)" == "df85d462774cf59a8cd159c47353b5592ff6eea7" ]] ||
+[[ "$(git rev-parse HEAD:android-native/app 2>/dev/null || true)" == "d835f1e6301e19b0fcd478151ce7602f1300a6d5" ]] ||
   fail "Unexpected D158 app source tree. Review before building."
 for item in 'versionCode = 52' 'versionName = "D-158"' 'applicationIdSuffix = ".dev"' 'targetSdk = 36' 'compileSdk = 36'; do
   grep -Fq "$item" app/build.gradle.kts || fail "Missing $item"
