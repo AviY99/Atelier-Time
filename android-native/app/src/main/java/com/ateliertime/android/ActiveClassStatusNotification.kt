@@ -13,6 +13,7 @@ import com.ateliertime.domain.TimerNotificationFormatter
 import com.ateliertime.domain.TimerNotificationStatus
 import com.ateliertime.domain.TimerStatus
 import com.ateliertime.domain.TimerView
+import com.ateliertime.domain.SessionRules
 
 /**
  * D-107 — quiet, permission-aware ongoing Class status notification.
@@ -47,7 +48,7 @@ class ActiveClassStatusNotification(context: Context) {
         notifications.createNotificationChannel(channel)
     }
 
-    fun update(className: String, view: TimerView, classRemainingSeconds: Int, nowEpochMs: Long) {
+    fun update(className: String, view: TimerView, classRemainingSeconds: Int, nowEpochMs: Long, rules: SessionRules? = null) {
         if (ClassNotificationTaskService.isTaskClosed()) {
             clear()
             return
@@ -71,7 +72,7 @@ class ActiveClassStatusNotification(context: Context) {
         }
 
         val snapshot = TimerNotificationFormatter.forActiveClass(
-            className, view, classRemainingSeconds,
+            className, view, classRemainingSeconds, rules,
         )
         val nowSecond = nowEpochMs / 1000L
         // Start task-lifecycle monitoring only after the user begins a Class.
@@ -133,7 +134,7 @@ class ActiveClassStatusNotification(context: Context) {
             // stopService also removes its foreground notification. Cancel
             // unconditionally: a stale item can survive while this instance
             // has lost its in-memory posted flag.
-            ClassNotificationTaskService.dismiss(appContext)
+            ClassNotificationTaskService.dismissClass(appContext)
         }
         posted = false
         serviceStarted = false
