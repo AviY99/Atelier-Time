@@ -1,7 +1,7 @@
 # Atelier Time — proposed background notification fixes after first Google Play Internal Test
 
 **Reported:** 2026-11-09, Asia/Jerusalem.  
-**Classification:** USER-REPORTED, DOCUMENTED, **WAITING FOR EXPLICIT APPROVAL TO IMPLEMENT**. No source change, version bump, build, APK/AAB, or Play update is authorized by this record.
+**Classification (updated 2026-11-10): USER-APPROVED D-158 / Code52 SOURCE IMPLEMENTED ON ANDROID DEV; LOCAL SAMSUNG BUILD AND DEVICE QA PENDING.** No Play update, Stable18 promotion, paid CI, installed APK or signed AAB has occurred. The original pre-approval statements below are historical.
 **Baseline:** Stable 17 / D-157 / Android versionCode 51 — frozen source branch `stable/android-d157-qa17-user-accepted`, SHA `f6866dca809f6214c6d1f88c1adf8f6592163ada`.
 
 ## Confirmed user acceptance of the first Play Internal Testing build
@@ -22,7 +22,7 @@ The user then reported **two pre-existing bugs**, present in the development ver
 - But `domain/TimerNotificationStatus.kt`, `TimerNotificationFormatter.forActiveClass`, currently hardcodes `"Session " + poseNumber`, and uses `"Opening break"` without group numbering. Its interface lacks the session's display rules.
 - `android/ActiveClassStatusNotification.kt` calls that formatter; `SessionEditorScreen.kt` supplies the running snapshot and class name.
 
-**Proposed correction (not implemented):** Reuse the established group-aware display-name formatter using the active saved session rules, passed safely into the notification formatting adapter; avoid changing the scheduler's underlying phase identifiers, persisted format, replay behavior or duration calculations. Check screen and background text agree across all pose/break cases.
+**Implemented in D158 DEV source, awaiting Samsung build and device acceptance:** Reuse the established group-aware display-name formatter using the active saved session rules, passed safely into the notification formatting adapter; avoid changing the scheduler's underlying phase identifiers, persisted format, replay behavior or duration calculations. Check screen and background text agree across all pose/break cases.
 
 ## B — Free Timer lacks its own background notification
 
@@ -36,7 +36,7 @@ The user then reported **two pre-existing bugs**, present in the development ver
 - `FreeCountdownSection.kt` renders Free status only in the app UI.
 - No Free notification adapter or explicitly distinct notification ID was found among the current native source filenames. This describes the current source, not a claim about Android OS behavior on every device.
 
-**Implementation design to validate AFTER approval:** Add Free notification state formatting and lifecycle, assign unique Free notification/channel IDs so notification updates/cancels never replace Class ID 107; respect Android 13+ `POST_NOTIFICATIONS`, system notification settings, Android notification UI, task removal and app exit. Determine whether a second foreground service is necessary or whether an existing foreground process can legitimately host another notification: this must be evaluated against Android 14+ `specialUse` Foreground Service policy / Play Console declarations, rather than adding a service or claiming unrestricted background execution. Keep the primary timer clocks in existing owners, not recreated inside notifications; a notification must mirror actual monotonic time, not independently drift.
+**Approved implementation, requiring Samsung QA and Play policy verification:** Add Free notification state formatting and lifecycle, assign unique Free notification/channel IDs so notification updates/cancels never replace Class ID 107; respect Android 13+ `POST_NOTIFICATIONS`, system notification settings, Android notification UI, task removal and app exit. Determine whether a second foreground service is necessary or whether an existing foreground process can legitimately host another notification: this must be evaluated against Android 14+ `specialUse` Foreground Service policy / Play Console declarations, rather than adding a service or claiming unrestricted background execution. Keep the primary timer clocks in existing owners, not recreated inside notifications; a notification must mirror actual monotonic time, not independently drift.
 
 ## Regression and acceptance matrix for a subsequent development candidate
 
@@ -47,8 +47,25 @@ The user then reported **two pre-existing bugs**, present in the development ver
 5. **No regression:** Saved Classes, edited schedule signatures, Repeat Last / Restart / Next, special-break planning, free completion audio, approved splash, local user data, diagnostic run history and stable API/permissions.
 6. **Quality gates:** Tests for display-formatter parity, Free Running/Paused/Finished snapshots and concurrent cancellation; local Samsung JVM suite + AndroidTest **execution when feasible** (don't call compilation execution); actual on-device UI/notification verification by user; original artwork SHA-in-APK/AAB; separately user-accepted new stable checkpoint; then a higher versionCode and separately signed Google Play Internal Testing update only if approved. Don't mutate frozen Stable 17, nor reuse versionCode 51 for a new Play upload.
 
-## Explicit approval gate / release boundary
+## Explicit user approval received — D158 source implemented, verification pending
 
-**Do not code yet.** On user approval only: prepare a new development candidate, likely **D-158 / versionCode 52** (candidate numbering not yet committed); implement both fixes together, test locally on Samsung and ask for device QA. This is post-Stable17 maintenance, not a requirement to retroactively alter the existing accepted D157 Play AAB. Existing Internal Testing continues; no paid GitHub Actions, data wipe, Play Console update or public release is authorized here.
+**User approval on 2026-11-10:** "כן" to implementing **both fixes together** as **D-158 / versionCode 52**. Implementation committed to `android-native-kotlin-compose`, not to the frozen Stable17 branch or `main` app source. Source changes:
+
+- `domain/TimerNotificationStatus.kt`: Class notification accepts actual saved SessionRules and shares the existing `PhaseDisplayNames.title` formatter; Free gets its own Running/Paused status snapshots; foreground selection and unique IDs live in `ActiveTimerNotificationSlots`, **Class 107** and **Free 109**.
+- `android/SessionEditorScreen.kt`: passes saved Class rules to notification, ticks the Free snapshot alongside Class on the existing clock loop, explicitly starts/pauses/exits Free notifications, and requests optional Android notification permission when Free starts.
+- `android/ActiveFreeStatusNotification.kt` (new): separate low-importance Free channel, notification ID109, no duplicate sound, countdown/paused text and status, own cancellation.
+- `android/ClassNotificationTaskService.kt`: reuses **one** existing FGS for user-started Class and/or Free, with lifecycle actions for each timer. During overlap, Class remains foreground ID107 with Free independently posted ID109; on Class completion Free can become foreground without resetting the Free clock. Exit/Recents task removal clears both. No second service is introduced. Android specialUse declarations need review before eventual Play upload of Code52.
+- `AndroidManifest.xml`: FGS specialUse subtype description acknowledges both user-started timers; same permissions and service as before.
+- `app/build.gradle.kts`: app D-158 / Code52; **debug-only** `applicationIdSuffix=".dev"` and label "Atelier Time DEV", allowing separate testing without uninstalling or replacing the installed Play-signed Stable17 package `com.ateliertime.android`. Release applicationId remains unchanged.
+- `D158BackgroundNotificationsTest.kt` (new): 8 JVM cases for grouped/regular/break/special/summary parity, paused and Running Free, ID coexistence and transitions. Existing 318 JVM tests are not claimed re-executed; minimum planned QA total 326.
+- Phone-only guarded script: `android-native/tools/build_d158_group_and_parallel_notifications_on_phone.sh`. It checks exact D158 app tree, original artwork and Code52, runs the complete JVM suite and compiles AndroidTest source, builds a **distinct .dev debug APK**, verifies approved artwork inside the APK and saves it to Downloads. **The assistant cannot run the user's Samsung local build; no build pass or AndroidTest execution is claimed.**
+
+**Safe local command, only when ready to test on Samsung Code on the Go (no paid cloud build):**
+
+```bash
+cd /storage/emulated/0/CodeOnTheGoProjects/Atelier-Time-Android/Atelier-Time/android-native && git pull --ff-only && bash -n tools/build_d158_group_and_parallel_notifications_on_phone.sh && bash tools/build_d158_group_and_parallel_notifications_on_phone.sh
+```
+
+**Next gates:** Get actual Samsung build/JVM screenshot, then separately approve installing the new debug **DEV** app, verify Class-only, Free-only, simultaneous timers and independent cancel/lock screen behavior. Only after user-confirmed runtime tests consider a new Stable18 checkpoint and separately signed Code52 release AAB for a Play Internal Testing update. No production/public release, data wipe, signed upload, or unrelated features authorized by this approval. Frozen Stable17 remains available unchanged.
 
 **Working documents:** [Current Stable17 → Play handoff](HANDOFF_CURRENT_STABLE17_TO_GOOGLE_PLAY_2026_11_07.md) · [Frozen Stable17 acceptance](STABLE17_D157_VOLUME_AND_SOUND_USER_ACCEPTANCE_2026_11_07.md).
