@@ -24,7 +24,7 @@
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Active user-initiated drawing class countdown; remove status when task is dismissed"/>
+                android:value="User-started Class and Free Timer countdown statuses; dismiss on task close"/>
         </service>
         <!-- Multi-window resizing changes display configuration; preserve active in-memory Class state. -->
         <activity android:name=".MainActivity" android:exported="true"
