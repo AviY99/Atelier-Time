@@ -10,6 +10,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import com.ateliertime.domain.TimerNotificationStatus
+import com.ateliertime.domain.ActiveTimerNotificationSlots
 
 /**
  * D-158: ONE notification-only foreground service for independent Class and Free
@@ -65,8 +66,8 @@ class ClassNotificationTaskService : Service() {
             return START_NOT_STICKY
         }
 
-        val targetId = if (classActive) ActiveClassStatusNotification.NOTIFICATION_ID
-            else ActiveFreeStatusNotification.NOTIFICATION_ID
+        val targetId = ActiveTimerNotificationSlots.foregroundId(classActive, freeActive)
+            ?: return START_NOT_STICKY
         if (foregroundId != targetId) {
             val previousId = foregroundId
             val title = if (classActive) classTitle else freeTitle
