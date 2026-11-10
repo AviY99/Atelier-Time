@@ -12,6 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.ateliertime.android"
+        manifestPlaceholders["appLabel"] = "Atelier Time"
         minSdk = 26
         targetSdk = 36
         // Android versionCode is the monotonic package-upgrade integer.
@@ -20,6 +21,15 @@ android {
         versionCode = 52
         versionName = "D-158"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // D-158 QA APK installs BESIDE Play-signed D157, never over user data.
+    // Release AAB keeps com.ateliertime.android and versionCode 52 unchanged.
+    buildTypes {
+        getByName("debug") {
+            applicationIdSuffix = ".dev"
+            manifestPlaceholders["appLabel"] = "Atelier Time DEV"
+        }
     }
 
     buildFeatures { compose = true }
