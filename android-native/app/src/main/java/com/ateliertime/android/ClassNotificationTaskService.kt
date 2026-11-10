@@ -12,79 +12,141 @@ import android.os.IBinder
 import com.ateliertime.domain.TimerNotificationStatus
 
 /**
- * D-108: notification-only foreground service; the Compose screen still owns
- * the timer and all A/B/C audio. A service receives onTaskRemoved when Android
- * Recents removes the task, even if Activity.onDestroy is skipped.
+ * D-158: ONE notification-only foreground service for independent Class and Free
+ * countdowns. Their clocks, sounds and state remain owned by Compose. While
+ * both are active, Class ID107 is foreground and Free ID109 is separately posted.
+ * If Class stops first, promote Free ID109 without interrupting its countdown.
+ * Do not claim timers survive a killed process: the service never reconstructs
+ * any running countdown and remains START_NOT_STICKY.
  *
- * This service never restarts itself, never recreates a Class and never plays
- * sounds. An Android 14+ specialUse declaration is reviewed at Play release.
+ * Existing Android 14+ specialUse policy requires Play declaration review.
  */
 class ClassNotificationTaskService : Service() {
+    private var classActive = false
+    private var freeActive = false
+    private var foregroundId: Int? = null
+    private var classTitle = "Atelier Time · Running"
+    private var classDetail = "Class in progress"
+    private var freeTitle = "Atelier Time · Free Timer"
+    private var freeDetail = "Free Timer running"
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action != ACTION_START || taskClosed) {
-            stopSelf(startId)
+        if (taskClosed) {
+            stopSelf()
             return START_NOT_STICKY
         }
-        val title = intent.getStringExtra(EXTRA_TITLE) ?: "Atelier Time · Running"
-        val detail = intent.getStringExtra(EXTRA_DETAIL) ?: "Class in progress"
-        val openApp = PendingIntent.getActivity(
-            this, 108,
-            Intent(this, MainActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            },
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-        val notification = Notification.Builder(this, ActiveClassStatusNotification.CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_atelier_class_status)
-            .setContentTitle(title)
-            .setContentText(detail)
-            .setContentIntent(openApp)
-            .setOnlyAlertOnce(true)
-            .setOngoing(true)
-            .setCategory(Notification.CATEGORY_STATUS)
-            .setVisibility(Notification.VISIBILITY_PRIVATE)
-            .build()
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                startForeground(
-                    ActiveClassStatusNotification.NOTIFICATION_ID,
-                    notification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
-                )
-            } else {
-                startForeground(ActiveClassStatusNotification.NOTIFICATION_ID, notification)
+        val notifications =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        when (intent?.action) {
+            ACTION_CLASS_START -> {
+                classActive = true
+                classTitle = intent.getStringExtra(EXTRA_TITLE) ?: classTitle
+                classDetail = intent.getStringExtra(EXTRA_DETAIL) ?: classDetail
             }
-        } catch (_: RuntimeException) {
-            // This optional status service must never stop Class timers/audio.
-            stopSelf(startId)
+            ACTION_FREE_START -> {
+                freeActive = true
+                freeTitle = intent.getStringExtra(EXTRA_TITLE) ?: freeTitle
+                freeDetail = intent.getStringExtra(EXTRA_DETAIL) ?: freeDetail
+            }
+            ACTION_CLASS_END -> {
+                classActive = false
+                notifications.cancel(ActiveClassStatusNotification.NOTIFICATION_ID)
+            }
+            ACTION_FREE_END -> {
+                freeActive = false
+                notifications.cancel(ActiveFreeStatusNotification.NOTIFICATION_ID)
+            }
+            else -> return START_NOT_STICKY
+        }
+        if (!classActive && !freeActive) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        val targetId = if (classActive) ActiveClassStatusNotification.NOTIFICATION_ID
+            else ActiveFreeStatusNotification.NOTIFICATION_ID
+        if (foregroundId != targetId) {
+            val previousId = foregroundId
+            val title = if (classActive) classTitle else freeTitle
+            val detail = if (classActive) classDetail else freeDetail
+            val channel = if (classActive) ActiveClassStatusNotification.CHANNEL_ID
+                else ActiveFreeStatusNotification.CHANNEL_ID
+            val openApp = PendingIntent.getActivity(
+                this, 108,
+                Intent(this, MainActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                },
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+            val notification = Notification.Builder(this, channel)
+                .setSmallIcon(R.drawable.ic_atelier_class_status)
+                .setContentTitle(title)
+                .setContentText(detail)
+                .setContentIntent(openApp)
+                .setOnlyAlertOnce(true)
+                .setOngoing(true)
+                .setCategory(Notification.CATEGORY_STATUS)
+                .setVisibility(Notification.VISIBILITY_PRIVATE)
+                .build()
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    startForeground(
+                        targetId, notification,
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
+                    )
+                } else {
+                    startForeground(targetId, notification)
+                }
+                foregroundId = targetId
+                // When the foreground owner switches, the other active timer
+                // continues to post its own ID from its independent observer.
+                if (previousId != null && previousId != targetId) {
+                    if (previousId == ActiveClassStatusNotification.NOTIFICATION_ID
+                        && !classActive) notifications.cancel(previousId)
+                    if (previousId == ActiveFreeStatusNotification.NOTIFICATION_ID
+                        && !freeActive) notifications.cancel(previousId)
+                }
+            } catch (_: RuntimeException) {
+                // Foreground restrictions must not crash either countdown.
+                stopSelf()
+            }
         }
         return START_NOT_STICKY
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        // Swipe-away explicitly closes Atelier Time on the user's device.
-        // Do not leave the last notification with a frozen countdown.
         taskClosed = true
-        removeNotification()
+        removeAllNotifications()
         stopSelf()
         super.onTaskRemoved(rootIntent)
     }
 
     override fun onDestroy() {
-        removeNotification()
+        removeAllNotifications()
         super.onDestroy()
     }
 
-    private fun removeNotification() {
+    private fun removeAllNotifications() {
         stopForeground(STOP_FOREGROUND_REMOVE)
-        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-            .cancel(ActiveClassStatusNotification.NOTIFICATION_ID)
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.cancel(ActiveClassStatusNotification.NOTIFICATION_ID)
+        manager.cancel(ActiveFreeStatusNotification.NOTIFICATION_ID)
+        classActive = false
+        freeActive = false
+        foregroundId = null
     }
 
     companion object {
-        private const val ACTION_START = "com.ateliertime.android.CLASS_NOTIFICATION_START"
+        private const val ACTION_CLASS_START =
+            "com.ateliertime.android.CLASS_NOTIFICATION_START"
+        private const val ACTION_FREE_START =
+            "com.ateliertime.android.FREE_NOTIFICATION_START"
+        private const val ACTION_CLASS_END =
+            "com.ateliertime.android.CLASS_NOTIFICATION_END"
+        private const val ACTION_FREE_END =
+            "com.ateliertime.android.FREE_NOTIFICATION_END"
         private const val EXTRA_TITLE = "notification_title"
         private const val EXTRA_DETAIL = "notification_detail"
 
@@ -92,34 +154,64 @@ class ClassNotificationTaskService : Service() {
 
         fun isTaskClosed(): Boolean = taskClosed
 
-        /** A newly opened Activity is a new Android task, not a stale swipe. */
+        /** A newly created Activity starts a new task, not a stale swipe. */
         fun allowNewTask() { taskClosed = false }
 
-        /** Called only for genuine Back/task finish, not Home or rotation. */
+        /** Root Back/task finish stops BOTH notifications, not just Class. */
         fun closeTask(context: Context) {
             taskClosed = true
             dismiss(context)
         }
 
+        /** Cold launch: discard orphan notifications without restoring timers. */
         fun dismiss(context: Context) {
             context.stopService(Intent(context, ClassNotificationTaskService::class.java))
-            (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-                .cancel(ActiveClassStatusNotification.NOTIFICATION_ID)
+            val manager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.cancel(ActiveClassStatusNotification.NOTIFICATION_ID)
+            manager.cancel(ActiveFreeStatusNotification.NOTIFICATION_ID)
         }
 
-        fun start(context: Context, snapshot: TimerNotificationStatus): Boolean {
+        private fun sendEnd(context: Context, action: String, id: Int) {
+            if (!taskClosed) {
+                try {
+                    context.startService(Intent(context, ClassNotificationTaskService::class.java)
+                        .apply { this.action = action })
+                } catch (_: RuntimeException) {
+                    // When Android refuses a background command, still clear
+                    // the exact notification without affecting the other ID.
+                }
+            }
+            (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                .cancel(id)
+        }
+
+        fun dismissClass(context: Context) = sendEnd(
+            context, ACTION_CLASS_END, ActiveClassStatusNotification.NOTIFICATION_ID)
+
+        fun dismissFree(context: Context) = sendEnd(
+            context, ACTION_FREE_END, ActiveFreeStatusNotification.NOTIFICATION_ID)
+
+        fun start(context: Context, snapshot: TimerNotificationStatus): Boolean =
+            startForegroundSlot(context, ACTION_CLASS_START, snapshot)
+
+        fun startFree(context: Context, snapshot: TimerNotificationStatus): Boolean =
+            startForegroundSlot(context, ACTION_FREE_START, snapshot)
+
+        private fun startForegroundSlot(
+            context: Context, actionName: String, snapshot: TimerNotificationStatus,
+        ): Boolean {
             if (taskClosed) return false
             return try {
                 context.startForegroundService(
                     Intent(context, ClassNotificationTaskService::class.java).apply {
-                        action = ACTION_START
+                        action = actionName
                         putExtra(EXTRA_TITLE, snapshot.title)
                         putExtra(EXTRA_DETAIL, snapshot.summary)
                     },
                 )
                 true
             } catch (_: RuntimeException) {
-                // A platform-specific FGS restriction cannot prevent a Class.
                 false
             }
         }
