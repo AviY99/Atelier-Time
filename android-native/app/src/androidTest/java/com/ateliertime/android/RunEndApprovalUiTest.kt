@@ -5,6 +5,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -164,6 +165,43 @@ class RunEndApprovalUiTest {
         clickWheel(if (minute == 0) "run_end_hour_previous" else "run_end_minute_previous")
     }
 
+    @Test fun d159FinishDialogHasReadableBottomActionsWithoutSoundPreview() {
+        openRunApproval()
+        compose.onNodeWithText("Test Class alert sound").assertDoesNotExist()
+        compose.onNodeWithTag("run_end_calculated_value").assertExists()
+        compose.onNodeWithTag("run_end_selected").assertExists()
+        compose.onNodeWithText("Final two Sessions:", substring = true).assertExists()
+        compose.onNodeWithTag("run_end_actions").assertExists()
+        compose.onNodeWithTag("run_end_change_finish").assertIsEnabled()
+        compose.onNodeWithTag("run_end_cancel").assertIsEnabled()
+        compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
+        val calculated = compose.onNodeWithTag("run_end_calculated_value")
+            .getUnclippedBoundsInRoot()
+        val change = compose.onNodeWithTag("run_end_change_finish")
+            .getUnclippedBoundsInRoot()
+        val cancel = compose.onNodeWithTag("run_end_cancel")
+            .getUnclippedBoundsInRoot()
+        val confirm = compose.onNodeWithTag("run_end_confirm")
+            .getUnclippedBoundsInRoot()
+        assertTrue("Actions must be below finish time", calculated.bottom < change.top)
+        assertTrue("Change action must be above Cancel / Confirm", change.bottom <= cancel.top)
+        assertTrue("Cancel and Confirm should occupy separate side-by-side buttons",
+            cancel.right <= confirm.left)
+        assertStoredClassUnchanged()
+    }
+
+    @Test fun d159ChangeButtonRemainsVisibleAndDisabledUntilReset() {
+        openRunApproval()
+        showWheels()
+        compose.onNodeWithTag("run_end_change_finish").assertExists().assertIsNotEnabled()
+        compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
+        compose.onNodeWithTag("run_end_reset_calculated")
+            .performScrollTo().performClick()
+        compose.onNodeWithTag("run_end_wheels").assertDoesNotExist()
+        compose.onNodeWithTag("run_end_change_finish").assertIsEnabled()
+        assertStoredClassUnchanged()
+    }
+
     @Test fun predictedFinishIsLiveWithoutShowingWheelsByDefault() {
         openRunApproval()
         compose.onNodeWithTag("run_end_calculated").assertExists()
@@ -245,7 +283,7 @@ class RunEndApprovalUiTest {
             .performScrollTo().performClick()
         compose.onNodeWithTag("run_end_wheels").assertDoesNotExist()
         compose.onNodeWithTag("run_end_blocked_reason").assertDoesNotExist()
-        compose.onNodeWithTag("run_end_change_finish").assertExists()
+        compose.onNodeWithTag("run_end_change_finish").assertIsEnabled()
         compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
     }
 
