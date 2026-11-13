@@ -1875,37 +1875,37 @@ fun SessionEditorScreen(
                             color = atelierErrorTextColor(),
                             style = MaterialTheme.typography.bodySmall)
                     }
-                    AtelierTextButton(
-                        enabled = soundEnabled,
-                        onClick = {
-                            melodyPlayer.play(soundSettings.soundFor(TimerCue.POSE_FINISHED),
-                                soundSettings.secondsFor(TimerCue.POSE_FINISHED),
-                                useAlarmVolume = soundSettings.classAlertsUseAlarmVolume,
-                                playbackVolumePercent = soundSettings.playbackVolumePercentFor(
-                                    TimerCue.POSE_FINISHED)) { message ->
-                                melodyError = message
-                            }
-                        },
-                    ) { Text("Test Class alert sound") }
-                    Text(
-                        "Calculated finish: " + clockFormat.format(Date(calculatedFinish)),
-                        modifier = Modifier.testTag("run_end_calculated"),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    if (!finishPickerVisible) {
-                        AtelierTextButton(
-                            modifier = Modifier.testTag("run_end_change_finish"),
-                            colors = atelierTextColors(),
-                            onClick = {
-                                // Reveal wheels without fixing/truncating the
-                                // live finish until a number actually changes.
-                                finishPickerVisible = true
-                                customFinishEnabled = false
-                                runApprovalError = null
-                                runFinishBlockedReason = null
-                            },
-                        ) { Text("Change finish time") }
-                    } else {
+                    // Keep the full calculated date/time on ONE line. Give the
+                    // changing time visual priority; auto-size it for narrow
+                    // screens / accessibility font scaling without truncation.
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                            .testTag("run_end_calculated")
+                            .semantics(mergeDescendants = true) {},
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            "Calculated finish:",
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            softWrap = false,
+                        )
+                        Text(
+                            clockFormat.format(Date(calculatedFinish)),
+                            modifier = Modifier.weight(1f)
+                                .testTag("run_end_calculated_value"),
+                            style = MaterialTheme.typography.headlineLarge,
+                            autoSize = TextAutoSize.StepBased(
+                                minFontSize = 12.sp, maxFontSize = 32.sp,
+                                stepSize = 0.5.sp,
+                            ),
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Clip,
+                        )
+                    }
+                    if (finishPickerVisible) {
                         Text(
                             "Red values cannot be selected.",
                             style = MaterialTheme.typography.bodySmall,
@@ -2031,11 +2031,45 @@ fun SessionEditorScreen(
                 }
             },
             confirmButton = {
-                AtelierTextButton(
-                    modifier = Modifier.testTag("run_end_confirm"),
-                    colors = atelierTextColors(),
-                    enabled = isValid,
-                    onClick = {
+                // All three choices are visible in a dedicated bottom action
+                // area. A two-row arrangement prevents truncated button labels
+                // on narrow phones; it also keeps actions out of wheel scrolling.
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                        .testTag("run_end_actions"),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    AtelierOutlinedButton(
+                        modifier = Modifier.fillMaxWidth()
+                            .testTag("run_end_change_finish"),
+                        enabled = !finishPickerVisible,
+                        onClick = {
+                            // Opening wheels must not freeze or select a clock.
+                            finishPickerVisible = true
+                            customFinishEnabled = false
+                            runApprovalError = null
+                            runFinishBlockedReason = null
+                        },
+                    ) { Text("Change finish time", maxLines = 1) }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        AtelierOutlinedButton(
+                            modifier = Modifier.weight(1f)
+                                .testTag("run_end_cancel"),
+                            onClick = {
+                                pendingRunApproval = null
+                                runApprovalError = null
+                            },
+                        ) { Text("Cancel", maxLines = 1) }
+                        AtelierButton(
+                            modifier = Modifier.weight(1f)
+                                .testTag("run_end_confirm"),
+                            enabled = isValid,
+                            onClick = {
                         val actualNow = System.currentTimeMillis()
                         try {
                             val actualTarget = if (customFinishEnabled)
@@ -2065,15 +2099,22 @@ fun SessionEditorScreen(
                         } catch (error: IllegalStateException) {
                             runApprovalError = error.message ?: "This saved Class is no longer available."
                         }
-                    },
-                ) { Text("Confirm & Run") }
+                            },
+                        ) {
+                            Text(
+                                "Confirm & Run",
+                                maxLines = 1,
+                                softWrap = false,
+                                autoSize = TextAutoSize.StepBased(
+                                    minFontSize = 11.sp, maxFontSize = 14.sp,
+                                    stepSize = 0.5.sp,
+                                ),
+                            )
+                        }
+                    }
+                }
             },
-            dismissButton = {
-                AtelierTextButton(colors = atelierTextColors(), onClick = {
-                    pendingRunApproval = null
-                    runApprovalError = null
-                }) { Text("Cancel") }
-            },
+            dismissButton = {},
         )
     }
 
