@@ -53,13 +53,15 @@ Debug package com.ateliertime.android.dev preserves installed Play data.
 
 Local log path reported by Samsung: `/storage/emulated/0/Download/Atelier-Time-D160-Code54-QA-20261113-145234.log`. Source tree and approved artwork verification were guarded in `android-native/tools/build_d160_finish_dialog_back_on_phone.sh`. 326 JVM unit tests were **executed**; Compose UI/AndroidTest tests were **compiled but not executed**. The APK and log are local device artifacts, not uploaded as GitHub releases. The user's subsequent statement confirms the installed D160 application works as desired.
 
-## 5. Google Play distinction and next approval gate
+## 5. Google Play Internal Testing promotion — completed 2026-11-13
 
-- **Last user-confirmed Play Internal Testing:** Stable17 / D157 / Code51. No further Play update was reported in this conversation.
-- **Stable18 / D158 / Code52:** A signed release **AAB was successfully built locally on Samsung on 2026-11-12** using the existing backed-up Upload Key. File: `/storage/emulated/0/Download/Atelier-Time-D158-Code52-InternalTest-SIGNED.aab`. The local script reported `SIGNED AAB SIGNATURE STRUCTURE PASS` and `SIGNED RELEASE AAB PREPARED FOR HUMAN REVIEW — NOT UPLOADED`. It was **not uploaded** to Play.
-- **Stable19 / D160 / Code54:** user-accepted separate **debug APK**, frozen source. **No Stable19 signed AAB built, signed, uploaded or published**; promoting the frozen Git branch is not a Play deployment.
-- Before any Google Play upload, explicitly choose the target version to publish, validate Upload Key certificate and Play Console version code availability, check release-bundle merged manifest, FGS `specialUse` justification/video for Class + Free, Data Safety/privacy, and request specific user authorization.
-- Do not request private signing keys/password, invoke paid cloud CI/GitHub Actions, alter a frozen branch, uninstall apps or clear user data.
+- **Stable19 / D-160 / Code54** was built as a **production-ID Release AAB**, signed locally on Samsung using the previously backed-up upload key, signature/integrity/artwork/manifest checks PASSED, and successfully uploaded to **Google Play Internal Testing**. Signed local bundle: `/storage/emulated/0/Download/Atelier-Time-D160-Code54-InternalTest-SIGNED.aab`.
+- Console upload-key certificate SHA-256 and AAB signing certificate SHA-256 **matched exactly**, and Play accepted Code54. Signed release tests on Samsung reported **326/326 JVM PASS**, including **8/8 inherited background regressions**, while AndroidTest **compiled, not executed**.
+- Play Console screenshot showed new active release **Atelier Time D-160 - Stable 19**, **Available to internal testers**, released **2026-11-13 19:29 (Asia/Jerusalem)**, marked **Not reviewed**; app name still temporary/unreviewed. Two nonblocking warnings: no deobfuscation mapping and no native debug symbols.
+- **User device post-rollout acceptance:** user updated existing Play-installed app on Samsung and explicitly reported: **"הכל עובד בוצע update והכל רץ תקין כולל נשמרו נתונים שמורים קודמים"** — update completed; tested features run correctly; previously saved data retained. This confirms successful in-place app update, **not** Google policy approval or a public release.
+- Frozen Stable19 branch and Stable18/17 branches remain unmodified. The previously signed Stable18 Code52 AAB was **never uploaded**.
+- **Still open:** foreground service `specialUse` Console declaration and demonstrably playable video link (Google Drive upload/share completed, playback error reported); privacy wording for separate Free Timer notification; trader-status banner/store identity and future Production policy checks. None of these should be marked approved because this Internal Testing update succeeded.
+- No new app source change, device uninstall/data clear, keystore exposure, paid GitHub Actions, or Production release.
 
 **Current canonical handoff:** [Stable19 → Google Play / next work](HANDOFF_CURRENT_STABLE19_TO_GOOGLE_PLAY_2026_11_13.md).  
 **D160 implementation/QA specification:** [D160 finish dialog Back and typography](https://github.com/AviY99/Atelier-Time/blob/stable/android-d160-qa19-finish-dialog-ui-user-accepted/docs/D160_FINISH_CONFIRMATION_DIALOG_BACK_AND_TEXT_2026_11_13.md).  
