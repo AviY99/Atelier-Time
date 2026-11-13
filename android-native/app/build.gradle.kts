@@ -18,12 +18,12 @@ android {
         // Android versionCode is the monotonic package-upgrade integer.
         // versionName is the real development iteration shown verbatim in About.
         // Keep this D-identifier synchronized with each future APK build.
-        versionCode = 53
-        versionName = "D-159"
+        versionCode = 54
+        versionName = "D-160"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // D-159 UI QA debug APK installs beside Play-signed D157 without wiping data.
+    // D-160 UI QA debug APK installs beside Play-signed D157 without wiping data.
     // Stable18 / D158 / Code52 remains frozen; never publish this unaccepted candidate.
     buildTypes {
         getByName("debug") {
