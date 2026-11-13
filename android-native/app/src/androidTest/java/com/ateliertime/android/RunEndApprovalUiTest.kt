@@ -165,17 +165,19 @@ class RunEndApprovalUiTest {
         clickWheel(if (minute == 0) "run_end_hour_previous" else "run_end_minute_previous")
     }
 
-    @Test fun d159FinishDialogHasReadableBottomActionsWithoutSoundPreview() {
+    @Test fun d160FinishDialogRestoresOneUniformCalculatedLineAndBottomActions() {
         openRunApproval()
         compose.onNodeWithText("Test Class alert sound").assertDoesNotExist()
-        compose.onNodeWithTag("run_end_calculated_value").assertExists()
+        compose.onNodeWithTag("run_end_calculated").assertExists()
+        assertTrue(textAt("run_end_calculated").startsWith("Calculated finish: "))
+        compose.onNodeWithTag("run_end_calculated_value").assertDoesNotExist()
         compose.onNodeWithTag("run_end_selected").assertExists()
         compose.onNodeWithText("Final two Sessions:", substring = true).assertExists()
         compose.onNodeWithTag("run_end_actions").assertExists()
         compose.onNodeWithTag("run_end_change_finish").assertIsEnabled()
         compose.onNodeWithTag("run_end_cancel").assertIsEnabled()
         compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
-        val calculated = compose.onNodeWithTag("run_end_calculated_value")
+        val calculated = compose.onNodeWithTag("run_end_calculated")
             .getUnclippedBoundsInRoot()
         val change = compose.onNodeWithTag("run_end_change_finish")
             .getUnclippedBoundsInRoot()
@@ -190,15 +192,25 @@ class RunEndApprovalUiTest {
         assertStoredClassUnchanged()
     }
 
-    @Test fun d159ChangeButtonRemainsVisibleAndDisabledUntilReset() {
+    @Test fun d160ChangeBecomesBackAndReturnsToLiveCalculatedFinish() {
         openRunApproval()
+        compose.onNodeWithText("Change finish time").assertExists()
         showWheels()
-        compose.onNodeWithTag("run_end_change_finish").assertExists().assertIsNotEnabled()
-        compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
-        compose.onNodeWithTag("run_end_reset_calculated")
-            .performScrollTo().performClick()
-        compose.onNodeWithTag("run_end_wheels").assertDoesNotExist()
         compose.onNodeWithTag("run_end_change_finish").assertIsEnabled()
+        compose.onNodeWithText("Back").assertExists()
+        compose.onNodeWithText("Use calculated finish").assertDoesNotExist()
+        val before = wheelValue("run_end_minute")
+        chooseOneMinuteLater()
+        assertEquals((before + 1) % 60, wheelValue("run_end_minute"))
+        compose.onNodeWithTag("run_end_change_finish").performClick()
+        compose.onNodeWithTag("run_end_wheels").assertDoesNotExist()
+        compose.onNodeWithText("Back").assertDoesNotExist()
+        compose.onNodeWithText("Change finish time").assertExists()
+        assertEquals(
+            textAt("run_end_calculated").removePrefix("Calculated finish: "),
+            textAt("run_end_selected").removePrefix("Selected finish: "),
+        )
+        compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
         assertStoredClassUnchanged()
     }
 
@@ -274,20 +286,19 @@ class RunEndApprovalUiTest {
         assertStoredClassUnchanged()
     }
 
-    @Test fun resetHidesWheelsAndClearsBlockedReason() {
+    @Test fun backHidesWheelsAndClearsBlockedReason() {
         openRunApproval()
         showWheels()
         clickWheel("run_end_hour_previous")
         compose.onNodeWithTag("run_end_blocked_reason").assertExists()
-        compose.onNodeWithTag("run_end_reset_calculated")
-            .performScrollTo().performClick()
+        compose.onNodeWithTag("run_end_change_finish").performClick()
         compose.onNodeWithTag("run_end_wheels").assertDoesNotExist()
         compose.onNodeWithTag("run_end_blocked_reason").assertDoesNotExist()
         compose.onNodeWithTag("run_end_change_finish").assertIsEnabled()
         compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
     }
 
-    @Test fun minuteWheelChangesOnlyAfterUserActionAndCanBeReset() {
+    @Test fun minuteWheelChangesOnlyAfterUserActionAndCanBeResetWithBack() {
         openRunApproval()
         showWheels()
         val before = wheelValue("run_end_minute")
@@ -295,8 +306,7 @@ class RunEndApprovalUiTest {
         val after = wheelValue("run_end_minute")
         assertEquals((before + 1) % 60, after)
         compose.onNodeWithTag("run_end_confirm").assertIsEnabled()
-        compose.onNodeWithTag("run_end_reset_calculated")
-            .performScrollTo().performClick()
+        compose.onNodeWithTag("run_end_change_finish").performClick()
         compose.onNodeWithTag("run_end_wheels").assertDoesNotExist()
         assertStoredClassUnchanged()
     }
