@@ -79,12 +79,22 @@ done
 key="$HOME/.atelier-time-signing/atelier-upload.p12"
 [[ -f "$key" && -s "$key" && ! -L "$key" ]] ||
   fail "Original local upload key unavailable. Do NOT create or upload a new key."
-# Code on the Go can launch scripts with closed stdin (EOF). Jarsigner then
-# prints "you must enter key password" without reading an actual password.
-# Require an interactive controlling terminal BEFORE starting expensive tests.
-if ! ( : </dev/tty ) 2>/dev/null; then
-  fail "Interactive /dev/tty unavailable. No key/password change; stop before build."
+# Ask ONCE, immediately BEFORE running tests. The secret stays in this
+# bash process's memory (not exported, not written to disk, not sent to GitHub).
+# Do not let shell tracing expose a private password if the caller enabled it.
+set +x
+if [[ ! -r /dev/tty ]] || ! ( : </dev/tty ) 2>/dev/null; then
+  fail "Interactive Samsung terminal unavailable; cannot safely read upload password."
 fi
+printf 'Upload key password (hidden, then press Enter): ' >/dev/tty
+if ! IFS= read -r -s signing_password </dev/tty; then
+  printf '\n' >/dev/tty
+  fail "Password input failed; stopping before build."
+fi
+printf '\n' >/dev/tty
+[[ -n "$signing_password" ]] ||
+  fail "Empty password; stopping before build."
+echo "Upload key password received privately. Continuing tests and build."
 
 dest="/storage/emulated/0/Download"
 [[ -d "$dest" ]] || fail "Samsung Downloads directory missing."
@@ -98,7 +108,8 @@ verifylog="$dest/Atelier-Time-D160-Code54-Signature-$stamp.log"
 certlog="$dest/Atelier-Time-D160-Code54-UploadCertificate-$stamp.log"
 partial="$dest/.Atelier-Time-D160-Code54-InternalTest-$stamp.partial.aab"
 cleanup() {
-  # Only this invocation's temporary signed bundle; never touch user data.
+  # Erase the shell variable on exit; only remove this run's temporary AAB.
+  unset signing_password
   if [[ -n "$partial" && -e "$partial" ]]; then rm -f -- "$partial"; fi
 }
 trap cleanup EXIT
@@ -304,13 +315,18 @@ print("Release package: com.ateliertime.android; D-160 / Code54; targetSdk36")
 print("Release permissions:", ", ".join(sorted(permissions)))
 PY_AAB
 
-echo "Signing with the previously used PRIVATE local upload key."
-echo "Enter the password ONLY at the Samsung terminal prompt; NEVER in chat or GitHub."
-if ! jarsigner -keystore "$key" -storetype PKCS12 \
+echo "Signing with existing local upload key using the password entered at script start."
+# Jarsigner can request both keystore and key password. For the existing PKCS12
+# keystore, supply the SAME password to both stdin prompts. No CLI arguments,
+# environment variables, temporary password files or additional user prompts.
+if ! printf '%s\n%s\n' "$signing_password" "$signing_password" | \
+  jarsigner -keystore "$key" -storetype PKCS12 \
   -sigalg SHA256withRSA -digestalg SHA-256 \
-  -signedjar "$partial" "$unsigned" atelier-upload </dev/tty; then
+  -signedjar "$partial" "$unsigned" atelier-upload; then
+  unset signing_password
   fail "Signing failed. No output may be uploaded."
 fi
+unset signing_password
 [[ -s "$partial" ]] || fail "Signed temporary AAB missing."
 jarsigner -verify -verbose -certs "$partial" >"$verifylog" 2>&1 ||
   fail "jarsigner verification failed. DO NOT UPLOAD."
