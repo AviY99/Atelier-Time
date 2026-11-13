@@ -1867,7 +1867,6 @@ fun SessionEditorScreen(
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Text(request.session.rules.name)
                     if (classAlertVolumeMuted) {
                         Text((if (soundSettings.classAlertsUseAlarmVolume)
                             "Alarm" else "Media") + " volume is at zero. Class cues " +
@@ -1875,36 +1874,12 @@ fun SessionEditorScreen(
                             color = atelierErrorTextColor(),
                             style = MaterialTheme.typography.bodySmall)
                     }
-                    // Keep the full calculated date/time on ONE line. Give the
-                    // changing time visual priority; auto-size it for narrow
-                    // screens / accessibility font scaling without truncation.
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                            .testTag("run_end_calculated")
-                            .semantics(mergeDescendants = true) {},
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            "Calculated finish:",
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1,
-                            softWrap = false,
-                        )
-                        Text(
-                            clockFormat.format(Date(calculatedFinish)),
-                            modifier = Modifier.weight(1f)
-                                .testTag("run_end_calculated_value"),
-                            style = MaterialTheme.typography.headlineLarge,
-                            autoSize = TextAutoSize.StepBased(
-                                minFontSize = 12.sp, maxFontSize = 32.sp,
-                                stepSize = 0.5.sp,
-                            ),
-                            maxLines = 1,
-                            softWrap = false,
-                            overflow = TextOverflow.Clip,
-                        )
-                    }
+                    // Restore the original uniform D158 Calculated finish line.
+                    Text(
+                        "Calculated finish: " + clockFormat.format(Date(calculatedFinish)),
+                        modifier = Modifier.testTag("run_end_calculated"),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
                     if (finishPickerVisible) {
                         Text(
                             "Red values cannot be selected.",
@@ -1980,22 +1955,12 @@ fun SessionEditorScreen(
                         runFinishBlockedReason?.let { reason ->
                             Text(
                                 "Blocked at the red boundary. " + reason +
-                                    " Scroll back toward green or use the calculated finish.",
+                                    " Scroll back toward green or tap Back.",
                                 modifier = Modifier.testTag("run_end_blocked_reason"),
                                 color = atelierErrorTextColor(),
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
-                        AtelierTextButton(
-                            modifier = Modifier.testTag("run_end_reset_calculated"),
-                            colors = atelierTextColors(),
-                            onClick = {
-                                customFinishEnabled = false
-                                finishPickerVisible = false
-                                runApprovalError = null
-                                runFinishBlockedReason = null
-                            },
-                        ) { Text("Use calculated finish") }
                     }
                     Text(
                         "Selected finish: " + clockFormat.format(Date(chosen)),
@@ -2043,15 +2008,24 @@ fun SessionEditorScreen(
                     AtelierOutlinedButton(
                         modifier = Modifier.fillMaxWidth()
                             .testTag("run_end_change_finish"),
-                        enabled = !finishPickerVisible,
                         onClick = {
-                            // Opening wheels must not freeze or select a clock.
-                            finishPickerVisible = true
-                            customFinishEnabled = false
+                            if (finishPickerVisible) {
+                                // Back closes the wheels and resumes the live
+                                // calculated finish, including after edits.
+                                finishPickerVisible = false
+                                customFinishEnabled = false
+                            } else {
+                                // Opening alone never freezes the live finish.
+                                finishPickerVisible = true
+                                customFinishEnabled = false
+                            }
                             runApprovalError = null
                             runFinishBlockedReason = null
                         },
-                    ) { Text("Change finish time", maxLines = 1) }
+                    ) {
+                        Text(if (finishPickerVisible) "Back" else "Change finish time",
+                            maxLines = 1)
+                    }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
