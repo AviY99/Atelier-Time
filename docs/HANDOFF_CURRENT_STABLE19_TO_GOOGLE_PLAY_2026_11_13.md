@@ -1,6 +1,8 @@
-# CURRENT AUTHORITATIVE HANDOFF — Atelier Time Stable 19 / D-160 / Code 54 → Next Google Play / development gate
+# CURRENT AUTHORITATIVE HANDOFF — Atelier Time Stable 19 / D-160 / Code 54 — Internal Testing published and device-updated
 
-**Updated:** 2026-11-13 (Asia/Jerusalem). **This is the latest authoritative handoff and supersedes the Stable18 handoff as current status.** Read this before any code/Play task. Earlier documents and pending-QA remarks are historical snapshots, not current blockers where newer evidence exists.
+**Updated:** 2026-11-13 (Asia/Jerusalem), AFTER successful Google Play Internal Testing rollout and user-confirmed in-place update. **This is the latest authoritative handoff and supersedes earlier Stable18 and earlier Stable19 preparation status.** Read this before any code/Play task. Earlier "signed AAB not built", "not uploaded" and "Stable17 is on Play" descriptions are historical.
+
+**CURRENT RESULT — COMPLETE:** Stable19 **D-160 / versionCode 54** was signed on Samsung using the EXISTING upload key, uploaded to the existing invite-only **Google Play Internal Testing** track, and shown in Play Console as **Active / Available to internal testers**, release **2026-11-13 19:29 (Asia/Jerusalem)**, with review label **Not reviewed** and temporary app name `com.ateliertime.android (unreviewed)`. The user then updated the installed **Play** app in place on Samsung and explicitly confirmed **all tested functionality works and prior saved data was retained**. This is a user/device-confirmed Play update, **NOT** a public Production release, Google policy approval, or instrumentation test execution.
 
 ## 1. Latest accepted stable release
 
@@ -14,25 +16,30 @@
 
 **Prior recovery points unchanged:** Stable18 / D158 / Code52 at `stable/android-d158-qa18-background-notifications-user-accepted`, SHA `7994dcfc2d077e68d72800400fa2086dacdc4132` (Class group labels + independent parallel Free notification); Stable17 / D157 / Code51 at `stable/android-d157-qa17-user-accepted`, SHA `f6866dca809f6214c6d1f88c1adf8f6592163ada`.
 
-## 2. Actual Google Play and signed-bundle status — DO NOT CONFUSE
+## 2. Google Play Internal Testing — confirmed completed 2026-11-13
 
-| Artifact | Latest verified or user-reported status |
+| Artifact / evidence | Confirmed state |
 |---|---|
-| **Play Internal Testing** | Last reported **Stable17 / D157 / Code51**, invite-only. No later Play upload confirmed. |
-| **Stable18 / D158 / Code52** | Signed **release AAB BUILT locally** on Samsung on 2026-11-12; script reported manifest/artwork checks and successful `jarsigner` verification. File: `/storage/emulated/0/Download/Atelier-Time-D158-Code52-InternalTest-SIGNED.aab`. **NOT uploaded** to Play; uploading Code52 is not presumed authorized. |
-| **Stable19 / D160 / Code54** | Frozen, user-accepted, **DEV debug APK** only. No signed **Code54 release AAB** built, uploaded, reviewed or distributed through Play. |
-| **Production** | No public release confirmed. |
+| **Play Internal Testing CURRENT** | **Stable19 / D-160 / Code54**, **Active / Available to internal testers** per Console screenshot, released **Nov 13, 19:29 local**; displayed **Not reviewed**. |
+| **Samsung Play update** | User explicitly confirmed **Update** completed successfully from Google Play, all tested operations run correctly, and **previously saved user data survived the in-place update**. Do not uninstall or clear data. |
+| **Stable19 signed release AAB** | Successfully built and signed locally using Samsung Code on the Go: `/storage/emulated/0/Download/Atelier-Time-D160-Code54-InternalTest-SIGNED.aab`; signed-bundle content integrity PASS; release package `com.ateliertime.android`, D-160 / Code54, targetSdk 36, FGS/permissions and approved splash/launcher checks PASS. **Not the DEV debug APK**. |
+| **Release test evidence** | Samsung log showed **326 JVM tests passed**, **8/8 background regressions passed**; AndroidTest **compiled but not executed**. Bundle signature verified with `jarsigner`. |
+| **Upload key matching** | Local signed AAB upload-certificate SHA-256 **matched exactly** the Console **Upload key certificate** fingerprint: `89:72:FA:E8:4D:47:4C:32:C5:50:5E:AA:85:6C:F9:E9:09:37:CC:31:45:F8:18:EB:57:2F:07:F5:A7:6B:07:39`. This is a *public certificate fingerprint*, not a secret. Never upload or expose keystore/password. |
+| **Prior Stable17 / D-157 / Code51** | Historical previous Internal Testing release, replaced in the track by Code54. Frozen source remains unchanged. |
+| **Stable18 / D-158 / Code52** | Historical locally signed AAB, **never uploaded**. Frozen source remains unchanged. |
+| **Production** | **Not released.** No public distribution authorized. |
 
-Stable18/Code52 signed AAB used the **existing privately backed-up** upload keystore `$HOME/.atelier-time-signing/atelier-upload.p12`; never request its bytes or passphrase. Signed AAB presence does not establish that its upload certificate matches the Play Console record until checked there. **Version code 53** was D159 intermediate candidate, **54** is accepted D160; next Play update must choose intended target version explicitly and verify Console rules. Never upload the older AAB automatically simply because it is ready.
+**Local signed-AAB preparation helper:** [`android-native/tools/build_d160_signed_aab_for_internal_test_on_phone.sh`](https://github.com/AviY99/Atelier-Time/blob/android-native-kotlin-compose/android-native/tools/build_d160_signed_aab_for_internal_test_on_phone.sh), development-branch signing-input fix at `07c5172e575eccef4262596c8a3a2e59926e7e50`. It prompts once at startup and holds the key password in shell memory for signing, never stores it in source files or logs. The previous failed passphrase-stdin attempt preceded this successful run. **This helper is not authorization for an additional build or Play upload.**
 
-## 3. Next Play preparation gate (ONLY upon explicit approval)
+**Console release review details:** version 54 accepted by Console with two nonblocking diagnostics warnings: missing deobfuscation file and missing native debug symbols (impact on crash/ANR analysis, not evidence of runtime failure). Device support remained unchanged. Console's **Save and publish** action was carried out by the user; current status shown as **Available to internal testers**.
 
-1. Decide whether the next Internal Testing release should be the **current user-accepted Stable19 / Code54** rather than the already-signed older Stable18 / Code52. Do not assume or publish.
-2. For Stable19, create a new **guarded, locally executed Samsung release AAB** helper based on the reviewed D158 signing process but locked to the **Stable19 app tree**, checking `applicationId=com.ateliertime.android` (no debug `.dev`), `versionCode=54`, `versionName=D-160`, SDK, merged permissions, FGS, splash, no untracked app sources, signature and upload certificate. Existing D158 release helper is pinned to Code52 and must NOT be used unchanged for Code54.
-3. Before a Play upload check the local AAB against the Play Console **Upload key certificate SHA-256**, existing track/version-code status and Play's exact current warnings. No upload or publish until separately authorized.
-4. Android foreground service: `foregroundServiceType=specialUse` and subtype must truthfully cover user-initiated **Class + Free** ongoing status. FGS supports foreground-process importance/status/cleanup; service itself does NOT compute clocks or play audio and cannot guarantee indefinite operation if the app process is killed. **Play policy approval is unverified**, and an evidence video/use-case declaration remains a release gate.
-5. Privacy: public policy at `https://aviy99.github.io/Atelier-Time/privacy-policy.html` is already linked from About and was visually verified on the phone. Existing hosted wording may need a narrowly scoped update to explicitly cover Free Timer background notification (separate documentation approval); no new in-app link required. The source-based Data Safety position remains tentative until actual release manifest/dependency review and the Console form state are checked. The Internal Testing-only exception to the Data Safety form should not be generalized to other tracks.
-6. Approved Play artwork and ZIP are in `main/artwork/play-store/`; do not recreate. Exact publication/store listing state requires a Console check. About → WhatsApp currently shares Instagram; changing it to a verified Play listing is a **pre-public-production** task only, not a blocker for Internal Testing.
+## 3. Remaining post-Internal-Testing readiness (NOT blockers to the already successful update)
+
+1. **Google Play FGS policy:** `FOREGROUND_SERVICE_SPECIAL_USE` and `specialUse` subtype are present for user-started Class/Free status notifications. Console **App content → Foreground service permissions** showed **Start declaration**; selecting **Other** requested a demo-video link. A 67-second demonstration was recorded; the user uploaded `AtlierTimeRecordingV1.mp4` to Google Drive with `Anyone with the link — Viewer`, URL `https://drive.google.com/file/d/1miOqtIp8fIa0s6Y1PAr8C-eZkdZtDFWc/view?usp=sharing`. The user later reported an external playback error. **Do not claim the video is independently playable, the declaration saved, or FGS approved by Google.** Resolve video accessibility and declaration before wider tracks/if Play prompts; the service coordinates notifications/cleanup, not the clocks or audio, and cannot guarantee uninterrupted execution if process is killed.
+2. **Store listing / account:** Play Console still showed temporary app name `com.ateliertime.android (unreviewed)` and banner to **Declare your trader status**. These are pending Console/content items, not evidence that the successful internal update failed. Review before broader release.
+3. **Privacy / Data Safety:** public policy `https://aviy99.github.io/Atelier-Time/privacy-policy.html` remains linked and phone-verified. Its wording still focuses on Class notification and may be updated to mention Free Timer via a separate, explicitly approved documentation/website change. Source-based no-automatic-collection statements remain conditional on actual SDK behavior and relevant track requirements. Internal Testing-only Data Safety exception is not a Production exemption.
+4. **Debugging symbols:** two warnings (deobfuscation mapping and native symbols) did not block Code54; include symbols in a later release if needed for useful Play crashes/ANR reports.
+5. **Future releases:** public **Production** rollout requires separate user approval and full Console/policy review. About → WhatsApp currently shares Instagram instead of a verified Play listing: pre-public-production task only. No cloud CI, data deletion or stable-branch modifications.
 
 ## 4. Development conventions and safety
 
@@ -50,4 +57,4 @@ Stable18/Code52 signed AAB used the **existing privately backed-up** upload keys
 - [Historical Stable18 handoff](HANDOFF_CURRENT_STABLE18_TO_GOOGLE_PLAY_2026_11_10.md)
 - [Documentation index and branch policy](DOCUMENTATION_INDEX_AND_BRANCH_POLICY.md)
 
-**No additional Android build, source modification, signed AAB upload, Play action, key access, stable-branch edit or data deletion is part of this Stable19 promotion.** 
+**Documentation update only:** the already completed signed release build, Play Internal Testing rollout, Samsung in-place update and data-preservation result above are historical user actions; this handoff edit does **not** perform any further build, signing, upload, policy submission, source modification, stable-branch edit or data deletion.
