@@ -246,7 +246,7 @@ attr = lambda el, namespace, name: el["attributes"].get((namespace, name))
 children = lambda el, tag: [e for e in el["children"] if e["tag"] == tag]
 check(attr(root, "", "package") == "com.ateliertime.android",
       "release package is not com.ateliertime.android")
-check(attr(root, A, "versionCode") == "52", "packaged versionCode is not 52")
+check(attr(root, A, "versionCode") == "54", "packaged versionCode is not 54")
 check(attr(root, A, "versionName") == "D-160", "packaged versionName is not D-160")
 sdk = children(root, "uses-sdk")
 check(len(sdk) == 1 and attr(sdk[0], A, "minSdkVersion") == "26"
