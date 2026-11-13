@@ -79,6 +79,12 @@ done
 key="$HOME/.atelier-time-signing/atelier-upload.p12"
 [[ -f "$key" && -s "$key" && ! -L "$key" ]] ||
   fail "Original local upload key unavailable. Do NOT create or upload a new key."
+# Code on the Go can launch scripts with closed stdin (EOF). Jarsigner then
+# prints "you must enter key password" without reading an actual password.
+# Require an interactive controlling terminal BEFORE starting expensive tests.
+if ! ( : </dev/tty ) 2>/dev/null; then
+  fail "Interactive /dev/tty unavailable. No key/password change; stop before build."
+fi
 
 dest="/storage/emulated/0/Download"
 [[ -d "$dest" ]] || fail "Samsung Downloads directory missing."
@@ -302,7 +308,7 @@ echo "Signing with the previously used PRIVATE local upload key."
 echo "Enter the password ONLY at the Samsung terminal prompt; NEVER in chat or GitHub."
 if ! jarsigner -keystore "$key" -storetype PKCS12 \
   -sigalg SHA256withRSA -digestalg SHA-256 \
-  -signedjar "$partial" "$unsigned" atelier-upload; then
+  -signedjar "$partial" "$unsigned" atelier-upload </dev/tty; then
   fail "Signing failed. No output may be uploaded."
 fi
 [[ -s "$partial" ]] || fail "Signed temporary AAB missing."
