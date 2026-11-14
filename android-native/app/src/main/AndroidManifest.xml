@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Android 13+: optional permission for the Class status notification.
+         Declining it never blocks the timer or audio cues. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- D-144: optional user-confirmed Max Both system volume control. -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <!-- Foreground status service only while a Class runs. Android 14+
+         requires an explicit type; the specialUse subtype also needs
+         a policy review before publication in Google Play. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+    <application
+        android:label="${appLabel}"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:allowBackup="false"
+        android:theme="@style/Theme.AtelierTime.Launch"
+        android:supportsRtl="true">
+        <service
+            android:name=".ClassNotificationTaskService"
+            android:exported="false"
+            android:stopWithTask="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="User-started Class and Free Timer countdown statuses; dismiss on task close"/>
+        </service>
+        <!-- Multi-window resizing changes display configuration; preserve active in-memory Class state. -->
+        <activity android:name=".MainActivity" android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|density|uiMode"
+            android:resizeableActivity="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
