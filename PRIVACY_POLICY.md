@@ -1,6 +1,6 @@
 # Atelier Time — Privacy Policy
 
-**Effective date:** October 30, 2026  
+**Effective date:** November 15, 2026  
 **App developer:** Avi Yosfan
 
 Atelier Time is an offline class-management timer for live-model drawing and sculpting workshops. It does not require an account, and it does not automatically upload saved classes, sound choices or diagnostic Run reports to the developer.
@@ -23,9 +23,9 @@ If you choose **Export** for a Run report, Android asks you to select a file des
 
 ## 4. Permissions, notifications and selected sounds
 
-Atelier Time may request Android notification permission to show a live class-status notification. Declining this permission does not prevent ordinary class timing and cue playback; it may prevent the status notification from being displayed.
+On supported Android versions, Atelier Time may request notification permission to display ongoing Class Timer and Free Timer status notifications, including separate notifications when both timers are active. Declining permission does not prevent ordinary timer operation and audible cues, but live notifications may not appear.
 
-During an active class, the app may use an Android foreground service to display up-to-date status, support the application process while it is in the background, and remove the status notification on task dismissal. This is not a guarantee that the Android system will never interrupt the app.
+During a user-started Class or Free Timer, an Android foreground service can maintain ongoing timer status notifications, support the application's process while in the background and remove notifications when timers end or the app task is dismissed. The service itself does not calculate countdowns or play audio, and it cannot guarantee uninterrupted operation if Android terminates the application process. Timer notification status is not uploaded to the developer or a server.
 
 If you select your own sound file, the app uses Android's system document picker for the specific file you choose. It does not request general browsing access to your media library. The optional keep-screen-awake setting operates while the app is visible.
 
@@ -53,4 +53,4 @@ For privacy questions or requests about Atelier Time, email **[Avi_yosfan@walla.
 
 ---
 
-*Atelier Time · Privacy Policy · October 30, 2026*
+*Atelier Time · Privacy Policy · November 15, 2026*
