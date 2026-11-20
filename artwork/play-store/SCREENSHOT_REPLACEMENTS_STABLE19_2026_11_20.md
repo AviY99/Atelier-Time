@@ -1,6 +1,30 @@
 # Atelier Time — Google Play screenshot replacements for Stable19 (2026-11-20)
 
-**Status: SEVEN NEW USER-SUPPLIED SCREENSHOTS MAPPED AND PACKAGED LOCALLY. ORIGINAL APPROVED FULL ZIP ON GITHUB IS UNCHANGED.** No app code, previously frozen Stable19/Code54 branch, source assets or public Production release was changed.
+## 2026-11-20 — COMPLETE ORIGINAL ARCHIVE RECEIVED AND MERGED (LATEST VERIFIED STATUS)
+
+The user supplied the **actual original approved ZIP** as a conversation attachment. SHA-256 on these bytes **exactly matched** the original approved receipt:
+`289de4efa7f5f7f9e51995265d964931c9ffa6aa059a30c3d6c105aa5a48b80f`.
+
+An updated **complete** archive was built and fully tested, containing all 13 original paths plus three extra documentation/backup paths, with **seven PNG screenshot entries 02–08 replaced** and active `SHA256_MANIFEST.json` refreshed. Unchanged original `README_FIRST.txt` was preserved, the original `SHA256_MANIFEST.json` was additionally preserved as `SHA256_MANIFEST_ORIGINAL_2026_11_01.json`, and the new ZIP contains `SCREENSHOT_REPLACEMENTS_SOURCE_MAP_2026_11_20.json` and `README_UPDATE_2026_11_20.txt`.
+
+**Deliverable:** `Atelier_Time_Google_Play_Approved_Assets_Complete_Pack_UPDATED_2026_11_20.zip` (conversation artifact) — **15,475,464 bytes**, SHA-256:
+`597a8ea993b989b2cbc1cbd51339a28a79e63ba58b50ea96d18d41688cc1f726`.
+An identical copy with the original base filename `Atelier_Time_Google_Play_Approved_Assets_Complete_Pack.zip` was prepared for a manual GitHub in-place replacement, with the **same** updated SHA-256.
+
+**Preservation verified by comparing ORIGINAL and UPDATED archive content bytes** for each untouched entry:
+- Icon `01_Store_Icon/Atelier_Time_Google_Play_Icon_Stable12_APPROVED_512x512.png`: `2e40dd769dbd04201efd3286d335f1d4f289f554280a7f68443b24069fbc030e`.
+- Locked feature graphic `02_Locked_Feature_Graphic/Atelier_Time_Google_Play_Feature_Graphic_ORIGINAL_LOCKED_1024x500.png`: `c2921bdb6d61cb24619201f3c20e8ac5bb811569a84c034acf1abf14fec4c04e`.
+- Slot 01 `03_Phone_Screenshots_Upload_In_This_Order/01_Splash.png`: `3d8d3013b1ffc3668fd66717bd45c214a80f8d20ede1441a31091e51d8b2aae6`.
+- Nested 10-original-screenshot backup `04_Original_10_Screens_Backup/Atelier_Time_Stable12_All_10_Screens_Exact_Order.zip`: `d9de1b691aa35879d8d7de56eee6dde95216750175b292c818b6957c2ad941e7`.
+- Historical `README_FIRST.txt` unchanged byte-for-byte.
+
+**Checks:** ZIP CRC PASS; all eight slot files accounted for; seven replacement PNGs exactly 1080×1920; updated SHA-256 manifest matches **all** listed assets; no dropped original paths, no duplicate entries; original filename copy passed ZIP test.
+
+**The full updated binary ZIP is NOT YET COMMITTED TO GITHUB.** Connected GitHub methods in this environment provide UTF-8 text-file writes or blobs requiring raw base64 to be provided in tool-call content, but no file-upload action accepting a mounted local binary file reference. Do **not** claim the GitHub archive was replaced. The next step is to upload the prepared same-name ZIP from the user's phone using GitHub's **Add file → Upload files** at `artwork/play-store/`, commit as the same filename to the intended branch and verify the GitHub blob/file afterwards. The original GitHub binary blob SHA-1 `506a9b9e6dd27b7d4531e71d1053096de1d3e6b0` remains the reference until replacement is confirmed. **No code/build/stable branches/public Play publication were changed.**
+
+---
+
+**HISTORICAL STATUS BEFORE FULL ORIGINAL ZIP WAS RECEIVED:** SEVEN NEW USER-SUPPLIED SCREENSHOTS MAPPED AND PACKAGED LOCALLY. ORIGINAL APPROVED FULL ZIP ON GITHUB IS UNCHANGED.** No app code, previously frozen Stable19/Code54 branch, source assets or public Production release was changed.
 
 ## User request and preservation rule
 
