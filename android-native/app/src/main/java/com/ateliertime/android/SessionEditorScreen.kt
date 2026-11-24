@@ -1670,15 +1670,28 @@ fun SessionEditorScreen(
                                 activeTab = MainTab.EDITOR
                             },
                             onRun = { record, restored ->
-                                // Ask for notification permission before showing
-                                // the clock approval, never AFTER user chose a target.
                                 requestClassStatusNotificationPermission()
-                                // No frozen finish: the confirmation view is live.
-                                pendingRunApproval = PendingRunApproval(record.id, restored)
                                 customFinishEnabled = false
                                 finishPickerVisible = false
                                 runApprovalError = null
                                 runFinishBlockedReason = null
+                                // Only a Run on the SAME interrupted saved Class
+                                // can offer Continue. Do not auto-run at startup.
+                                val lookup = runCatching { classCheckpointStore?.read() }
+                                val checkpoint = lookup.getOrNull()?.takeIf {
+                                    it.eligibleFor(record.id,
+                                        PresetCatalog.signature(restored),
+                                        System.currentTimeMillis())
+                                }
+                                if (checkpoint != null) {
+                                    pendingRecovery = checkpoint
+                                    pendingRunApproval = null
+                                } else {
+                                    lookup.exceptionOrNull()?.let { problem ->
+                                        runApprovalError = problem.message
+                                    }
+                                    pendingRunApproval = PendingRunApproval(record.id, restored)
+                                }
                             },
                             onDeleted = { id ->
                                 if (selectedPresetId == id) {
@@ -1924,6 +1937,58 @@ fun SessionEditorScreen(
             },
             dismissButton = {
                 AtelierTextButton(onClick = { showTailRecovery = false }) { Text("Cancel") }
+            },
+        )
+    }
+
+    pendingRecovery?.let { previous ->
+        val endFormat = remember { SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()) }
+        AlertDialog(
+            modifier = Modifier.testTag("run_interrupted_class_recovery_dialog"),
+            onDismissRequest = { pendingRecovery = null },
+            title = { Text("Previous Class was interrupted") },
+            text = {
+                Text(
+                    "The previous Run has not reached its approved finish (" +
+                    endFormat.format(Date(previous.classDeadlineEpochMs)) + "). " +
+                    "Continue from the current actual time, keeping that finish, " +
+                    "or start the Class again with new Run confirmation?"
+                )
+            },
+            confirmButton = {
+                AtelierTextButton(onClick = {
+                    try {
+                        val restored = catalog.activate(previous.presetId)
+                        check(PresetCatalog.signature(restored) == previous.presetSignature)
+                        selectedPresetId = previous.presetId
+                        playingSession = restored
+                        restoringCheckpoint = previous
+                        pendingRecovery = null
+                        activeTab = MainTab.TIMER
+                        runApprovalError = null
+                    } catch (error: Exception) {
+                        pendingRecovery = null
+                        runApprovalError = "Cannot safely recover this Class: " +
+                            (error.message ?: "checkpoint invalid")
+                    }
+                }) { Text("Continue") }
+            },
+            dismissButton = {
+                Row {
+                    AtelierTextButton(onClick = { pendingRecovery = null }) {
+                        Text("Cancel")
+                    }
+                    AtelierTextButton(onClick = {
+                        try {
+                            pendingRunApproval = PendingRunApproval(
+                                previous.presetId, catalog.open(previous.presetId))
+                            pendingRecovery = null
+                        } catch (error: Exception) {
+                            pendingRecovery = null
+                            runApprovalError = error.message
+                        }
+                    }) { Text("Start again") }
+                }
             },
         )
     }
