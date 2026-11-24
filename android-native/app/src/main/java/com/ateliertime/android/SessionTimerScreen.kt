@@ -97,7 +97,7 @@ fun SessionTimerScreen(
     }
     val currentRemainingLabel = when (view.phase?.kind) {
         PhaseKind.POSE -> "Current session remaining"
-        PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK ->
+        PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK, PhaseKind.PREPARATION ->
             phaseLabel(view.phase) + " remaining"
         PhaseKind.SUMMARY -> "Class summary remaining"
         null -> "No current session / break"
@@ -215,6 +215,7 @@ fun SessionTimerScreen(
                             val lengthLabel = when (active.kind) {
                                 PhaseKind.POSE -> "Session length"
                                 PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK -> "Break length"
+                                PhaseKind.PREPARATION -> "Preparation length"
                                 else -> null
                             }
                             lengthLabel?.let { label ->
