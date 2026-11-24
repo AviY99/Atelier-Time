@@ -27,6 +27,28 @@ data class TimerView(
 
 data class TimerTick(val view: TimerView, val cue: TimerCue? = null)
 
+/** Versioned by the Android checkpoint store; immutable runtime copy, not preset rules. */
+data class ClassTimerSnapshot(
+    val status: TimerStatus,
+    val originalStartMs: Long,
+    val elapsedBeforeRunMs: Long,
+    val runningFromMs: Long?,
+    val suspendedFromMs: Long?,
+    val lostSeconds: Int,
+    val lostMillis: Long,
+    val initialEndCorrectionSeconds: Int,
+    val physicalDeadlineMs: Long,
+    val activePhases: List<SchedulePhase>,
+    val activeTotalMs: Long,
+    val lastPhaseIndex: Int?,
+    val classFinishCueIssued: Boolean,
+    val nextHasOccurred: Boolean,
+    val repeatLockedPhaseId: String?,
+    val observedFragments: List<RuntimeTimelineSegment>,
+    val fragmentStartMs: Long,
+    val pauseRemainderMs: Long,
+)
+
 class MonotonicSessionTimer(
     private val session: ApprovedSession,
     private val nowMillis: () -> Long,
@@ -574,6 +596,99 @@ class MonotonicSessionTimer(
                 (it.endSeconds.toLong() * 1_000L - preciseElapsedMs).coerceAtLeast(0L)
             },
         )
+    }
+
+    /**
+     * Crash recovery captures the entire effective schedule and time-correction
+     * state, including Next/Restart/Repeat. The checkpoint is committed by the
+     * Android adapter; this domain engine is independent of storage.
+     */
+    fun recoverySnapshot(): ClassTimerSnapshot {
+        check(status == TimerStatus.RUNNING || status == TimerStatus.PAUSED ||
+            status == TimerStatus.STOPPED) { "Only an active Class can be checkpointed." }
+        return ClassTimerSnapshot(
+            status = status,
+            originalStartMs = originalStartMs ?: error("Missing original start."),
+            elapsedBeforeRunMs = elapsedBeforeRunMs,
+            runningFromMs = runningFromMs,
+            suspendedFromMs = suspendedFromMs,
+            lostSeconds = lostSeconds,
+            lostMillis = lostMillis,
+            initialEndCorrectionSeconds = initialEndCorrectionSeconds,
+            physicalDeadlineMs = physicalDeadlineMs ?: error("Missing deadline."),
+            activePhases = activePhases.toList(),
+            activeTotalMs = activeTotalMs,
+            lastPhaseIndex = lastPhaseIndex,
+            classFinishCueIssued = classFinishCueIssued,
+            nextHasOccurred = nextHasOccurred,
+            repeatLockedPhaseId = repeatLockedPhaseId,
+            observedFragments = observedFragments.toList(),
+            fragmentStartMs = fragmentStartMs,
+            pauseRemainderMs = pauseRemainderMs,
+        )
+    }
+
+    /**
+     * Restore once into a fresh timer after explicit user approval.
+     * clockShiftMs translates stored elapsedRealtime timestamps across process
+     * restart or device reboot, while accounting for elapsed wall-clock time.
+     * Missed phase cues are NOT replayed as a burst.
+     */
+    fun restoreRecovery(snapshot: ClassTimerSnapshot, clockShiftMs: Long): TimerView {
+        check(status == TimerStatus.READY) { "Recovery requires an unused timer." }
+        require(snapshot.status == TimerStatus.RUNNING ||
+            snapshot.status == TimerStatus.PAUSED ||
+            snapshot.status == TimerStatus.STOPPED) { "Checkpoint is not active." }
+        require(snapshot.activePhases.isNotEmpty() &&
+            snapshot.activeTotalMs > 0L &&
+            snapshot.activePhases.first().startSeconds == 0 &&
+            snapshot.activePhases.last().endSeconds.toLong() * 1_000L ==
+                snapshot.activeTotalMs &&
+            snapshot.activePhases.zipWithNext().all { (a, b) ->
+                a.endSeconds == b.startSeconds && a.durationSeconds > 0
+            } && snapshot.activePhases.last().durationSeconds > 0) {
+            "Checkpoint contains an invalid timeline."
+        }
+        val shiftedStart = Math.addExact(snapshot.originalStartMs, clockShiftMs)
+        val shiftedDeadline = Math.addExact(snapshot.physicalDeadlineMs, clockShiftMs)
+        check(nowMillis() < shiftedDeadline) { "Original Class deadline has passed." }
+        status = snapshot.status
+        originalStartMs = shiftedStart
+        elapsedBeforeRunMs = snapshot.elapsedBeforeRunMs
+        runningFromMs = snapshot.runningFromMs?.let { Math.addExact(it, clockShiftMs) }
+        suspendedFromMs = snapshot.suspendedFromMs?.let { Math.addExact(it, clockShiftMs) }
+        lostSeconds = snapshot.lostSeconds
+        lostMillis = snapshot.lostMillis
+        initialEndCorrectionSeconds = snapshot.initialEndCorrectionSeconds
+        physicalDeadlineMs = shiftedDeadline
+        activePhases = snapshot.activePhases.toList()
+        activeTotalMs = snapshot.activeTotalMs
+        lastPhaseIndex = snapshot.lastPhaseIndex
+        classFinishCueIssued = snapshot.classFinishCueIssued
+        nextHasOccurred = snapshot.nextHasOccurred
+        repeatLockedPhaseId = snapshot.repeatLockedPhaseId
+        observedFragments.clear()
+        observedFragments.addAll(snapshot.observedFragments)
+        fragmentStartMs = snapshot.fragmentStartMs
+        pauseRemainderMs = snapshot.pauseRemainderMs
+
+        if (status == TimerStatus.PAUSED || status == TimerStatus.STOPPED) {
+            // A recovered Class continues from current real time, not from its
+            // frozen phase cursor; Resume compensates against the original end.
+            return resume()
+        }
+        val currentIndex = phaseIndex(view().elapsedSeconds)
+        val preceding = lastPhaseIndex
+        if (preceding != null && currentIndex != null && currentIndex > preceding) {
+            for (i in preceding until currentIndex) {
+                val phase = activePhases[i]
+                appendFragment(phase, phase.endSeconds.toLong() * 1_000L)
+            }
+            fragmentStartMs = activePhases[currentIndex].startSeconds.toLong() * 1_000L
+        }
+        // Suppress every cue missed while Android had no live Activity/process.
+        lastPhaseIndex = currentIndex
+        return view()
     }
 
     /** Immutable snapshot of the ACTUAL runtime plan for the live chart. */
