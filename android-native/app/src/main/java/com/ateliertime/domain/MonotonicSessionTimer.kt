@@ -782,7 +782,7 @@ class MonotonicSessionTimer(
                     TimerCue.SESSION_FINISHED
                 } else TimerCue.POSE_FINISHED
                 PhaseKind.SHORT_BREAK, PhaseKind.SPECIAL_BREAK -> TimerCue.BREAK_FINISHED
-                PhaseKind.SUMMARY -> null
+                PhaseKind.PREPARATION, PhaseKind.SUMMARY -> null
             }
         } else null
         if (oldIndex != null && oldIndex != newIndex) {
