@@ -286,6 +286,7 @@ fun SessionEditorScreen(
     }
     fun humanPhase(phase: SchedulePhase?): String = when (phase?.kind) {
         PhaseKind.POSE -> "Session" + (phase.poseNumber?.let { " $it" } ?: "")
+        PhaseKind.PREPARATION -> "Preparation"
         PhaseKind.SHORT_BREAK -> "Regular Break"
         PhaseKind.SPECIAL_BREAK -> "Special Break"
         PhaseKind.SUMMARY -> "Summary"
@@ -1345,6 +1346,7 @@ fun SessionEditorScreen(
                     candidate.phases.forEach { phase ->
                         val label = when (phase.kind) {
                             PhaseKind.POSE -> "Session " + phase.poseNumber
+                            PhaseKind.PREPARATION -> "Preparation · 5 seconds"
                             PhaseKind.SHORT_BREAK ->
                                 if (phase.openingGroupId != null)
                                     "Break · opening group"
@@ -1355,7 +1357,8 @@ fun SessionEditorScreen(
                         Text(
                             formatOffset(phase.startSeconds) + "–" +
                                 formatOffset(phase.endSeconds) + "  " + label +
-                                "  (" + phase.durationSeconds / 60 + " min)",
+                                "  (" + if (phase.kind == PhaseKind.PREPARATION)
+                                    "0:05" else (phase.durationSeconds / 60).toString() + " min" + ")",
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
