@@ -68,6 +68,7 @@ fun SessionTimerScreen(
     val canRestartSegment = view.phase?.kind == PhaseKind.POSE ||
         view.phase?.kind == PhaseKind.SHORT_BREAK
     val isWork = view.phase?.kind == PhaseKind.POSE
+    val isPreparation = view.phase?.kind == PhaseKind.PREPARATION
     val tahini = tahiniFill(designPalette)
     val durationMs = view.phase?.durationSeconds?.toLong()?.times(1_000L) ?: 0L
     val msLeft = view.phaseRemainingMillis ?:
@@ -174,7 +175,7 @@ fun SessionTimerScreen(
             ),
         ) {
             Box(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large)) {
-                if (isWork || isBreak) {
+                if (isWork || isBreak || isPreparation) {
                     Box(modifier = Modifier.matchParentSize()) {
                         Box(
                             modifier = Modifier.align(Alignment.BottomCenter)
@@ -237,7 +238,7 @@ fun SessionTimerScreen(
                     // Session AND Break bars show ELAPSED time, filling from
                     // zero to full. Unlike the bar, the Break background drains.
                     SolidProgressBar(
-                        progressFraction = if (isWork || isBreak) smoothElapsed
+                        progressFraction = if (isWork || isBreak || isPreparation) smoothElapsed
                             else DesignMotion.elapsedFraction(
                                 phase.durationSeconds.toLong(),
                                 view.phaseRemainingSeconds.toLong(),
