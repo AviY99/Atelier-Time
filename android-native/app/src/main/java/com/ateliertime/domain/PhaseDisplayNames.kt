@@ -21,6 +21,7 @@ object PhaseDisplayNames {
                     else phase.poseNumber?.toString().orEmpty()
             }
         }
+        PhaseKind.PREPARATION -> "Preparation · 5 seconds"
         PhaseKind.SHORT_BREAK -> if (phase.openingGroupId != null) {
             val groupIndex = rules.openingGroups.indexOfFirst { it.id == phase.openingGroupId }
             if (groupIndex >= 0) "Group ${groupIndex + 1} · Break"
