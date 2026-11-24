@@ -1454,11 +1454,15 @@ fun SessionEditorScreen(
                 val prepSeconds = candidate.phases.filter {
                     it.kind == PhaseKind.PREPARATION
                 }.sumOf { it.durationSeconds }
+                val sessionSeconds = candidate.phases.filter {
+                    it.kind == PhaseKind.POSE
+                }.sumOf { it.durationSeconds }
+                val sessionDurationText = (sessionSeconds / 60).toString() + " min" +
+                    (if (sessionSeconds % 60 > 0)
+                        " " + (sessionSeconds % 60).toString() + " sec" else "")
                 Text(
-                    "Sessions: " + candidate.phases.filter {
-                        it.kind == PhaseKind.POSE
-                    }.sumOf { it.durationSeconds } / 60 +
-                        " min · Rest: " + candidate.phases.filter {
+                    "Sessions: " + sessionDurationText +
+                        " · Rest: " + candidate.phases.filter {
                             it.kind == PhaseKind.SHORT_BREAK ||
                                 it.kind == PhaseKind.SPECIAL_BREAK
                         }.sumOf { it.durationSeconds } / 60 + " min" +
@@ -1466,6 +1470,9 @@ fun SessionEditorScreen(
                 )
                 // Keep the chronological text timeline compact without changing
                 // its timestamps, phase labels, order, or the chart below it.
+                val showExactSeconds = candidate.phases.any {
+                    it.startSeconds % 60 != 0 || it.endSeconds % 60 != 0
+                }
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     candidate.phases.forEach { phase ->
                         val label = when (phase.kind) {
@@ -1479,10 +1486,13 @@ fun SessionEditorScreen(
                             PhaseKind.SUMMARY -> "End-of-class summary"
                         }
                         val durationText = if (phase.kind == PhaseKind.PREPARATION)
-                            "${phase.durationSeconds} sec" else "${phase.durationSeconds / 60} min"
+                            phase.durationSeconds.toString() + " sec" else
+                            (phase.durationSeconds / 60).toString() + " min" +
+                                (if (phase.durationSeconds % 60 > 0)
+                                    " " + (phase.durationSeconds % 60).toString() + " sec" else "")
                         Text(
-                            formatOffset(phase.startSeconds) + "–" +
-                                formatOffset(phase.endSeconds) + "  " + label +
+                            formatOffset(phase.startSeconds, showExactSeconds) + "–" +
+                                formatOffset(phase.endSeconds, showExactSeconds) + "  " + label +
                                 "  (" + durationText + ")",
                             style = MaterialTheme.typography.bodyMedium,
                         )
@@ -2396,9 +2406,11 @@ private fun MinuteInput(
     )
 }
 
-private fun formatOffset(seconds: Int): String {
+private fun formatOffset(seconds: Int, includeSeconds: Boolean = false): String {
     val hours = seconds / 3600
     val minutes = (seconds / 60) % 60
-    return hours.toString().padStart(2, '0') + ":" +
+    val basic = hours.toString().padStart(2, '0') + ":" +
         minutes.toString().padStart(2, '0')
+    return if (includeSeconds) basic + ":" +
+        (seconds % 60).toString().padStart(2, '0') else basic
 }
