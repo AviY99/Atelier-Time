@@ -4,7 +4,7 @@ package com.ateliertime.domain
 const val SECONDS_PER_MINUTE = 60
 
 enum class CycleStart { POSE_FIRST, BREAK_FIRST }
-enum class PhaseKind { POSE, SHORT_BREAK, SPECIAL_BREAK, SUMMARY }
+enum class PhaseKind { POSE, PREPARATION, SHORT_BREAK, SPECIAL_BREAK, SUMMARY }
 enum class PoseSource { OPENING, REGULAR }
 enum class IssueSeverity { ERROR, WARNING }
 enum class FinalPoseMode { REMAINDER, EVEN_SPLIT, CUSTOM_SPLIT }
@@ -50,6 +50,8 @@ data class SessionRules(
     val placement: SpecialBreakPlacement = SpecialBreakPlacement(),
     /** Explicit user-approved terminal extension. Zero preserves every old preset. */
     val tailPoseExtensionSeconds: Int = 0,
+    /** 0 retains original saved Class signatures; fresh Editor schedules use 5 seconds. */
+    val preparationSeconds: Int = 0,
 ) {
     val workSeconds: Int get() = totalSeconds - summarySeconds
 }
