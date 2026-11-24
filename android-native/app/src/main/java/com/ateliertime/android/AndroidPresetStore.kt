@@ -109,6 +109,7 @@ class AndroidPresetStore(
                 put("tailPoseExtensionSeconds", r.tailPoseExtensionSeconds)
             }
         }
+        .apply { if (r.preparationSeconds > 0) put("preparationSeconds", r.preparationSeconds) }
         .put("placementAutomatic", r.placement.automatic)
         .put("placementOrdinals", JSONArray().apply {
             r.placement.breakOrdinals.forEach { put(it) }
@@ -161,6 +162,7 @@ class AndroidPresetStore(
             cycleStart = CycleStart.valueOf(data.getString("cycleStart")),
             placement = placement,
             tailPoseExtensionSeconds = data.optInt("tailPoseExtensionSeconds", 0),
+            preparationSeconds = data.optInt("preparationSeconds", 0),
         )
     }
 
