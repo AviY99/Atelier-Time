@@ -1,0 +1,56 @@
+# D161 — Proposed Class timing upgrades after user tests (2026-11-24)
+
+**Status: REQUIREMENTS RECORDED / DESIGN ONLY / NO SOURCE CHANGE / NO BUILD OR RELEASE.**
+User reported on 2026-11-24 that GitHub browser account access is working again, and requested the three behaviors below. Stable19 / D160 / versionCode 54 remains the accepted, frozen recovery point. Develop only on `android-native-kotlin-compose` or a separate new development branch after approval; never modify stable branches or silently update Play.
+
+## 1. Five-second preparation break between consecutive Sessions in the same opening group
+
+User requirement: when two Sessions in an opening group are adjacent with no configured break, insert a real **5-second preparation break** between them.
+
+- Applies to adjacent work Sessions **within one opening group** (`OpeningPoseGroup`, where `group.count > 1`). For a group with N consecutive Sessions, insert N-1 preparation phases (exactly 5 seconds each). Do not insert before first or after last, at boundaries between different groups, or in place of an existing configured break.
+- Show the distinct 5-second phase in preview, actual timer, full timeline, clock labels and notifications. Maintain existing Session ordinal/group labels. No confusion with a normal `SHORT_BREAK`, `SPECIAL_BREAK`, break ordinal, 5-minute safety rule, or summary.
+- Maintain the user's accepted **Class finish deadline** and full user-configured opening-session durations. Reserve the required seconds inside existing flexible schedule budgeting; rebuild with the scheduling engine and compensation constraints before allowing Run. Do not silently cut fixed Session lengths, normal/special rests, or summary. If the timetable cannot contain the extra seconds, show an actionable schedule problem for user review rather than starting an inconsistent class.
+- Legacy saved schedules: preserve their original data and never overwrite corrupt/unreadable presets. Define a compatible migration/reapproval path before applying new timing to an existing saved Class; the old timeline signature must not be silently invalidated.
+- Review cue at the transition: avoid unexpected duplicate session-finish melody and preserve current volume/alarm controls. No background-only requirement for a full-screen activity popup.
+- Engineering: model a dedicated transition phase or equivalent strongly distinguished kind; update exhaustive `PhaseKind` switches and runtime timeline, physical clock, diagnostics, schedule invariants and test coverage.
+
+## 2. Pause warning after more than one minute
+
+User requirement: when a timer has been in Pause for more than 60 seconds, sound a warning and show a **red alert dialog**.
+
+- Scope proposed: independently support **Class Timer and Free Timer**, which can operate simultaneously. Each timer has its own pause-start timestamp; alert once when pause time strictly exceeds 60 seconds, per pause episode. Reset after Resume/Exit; do not repeatedly chime or reopen the dialog every 200ms.
+- Foreground: clear red warning dialog with elapsed paused duration, indication of which timer is paused, and an unambiguous action to acknowledge and/or Resume. An acknowledgement alone must not resume automatically.
+- Background: Android does not guarantee that an Activity modal can be shown while backgrounded. Use an appropriate status notification if notification permission and platform rules allow it; display the red dialog upon return if still paused. Respect established audio stream and sound controls, avoid overriding system mute and alarm settings.
+- Class deadline stays unchanged while paused, consistent with D160. Do not alert for a Class already naturally finished or physically past its approved end. Verify when there is insufficient compensable time in the final two Sessions.
+- Test 59s/60s/61s, single sound/no repeated popups, repeated pause cycles, two paused timers, foreground/background, sound off, notification permission denied, deadline and Exit.
+
+## 3. Resume Class after unexpected Activity/process stop or crash
+
+User requirement: on reopening the app, only when user selects **Run** for the affected saved Class, first ask **Start again** or **Continue** when the original Class date and planned finish time have **not passed**; if continuing, advance to the correct current time/phase and update all remaining displayed data accordingly.
+
+- Create a private, crash-tolerant, versioned **active-run checkpoint** separate from the saved Class preset library. Include preset identity and timeline signature, approved Class date, absolute start and absolute deadline, current effective timeline, phase cursor, user actions/rebalancing (Pause, Resume, Next, Restart, Repeat Last), pause durations, last update/boot identity where applicable, and revision/checksum. Store atomically, using disk commit before reporting user-visible actions complete. Never put secrets in diagnostics.
+- Checkpoint must preserve progress and all applied timeline changes, not merely a Class name or start time. Evaluate against real wall-clock now after process death or reboot, with clock-change/DST sanity checks; `SystemClock.elapsedRealtime()` cannot be blindly persisted across reboot. The clock is monotonic during one boot but should be reconciled to saved epoch times after process restart.
+- On **Run** for the same Class: if saved incomplete checkpoint is valid and `now < originalDeadlineEpochMs` and date matches, show a choice **Continue previous Class** / **Start a new Class** / **Cancel** **before** the normal new-Run finish-time approval. Continue resumes with its original fixed finish and recomputes current phase, all countdowns, final-two compensation, clock timestamps, labels, status notification, and diagnostics from the effective real-time plan. Do not emit a burst of missed cues; mark missed transitions as such.
+- Starting anew requires a fresh Run approval and consciously supersedes the old checkpoint; Cancel changes nothing. Explicit user Exit, successful natural finish, or deadline finish clears/retires the checkpoint. Do not re-offer a run which ended normally. If the original deadline has elapsed, **do not offer Continue**; allow normal new Run and retain an appropriate diagnostic of the interrupted earlier Class.
+- If the checkpoint is corrupt, incompatible with changed/deleted preset, clock-shifted or cannot be safely reconciled, leave the saved Class library untouched and offer a safe new Run with an informative message, never an unvalidated Continue.
+- Preserve parallel Free Timer state independently. Do not imply missed alerts ran while Android process was dead or restore unsent sounds.
+- End-time invariants from D160: Class physical finish remains original wall time; final two Session compensation may reject impossible recovery. The user must see a clear failure rather than an inaccurate timer if there is insufficient room.
+- Tests: process death at opening Session, 5s preparation break, regular/Special Break, final two Sessions, Pause, Next and Repeat Last, background, clock midnight, after deadline, user Exit, persisted old app data, preference corruption, app upgrade, no destructive data loss, and concurrent Free Timer.
+
+## Existing source verified 2026-11-24 (frozen D160)
+
+- `android-native/app/src/main/java/com/ateliertime/domain/ScheduleEngine.kt`: opening-group poses currently appear back-to-back; no 5s inter-session break; opening-group configured breaks are only after groups.
+- `android-native/app/src/main/java/com/ateliertime/domain/Models.kt`: `PhaseKind = POSE | SHORT_BREAK | SPECIAL_BREAK | SUMMARY` currently; no dedicated preparation phase.
+- `android-native/app/src/main/java/com/ateliertime/domain/MonotonicSessionTimer.kt`: Class is monotonic, pauses compensate via final regular pair; no persisted active runtime checkpoint API.
+- `android-native/app/src/main/java/com/ateliertime/domain/FreeCountdownTimer.kt`: independent pause/resume, no >60s alert.
+- `android-native/app/src/main/java/com/ateliertime/android/SessionEditorScreen.kt`: `playingSession`, `liveTimer`, `freeTimer`, and `ClassClockTracker` are in-memory Compose-owned state; onRun currently opens only finish approval.
+- `android-native/app/src/main/java/com/ateliertime/android/AndroidPresetStore.kt`: `SharedPreferences` stores saved templates; **do not misuse or overwrite this store for live checkpoints**.
+- `android-native/app/src/main/java/com/ateliertime/android/MainActivity.kt`: foreground notification/task lifecycle and user Exit behavior need regression coverage.
+
+## Implementation and acceptance gate
+
+Treat these as three related features in a **new, unaccepted development revision**, not an alteration of stable19. Implement domain calculations/checkpoint schema first, then integration/dialog/notifications, then tests. Cover existing 326 JVM tests and 8 background regression tests **plus** dedicated new cases; actual execution on Samsung Code on the Go must be verified before QA acceptance. Android instrumentation compilation is not execution. Do not build, sign, install, push an AAB, submit Play declarations or release without the user's separate explicit instruction.
+
+## Separate GitHub asset task (not part of app changes)
+
+As of 2026-11-24 the user reports browser GitHub login restored. **No upload completion has yet been verified.** The full merged Store ZIP is ready, SHA-256 `597a8ea993b989b2cbc1cbd51339a28a79e63ba58b50ea96d18d41688cc1f726` (15,475,464 bytes), prepared with the original GitHub basename for browser replacement. Existing GitHub archive blob SHA-1 remained `506a9b9e6dd27b7d4531e71d1053096de1d3e6b0` when read on this date. After user upload, independently verify new GitHub blob, then and only then update archive docs from "pending" to "complete".
