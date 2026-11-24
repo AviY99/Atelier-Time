@@ -60,6 +60,27 @@ class ClassClockTracker(
         return observe(view, nowEpochMs)
     }
 
+    /** Reconstruct the original wall-clock Class deadline after process death. */
+    fun recoverClass(
+        view: TimerView,
+        startedEpochMs: Long,
+        deadlineEpochMs: Long,
+        nowEpochMs: Long,
+    ): ClassClockTimes {
+        require(view.status == TimerStatus.RUNNING &&
+            startedEpochMs <= nowEpochMs && nowEpochMs < deadlineEpochMs) {
+            "Recovered Class must have a valid active deadline."
+        }
+        classStarted = startedEpochMs
+        classDeadline = deadlineEpochMs
+        val mono = monotonicNowMs?.invoke()
+        classStartedMonotonic = mono?.minus(nowEpochMs - startedEpochMs)
+        classDeadlineMonotonic = mono?.plus(deadlineEpochMs - nowEpochMs)
+        phaseId = null
+        phaseStarted = null
+        return observe(view, nowEpochMs)
+    }
+
     /** Restart preserves the original finish target but starts class again now. */
     fun restartClass(view: TimerView, nowEpochMs: Long): ClassClockTimes {
         require(view.status == TimerStatus.RUNNING && view.elapsedSeconds == 0)
