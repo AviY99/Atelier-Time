@@ -84,6 +84,7 @@ data class EditorInput(
             specialBreakCount = count,
             cycleStart = cycleStart,
             placement = placement,
+            preparationSeconds = 5,
             tailPoseExtensionSeconds = run {
                 val value = tailExtensionMinutes.toLong() * SECONDS_PER_MINUTE
                 require(value in 0L..Int.MAX_VALUE.toLong()) {
