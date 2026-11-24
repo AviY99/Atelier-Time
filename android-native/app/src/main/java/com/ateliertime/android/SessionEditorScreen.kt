@@ -209,6 +209,8 @@ fun SessionEditorScreen(
     var runStartTargetEpochMs by remember { mutableStateOf<Long?>(null) }
     var runFollowSuggestedFinish by remember { mutableStateOf(false) }
     var pendingRunApproval by remember { mutableStateOf<PendingRunApproval?>(null) }
+    var pendingRecovery by remember { mutableStateOf<StoredClassRunCheckpoint?>(null) }
+    var restoringCheckpoint by remember { mutableStateOf<StoredClassRunCheckpoint?>(null) }
     var customFinishEnabled by remember { mutableStateOf(false) }
     var finishPickerVisible by remember { mutableStateOf(false) }
     var customFinishHour by remember { mutableIntStateOf(0) }
@@ -277,6 +279,10 @@ fun SessionEditorScreen(
     val diagnosticArchive = remember(context, presetStoreOverride) {
         if (presetStoreOverride == null) RunDiagnosticsArchive(context) else null
     }
+    val classCheckpointStore = remember(context, presetStoreOverride) {
+        if (presetStoreOverride == null) ClassRunCheckpointStore(context) else null
+    }
+    var lastClassCheckpointEpochMs by remember { mutableLongStateOf(0L) }
     var currentReport by remember { mutableStateOf<RunDiagnosticsRecorder?>(null) }
     var diagnosticError by remember { mutableStateOf<String?>(null) }
     val liveTimer = remember(playingSession) {
@@ -387,6 +393,31 @@ fun SessionEditorScreen(
     }
     var classClockTimes by remember(liveTimer) { mutableStateOf(ClassClockTimes()) }
     var timerError by remember(liveTimer) { mutableStateOf<String?>(null) }
+    /** Store a complete effective runtime checkpoint, never in the saved preset library. */
+    fun saveActiveClassCheckpoint() {
+        val timer = liveTimer ?: return
+        val session = playingSession ?: return
+        val id = selectedPresetId ?: return
+        val start = classClockTimes.classStartEpochMs ?: return
+        val deadline = classClockTimes.classEndEpochMs ?: return
+        if (timer.view().status != TimerStatus.RUNNING &&
+            timer.view().status != TimerStatus.PAUSED) return
+        try {
+            classCheckpointStore?.write(id, PresetCatalog.signature(session),
+                start, deadline, timer.recoverySnapshot())
+            lastClassCheckpointEpochMs = System.currentTimeMillis()
+        } catch (error: Exception) {
+            diagnosticError = "Class recovery checkpoint was not saved: " +
+                (error.message ?: "storage error")
+        }
+    }
+    fun clearActiveClassCheckpoint() {
+        try { classCheckpointStore?.clear() }
+        catch (error: Exception) {
+            diagnosticError = "Class recovery checkpoint could not be cleared: " +
+                (error.message ?: "storage error")
+        }
+    }
     val activity = context as? Activity
     // D-140: system navigation belongs to the CURRENT in-app design palette,
     // not to the one-time parchment splash. This also follows AUTO by clock and
