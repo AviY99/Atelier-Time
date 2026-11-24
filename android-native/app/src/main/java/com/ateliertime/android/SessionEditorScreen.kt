@@ -1354,11 +1354,12 @@ fun SessionEditorScreen(
                             PhaseKind.SPECIAL_BREAK -> "Break · special #" + phase.breakOrdinal
                             PhaseKind.SUMMARY -> "End-of-class summary"
                         }
+                        val durationText = if (phase.kind == PhaseKind.PREPARATION)
+                            "${phase.durationSeconds} sec" else "${phase.durationSeconds / 60} min"
                         Text(
                             formatOffset(phase.startSeconds) + "–" +
                                 formatOffset(phase.endSeconds) + "  " + label +
-                                "  (" + if (phase.kind == PhaseKind.PREPARATION)
-                                    "0:05" else (phase.durationSeconds / 60).toString() + " min" + ")",
+                                "  (" + durationText + ")",
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
