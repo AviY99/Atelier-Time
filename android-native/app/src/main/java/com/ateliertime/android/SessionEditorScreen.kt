@@ -1165,6 +1165,12 @@ fun SessionEditorScreen(
                     "last group's configured rest, so it is not counted twice."
             }) { Text("Help") }
         }
+        if (opening.isNotEmpty()) {
+            Text("A 5-second preparation phase is included between consecutive Sessions " +
+                "inside each opening group. These seconds are already included in " +
+                "the Editor timeline and do not extend the Class finish.",
+                style = MaterialTheme.typography.bodySmall)
+        }
         opening.toList().forEachIndexed { index, group ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Opening session group " + (index + 1), modifier = Modifier.weight(1f))
