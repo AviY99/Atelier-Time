@@ -40,12 +40,16 @@ class ScheduleEngine {
             rules.tailPoseExtensionSeconds % SECONDS_PER_MINUTE != 0) {
             error("invalid_tail_extension", "Final Session extension requires whole positive minutes.")
         }
+        if (rules.preparationSeconds !in listOf(0, 5)) {
+            error("invalid_preparation", "Preparation time must be either 0 or 5 seconds.")
+        }
         var openingSum = 0L
         rules.openingGroups.forEachIndexed { index, group ->
             if (group.count <= 0 || group.poseSeconds <= 0) {
                 error("invalid_opening_group", "Opening groups need positive values.")
             } else {
-                openingSum += group.count.toLong() * group.poseSeconds
+                openingSum += group.count.toLong() * group.poseSeconds +
+                    (group.count - 1).toLong() * rules.preparationSeconds
             }
             val configured = group.breakAfterSeconds
             if (configured != null) {
@@ -294,6 +298,16 @@ class ScheduleEngine {
         rules.openingGroups.forEachIndexed { groupIndex, group ->
             for (index in 0 until group.count) {
                 addPose(group.poseSeconds, PoseSource.OPENING, group.id)
+                if (index < group.count - 1 && rules.preparationSeconds > 0) {
+                    phases += SchedulePhase(
+                        id = "phase_" + (phases.size + 1),
+                        kind = PhaseKind.PREPARATION,
+                        startSeconds = cursor,
+                        endSeconds = cursor + rules.preparationSeconds,
+                        openingGroupId = group.id,
+                    )
+                    cursor += rules.preparationSeconds
+                }
             }
             val rest = group.breakAfterSeconds
             if (groupIndex != rules.openingGroups.lastIndex && rest != null && rest > 0) {
