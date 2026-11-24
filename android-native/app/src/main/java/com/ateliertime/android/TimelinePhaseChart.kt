@@ -42,6 +42,8 @@ fun TimelinePhaseChart(
         .sumOf { it.durationSeconds }
     val normalTotal = displaySegments.filter { it.kind == PhaseKind.SHORT_BREAK }
         .sumOf { it.durationSeconds }
+    val preparationTotal = displaySegments.filter { it.kind == PhaseKind.PREPARATION }
+        .sumOf { it.durationSeconds }
     val specialTotal = displaySegments.filter { it.kind == PhaseKind.SPECIAL_BREAK }
         .sumOf { it.durationSeconds }
     val summaryTotal = displaySegments.filter { it.kind == PhaseKind.SUMMARY }
@@ -53,6 +55,10 @@ fun TimelinePhaseChart(
     val accessibleTimeline = buildString {
         append("Class timeline. Session time ")
         append(chartTime(poseTotal))
+        if (preparationTotal > 0) {
+            append(", preparation ")
+            append(chartTime(preparationTotal))
+        }
         append(", regular breaks ")
         append(chartTime(normalTotal))
         append(", special breaks ")
@@ -160,6 +166,7 @@ fun TimelinePhaseChart(
                     TimelineColorKey("Elapsed", Color(0xFFD1A34C))
                 }
                 TimelineColorKey("Session", phaseColor(PhaseKind.POSE))
+                if (preparationTotal > 0) TimelineColorKey("Prep.", phaseColor(PhaseKind.PREPARATION))
                 TimelineColorKey("Reg. break", phaseColor(PhaseKind.SHORT_BREAK))
                 TimelineColorKey("Special", phaseColor(PhaseKind.SPECIAL_BREAK))
                 TimelineColorKey("Summary", phaseColor(PhaseKind.SUMMARY))
@@ -181,6 +188,8 @@ fun TimelinePhaseChart(
             if (runtimeTimeline == null) {
                 Text("Time by activity", style = MaterialTheme.typography.titleSmall)
                 ChartLegend("Sessions", poseTotal, PhaseKind.POSE)
+                if (preparationTotal > 0)
+                    ChartLegend("Preparation", preparationTotal, PhaseKind.PREPARATION)
                 ChartLegend("Break · regular", normalTotal, PhaseKind.SHORT_BREAK)
                 ChartLegend("Break · special", specialTotal, PhaseKind.SPECIAL_BREAK)
                 ChartLegend("Class summary", summaryTotal, PhaseKind.SUMMARY)
@@ -217,6 +226,7 @@ private fun ChartLegend(label: String, seconds: Int, kind: PhaseKind) {
 
 private fun phaseColor(kind: PhaseKind): Color = when (kind) {
     PhaseKind.POSE -> Color(0xFF6750A4)
+    PhaseKind.PREPARATION -> Color(0xFF8492AE)
     PhaseKind.SHORT_BREAK -> Color(0xFF66A5A2)
     PhaseKind.SPECIAL_BREAK -> Color(0xFFCF8C36)
     PhaseKind.SUMMARY -> Color(0xFF9AA3B0)
