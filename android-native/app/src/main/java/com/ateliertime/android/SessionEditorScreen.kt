@@ -592,8 +592,54 @@ fun SessionEditorScreen(
 
     // Run starts only AFTER explicit end-clock approval. Never auto-start
     // while the approval dialog is visible or after its cancellation.
-    LaunchedEffect(liveTimer, launchRunRequested) {
+    LaunchedEffect(liveTimer, launchRunRequested, restoringCheckpoint) {
         val clock = liveTimer
+        val recovery = restoringCheckpoint
+        if (clock != null && recovery != null) {
+            try {
+                val session = playingSession
+                    ?: throw IllegalStateException("Missing selected recovery Class.")
+                check(PresetCatalog.signature(session) == recovery.presetSignature) {
+                    "The saved Class was changed after the interrupted Run."
+                }
+                val nowEpoch = System.currentTimeMillis()
+                check(recovery.eligibleFor(recovery.presetId,
+                    recovery.presetSignature, nowEpoch)) {
+                    "The original Class date/end time has passed."
+                }
+                val shift = recovery.clockShift(nowEpoch,
+                    SystemClock.elapsedRealtime(),
+                    classCheckpointStore?.bootCount() ?: -1)
+                val view = clock.restoreRecovery(recovery.timer, shift)
+                classClockTimes = classClockTracker.recoverClass(view,
+                    recovery.classStartEpochMs, recovery.classDeadlineEpochMs, nowEpoch)
+                currentReport = runCatching {
+                    diagnosticArchive?.begin(session, recovery.classStartEpochMs,
+                        recovery.classDeadlineEpochMs, soundSettings, soundEnabled)
+                }.getOrNull()
+                runCatching {
+                    currentReport?.note("recovery",
+                        "Class resumed after interruption at " + nowEpoch)
+                }
+                eventHistory.clear()
+                recordClassEvent("Recovered after interruption", null, view,
+                    beforePhases = session.phases)
+                timerView = view
+                timerError = null
+                runApprovalError = null
+                saveActiveClassCheckpoint()
+                // No start check and no missed session/break melodies on recovery.
+            } catch (error: Exception) {
+                playingSession = null
+                timerView = null
+                runApprovalError = "Cannot safely continue previous Class: " +
+                    (error.message ?: "invalid checkpoint") +
+                    ". Start a new Run instead."
+                activeTab = MainTab.TIMER
+            } finally {
+                restoringCheckpoint = null
+            }
+        }
         if (clock != null && launchRunRequested) {
             try {
                 val startEpochMs = System.currentTimeMillis()
@@ -631,6 +677,7 @@ fun SessionEditorScreen(
                     beforePhases = session.phases)
                 timerView = view
                 timerError = null
+                saveActiveClassCheckpoint()
                 // D-144: a quiet, short three-note sound/volume indicator
                 // starts ONLY with a user-confirmed Class, never at splash.
                 if (soundEnabled) {
