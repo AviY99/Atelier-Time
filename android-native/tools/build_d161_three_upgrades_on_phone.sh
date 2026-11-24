@@ -5,7 +5,7 @@ cd "$(dirname "$0")/.."
 fail() { echo "STOP: $*" >&2; exit 2; }
 [[ "$(git branch --show-current)" == "dev/d161-preparation-pause-recovery-2026-11-24" ]] ||
   fail "Wrong branch: switch to the dedicated D161 development branch."
-[[ "$(git rev-parse HEAD:android-native/app 2>/dev/null || true)" == "9bf7a79b42fda34cfb90ed421765cc2386e730dd" ]] ||
+[[ "$(git rev-parse HEAD:android-native/app 2>/dev/null || true)" == "648cbbcccdb2e4c5191accc5e0744603c09e4c93" ]] ||
   fail "App source changed since D161 QA script was prepared; review before build."
 for line in 'versionCode = 55' 'versionName = "D-161"' 'applicationIdSuffix = ".dev"'             'targetSdk = 36' 'compileSdk = 36'; do
   grep -Fq "$line" app/build.gradle.kts || fail "Missing version/package guard: $line"
