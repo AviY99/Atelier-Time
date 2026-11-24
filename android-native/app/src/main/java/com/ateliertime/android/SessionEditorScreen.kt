@@ -1451,6 +1451,9 @@ fun SessionEditorScreen(
                         Text("I acknowledge the 25/5 rest warning")
                     }
                 }
+                val prepSeconds = candidate.phases.filter {
+                    it.kind == PhaseKind.PREPARATION
+                }.sumOf { it.durationSeconds }
                 Text(
                     "Sessions: " + candidate.phases.filter {
                         it.kind == PhaseKind.POSE
@@ -1458,7 +1461,8 @@ fun SessionEditorScreen(
                         " min · Rest: " + candidate.phases.filter {
                             it.kind == PhaseKind.SHORT_BREAK ||
                                 it.kind == PhaseKind.SPECIAL_BREAK
-                        }.sumOf { it.durationSeconds } / 60 + " min",
+                        }.sumOf { it.durationSeconds } / 60 + " min" +
+                        (if (prepSeconds > 0) " · Preparation: $prepSeconds sec" else ""),
                 )
                 // Keep the chronological text timeline compact without changing
                 // its timestamps, phase labels, order, or the chart below it.
