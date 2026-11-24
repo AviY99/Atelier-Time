@@ -167,6 +167,7 @@ class ClassClockTracker(
 
 fun clockPhaseLabel(phase: SchedulePhase): String = when (phase.kind) {
     PhaseKind.POSE -> "Session " + (phase.poseNumber ?: "")
+    PhaseKind.PREPARATION -> "Preparation · 5 seconds"
     PhaseKind.SHORT_BREAK -> if (phase.openingGroupId != null) "Break · opening group"
         else "Break · regular"
     PhaseKind.SPECIAL_BREAK -> "Break · special"
