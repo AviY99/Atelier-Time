@@ -168,6 +168,11 @@ class PresetCatalog(
                     it.breakOrdinal,
                 ))
             }
+            // Keep historical presets' signatures byte-identical when no
+            // preparation phases were included in their approved timeline.
+            if (rules.preparationSeconds > 0) {
+                fields.addAll(listOf("opening_preparation_seconds", rules.preparationSeconds))
+            }
             // Existing records keep their exact signature bytes. Only a new
             // explicitly confirmed tail extension contributes extra signed fields.
             if (rules.tailPoseExtensionSeconds > 0) {
