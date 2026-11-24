@@ -32,6 +32,7 @@ object TimerNotificationFormatter {
         val phaseTitle = rules?.let { PhaseDisplayNames.title(view.phase, it) }
             ?: when (view.phase?.kind) {
             PhaseKind.POSE -> "Session " + (view.phase?.poseNumber ?: "")
+            PhaseKind.PREPARATION -> "Preparation · 5 seconds"
             PhaseKind.SHORT_BREAK -> if (view.phase.openingGroupId != null)
                 "Opening break" else "Break"
             PhaseKind.SPECIAL_BREAK -> "Special break"
