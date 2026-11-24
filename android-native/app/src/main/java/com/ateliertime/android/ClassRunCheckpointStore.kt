@@ -192,7 +192,7 @@ internal class ClassRunCheckpointStore(
                     startSeconds = phase.getInt("startSeconds"),
                     endSeconds = phase.getInt("endSeconds"),
                     poseNumber = optionalPhaseInt("poseNumber"),
-                    poseSource = optionalPhaseString("poseSource")?.let(PoseSource::valueOf),
+                    poseSource = optionalPhaseString("poseSource")?.let { PoseSource.valueOf(it) },
                     openingGroupId = optionalPhaseString("openingGroupId"),
                     breakOrdinal = optionalPhaseInt("breakOrdinal"),
                 )
