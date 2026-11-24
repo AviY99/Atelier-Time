@@ -344,6 +344,11 @@ fun SessionEditorScreen(
                 (failure.message ?: "storage error")
         }
         currentReport = null
+        // A deliberate Exit, natural finish or physical deadline ends recovery.
+        try { classCheckpointStore?.clear() }
+        catch (failure: Exception) {
+            diagnosticError = "Could not clear old active Class checkpoint."
+        }
     }
     var timerView by remember(liveTimer) { mutableStateOf(liveTimer?.view()) }
 
@@ -760,6 +765,11 @@ fun SessionEditorScreen(
                     nowEpochMs,
                     playingSession?.rules,
                 )
+                if ((tick.view.status == TimerStatus.RUNNING ||
+                    tick.view.status == TimerStatus.PAUSED) &&
+                    nowEpochMs - lastClassCheckpointEpochMs >= 5_000L) {
+                    saveActiveClassCheckpoint()
+                }
                 if (soundEnabled && tick.cue != null) {
                     // Capture the recorder for an asynchronous audio error:
                     // the Run may have finished by the time playback fails.
@@ -815,6 +825,7 @@ fun SessionEditorScreen(
             timerView = updated
             classClockTimes = classClockTracker.observe(updated, System.currentTimeMillis())
             timerError = null
+            saveActiveClassCheckpoint()
         } catch (error: IllegalArgumentException) {
             timerError = error.message ?: "Cannot fit the interruption into the final Sessions."
             recordClassEvent(source, before, liveTimer?.view(), beforePhases = phasesBefore,
@@ -854,6 +865,7 @@ fun SessionEditorScreen(
                 classClockTracker.observe(event.view, nowEpochMs)
             }
             timerError = null
+            saveActiveClassCheckpoint()
             if (soundEnabled && event.cue != null) {
                 val cueReport = currentReport
                 melodyPlayer.play(soundSettings.soundFor(event.cue),
