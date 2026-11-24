@@ -415,6 +415,30 @@ fun SessionEditorScreen(
         timerView?.status == TimerStatus.PAUSED
     val activeFree = freeTimerView.status == FreeTimerStatus.RUNNING ||
         freeTimerView.status == FreeTimerStatus.PAUSED
+    // D161: Class and Free Pause episodes are tracked independently. A single
+    // red dialog/beeper is shared, so simultaneous pauses cannot overlap audio.
+    val pauseWarningTracker = remember { PauseWarningTracker() }
+    var pauseWarning by remember { mutableStateOf(PauseWarningState()) }
+    val classPaused = timerView?.status == TimerStatus.PAUSED
+    val freePaused = freeTimerView.status == FreeTimerStatus.PAUSED
+    LaunchedEffect(classPaused, freePaused, wallClockMillis / 1_000L) {
+        pauseWarning = pauseWarningTracker.observe(
+            classPaused, freePaused, SystemClock.elapsedRealtime(),
+        )
+    }
+    // Repeat a short beep without a terminal timeout: ONLY dismissing the
+    // dialog or leaving Pause stops it. Respect the user's actual Sound OFF.
+    LaunchedEffect(pauseWarning.showing, soundEnabled,
+        soundSettings.classAlertsUseAlarmVolume) {
+        if (pauseWarning.showing && soundEnabled) {
+            PauseWarningBeeper(soundSettings.classAlertsUseAlarmVolume).use { beeper ->
+                while (true) {
+                    beeper.beep()
+                    delay(850L)
+                }
+            }
+        }
+    }
     DisposableEffect(activity, keepScreenAwake, activeClass, activeFree) {
         if (keepScreenAwake && (activeClass || activeFree)) {
             activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -2111,6 +2135,37 @@ fun SessionEditorScreen(
             dismissButton = {
                 AtelierTextButton(colors = atelierTextColors(), onClick = { overwriteTarget = null }) {
                     Text("Cancel")
+                }
+            },
+        )
+    }
+
+    if (pauseWarning.showing) {
+        val affected = when {
+            pauseWarning.classWarning && pauseWarning.freeWarning ->
+                "Class Timer and Free Timer"
+            pauseWarning.classWarning -> "Class Timer"
+            else -> "Free Timer"
+        }
+        fun closePauseWarning() {
+            pauseWarningTracker.dismissVisible(pauseWarning)
+            pauseWarning = pauseWarningTracker.observe(
+                classPaused, freePaused, SystemClock.elapsedRealtime(),
+            )
+            // The beep's LaunchedEffect is cancelled immediately. Closing this
+            // dialog does NOT resume either timer.
+        }
+        AlertDialog(
+            modifier = Modifier.testTag("pause_over_one_minute_red_warning"),
+            onDismissRequest = { closePauseWarning() },
+            containerColor = Color(0xFFB3261E),
+            titleContentColor = Color.White,
+            textContentColor = Color.White,
+            title = { Text("Paused for over one minute") },
+            text = { Text("$affected is still paused. The repeating beep continues until you close this warning. Closing does not resume the timer.") },
+            confirmButton = {
+                TextButton(onClick = { closePauseWarning() }) {
+                    Text("Close warning", color = Color.White)
                 }
             },
         )
