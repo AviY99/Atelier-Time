@@ -5,7 +5,7 @@ cd "$(dirname "$0")/.."
 fail() { echo "STOP: $*" >&2; exit 2; }
 [[ "$(git branch --show-current)" == "dev/d161-preparation-pause-recovery-2026-11-24" ]] ||
   fail "Wrong branch: switch to the dedicated D161 development branch."
-[[ "$(git rev-parse HEAD:android-native/app 2>/dev/null || true)" == "648cbbcccdb2e4c5191accc5e0744603c09e4c93" ]] ||
+[[ "$(git rev-parse HEAD:android-native/app 2>/dev/null || true)" == "381201a39527e2f6e97c88dfc53fd9312407506d" ]] ||
   fail "App source changed since D161 QA script was prepared; review before build."
 for line in 'versionCode = 55' 'versionName = "D-161"' 'applicationIdSuffix = ".dev"'             'targetSdk = 36' 'compileSdk = 36'; do
   grep -Fq "$line" app/build.gradle.kts || fail "Missing version/package guard: $line"
@@ -14,7 +14,7 @@ root="app/src/main/java/com/ateliertime"
 for entry in "$root/domain/PauseWarningTracker.kt"              "$root/android/PauseWarningBeeper.kt"              "$root/android/ClassRunCheckpointStore.kt"; do
   [[ -s "$entry" ]] || fail "Missing D161 code: $entry"
 done
-for test in D161PreparationInEditorTimelineTest D161PauseWarningTrackerTest             D161ClassCrashRecoverySnapshotTest D161PreparationPresetCompatibilityTest; do
+for test in D161PreparationInEditorTimelineTest D161PauseWarningTrackerTest             D161ClassCrashRecoverySnapshotTest D161ClassCrashRecoveryTest             D161PreparationPresetCompatibilityTest; do
   [[ -s "app/src/test/java/com/ateliertime/domain/$test.kt" ]] ||
     fail "Missing regression test: $test"
 done
@@ -64,6 +64,7 @@ for klass, expected in [
   ("D161PreparationInEditorTimelineTest",5),
   ("D161PauseWarningTrackerTest",2),
   ("D161ClassCrashRecoverySnapshotTest",4),
+  ("D161ClassCrashRecoveryTest",4),
   ("D161PreparationPresetCompatibilityTest",2),
 ]:
     record=classes.get("com.ateliertime.domain."+klass)
@@ -71,7 +72,7 @@ for klass, expected in [
     if not record or record["tests"] < expected or any(
         record[k] for k in ("failures","errors","skipped")):
         raise SystemExit("STOP: required regression suite missing/failed: "+klass)
-if counts["tests"] < 339 or any(counts[k] for k in ("failures","errors","skipped")):
+if counts["tests"] < 343 or any(counts[k] for k in ("failures","errors","skipped")):
     raise SystemExit("STOP: full JVM regression tests failed or incomplete.")
 print("D161 FULL JVM PASS")
 PY
