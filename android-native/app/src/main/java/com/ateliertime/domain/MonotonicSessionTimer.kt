@@ -680,9 +680,19 @@ class MonotonicSessionTimer(
         val currentIndex = phaseIndex(view().elapsedSeconds)
         val preceding = lastPhaseIndex
         if (preceding != null && currentIndex != null && currentIndex > preceding) {
+            // Lost-process time advances the planned Class clock, but is NOT
+            // evidence that the model actually performed a work Session.
+            // Preserve prior observed work and mark missed fragments unobserved
+            // so later 25/5 safety logic does not invent performed work.
             for (i in preceding until currentIndex) {
                 val phase = activePhases[i]
-                appendFragment(phase, phase.endSeconds.toLong() * 1_000L)
+                val from = if (i == preceding) fragmentStartMs
+                    else phase.startSeconds.toLong() * 1_000L
+                val to = phase.endSeconds.toLong() * 1_000L
+                val seconds = ((to - from).coerceAtLeast(0L) / 1_000L).toInt()
+                if (seconds > 0) observedFragments.add(
+                    RuntimeTimelineSegment(phase.id, phase.kind, seconds,
+                        observed = false))
             }
             fragmentStartMs = activePhases[currentIndex].startSeconds.toLong() * 1_000L
         }
